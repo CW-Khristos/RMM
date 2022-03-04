@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><Policy ID="8ad58f4f-e49a-4a6c-9f15-8c4a3efe3cf2" Name="Reboot Required (mod)" Description="Lg==" Version="2.10.0.19" RemoteCategory="0" ExecutionType="Local" MinimumPSVersionRequired="0.0.0">
+  <Object ID="{6f3fbddd-68b5-419d-8830-aaf542f5bc99}" Type="{B6FA6D8B-EEAA-47A6-8463-7F9A4F5BBB6E}" Data="&lt;xml&gt;&lt;OutputParameters&gt;&lt;Parameter ParameterName=&quot;AMPRBCBSRebootPending&quot; Label=&quot;CBS Reboot Pending&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.CBSRebootPending&quot; /&gt;&lt;Parameter ParameterName=&quot;AMPRBWindowsUpdateRebootRequired&quot; Label=&quot;Windows Update Reboot Required&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.WindowsUpdateRebootRequired&quot; /&gt;&lt;Parameter ParameterName=&quot;AMPRBFileRenamePending&quot; Label=&quot;File Rename Pending (Reboot)&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.FileRenamePending&quot; /&gt;&lt;Parameter ParameterName=&quot;AMPRBPendingFileRenameOperations&quot; Label=&quot;Pending File Rename Operations&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.PendingFileRenameOperations&quot; /&gt;&lt;Parameter ParameterName=&quot;AMPPendingReboot&quot; Label=&quot;PME Reboot Required&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.PMEPrendingReboot&quot; /&gt;&lt;/OutputParameters&gt;&lt;/xml&gt;" />
+  <LinkManager xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/PolicyExecutor">
+    <hashset xmlns:d2p1="http://schemas.datacontract.org/2004/07/System">
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>0fb6b595-fb68-4aa7-ae9c-0207a8a133b7.CBSRebootPending</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AMPRBCBSRebootPending</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>0fb6b595-fb68-4aa7-ae9c-0207a8a133b7.WindowsUpdateRebootRequired</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AMPRBWindowsUpdateRebootRequired</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>0fb6b595-fb68-4aa7-ae9c-0207a8a133b7.FileRenamePending</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AMPRBFileRenamePending</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>0fb6b595-fb68-4aa7-ae9c-0207a8a133b7.PendingFileRenameOperations</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AMPRBPendingFileRenameOperations</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>0fb6b595-fb68-4aa7-ae9c-0207a8a133b7.PMEPendingReboot</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AMPPendingReboot</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+    </hashset>
+  </LinkManager>
+  <Diagnostics OriginalVersion="2.18.1.8" />
+  <Activity mc:Ignorable="sads sap" x:Class="Policy Builder" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:p="clr-namespace:PolicyExecutor;assembly=PolicyExecutionEngine" xmlns:sads="http://schemas.microsoft.com/netfx/2010/xaml/activities/debugger" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:Members>
+      <x:Property Name="PolicyGUID" Type="InArgument(x:String)" />
+    </x:Members>
+    <sap:VirtualizedContainerService.HintSize>504,745</sap:VirtualizedContainerService.HintSize>
+    <mva:VisualBasic.Settings>Assembly references and imported namespaces serialized as XML namespaces</mva:VisualBasic.Settings>
+    <p:PolicySequence DisplayName="Policy Builder" sap:VirtualizedContainerService.HintSize="504,745" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
+      <p:PolicySequence.Activities>
+        <p:RunPowerShellScript AssemblyName="PolicyExecutionEngine, Version=2.1.2.19, Culture=neutral, PublicKeyToken=null" DisplayName="Run PowerShell Script" sap:VirtualizedContainerService.HintSize="468,522" Moniker="0fb6b595-fb68-4aa7-ae9c-0207a8a133b7" OutPut_64="[RunPowerShellScript_OutPut_64]" Result="[RunPowerShellScript_Result]" ResultString="[RunPowerShellScript_ResultString]" Results_x64="[RunPowerShellScript_Results_x64]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="RunPowerShellScript" genArgEvent="234f8191-dfad-4f7f-9770-5e450180eb6e" m_bTextLinkChange="False" script="IwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMADQAKACMAIABOAGEAbQBlADoAIABDAGgAZQBjAGsAIABSAGUAYgBvAG8AdAAgAFIAZQBxAHUAaQByAGUAZAAuAHAAcwAxAA0ACgAjACAARABlAHMAYwByAGkAcAB0AGkAbwBuADoAIABDAGgAZQBjAGsAIAB3AGkAbgBkAG8AdwBzACAAUgBlAGIAbwBvAHQAIABmAG8AcgAgAHcAaQBuAGQAbwB3AHMAIAB1AHAAZABhAHQAZQAgAGEAbgBkACAAdABoAGkAcgBkACAAUABhAHIAdAB5ACAASQBuAHMAdABhAGwAbAANAAoAIwAgAEQAZQBwAGUAbgBkAGEAbgBjAGUAcwA6ACAAUABvAHcAZQByAHMAaABlAGwAbAAgADIALgAwACAAbQB1AHMAdAAgAGIAZQAgAGkAbgBzAHQAYQBsAGwAZQBkAA0ACgAjACAAVgBlAHIAcwBpAG8AbgA6ACAAMQAuADAADQAKACMAIABBAHUAdABoAG8AcgA6ACgAQQAtAEEAKQAgAE4ALQBhAGIAbABlACAAVABlAGMAaABuAG8AbABvAGcAaQBlAHMADQAKACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjACMAIwAjAA0ACgAgAA0ACgAjACAAVgBlAHIAcwBpAG8AbgAgAEgAaQBzAHQAbwByAHkADQAKAA0ACgAjACAATQBhAGsAZQAgAHMAdQByAGUAIAB0AGgAYQB0ACAAUABvAHcAZQByAFMAaABlAGwAbAAgADIALgAwACAAaQBzACAAaQBuAHMAdABhAGwAbABlAGQADQAKACMAUgBlAHEAdQBpAHIAZQBzACAALQBWAGUAcgBzAGkAbwBuACAAMgAuADAADQAKAA0ACgAjAEIAYQBzAGUAZAAgAG8AbgAgADwAaAB0AHQAcAA6AC8ALwBnAGEAbABsAGUAcgB5AC4AdABlAGMAaABuAGUAdAAuAG0AaQBjAHIAbwBzAG8AZgB0AC4AYwBvAG0ALwBzAGMAcgBpAHAAdABjAGUAbgB0AGUAcgAvAEcAZQB0AC0AUABlAG4AZABpAG4AZwBSAGUAYgBvAG8AdAAtAFEAdQBlAHIAeQAtAGIAZABiADcAOQA1ADQAMgA+AA0ACgAjAEIAYQBzAGUAZAAgAG8AbgAgACAAPABoAHQAdABwAHMAOgAvAC8AZwBpAHMAdAAuAGcAaQB0AGgAdQBiAC4AYwBvAG0ALwBhAGwAdAByAGkAdgBlAC8ANQAzADIAOQAzADcANwA+AA0ACgAkAEUAcgByAG8AcgBBAGMAdABpAG8AbgBQAHIAZQBmAGUAcgBlAG4AYwBlACAAPQAgACIAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAiACAAOwANAAoAJABDAEIAUwBSAGUAYgBvAG8AdABQAGUAbgBkAGkAbgBnACAAPQAkAEYAYQBsAHMAZQANAAoAJABXAGkAbgBkAG8AdwBzAFUAcABkAGEAdABlAFIAZQBiAG8AbwB0AFIAZQBxAHUAaQByAGUAZAAgAD0AIAAkAEYAYQBsAHMAZQANAAoAJABQAGUAbgBkAGkAbgBnAEYAaQBsAGUAUgBlAG4AYQBtAGUATwBwAGUAcgBhAHQAaQBvAG4AcwAgAD0AIAAiACQARgBhAGwAcwBlACIAOwANAAoAJABGAGkAbABlAFIAZQBuAGEAbQBlAFAAZQBuAGQAaQBuAGcAIAA9ACAAJABGAGEAbABzAGUADQAKACQAUABNAEUAUABlAG4AZABpAG4AZwBSAGUAYgBvAG8AdAAgAD0AIAAkAEYAYQBsAHMAZQANAAoAIAANAAoAIwBDAGgAZQBjAGsAIABDAEIAUwAgAFIAZQBnAGkAcwB0AHIAeQANAAoAJABXAE0ASQBfAE8AUwAgAD0AIABHAGUAdAAtAFcAbQBpAE8AYgBqAGUAYwB0ACAALQBDAGwAYQBzAHMAIABXAGkAbgAzADIAXwBPAHAAZQByAGEAdABpAG4AZwBTAHkAcwB0AGUAbQAgAC0AUAByAG8AcABlAHIAdAB5ACAAQgB1AGkAbABkAE4AdQBtAGIAZQByAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAA0ACgBJAGYAKAAkAFcATQBJAF8ATwBTACAALQBuAGUAIAAkAG4AdQBsAGwAKQAgAHsADQAKACAAIAAjAEkAZgAgAFYAaQBzAHQAYQAvADIAMAAwADgAIAAmACAAQQBiAG8AdgBlACAAcQB1AGUAcgB5ACAAdABoAGUAIABDAEIAUwAgAFIAZQBnACAASwBlAHkAIAANAAoAIAAgAEkAZgAgACgAJABXAE0ASQBfAE8AUwAuAEIAdQBpAGwAZABOAHUAbQBiAGUAcgAgAC0AZwBlACAANgAwADAAMQApACAAewAgAA0ACgAgACAAIAAgACQAawBlAHkAIAA9ACAARwBlAHQALQBDAGgAaQBsAGQASQB0AGUAbQAgACIAUgBlAGcAaQBzAHQAcgB5ADoAOgBIAEsARQBZAF8ATABPAEMAQQBMAF8ATQBBAEMASABJAE4ARQBcAFMAbwBmAHQAdwBhAHIAZQBcAE0AaQBjAHIAbwBzAG8AZgB0AFwAVwBpAG4AZABvAHcAcwBcAEMAdQByAHIAZQBuAHQAVgBlAHIAcwBpAG8AbgBcAEMAbwBtAHAAbwBuAGUAbgB0ACAAQgBhAHMAZQBkACAAUwBlAHIAdgBpAGMAaQBuAGcAIgAgAA0ACgAgACAAIAAgACMAVwByAGkAdABlAC0ATwB1AHQAcAB1AHQAIAAkAGsAZQB5ADsADQAKACAAIAAgACAARgBvAHIARQBhAGMAaAAgACgAIAAkAGsAZQB5AGUAIABJAG4AIAAkAGsAZQB5ACkAIAB7AA0ACgAgACAAIAAgACAAIAAkAGsAZQB5AHMAIAA9ACAAJABrAGUAeQBlAC4ATgBhAG0AZQAgAHwAIABPAHUAdAAtAFMAdAByAGkAbgBnAA0ACgAgACAAIAAgACAAIAAkAGsAZQB5AHMAcwAgAD0AIAAkAGsAZQB5AHMALgBSAGUAcABsAGEAYwBlACgAIgBcACIALAAiACAAIgApAA0ACgAgACAAIAAgACAAIAAkAEMAQgBTAFIAZQBiAG8AbwB0AFAAZQBuAGQAaQBuAGcAIAA9ACAAJABrAGUAeQBzAHMALgBDAG8AbgB0AGEAaQBuAHMAKAAiAFIAZQBiAG8AbwB0AFAAZQBuAGQAaQBuAGcAIgApADsADQAKACAAIAAgACAAfQANAAoAIAAgAH0ADQAKAH0ADQAKACAAIAAgAA0ACgAjAEMAaABlAGMAawAgAFcAaQBuAGQAbwB3AHMAIABVAHAAZABhAHQAZQANAAoAJABrAGUAeQAgAD0AIABHAGUAdAAtAEkAdABlAG0AIAAiAFIAZQBnAGkAcwB0AHIAeQA6ADoASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAE8ARgBUAFcAQQBSAEUAXABNAGkAYwByAG8AcwBvAGYAdABcAFcAaQBuAGQAbwB3AHMAXABDAHUAcgByAGUAbgB0AFYAZQByAHMAaQBvAG4AXABXAGkAbgBkAG8AdwBzAFUAcABkAGEAdABlAFwAQQB1AHQAbwAgAFUAcABkAGEAdABlAFwAUgBlAGIAbwBvAHQAUgBlAHEAdQBpAHIAZQBkACIAIAANAAoASQBmACgAJABrAGUAeQAgAC0AbgBlACAAJABuAHUAbABsACkAIAB7AA0ACgAgACAAJABXAGkAbgBkAG8AdwBzAFUAcABkAGEAdABlAFIAZQBiAG8AbwB0AFIAZQBxAHUAaQByAGUAZAAgAD0AIAAkAFQAcgB1AGUADQAKAH0ADQAKACAADQAKACMAQwBoAGUAYwBrACAAUABlAG4AZABpAG4AZwBGAGkAbABlAFIAZQBuAGEAbQBlAE8AcABlAHIAYQB0AGkAbwBuAHMADQAKACQAcAByAG8AcAAgAD0AIABHAGUAdAAtAEkAdABlAG0AUAByAG8AcABlAHIAdAB5ACAAIgBSAGUAZwBpAHMAdAByAHkAOgA6AEgASwBFAFkAXwBMAE8AQwBBAEwAXwBNAEEAQwBIAEkATgBFAFwAUwBZAFMAVABFAE0AXABDAHUAcgByAGUAbgB0AEMAbwBuAHQAcgBvAGwAUwBlAHQAXABDAG8AbgB0AHIAbwBsAFwAUwBlAHMAcwBpAG8AbgAgAE0AYQBuAGEAZwBlAHIAIgAgAC0ATgBhAG0AZQAgAFAAZQBuAGQAaQBuAGcARgBpAGwAZQBSAGUAbgBhAG0AZQBPAHAAZQByAGEAdABpAG8AbgBzAA0ACgBXAHIAaQB0AGUALQBIAG8AcwB0ACAAJABwAHIAbwBwADsADQAKAEkAZgAoACQAcAByAG8AcAAgAC0AbgBlACAAJABuAHUAbABsACkAIAB7AA0ACgAgACAAIwBqAHUAcwB0ACAAcgBlAHQAdQByAG4AIABvAG4AZQAgAHYAYQBsAHUAZQANAAoAIAAgACQAYQBsAGwAZQBuAGQAaQBuAGcARgBpAGwAZQBSAGUAbgBhAG0AZQBPAHAAZQByAGEAdABpAG8AbgAgACAAPQAgACQAcAByAG8AcAAuAFAAZQBuAGQAaQBuAGcARgBpAGwAZQBSAGUAbgBhAG0AZQBPAHAAZQByAGEAdABpAG8AbgBzADsADQAKACAAIABGAG8AcgBFAGEAYwBoACAAKAAgACQAUABlAG4AZABpAG4AZwBGAGkAbABlAFIAZQBuAGEAbQBlAE8AcABlAHIAYQB0AGkAbwBuACAASQBuACAAJABhAGwAbABlAG4AZABpAG4AZwBGAGkAbABlAFIAZQBuAGEAbQBlAE8AcABlAHIAYQB0AGkAbwBuACkAIAB7AA0ACgAgACAAIAAgACQAUABlAG4AZABpAG4AZwBGAGkAbABlAFIAZQBuAGEAbQBlAE8AcABlAHIAYQB0AGkAbwBuAHMAIAA9ACAAJABQAGUAbgBkAGkAbgBnAEYAaQBsAGUAUgBlAG4AYQBtAGUATwBwAGUAcgBhAHQAaQBvAG4AOwANAAoAIAAgACAAIABCAHIAZQBhAGsAOwANAAoAIAAgAH0ADQAKACAAIAAkAEYAaQBsAGUAUgBlAG4AYQBtAGUAUABlAG4AZABpAG4AZwAgAD0AIAAkAFQAcgB1AGUADQAKAH0ADQAKAA0ACgAjAEMAaABlAGMAawAgAFAATQBFACAALQAgAFAAYQB0AGMAaAAgAFMAdABhAHQAdQBzACAAdgAyACAAUgBlAGIAbwBvAHQAIABSAGUAcQB1AGkAcgBlAGQADQAKAEkAZgAgACgAJAB7AGUAbgB2ADoAUAByAG8AZwByAGEAbQBGAGkAbABlAHMAKAB4ADgANgApAH0AKQAgAHsADQAKACAAIAAkAFAAcgBvAGcAcgBhAG0ARgBpAGwAZQBzAFAAYQB0AGgAIAA9ACAAJAB7AGUAbgB2ADoAUAByAG8AZwByAGEAbQBGAGkAbABlAHMAKAB4ADgANgApAH0ADQAKAH0AIABFAGwAcwBlACAAewANAAoAIAAgACQAUAByAG8AZwByAGEAbQBGAGkAbABlAHMAUABhAHQAaAAgAD0AIAAkAHsAZQBuAHYAOgBQAHIAbwBnAHIAYQBtAEYAaQBsAGUAcwB9AA0ACgB9AA0ACgAkAEEAZwBlAG4AdABDAG8AbgBmAGkAZwBQAGEAdABoACAAPQAgACQAUAByAG8AZwByAGEAbQBGAGkAbABlAHMAUABhAHQAaAAgACsAIAAnAFwATgAtAGEAYgBsAGUAIABUAGUAYwBoAG4AbwBsAG8AZwBpAGUAcwBcAFcAaQBuAGQAbwB3AHMAIABBAGcAZQBuAHQAXABjAG8AbgBmAGkAZwBcACcADQAKAFsAeABtAGwAXQAkAHgAbQBsAFAAYQB0AGMAaAAgAD0AIABHAGUAdAAtAEMAbwBuAHQAZQBuAHQAIAAtAEwAaQB0AGUAcgBhAGwAUABhAHQAaAAgACQAQQBnAGUAbgB0AEMAbwBuAGYAaQBnAFAAYQB0AGgAXABQAGEAdABjAGgAQwBvAG4AZgBpAGcALgB4AG0AbAANAAoAJABQAE0ARQBQAGUAbgBkAGkAbgBnAFIAZQBiAG8AbwB0ACAAPQAgACQAeABtAGwAUABhAHQAYwBoAC4AUAByAG8AZgBpAGwAZQAuAFAAZQBuAGQAaQBuAGcAUgBlAGIAbwBvAHQADQAKAEkAZgAgACgAJABQAE0ARQBQAGUAbgBkAGkAbgBnAFIAZQBiAG8AbwB0ACAALQBlAHEAIAAiADAAIgApACAAewANAAoAIAAgACQAUABNAEUAUABlAG4AZABpAG4AZwBSAGUAYgBvAG8AdAAgAD0AIAAkAEYAYQBsAHMAZQANAAoAfQAgAEUAbABzAGUASQBmACAAKAAkAFAATQBFAFAAZQBuAGQAaQBuAGcAUgBlAGIAbwBvAHQAIAAtAG4AZQAgACIAMAAiACkAIAB7AA0ACgAgACAAJABQAE0ARQBQAGUAbgBkAGkAbgBnAFIAZQBiAG8AbwB0ACAAPQAgACQAVAByAHUAZQANAAoAfQA=">
+          <p:RunPowerShellScript.InArgs>
+            <scg:Dictionary x:TypeArguments="x:String, p:InArg" />
+          </p:RunPowerShellScript.InArgs>
+          <p:RunPowerShellScript.OutArgs>
+            <p:OutArg x:Key="CBSRebootPending" ArgType="string" DisplayName="CBSRebootPending" Name="CBSRebootPending">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_CBSRebootPending]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="WindowsUpdateRebootRequired" ArgType="string" DisplayName="WindowsUpdateRebootRequired" Name="WindowsUpdateRebootRequired">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_WindowsUpdateRebootRequired]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="FileRenamePending" ArgType="string" DisplayName="FileRenamePending" Name="FileRenamePending">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_FileRenamePending]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="PendingFileRenameOperations" ArgType="string" DisplayName="PendingFileRenameOperations" Name="PendingFileRenameOperations">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_PendingFileRenameOperations]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="PMEPendingReboot" ArgType="string" DisplayName="PMEPrendingReboot" Name="PMEPendingReboot">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_PMEPendingReboot]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+          </p:RunPowerShellScript.OutArgs>
+        </p:RunPowerShellScript>
+      </p:PolicySequence.Activities>
+      <p:PolicySequence.Variables>
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_OutPut_64" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_ResultString" />
+        <Variable x:TypeArguments="scg:IEnumerable(x:Object)" Name="RunPowerShellScript_Results_x64" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_Result" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_CBSRebootPending" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_WindowsUpdateRebootRequired" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_FileRenamePending" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_PendingFileRenameOperations" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_PMEPendingReboot" />
+      </p:PolicySequence.Variables>
+    </p:PolicySequence>
+  </Activity>
+</Policy>

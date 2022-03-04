@@ -75,6 +75,7 @@
 
 #REGION ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
+  #UNCOMMENT BELOW PARAM() AND RENAME '$env:i_PAV' TO '$i_PAV' TO UTILIZE IN CLI
   #Param(
   #  [Parameter(Mandatory=$true)]$i_PAV
   #)
@@ -482,14 +483,14 @@ if (-not ($global:blnAVXML)) {
   if ([system.version]$global:OSVersion -ge [system.version]'6.0.0.0') {
     write-verbose "OS Windows Vista/Server 2008 or newer detected."
     try {
-      $AntiVirusProduct = get-wmiobject -Namespace "root\SecurityCenter2" -Class "AntiVirusProduct" -ComputerName $global:computername -ErrorAction Stop
+      $AntiVirusProduct = get-wmiobject -Namespace "root\SecurityCenter2" -Class "AntiVirusProduct" -ComputerName "$($global:computername)" -ErrorAction Stop
     } catch {
       $global:blnWMI = $false
     }
   } elseif ([system.version]$global:OSVersion -lt [system.version]'6.0.0.0') {
     write-verbose "Windows 2000, 2003, XP detected" 
     try {
-      $AntiVirusProduct = get-wmiobject -Namespace "root\SecurityCenter" -Class "AntiVirusProduct"  -ComputerName $global:computername -ErrorAction Stop
+      $AntiVirusProduct = get-wmiobject -Namespace "root\SecurityCenter" -Class "AntiVirusProduct"  -ComputerName "$($global:computername)" -ErrorAction Stop
     } catch {
       $global:blnWMI = $false
     }
@@ -555,7 +556,7 @@ if (-not ($global:blnAVXML)) {
           }
           try {
             if (($regDisplay -ne "") -and ($regDisplay -ne $null)) {
-              if (test-path "HKLM:$($regDisplay)") {                                                   #ATTEMPT TO VALIDATE INSTALLED AV PRODUCT BY TEST READING A KEY
+              if (test-path "HKLM:$($regDisplay)") {                                                #ATTEMPT TO VALIDATE INSTALLED AV PRODUCT BY TEST READING A KEY
                 $global:diag += "Found 'HKLM:$($regDisplay)' for product : $($key)`r`n"
                 write-host "Found 'HKLM:$($regDisplay)' for product : $($key)" -foregroundcolor yellow
                 try {                                                                               #IF VALIDATION PASSES; FABRICATE 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
@@ -567,7 +568,7 @@ if (-not ($global:blnAVXML)) {
                   $strName = "$($keyval1.$regDisplayVal)"
                   if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($strName -match "Sophos") -and ($strName -match "BETA")) {             #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
                   }
                   $strDisplay = "$($strDisplay)$($strName), "
@@ -629,7 +630,7 @@ if (-not ($global:blnAVXML)) {
                   $strName = "$($keyval1.$regDisplayVal)"
                   if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($strName -match "Sophos") -and ($strName -match "BETA")) {             #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
                   }
                   $strDisplay = "$($strDisplay)$($strName), "
@@ -1098,14 +1099,14 @@ if (-not ($global:blnAVXML)) {
               $tamperkey = get-childitem -path "HKLM:$($i_tamper)" -erroraction stop
               foreach ($tkey in $tamperkey) {
                 $tamperkey = get-itemproperty -path "HKLM:$($i_tamper)$($tkey.PSChildName)\tamper_protection" -name "$($i_tamperval)" -erroraction stop
-                $tval = "$(tamperkey.$i_tamperval)"
+                $tval = "$($tamperkey.$i_tamperval)"
                 break
               }
             }
             #INTERPRET 'TAMPER PROTECTION' STATUS BASED ON ANY AV PRODUCT VALUE REPRESENTATION
             if ($avs[$av].display -match "Windows Defender") {                                      #WINDOWS DEFENDER TREATS '5' AS 'ENABLED' FOR 'TAMPER PROTECTION'
-              $global:diag += "$($avs[$av].display) reports '$($tamperkey.$i_tamperval)' for 'Tamper Protection' (Expected : '5')`r`n"
-              write-host "$($avs[$av].display) reports '$($tamperkey.$i_tamperval)' for 'Tamper Protection' (Expected : '5')" -foregroundcolor yellow
+              $global:diag += "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '5')`r`n"
+              write-host "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '5')" -foregroundcolor yellow
               if ($tval -eq 5) {
                 $tamper = "$($true) (REG Check)"
               } elseif ($tval -le 4) {
@@ -1245,7 +1246,7 @@ if (-not ($global:blnAVXML)) {
             if ($avs[$av].display -match "Windows Defender") {                                      #WINDOWS DEFENDER DEFINITION UPDATE TIMESTAMP
               $Int64Value = [System.BitConverter]::ToInt64($defkey.$i_defupdateval,0)
               $time = [DateTime]::FromFileTime($Int64Value)
-              $update = Get-Date $time
+              $update = Get-Date($time)
               $age = new-timespan -start $update -end (Get-Date)
               if ($age.compareto($time1) -le 0) {
                 $global:o_DefStatus += "Status : Up to date (REG Check)`r`n"
@@ -1330,7 +1331,7 @@ if (-not ($global:blnAVXML)) {
           }
           #GET PRIMARY AV PRODUCT DETECTED INFECTIONS VIA REGISTRY
           if ($global:zNoInfect -notcontains $env:i_PAV) {
-            if ($env:i_PAV -match "Sophos") {                                                           #SOPHOS DETECTED INFECTIONS
+            if ($env:i_PAV -match "Sophos") {                                                       #SOPHOS DETECTED INFECTIONS
               try {
                 $global:diag += "Reading : -path 'HKLM:$($i_infect)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_infect)'" -foregroundcolor yellow
@@ -1351,7 +1352,7 @@ if (-not ($global:blnAVXML)) {
                 write-host $_.scriptstacktrace
                 write-host $_
               }
-            } elseif ($env:i_PAV -match "Trend Micro") {                                                #TREND MICRO DETECTED INFECTIONS
+            } elseif ($env:i_PAV -match "Trend Micro") {                                            #TREND MICRO DETECTED INFECTIONS
               try {
                 $global:diag += "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor yellow
@@ -1368,14 +1369,14 @@ if (-not ($global:blnAVXML)) {
                 write-host $_.scriptstacktrace
                 write-host $_
               }
-            } elseif ($env:i_PAV -match "Symantec") {                                                   #SYMANTEC DETECTED INFECTIONS
+            } elseif ($env:i_PAV -match "Symantec") {                                               #SYMANTEC DETECTED INFECTIONS
               try {
                 $global:diag += "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor yellow
                 $infectkey = get-ItemProperty -path "HKLM:$($i_infect)" -name "$($i_infectval)" -erroraction silentlycontinue
-                if ($infectkey.$i_infectval -gt 0) {                                                #NO DETECTED INFECTIONS
+                if ($infectkey.$i_infectval -eq 0) {                                                #NO DETECTED INFECTIONS
                   $global:o_Infect += "Virus/Malware Present : $($false)`r`n"
-                } elseif ($infectkey.$i_infectval -eq 0) {                                          #DETECTED INFECTIONS
+                } elseif ($infectkey.$i_infectval -gt 0) {                                          #DETECTED INFECTIONS
                   try {
                     $global:diag += "Reading : -path 'HKLM:$($i_scan)' -name 'WorstInfectionType'`r`n"
                     write-host "Reading : -path 'HKLM:$($i_scan)' -name 'WorstInfectionType'" -foregroundcolor yellow
@@ -1475,7 +1476,7 @@ $global:diag += "Definitions :`r`nStatus : $($global:o_DefStatus)`r`n"
 write-host "Definitions :" -foregroundcolor yellow
 write-host "Status : $($global:o_DefStatus)" -foregroundcolor $ccode
 #THREATS
-$global:diag += "`r`nActive Detections :`r`n$($global:o_Infect)`r`n$($global:o_Threats)`r`n"
+$global:diag += "`r`nActive Detections :$($global:o_Infect)`r`n$($global:o_Threats)`r`n"
 write-host "`r`nActive Detections :" -foregroundcolor yellow
 write-host "$($global:o_Infect)" -foregroundcolor $ccode
 write-host "Detected Threats :" -foregroundcolor yellow
@@ -1493,13 +1494,14 @@ write-host "$($global:o_CompState)" -foregroundcolor $ccode
 #DATTO OUTPUT
 write-host 'DATTO OUTPUT :'
 if ($global:blnWARN) {
-  write-DRRMAlert "AV Health : Could not download $($srcAVP)"
+  write-DRRMAlert "AV Health : $($env:i_PAV) : Warning"
   write-DRMMDiag "$($global:diag)"
-  $global:diag =$null
+  $global:diag = $null
   exit 1
 } elseif (-not $global:blnWARN) {
   write-DRRMAlert "AV Health : $($env:i_PAV) : Healthy"
   write-DRMMDiag "$($global:diag)"
+  $global:diag = $null
   exit 0
 }
 #END SCRIPT
