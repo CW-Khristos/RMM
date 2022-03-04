@@ -474,7 +474,7 @@ if (-not ($global:blnAVXML)) {
                   $strName = $keyval1.$regDisplayVal
                   if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($i_PAV -match "Sophos") -and ($strName -match "BETA")) {               #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($regDisplay -match "Sophos") -and ($strName -match "BETA")) {          #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
                   }
                   $strDisplay = "$($strDisplay)$($strName), "
@@ -531,7 +531,7 @@ if (-not ($global:blnAVXML)) {
                   $strName = "$($keyval1.$regDisplayVal)"
                   if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($i_PAV -match "Sophos") -and ($strName -match "BETA")) {               #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($regDisplay -match "Sophos") -and ($strName -match "BETA")) {          #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
                   }
                   $strDisplay = "$($strDisplay)$($strName), "
@@ -1122,8 +1122,8 @@ if (-not ($global:blnAVXML)) {
           }
           #GET PRIMARY AV PRODUCT DETECTED ALERTS VIA REGISTRY
           if ($global:zNoAlert -notcontains $i_PAV) {
-            try {
-              if ($i_PAV -match "Sophos") {
+            if ($i_PAV -match "Sophos") {
+              try {
                 write-host "Reading : -path 'HKLM:$($i_alert)'" -foregroundcolor yellow
                 $alertkey = get-ItemProperty -path "HKLM:$($i_alert)" -erroraction silentlycontinue
                 foreach ($alert in $alertkey.psobject.Properties) {
@@ -1135,34 +1135,34 @@ if (-not ($global:blnAVXML)) {
                     }
                   }
                 }
+              } catch {
+                write-host "Could not validate Registry data : 'HKLM:$($i_alert)'" -foregroundcolor red
+                $global:o_Infect = "N/A`r`n"
+                write-host $_.scriptstacktrace
+                write-host $_
               }
-              # NOT ACTUAL DETECTIONS - SAVE BELOW CODE FOR 'CONFIGURED ALERTS' METRIC
-              #elseif ($i_PAV -match "Trend Micro") {
-              #  if ($global:producttype -eq "Workstation") {
-              #    $i_alert += "Client"
-              #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
-              #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
-              #  } elseif (($global:producttype -eq "Server") -or ($global:producttype -eq "DC")) {
-              #    $i_alert += "Server"
-              #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
-              #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
-              #  }
-              #  foreach ($alert in $alertkey.psobject.Properties) {
-              #    if (($alert.name -notlike "PS*") -and ($alert.name -notlike "(default)")) {
-              #      if ($alert.value -eq 0) {
-              #        $global:o_Infect += "Type - $($alert.name) : $false`r`n"
-              #      } elseif ($alert.value -eq 1) {
-              #        $global:o_Infect += "Type - $($alert.name) : $true`r`n"
-              #      }
-              #    }
-              #  }
-              #}
-            } catch {
-              write-host "Could not validate Registry data : 'HKLM:$($i_alert)'" -foregroundcolor red
-              $global:o_Infect = "N/A`r`n"
-              write-host $_.scriptstacktrace
-              write-host $_
             }
+            # NOT ACTUAL DETECTIONS - SAVE BELOW CODE FOR 'CONFIGURED ALERTS' METRIC
+            #elseif ($i_PAV -match "Trend Micro") {
+            #  if ($global:producttype -eq "Workstation") {
+            #    $i_alert += "Client"
+            #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
+            #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
+            #  } elseif (($global:producttype -eq "Server") -or ($global:producttype -eq "DC")) {
+            #    $i_alert += "Server"
+            #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
+            #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
+            #  }
+            #  foreach ($alert in $alertkey.psobject.Properties) {
+            #    if (($alert.name -notlike "PS*") -and ($alert.name -notlike "(default)")) {
+            #      if ($alert.value -eq 0) {
+            #        $global:o_Infect += "Type - $($alert.name) : $false`r`n"
+            #      } elseif ($alert.value -eq 1) {
+            #        $global:o_Infect += "Type - $($alert.name) : $true`r`n"
+            #      }
+            #    }
+            #  }
+            #}
           }
           #GET PRIMARY AV PRODUCT DETECTED INFECTIONS VIA REGISTRY
           if ($global:zNoInfect -notcontains $i_PAV) {
@@ -1313,19 +1313,19 @@ write-host "Competitor State :" -foregroundcolor yellow
 write-host "$($global:o_CompState)" -foregroundcolor $ccode
 #REFORMAT OUTPUT METRICS FOR LEGIBILITY IN NCENTRAL
 #AV DETAILS
-$global:o_AVname = $global:o_AVname.replace("`r`n", "<br>")
-$global:o_AVpath = $global:o_AVpath.replace("`r`n", "<br>")
-$global:o_AVVersion = $global:o_AVVersion.replace("`r`n", "<br>")
-$global:o_AVStatus = $global:o_AVStatus.replace("`r`n", "<br>")
+if (($global:o_AVname -ne "") -and ($global:o_AVname -ne $null)) {$global:o_AVname = $global:o_AVname.replace("`r`n", "<br>")}
+if (($global:o_AVpath -ne "") -and ($global:o_AVpath -ne $null)) {$global:o_AVpath = $global:o_AVpath.replace("`r`n", "<br>")}
+if (($global:o_AVVersion -ne "") -and ($global:o_AVVersion -ne $null)) {$global:o_AVVersion = $global:o_AVVersion.replace("`r`n", "<br>")}
+if (($global:o_AVStatus -ne "") -and ($global:o_AVStatus -ne $null)) {$global:o_AVStatus = $global:o_AVStatus.replace("`r`n", "<br>")}
 #REAL-TIME SCANNING & DEFINITIONS
-$global:o_RTstate = $global:o_RTstate.replace("`r`n", "<br>")
-$global:o_DefStatus = $global:o_DefStatus.replace("`r`n", "<br>")
+if (($global:o_RTstate -ne "") -and ($global:o_RTstate -ne $null)) {$global:o_RTstate = $global:o_RTstate.replace("`r`n", "<br>")}
+if (($global:o_DefStatus -ne "") -and ($global:o_DefStatus -ne $null)) {$global:o_DefStatus = $global:o_DefStatus.replace("`r`n", "<br>")}
 #THREATS
-$global:o_Infect = $global:o_Infect.replace("`r`n", "<br>")
-$global:o_Threats = $global:o_Threats.replace("`r`n", "<br>")
+if (($global:o_Infect -ne "") -and ($global:o_Infect -ne $null)) {$global:o_Infect = $global:o_Infect.replace("`r`n", "<br>")}
+if (($global:o_Threats -ne "") -and ($global:o_Threats -ne $null)) {$global:o_Threats = $global:o_Threats.replace("`r`n", "<br>")}
 #COMPETITOR AV
-$global:o_CompAV = $global:o_CompAV.replace("`r`n", "<br>")
-$global:o_CompPath = $global:o_CompPath.replace("`r`n", "<br>")
-$global:o_CompState = $global:o_CompState.replace("`r`n", "<br>")
+if (($global:o_CompAV -ne "") -and ($global:o_CompAV -ne $null)) {$global:o_CompAV = $global:o_CompAV.replace("`r`n", "<br>")}
+if (($global:o_CompPath -ne "") -and ($global:o_CompPath -ne $null)) {$global:o_CompPath = $global:o_CompPath.replace("`r`n", "<br>")}
+if (($global:o_CompState -ne "") -and ($global:o_CompState -ne $null)) {$global:o_CompState = $global:o_CompState.replace("`r`n", "<br>")}
 #END SCRIPT
 #------------
