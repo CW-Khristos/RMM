@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeDropMeta xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!--The section BackupLocation defines location of backup files, relatively from CodeDrop directory-->
+  <BackupLocation>
+    <Agent>BackupLocationForAgent</Agent>
+    <Probe>BackupLocationForProbe</Probe>
+  </BackupLocation>
+  <!--The section Shutdown defines if agent or probe should be stopped before upgrading-->
+  <Shutdown>
+    <Agent>true</Agent>
+    <Probe>false</Probe>
+  </Shutdown>
+  <!--The section Files defines where files from unzipped contents should be copied-->
+  <Files>   
+    <File Name="agent.exe" CheckRevision="false">
+      <Locations>        
+        <Location>Windows Agent\bin</Location>
+      </Locations>
+    </File>	
+  </Files>
+  <!--The section TemporaryFiles defines if temporary downloaded files should be deleted or copied somewhere-->
+  <TemporaryFiles>
+    <CopyTo />
+    <Delete>true</Delete>
+  </TemporaryFiles>
+</CodeDropMeta>

@@ -1,0 +1,1 @@
+#! /bin/bashlaunchctl unload /Library/LaunchDaemons/com.n-able.agent-macosx.plistrm /Applications/Mac_Agent.app/Contents/Daemon/home/nagent/CMData/*rm /Applications/Mac_Agent.app/Contents/Daemon/home/nagent/CMSetting/*launchctl load /Library/LaunchDaemons/com.n-able.agent-macosx.plist

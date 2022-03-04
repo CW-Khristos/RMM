@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><Policy ID="3130da18-aed5-4220-ac0f-3989f5577788" Name="N-able Windows Agent Self-Healing Task Deployment" Description="RGVwbG95cyBBZ2VudFNlbGZIZWFsaW5nLnBzMSBhbmQgYSBXaW5kb3dzIFRhc2sgdG8gcnVuIGF0IHN0YXJ0dXAgYW5kIGV2ZXJ5IDMwIG1pbnV0ZXMuIFRhc2sgcGVyaW9kaWNhbGx5IGJhY2tzIHVwIFdpbmRvd3MgQWdlbnQncyBBcHBsaWFuY2VDb25maWcgJiBTZXJ2ZXJDb25maWcgWE1MIGZpbGVzLCB0aGVuIHJlc3RvcmVzIHRoZW0gaWYgbmVjZXNzYXJ5IHRvIHJlc3RvcmUgY29tbXVuaWNhdGlvbiB3aXRoIG91ciBOLWNlbnRyYWwu" Version="2.18.0.1" MinRequiredVersion="2.18.0.1" RemoteCategory="0" ExecutionType="CurrentLoggedOnUser" MinimumPSVersionRequired="0.0.0">
+  <Object ID="{dfd17881-3f48-48ab-a67c-ec453dd46c20}" Type="{B6FA6D8B-EEAA-47A6-8463-7F9A4F5BBB6E}" Data="&lt;xml /&gt;" />
+  <LinkManager xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/PolicyExecutor">
+    <hashset xmlns:d2p1="http://schemas.datacontract.org/2004/07/System" />
+  </LinkManager>
+  <Diagnostics OriginalVersion="2.18.1.8" />
+  <Activity mc:Ignorable="sads sap" x:Class="Policy Builder" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:p="clr-namespace:PolicyExecutor;assembly=PolicyExecutionEngine" xmlns:sads="http://schemas.microsoft.com/netfx/2010/xaml/activities/debugger" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:Members>
+      <x:Property Name="PolicyGUID" Type="InArgument(x:String)" />
+    </x:Members>
+    <sap:VirtualizedContainerService.HintSize>983,2996</sap:VirtualizedContainerService.HintSize>
+    <mva:VisualBasic.Settings>Assembly references and imported namespaces serialized as XML namespaces</mva:VisualBasic.Settings>
+    <p:PolicySequence DisplayName="Policy Builder" sap:VirtualizedContainerService.HintSize="983,2996" MinRequiredVersion="2.18.0.1" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
+      <p:PolicySequence.Activities>
+        <p:FolderExists Folder_Item="{x:Null}" Folder_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" Conditional="[FolderExists_Conditional]" DisplayName="Folder Exists.Scripts" Folder="C:\IT" Folder_DisplayArg="C:\IT" sap:VirtualizedContainerService.HintSize="947,88" MinRequiredVersion="2.10.0.19" Moniker="0ccd7491-ef61-4f93-9f44-74431207cbb8" Result="[FolderExists_Result]" ResultString="[FolderExists_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="FolderExists" m_bTextLinkChange="False" />
+        <p:IfObject CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" VerboseOutput_Item="{x:Null}" VerboseOutput_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="equals" Condition_DisplayArg="equals" DisplayName="If" sap:VirtualizedContainerService.HintSize="947,511" MinRequiredVersion="2.16.0.1" Moniker="33590863-492b-4897-816c-35fe4642563c" Result="[IfObject_Result]" ResultString="[IfObject_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfObject" Value_DisplayArg="False" Value_Type="x:String" Variable="[FolderExists_Conditional]" Variable_DisplayArg="Folder Exists.Scripts.Conditional" Variable_Type="x:String" VerboseOutput="False" VerboseOutput_DisplayArg="" m_bTextLinkChange="False">
+          <p:IfObject.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="371,238" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:CreateFolder Folder_Item="{x:Null}" Folder_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Create Folder" Folder="C:\IT" FolderInfo="[CreateFolder_FolderInfo]" Folder_DisplayArg="C:\IT" sap:VirtualizedContainerService.HintSize="333,88" MinRequiredVersion="2.10.0.19" Moniker="f3f56f5b-107e-41b5-8a82-9724b3691bd8" Result="[CreateFolder_Result]" ResultString="[CreateFolder_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="CreateFolder" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="CreateFolder_FolderInfo" />
+                <Variable x:TypeArguments="x:String" Name="CreateFolder_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="CreateFolder_Result" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfObject.IfOption>
+          <p:IfObject.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="False" />
+            </InArgument>
+          </p:IfObject.Value>
+        </p:IfObject>
+        <p:FolderExists Folder_Item="{x:Null}" Folder_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" Conditional="[FolderExists_Conditional_1]" DisplayName="Folder Exists.Scripts" Folder="C:\IT\Scripts" Folder_DisplayArg="C:\IT\Scripts" sap:VirtualizedContainerService.HintSize="947,88" MinRequiredVersion="2.10.0.19" Moniker="8062217b-4895-4c8e-8ccc-1eff71046057" Result="[FolderExists_Result_1]" ResultString="[FolderExists_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="FolderExists" m_bTextLinkChange="False" />
+        <p:IfObject CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" VerboseOutput_Item="{x:Null}" VerboseOutput_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="equals" Condition_DisplayArg="equals" DisplayName="If" sap:VirtualizedContainerService.HintSize="947,511" MinRequiredVersion="2.16.0.1" Moniker="f0bf4e0a-11e1-4678-a0ec-fc86e2792d83" Result="[IfObject_Result_1]" ResultString="[IfObject_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfObject" Value_DisplayArg="False" Value_Type="x:String" Variable="[FolderExists_Conditional_1]" Variable_DisplayArg="Folder Exists.Scripts.Conditional" Variable_Type="x:String" VerboseOutput="False" VerboseOutput_DisplayArg="" m_bTextLinkChange="False">
+          <p:IfObject.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="371,238" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:CreateFolder Folder_Item="{x:Null}" Folder_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Create Folder" Folder="C:\IT\Scripts" FolderInfo="[CreateFolder_FolderInfo_1]" Folder_DisplayArg="C:\IT\Scripts" sap:VirtualizedContainerService.HintSize="333,88" MinRequiredVersion="2.10.0.19" Moniker="98f3a9f6-802f-4730-9ba6-a78c06c1d143" Result="[CreateFolder_Result_1]" ResultString="[CreateFolder_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="CreateFolder" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="CreateFolder_FolderInfo_1" />
+                <Variable x:TypeArguments="x:String" Name="CreateFolder_ResultString_1" />
+                <Variable x:TypeArguments="x:Double" Name="CreateFolder_Result_1" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfObject.IfOption>
+          <p:IfObject.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="False" />
+            </InArgument>
+          </p:IfObject.Value>
+        </p:IfObject>
+        <p:FolderExists Folder_Item="{x:Null}" Folder_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" Conditional="[FolderExists_Conditional_2]" DisplayName="Folder Exists.Tasks" Folder="C:\IT\Scripts\Tasks" Folder_DisplayArg="C:\IT\Scripts\Tasks" sap:VirtualizedContainerService.HintSize="947,88" MinRequiredVersion="2.10.0.19" Moniker="ad85b084-4468-4001-85c7-b6b6c34aff12" Result="[FolderExists_Result_2]" ResultString="[FolderExists_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="FolderExists" m_bTextLinkChange="False" />
+        <p:IfObject CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" VerboseOutput_Item="{x:Null}" VerboseOutput_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="equals" Condition_DisplayArg="equals" DisplayName="If" sap:VirtualizedContainerService.HintSize="947,511" MinRequiredVersion="2.16.0.1" Moniker="80737507-ebb6-4bd6-b7cc-77a2cbb6d0a0" Result="[IfObject_Result_2]" ResultString="[IfObject_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfObject" Value_DisplayArg="False" Value_Type="x:String" Variable="[FolderExists_Conditional_2]" Variable_DisplayArg="Folder Exists.Tasks.Conditional" Variable_Type="x:String" VerboseOutput="False" VerboseOutput_DisplayArg="" m_bTextLinkChange="False">
+          <p:IfObject.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="371,238" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:CreateFolder Folder_Item="{x:Null}" Folder_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Create Folder" Folder="C:\IT\Scripts\Tasks" FolderInfo="[CreateFolder_FolderInfo_2]" Folder_DisplayArg="C:\IT\Scripts\Tasks" sap:VirtualizedContainerService.HintSize="333,88" MinRequiredVersion="2.10.0.19" Moniker="c13758ea-8de8-49b6-aa27-b1357eec987e" Result="[CreateFolder_Result_2]" ResultString="[CreateFolder_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="CreateFolder" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="CreateFolder_FolderInfo_2" />
+                <Variable x:TypeArguments="x:String" Name="CreateFolder_ResultString_2" />
+                <Variable x:TypeArguments="x:Double" Name="CreateFolder_Result_2" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfObject.IfOption>
+          <p:IfObject.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="False" />
+            </InArgument>
+          </p:IfObject.Value>
+        </p:IfObject>
+        <p:DownloadFileFromURL OverwriteExistingFile_Item="{x:Null}" OverwriteExistingFile_ItemProp="{x:Null}" RemoteFileURL_Item="{x:Null}" RemoteFileURL_ItemProp="{x:Null}" SaveAsFileName_Item="{x:Null}" SaveAsFileName_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Download File From URL" sap:VirtualizedContainerService.HintSize="947,160" MinRequiredVersion="2.18.0.1" Moniker="cb00a006-456f-4c5b-9a0c-bad6fe0ccf0f" OverwriteExistingFile="True" OverwriteExistingFile_DisplayArg="true" RemoteFileURL="https://raw.githubusercontent.com/CW-Khristos/scripts/master/Agent_SelfHeal/AgentSelfHeal.ps1" RemoteFileURL_DisplayArg="https://raw.githubusercontent.com/CW-Khristos/scripts/master/Agent_SelfHeal/AgentSelfHeal.ps1" Result="[DownloadFileFromURL_Result]" ResultString="[DownloadFileFromURL_ResultString]" RunAsCurrentLoggedOnUser="False" SaveAsFileName="C:\IT\Scripts\AgentSelfHeal.ps1" SaveAsFileName_DisplayArg="C:\IT\Scripts\AgentSelfHeal.ps1" ScriptExecutionMethod="ExecuteDebug" TypeName="DownloadFileFromURL" m_bTextLinkChange="False" />
+        <p:DownloadFileFromURL OverwriteExistingFile_Item="{x:Null}" OverwriteExistingFile_ItemProp="{x:Null}" RemoteFileURL_Item="{x:Null}" RemoteFileURL_ItemProp="{x:Null}" SaveAsFileName_Item="{x:Null}" SaveAsFileName_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Download File From URL" sap:VirtualizedContainerService.HintSize="947,160" MinRequiredVersion="2.18.0.1" Moniker="90ac6f90-12e0-43f3-9d11-de70f6a96645" OverwriteExistingFile="True" OverwriteExistingFile_DisplayArg="true" RemoteFileURL="https://raw.githubusercontent.com/CW-Khristos/scripts/master/Agent_SelfHeal/N-able%20Windows%20Agent%20Self-Healing.xml" RemoteFileURL_DisplayArg="https://raw.githubusercontent.com/CW-Khristos/scripts/master/Agent_SelfHeal/N-able%20Windows%20Agent%20Self-Healing.xml" Result="[DownloadFileFromURL_Result_1]" ResultString="[DownloadFileFromURL_ResultString_1]" RunAsCurrentLoggedOnUser="False" SaveAsFileName="C:\IT\Scripts\Tasks\N-able Windows Agent Self-Healing.xml" SaveAsFileName_DisplayArg="C:\IT\Scripts\Tasks\N-able Windows Agent Self-Healing.xml" ScriptExecutionMethod="ExecuteDebug" TypeName="DownloadFileFromURL" m_bTextLinkChange="False" />
+        <p:RunProgram Arguments_Item="{x:Null}" Arguments_ItemProp="{x:Null}" Program_Item="{x:Null}" Program_ItemProp="{x:Null}" RunAsType_Item="{x:Null}" RunAsType_ItemProp="{x:Null}" WaitForCompletion_Item="{x:Null}" WaitForCompletion_ItemProp="{x:Null}" WindowType_Item="{x:Null}" WindowType_ItemProp="{x:Null}" WorkingDirectory="{x:Null}" WorkingDirectory_DisplayArg="{x:Null}" WorkingDirectory_Item="{x:Null}" WorkingDirectory_ItemProp="{x:Null}" Arguments="/CREATE /TN &quot;IPM Computers\N-able Windows Agent Self-Healing&quot; /XML &quot;C:\IT\Scripts\Tasks\N-able Windows Agent Self-Healing.xml&quot; /F" Arguments_DisplayArg="/CREATE /TN &quot;IPM Computers\N-able Windows Agent Self-Healing&quot; /XML &quot;C:\IT\Scripts\Tasks\N-able Windows Agent Self-Healing.xml&quot; /F" AssemblyName="PolicyExecutionEngine, Version=2.15.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Run Program" sap:VirtualizedContainerService.HintSize="947,336" MinRequiredVersion="2.10.0.19" Moniker="86822d8f-b7ed-4971-a9d1-1f0387f880cf" ProcessID="[RunProgram_ProcessID]" Program="C:\Windows\System32\SchTasks.exe" Program_DisplayArg="C:\Windows\System32\SchTasks.exe" Result="[RunProgram_Result]" ResultString="[RunProgram_ResultString]" RunAsCurrentLoggedOnUser="True" RunAsType="LocalSystem" RunAsType_DisplayArg="LocalSystem" ScriptExecutionMethod="None" TypeName="RunProgram" WaitForCompletion="True" WaitForCompletion_DisplayArg="" WindowType="Hidden" WindowType_DisplayArg="Hidden" m_bTextLinkChange="False" />
+      </p:PolicySequence.Activities>
+      <p:PolicySequence.Variables>
+        <Variable x:TypeArguments="x:String" Name="DownloadFileFromURL_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="DownloadFileFromURL_Result" />
+        <Variable x:TypeArguments="x:String" Name="DownloadFileFromURL_ResultString_1" />
+        <Variable x:TypeArguments="x:Double" Name="DownloadFileFromURL_Result_1" />
+        <Variable x:TypeArguments="x:String" Name="FolderExists_Conditional" />
+        <Variable x:TypeArguments="x:String" Name="FolderExists_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="FolderExists_Result" />
+        <Variable x:TypeArguments="x:String" Name="IfObject_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="IfObject_Result" />
+        <Variable x:TypeArguments="x:String" Name="FolderExists_Conditional_1" />
+        <Variable x:TypeArguments="x:String" Name="FolderExists_ResultString_1" />
+        <Variable x:TypeArguments="x:Double" Name="FolderExists_Result_1" />
+        <Variable x:TypeArguments="x:String" Name="IfObject_ResultString_1" />
+        <Variable x:TypeArguments="x:Double" Name="IfObject_Result_1" />
+        <Variable x:TypeArguments="x:String" Name="FolderExists_Conditional_2" />
+        <Variable x:TypeArguments="x:String" Name="FolderExists_ResultString_2" />
+        <Variable x:TypeArguments="x:Double" Name="FolderExists_Result_2" />
+        <Variable x:TypeArguments="x:String" Name="IfObject_ResultString_2" />
+        <Variable x:TypeArguments="x:Double" Name="IfObject_Result_2" />
+        <Variable x:TypeArguments="x:String" Name="RunProgram_ProcessID" />
+        <Variable x:TypeArguments="x:String" Name="RunProgram_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="RunProgram_Result" />
+      </p:PolicySequence.Variables>
+    </p:PolicySequence>
+  </Activity>
+</Policy>

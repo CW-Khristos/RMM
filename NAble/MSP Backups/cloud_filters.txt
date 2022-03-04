@@ -1,0 +1,134 @@
+C:\ADWCleaner|
+C:\AMD|
+C:\Apps|
+C:\cclutter.txt|
+C:\ComboFix|
+C:\Dell|
+C:\Drivers|
+C:\ESD|
+C:\GRBData|
+C:\Images|
+C:\Intel|
+C:\OneDriveTemp|
+C:\NVIDIA|
+C:\PerfLogs|
+C:\Program Files|
+C:\Program Files (x86)|
+C:\ProgramData|
+C:\Qoobox|
+C:\temp|
+C:\tempini|
+C:\wu_output|
+C:\Windows|
+C:\Documents and Settings|
+C:\Users\Default|
+%PROGRAMFILES(X86)%\StorageCraft|
+%PROGRAMFILES(X86)%\Temp|
+%PROGRAMFILES(X86)%\N-Able Technologies\Reactive\Temp|
+%PROGRAMFILES(X86)%\N-Able Technologies\PatchManagement|
+%PROGRAMFILES(X86)%\N-Able Technologies\Windows Agent\cache|
+%PROGRAMFILES(X86)%\N-Able Technologies\Windows Agent\Temp|
+%PROGRAMFILES(X86)%\N-Able Technologies\Tools\AVDefenderTools|
+%PROGRAMFILES(X86)%\N-Able Technologies\Tools\AVDefenderEvents|
+%PROGRAMFILES(X86)%\N-Able Technologies\Tools\AVDefenderPolicies|
+%PROGRAMFILES(X86)%\N-able Technologies\UpdateServerCache|
+%PROGRAMFILES(X86)%\N-able Technologies\NablePatchCache|
+%PROGRAMFILES%\N-Able Technologies\AVDefender\Logs|
+%PROGRAMFILES%\N-Able Technologies\AVDefender\Signatures|
+%PROGRAMFILES%\N-Able Technologies\AVDefender\mitm_cache|
+%PROGRAMFILES%\N-Able Technologies\AVDefender\Quarantine|
+%PROGRAMFILES%\N-Able Technologies\AVDefender\ThreatScanner|
+%PROGRAMDATA%\MXB|
+%PROGRAMDATA%\MXB.old|
+%PROGRAMDATA%\MXB.old2|
+%PROGRAMDATA%\MXB.old3|
+%PROGRAMDATA%\MXB.older|
+%PROGRAMDATA%\MXB_old|
+%PROGRAMDATA%\MXB_old2|
+%PROGRAMDATA%\MXB_old3|
+%PROGRAMDATA%\MXB_older|
+%PROGRAMDATA%\Sentinel|
+%PROGRAMDATA%\SolarWinds|
+%PROGRAMDATA%\SolarWinds MSP|
+%PROGRAMDATA%\N-Able Technologies|
+%PROGRAMDATA%\GetSupportService|
+%PROGRAMDATA%\GetSupportService_N-Central|
+%PROGRAMDATA%\AdvancedMonitoringNetpathAgent|
+%PROGRAMDATA%\bdlogging|
+%PROGRAMDATA%\restored_quar|
+%PROGRAMDATA%\Temp|
+%PROGRAMDATA%\Roaming|
+%PROGRAMDATA%\SoftwareDistribution|
+%PROGRAMDATA%\Microsoft\Search\Data\Temp|
+%PROGRAMDATA%\Microsoft\Windows\Caches|
+%PROGRAMDATA%\Microsoft\Windows\AppRepository|
+%PROGRAMDATA%\Microsoft\Windows\DeviceMetadataCache|
+%PROGRAMDATA%\Microsoft\Windows\Hyper-V\Groups Cache|
+%PROGRAMDATA%\Microsoft\Windows\Hyper-V\Planned Snapshots Cache|
+%PROGRAMDATA%\Microsoft\Windows\Hyper-V\Planned Virtual Machines Cache|
+%PROGRAMDATA%\Microsoft\Windows\Hyper-V\Snapshot Groups Cache|
+%PROGRAMDATA%\Microsoft\Windows\Hyper-V\Snapshots Cache|
+%PROGRAMDATA%\Microsoft\Windows\Hyper-V\UndoLog Configuration Cache|
+%PROGRAMDATA%\Microsoft\Windows\Hyper-V\Virtual Machines Cache|
+%PROGRAMDATA%\Microsoft\Windows\WER|
+%PROGRAMDATA%\Microsoft\Windows\Windows Defender\Quarantine|
+%PROGRAMDATA%\Microsoft\Windows\Windows Defender\Scans|
+%PROGRAMDATA%\Microsoft\Windows\Windows Defender\Support|
+%PROGRAMDATA%\Microsoft\XboxLive\NSALCache|
+%SystemRoot%.old|
+%SystemRoot%.000|
+%SystemRoot%.001|
+%SystemRoot%.002|
+%SystemRoot%.003|
+%SystemRoot%.004|
+%SystemRoot%.005|
+%SystemRoot%\CbsTemp|
+%SystemRoot%\LiveKernelReports|
+%SystemRoot%\Logs|
+%SystemRoot%\minidump|
+%SystemRoot%\ModemLogs|
+%SystemRoot%\rescache|
+%SystemRoot%\SchCache|
+%SystemRoot%\ServiceProfiles\LocalService\AppData\Local\Microsoft\Windows\INetCache|
+%SystemRoot%\ServiceProfiles\LocalService\AppData\Local\Temp|
+%SystemRoot%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization|
+%SystemRoot%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\INetCache|
+%SystemRoot%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\SchCache|
+%SystemRoot%\ServiceProfiles\NetworkService\AppData\Local\Temp|
+%SystemRoot%\SoftwareDistribution|
+%SystemRoot%\System32\LogFiles|
+%SystemRoot%\System32\config\systemprofile\AppData\Local\D3DSCache|
+%SystemRoot%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\Caches|
+%SystemRoot%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\CloudAPCache|
+%SystemRoot%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\PRICache|
+%SystemRoot%\Temp|
+%SystemRoot%\winsxs\temp|
+%SystemRoot%\WinSxS\ManifestCache|
+%LOCALAPPDATA%\temp|
+%LOCALAPPDATA%\Google\Chrome\User Data\Temp|
+%LOCALAPPDATA%\Google\Chrome\User Data\Crashpad|
+%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache|
+%LOCALAPPDATA%\Google\Chrome\User Data\Default\IndexedDB|
+%LOCALAPPDATA%\Google\Chrome\User Data\Default\GPUCache|
+%LOCALAPPDATA%\Google\Chrome\User Data\Default\Extensions|
+%LOCALAPPDATA%\Google\Chrome\User Data\Default\Thumbnails|
+%LOCALAPPDATA%\Google\Chrome\User Data\Default\Media Cache|
+%LOCALAPPDATA%\Google\Chrome\User Data\Default\Application Cache|
+%LOCALAPPDATA%\Microsoft\FontCache|
+%LOCALAPPDATA%\Microsoft\Feeds Cache|
+%LOCALAPPDATA%\Microsoft\Windows\WER|
+%LOCALAPPDATA%\Microsoft\Windows\Caches|
+%LOCALAPPDATA%\Microsoft\Windows\AppCache|
+%LOCALAPPDATA%\Microsoft\Windows\PriCache|
+%LOCALAPPDATA%\Microsoft\Windows\WebCache|
+%LOCALAPPDATA%\Microsoft\Windows\INetCache|
+%LOCALAPPDATA%\Microsoft\Windows\INetCookies|
+%LOCALAPPDATA%\Microsoft\Windows\IECompatCache|
+%LOCALAPPDATA%\Microsoft\Windows\IECompatUaCache|
+%LOCALAPPDATA%\Microsoft\Windows\IEDownloadHistory|
+%LOCALAPPDATA%\Microsoft\Windows\PPBCompatCache|
+%LOCALAPPDATA%\Microsoft\Windows\PPBCompatUaCache|
+%LOCALAPPDATA%\Microsoft\Windows\INetCacheContent.Word|
+%LOCALAPPDATA%\Microsoft\Windows\Explorer\ThumbCacheToDelete|
+%LOCALAPPDATA%\Microsoft\Windows\ActionCenterCache|
+%LOCALAPPDATA%\Microsoft\Windows\TemporaryInternetFiles|

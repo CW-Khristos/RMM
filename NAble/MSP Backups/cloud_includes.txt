@@ -1,0 +1,9 @@
+%PROGRAMFILES%\Backup Manager|
+%PROGRAMFILES%\N-able Technologies|
+%PROGRAMFILES(X86)%\SolarWinds MSP|
+%PROGRAMFILES(X86)%\BeAnywhere Support Express|
+%PROGRAMFILES(X86)%\N-able Technologies\Tools|
+%PROGRAMFILES(X86)%\N-able Technologies\Reactive|
+%PROGRAMFILES(X86)%\N-able Technologies\Windows Agent|
+%PROGRAMFILES(X86)%\N-able Technologies\PatchManagement|
+%PROGRAMFILES(X86)%\N-able Technologies\Windows Software Probe|

@@ -1,0 +1,333 @@
+<NODE>
+  <!--Sophos Anti-Virus-->
+  <SOPHOSANTIVIRUS>
+    <bit64>
+      <!--AV Details-->
+      <display>\SOFTWARE\WOW6432Node\Sophos\SAVService\Application\</display>
+      <displayval>EventSource</displayval>
+      <path>\SOFTWARE\WOW6432Node\Sophos\SAVService\Application\</path>
+      <pathval>Path</pathval>
+      <!--AV Versions-->
+      <ver>\SOFTWARE\WOW6432Node\Sophos\SAVService\Application\</ver>
+      <verval>MarketingVersion</verval>
+      <compver>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\Details\</compver>
+      <!--AV Status-->
+      <stat>\SOFTWARE\WOW6432Node\Sophos\SavService\Status\</stat>
+      <statval>UpToDateState</statval>
+      <!--AV Product Updates-->
+      <update>\SOFTWARE\WOW6432Node\Sophos\SAVService\Telemetry\MajorUpdate\</update>
+      <updateval>LastSuccessUtc</updateval>
+      <source>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</source>
+      <sourceval>UpdateSource</sourceval>
+      <!--AV Real-Time Scanning-->
+      <rt>\SOFTWARE\Sophos\Sophos Network Threat Protection\Adapter Notifications\</rt>
+      <rtval>RealTimeScanning</rtval>
+      <!--AV Definition Updates-->
+      <defupdate>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</defupdate>
+      <defupdateval>LastUpdateTime</defupdateval>
+      <!--AV Tamper Protection-->
+      <tamper>\SOFTWARE\WOW6432Node\Sophos\SAVService\TamperProtection\</tamper>
+      <tamperval>Enabled</tamperval>
+      <!--AV Is Managed-->
+      <managed>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\</managed>
+      <managedval>IsManaged</managedval>
+      <!--AV Threats-->
+      <scan>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\LastScan\</scan>
+      <scantype>PLACEHOLDER</scantype>
+      <scanval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\LastScan\</scanval>
+      <alert>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</alert>
+      <alertval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</alertval>
+      <infect>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</infect>
+      <infectval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</infectval>
+      <threat>\SOFTWARE\WOW6432Node\Sophos\SAVService\ThreatLifetime\Threats\</threat>
+    </bit64>
+    <bit32>
+      <!--AV Details-->
+      <display>\SOFTWARE\Sophos\SAVService\Application\</display>
+      <displayval>EventSource</displayval>
+      <path>\SOFTWARE\Sophos\SAVService\Application\</path>
+      <pathval>Path</pathval>
+      <!--AV Versions-->
+      <ver>\SOFTWARE\Sophos\SAVService\Application\</ver>
+      <verval>MarketingVersion</verval>
+      <compver>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\Details\</compver>
+      <!--AV Status-->
+      <stat>\SOFTWARE\Sophos\SavService\Status\</stat>
+      <statval>UpToDateState</statval>
+      <!--AV Product Updates-->
+      <update>\SOFTWARE\Sophos\SAVService\Telemetry\MajorUpdate\</update>
+      <updateval>LastSuccessUtc</updateval>
+      <source>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</source>
+      <sourceval>UpdateSource</sourceval>
+      <!--AV Real-Time Scanning-->
+      <rt>\SOFTWARE\Sophos\Sophos Network Threat Protection\Adapter Notifications\</rt>
+      <rtval>RealTimeScanning</rtval>
+      <!--AV Definition Updates-->
+      <defupdate>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</defupdate>
+      <defupdateval>LastUpdateTime</defupdateval>
+      <!--AV Tamper Protection-->
+      <tamper>\SOFTWARE\Sophos\SAVService\TamperProtection\</tamper>
+      <tamperval>Enabled</tamperval>
+      <!--AV Is Managed-->
+      <managed>\SOFTWARE\Sophos\AutoUpdate\</managed>
+      <managedval>IsManaged</managedval>
+      <!--AV Threats-->
+      <scan>\SOFTWARE\Sophos\SAVService\Status\LastScan\</scan>
+      <scantype>PLACEHOLDER</scantype>
+      <scanval>\SOFTWARE\Sophos\SAVService\Status\LastScan\</scanval>
+      <alert>\SOFTWARE\Sophos\SAVService\Status\Infected\</alert>
+      <alertval>\SOFTWARE\Sophos\SAVService\Status\Infected\</alertval>
+      <infect>\SOFTWARE\Sophos\SAVService\Status\Infected\</infect>
+      <infectval>\SOFTWARE\Sophos\SAVService\Status\Infected\</infectval>
+      <threat>\SOFTWARE\Sophos\SAVService\ThreatLifetime\Threats\</threat>
+    </bit32>
+  </SOPHOSANTIVIRUS>
+  <!--Sophos Anti-Virus "InterceptX" / Beta-->
+  <SOPHOSINTERCEPTXBETA>
+    <bit64>
+      <!--AV Details-->
+      <display>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\Details\</display>
+      <displayval>Version</displayval>
+      <path>\SOFTWARE\Sophos\Sophos UI\Application\</path>
+      <pathval>Path</pathval>
+      <!--AV Versions-->
+      <ver>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\Details\</ver>
+      <verval>Version</verval>
+      <compver>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\Details\</compver>
+      <!--AV Status-->
+      <stat>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</stat>
+      <statval>Result</statval>
+      <!--AV Product Updates-->
+      <update>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus</update>
+      <updateval>LastUpdateTime</updateval>
+      <source>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</source>
+      <sourceval>UpdateSource</sourceval>
+      <!--AV Real-Time Scanning-->
+      <rt>\SOFTWARE\Sophos\Sophos Network Threat Protection\Adapter Notifications\</rt>
+      <rtval>RealTimeScanning</rtval>
+      <!--AV Definition Updates-->
+      <defupdate>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</defupdate>
+      <defupdateval>LastUpdateTime</defupdateval>
+      <!--AV Tamper Protection-->
+      <tamper>\SOFTWARE\Sophos\Management\Policy\Driver\</tamper>
+      <tamperval>tamper_protection_enabled</tamperval>
+      <!--AV Is Managed-->
+      <managed>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\</managed>
+      <managedval>IsManaged</managedval>
+      <!--AV Threats-->
+      <scan>\SOFTWARE\Sophos\EndpointDefense\BackgroundScanV2\</scan>
+      <scantype>PLACEHOLDER</scantype>
+      <scanval>OverallLastCompletedTime</scanval>
+      <alert>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</alert>
+      <alertval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</alertval>
+      <infect>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</infect>
+      <infectval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</infectval>
+      <threat>\SOFTWARE\WOW6432Node\Sophos\SAVService\ThreatLifetime\Threats\</threat>
+    </bit64>
+    <bit32>
+      <!--AV Details-->
+      <display>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\Details\</display>
+      <displayval>Version</displayval>
+      <path>\SOFTWARE\Sophos\Sophos UI\Application\</path>
+      <pathval>Path</pathval>
+      <!--AV Versions-->
+      <ver>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\Details\</ver>
+      <verval>Version</verval>
+      <compver>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\Details\</compver>
+      <!--AV Status-->
+      <stat>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</stat>
+      <statval>Result</statval>
+      <!--AV Product Updates-->
+      <update>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus</update>
+      <updateval>LastUpdateTime</updateval>
+      <source>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</source>
+      <sourceval>UpdateSource</sourceval>
+      <!--AV Real-Time Scanning-->
+      <rt>\SOFTWARE\Sophos\Sophos Network Threat Protection\Adapter Notifications\</rt>
+      <rtval>RealTimeScanning</rtval>
+      <!--AV Definition Updates-->
+      <defupdate>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</defupdate>
+      <defupdateval>LastUpdateTime</defupdateval>
+      <!--AV Tamper Protection-->
+      <tamper>\SOFTWARE\Sophos\Management\Policy\Driver\</tamper>
+      <tamperval>tamper_protection_enabled</tamperval>
+      <!--AV Is Managed-->
+      <managed>\SOFTWARE\Sophos\AutoUpdate\</managed>
+      <managedval>IsManaged</managedval>
+      <!--AV Threats-->
+      <scan>\SOFTWARE\Sophos\EndpointDefense\BackgroundScanV2\</scan>
+      <scantype>PLACEHOLDER</scantype>
+      <scanval>OverallLastCompletedTime</scanval>
+      <alert>\SOFTWARE\Sophos\SAVService\Status\Infected\</alert>
+      <alertval>\SOFTWARE\Sophos\SAVService\Status\Infected\</alertval>
+      <infect>\SOFTWARE\Sophos\SAVService\Status\Infected\</infect>
+      <infectval>\SOFTWARE\Sophos\SAVService\Status\Infected\</infectval>
+      <threat>\SOFTWARE\Sophos\SAVService\ThreatLifetime\Threats\</threat>
+    </bit32>
+  </SOPHOSINTERCEPTXBETA>
+  <SOPHOSINTERCEPTX>
+    <bit64>
+      <!--AV Details-->
+      <display>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\Details\</display>
+      <displayval>Version</displayval>
+      <path>\SOFTWARE\Sophos\Sophos UI\Application\</path>
+      <pathval>Path</pathval>
+      <!--AV Versions-->
+      <ver>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\Details\</ver>
+      <verval>Version</verval>
+      <compver>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\Details\</compver>
+      <!--AV Status-->
+      <stat>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</stat>
+      <statval>Result</statval>
+      <!--AV Product Updates-->
+      <update>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus</update>
+      <updateval>LastUpdateTime</updateval>
+      <source>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</source>
+      <sourceval>UpdateSource</sourceval>
+      <!--AV Real-Time Scanning-->
+      <rt>\SOFTWARE\Sophos\Sophos Network Threat Protection\Adapter Notifications\</rt>
+      <rtval>RealTimeScanning</rtval>
+      <!--AV Definition Updates-->
+      <defupdate>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</defupdate>
+      <defupdateval>LastUpdateTime</defupdateval>
+      <!--AV Tamper Protection-->
+      <tamper>\SOFTWARE\Sophos\Management\Policy\Driver\</tamper>
+      <tamperval>tamper_protection_enabled</tamperval>
+      <!--AV Is Managed-->
+      <managed>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\</managed>
+      <managedval>IsManaged</managedval>
+      <!--AV Threats-->
+      <scan>\SOFTWARE\Sophos\EndpointDefense\BackgroundScanV2\</scan>
+      <scantype>PLACEHOLDER</scantype>
+      <scanval>OverallLastCompletedTime</scanval>
+      <alert>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</alert>
+      <alertval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</alertval>
+      <infect>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</infect>
+      <infectval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</infectval>
+      <threat>\SOFTWARE\WOW6432Node\Sophos\SAVService\ThreatLifetime\Threats\</threat>
+    </bit64>
+    <bit32>
+      <!--AV Details-->
+      <display>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\Details\</display>
+      <displayval>Version</displayval>
+      <path>\SOFTWARE\Sophos\Sophos UI\Application\</path>
+      <pathval>Path</pathval>
+      <!--AV Versions-->
+      <ver>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\Details\</ver>
+      <verval>Version</verval>
+      <compver>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\Details\</compver>
+      <!--AV Status-->
+      <stat>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</stat>
+      <statval>Result</statval>
+      <!--AV Product Updates-->
+      <update>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus</update>
+      <updateval>LastUpdateTime</updateval>
+      <source>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</source>
+      <sourceval>UpdateSource</sourceval>
+      <!--AV Real-Time Scanning-->
+      <rt>\SOFTWARE\Sophos\Sophos Network Threat Protection\Adapter Notifications\</rt>
+      <rtval>RealTimeScanning</rtval>
+      <!--AV Definition Updates-->
+      <defupdate>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</defupdate>
+      <defupdateval>LastUpdateTime</defupdateval>
+      <!--AV Tamper Protection-->
+      <tamper>\SOFTWARE\Sophos\Management\Policy\Driver\</tamper>
+      <tamperval>tamper_protection_enabled</tamperval>
+      <!--AV Is Managed-->
+      <managed>\SOFTWARE\Sophos\AutoUpdate\</managed>
+      <managedval>IsManaged</managedval>
+      <!--AV Threats-->
+      <scan>\SOFTWARE\Sophos\EndpointDefense\BackgroundScanV2\</scan>
+      <scantype>PLACEHOLDER</scantype>
+      <scanval>OverallLastCompletedTime</scanval>
+      <alert>\SOFTWARE\Sophos\SAVService\Status\Infected\</alert>
+      <alertval>\SOFTWARE\Sophos\SAVService\Status\Infected\</alertval>
+      <infect>\SOFTWARE\Sophos\SAVService\Status\Infected\</infect>
+      <infectval>\SOFTWARE\Sophos\SAVService\Status\Infected\</infectval>
+      <threat>\SOFTWARE\Sophos\SAVService\ThreatLifetime\Threats\</threat>
+    </bit32>
+  </SOPHOSINTERCEPTX>
+  <!--Sophos Endpoint Agent-->
+  <SOPHOSENDPOINTAGENT>
+    <bit64>
+      <!--AV Details-->
+      <display>\SOFTWARE\WOW6432Node\Sophos\SAVService\Application\</display>
+      <displayval>EventSource</displayval>
+      <path>\SOFTWARE\WOW6432Node\Sophos\SAVService\Application\</path>
+      <pathval>Path</pathval>
+      <!--AV Versions-->
+      <ver>\SOFTWARE\WOW6432Node\Sophos\SAVService\Application\</ver>
+      <verval>MarketingVersion</verval>
+      <compver>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\Details\</compver>
+      <!--AV Status-->
+      <stat>\SOFTWARE\WOW6432Node\Sophos\SavService\Status\</stat>
+      <statval>UpToDateState</statval>
+      <!--AV Product Updates-->
+      <update>\SOFTWARE\WOW6432Node\Sophos\SAVService\Telemetry\MajorUpdate\</update>
+      <updateval>LastSuccessUtc</updateval>
+      <source>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</source>
+      <sourceval>UpdateSource</sourceval>
+      <!--AV Real-Time Scanning-->
+      <rt>\SOFTWARE\Sophos\Sophos Network Threat Protection\Adapter Notifications\</rt>
+      <rtval>RealTimeScanning</rtval>
+      <!--AV Definition Updates-->
+      <defupdate>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</defupdate>
+      <defupdateval>LastUpdateTime</defupdateval>
+      <!--AV Tamper Protection-->
+      <tamper>\SOFTWARE\WOW6432Node\Sophos\SAVService\TamperProtection\</tamper>
+      <tamperval>Enabled</tamperval>
+      <!--AV Is Managed-->
+      <managed>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\</managed>
+      <managedval>IsManaged</managedval>
+      <!--AV Threats-->
+      <scan>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\LastScan\</scan>
+      <scantype>PLACEHOLDER</scantype>
+      <scanval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\LastScan\</scanval>
+      <alert>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</alert>
+      <alertval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</alertval>
+      <infect>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</infect>
+      <infectval>\SOFTWARE\WOW6432Node\Sophos\SAVService\Status\Infected\</infectval>
+      <threat>\SOFTWARE\WOW6432Node\Sophos\SAVService\ThreatLifetime\Threats\</threat>
+    </bit64>
+    <bit32>
+      <!--AV Details-->
+      <display>\SOFTWARE\Sophos\SAVService\Application\</display>
+      <displayval>EventSource</displayval>
+      <path>\SOFTWARE\Sophos\SAVService\Application\</path>
+      <pathval>Path</pathval>
+      <!--AV Versions-->
+      <ver>\SOFTWARE\Sophos\SAVService\Application\</ver>
+      <verval>MarketingVersion</verval>
+      <compver>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\Details\</compver>
+      <!--AV Status-->
+      <stat>\SOFTWARE\Sophos\SavService\Status\</stat>
+      <statval>UpToDateState</statval>
+      <!--AV Product Updates-->
+      <update>\SOFTWARE\Sophos\SAVService\Telemetry\MajorUpdate\</update>
+      <updateval>LastSuccessUtc</updateval>
+      <source>\SOFTWARE\WOW6432Node\Sophos\AutoUpdate\UpdateStatus\</source>
+      <sourceval>UpdateSource</sourceval>
+      <!--AV Real-Time Scanning-->
+      <rt>\SOFTWARE\Sophos\Sophos Network Threat Protection\Adapter Notifications\</rt>
+      <rtval>RealTimeScanning</rtval>
+      <!--AV Definition Updates-->
+      <defupdate>\SOFTWARE\Sophos\AutoUpdate\UpdateStatus\</defupdate>
+      <defupdateval>LastUpdateTime</defupdateval>
+      <!--AV Tamper Protection-->
+      <tamper>\SOFTWARE\Sophos\SAVService\TamperProtection\</tamper>
+      <tamperval>Enabled</tamperval>
+      <!--AV Is Managed-->
+      <managed>\SOFTWARE\Sophos\AutoUpdate\</managed>
+      <managedval>IsManaged</managedval>
+      <!--AV Threats-->
+      <scan>\SOFTWARE\Sophos\SAVService\Status\LastScan\</scan>
+      <scantype>PLACEHOLDER</scantype>
+      <scanval>\SOFTWARE\Sophos\SAVService\Status\LastScan\</scanval>
+      <alert>\SOFTWARE\Sophos\SAVService\Status\Infected\</alert>
+      <alertval>\SOFTWARE\Sophos\SAVService\Status\Infected\</alertval>
+      <infect>\SOFTWARE\Sophos\SAVService\Status\Infected\</infect>
+      <infectval>\SOFTWARE\Sophos\SAVService\Status\Infected\</infectval>
+      <threat>\SOFTWARE\Sophos\SAVService\ThreatLifetime\Threats\</threat>
+    </bit32>
+  </SOPHOSENDPOINTAGENT>
+</NODE>

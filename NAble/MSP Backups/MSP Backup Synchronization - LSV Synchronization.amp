@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><Policy ID="6e347b71-8d7c-4df2-ae85-88b3dcbde8d7" Name="N-able Backup - LSV Synchronization" Description="Q3VzdG9tIEFNUCBTZXJ2aWNlIHRvIG1vbml0b3IgTVNQIEJhY2t1cHMgTFNWIFN0YXR1cw==" Version="2.16.0.1" MinRequiredVersion="2.16.0.1" RemoteCategory="0" ExecutionType="Local" MinimumPSVersionRequired="0.0.0">
+  <Object ID="{7117f267-3115-4824-b9c8-4e41d310d1b2}" Type="{B6FA6D8B-EEAA-47A6-8463-7F9A4F5BBB6E}" Data="&lt;xml&gt;&lt;OutputParameters&gt;&lt;Parameter ParameterName=&quot;LSVOut&quot; Label=&quot;LSV Status&quot; ParameterType=&quot;string&quot; Value=&quot;Global Variables.LSV Status&quot; /&gt;&lt;Parameter ParameterName=&quot;LSVSyncOut&quot; Label=&quot;LSV Synchronization&quot; ParameterType=&quot;number&quot; Value=&quot;Global Variables.LSV Synchronization&quot; /&gt;&lt;Parameter ParameterName=&quot;LSVPathOut&quot; Label=&quot;LSV Backup Destination&quot; ParameterType=&quot;string&quot; Value=&quot;Global Variables.LSV Backup Destination&quot; /&gt;&lt;/OutputParameters&gt;&lt;GlobalVariables&gt;&lt;Parameter ParameterName=&quot;LSVStatus&quot; Label=&quot;LSV Status&quot; ParameterType=&quot;string&quot; Value=&quot;Failed&quot; /&gt;&lt;Parameter ParameterName=&quot;LSVSync&quot; Label=&quot;LSV Synchronization&quot; ParameterType=&quot;number&quot; Value=&quot;0&quot; /&gt;&lt;Parameter ParameterName=&quot;SyncSwitch&quot; Label=&quot;Sync Switch&quot; ParameterType=&quot;number&quot; Value=&quot;0&quot; /&gt;&lt;Parameter ParameterName=&quot;LSVPath&quot; Label=&quot;LSV Backup Destination&quot; ParameterType=&quot;string&quot; Value=&quot;&quot; /&gt;&lt;/GlobalVariables&gt;&lt;/xml&gt;" />
+  <LinkManager xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/PolicyExecutor">
+    <hashset xmlns:d2p1="http://schemas.datacontract.org/2004/07/System">
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>GlobalVariable.LSVStatus</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>LSVOut</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>GlobalVariable.LSVSync</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>LSVSyncOut</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>GlobalVariable.LSVPath</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>LSVPathOut</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+    </hashset>
+  </LinkManager>
+  <Diagnostics OriginalVersion="2.18.1.8" />
+  <Activity mc:Ignorable="sads sap" x:Class="Policy Builder" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:p="clr-namespace:PolicyExecutor;assembly=PolicyExecutionEngine" xmlns:sads="http://schemas.microsoft.com/netfx/2010/xaml/activities/debugger" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:Members>
+      <x:Property Name="PolicyGUID" Type="InArgument(x:String)" />
+    </x:Members>
+    <sap:VirtualizedContainerService.HintSize>1926,6865</sap:VirtualizedContainerService.HintSize>
+    <mva:VisualBasic.Settings>Assembly references and imported namespaces serialized as XML namespaces</mva:VisualBasic.Settings>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="ShouldExpandAll">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <p:PolicySequence DisplayName="Policy Builder" sap:VirtualizedContainerService.HintSize="1926,6865" MinRequiredVersion="2.16.0.1" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
+      <p:PolicySequence.Activities>
+        <p:FindTextInFile File_Item="{x:Null}" File_ItemProp="{x:Null}" SearchFor_Item="{x:Null}" SearchFor_ItemProp="{x:Null}" UseRegularExpression_Item="{x:Null}" UseRegularExpression_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Find Text in File" File="C:\IT\Scripts\lsv.txt" File_DisplayArg="C:\IT\Scripts\lsv.txt" Found="[FindTextInFile_Found_6]" sap:VirtualizedContainerService.HintSize="1890,160" MinRequiredVersion="2.10.0.19" Moniker="43bef8fe-d81b-4d47-8e30-5d3c52f2ef82" Result="[FindTextInFile_Result_6]" ResultString="[FindTextInFile_ResultString_6]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" SearchFor="[A-Z]:\\[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*\\?[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*" SearchFor_DisplayArg="[A-Z]:\\[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*\\?[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*" TypeName="FindTextInFile" UseRegularExpression="True" UseRegularExpression_DisplayArg="" m_bTextLinkChange="False" />
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="contains" Condition_DisplayArg="contains" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="1890,1743" MinRequiredVersion="2.16.0.1" Moniker="c54af51e-69a9-45c3-b8de-dda6eb837cfa" Result="[IfElse_Result_4]" ResultString="[IfElse_ResultString_4]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg=":\" Value_Type="x:String" Variable="[FindTextInFile_Found_6]" Variable_DisplayArg="Find Text in File.Found" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="1439,1506" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:FindTextInFile File_Item="{x:Null}" File_ItemProp="{x:Null}" SearchFor_Item="{x:Null}" SearchFor_ItemProp="{x:Null}" UseRegularExpression_Item="{x:Null}" UseRegularExpression_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Find Text in File" File="C:\IT\Scripts\lsv.txt" File_DisplayArg="C:\IT\Scripts\lsv.txt" Found="[FindTextInFile_Found_7]" sap:VirtualizedContainerService.HintSize="1401,160" MinRequiredVersion="2.10.0.19" Moniker="3a733bad-9da5-43d1-a116-f7c5e63debcf" Result="[FindTextInFile_Result_7]" ResultString="[FindTextInFile_ResultString_7]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" SearchFor="\\\\[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*\\[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*\\?[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*" SearchFor_DisplayArg="\\\\[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*\\[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*\\?[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*" TypeName="FindTextInFile" UseRegularExpression="True" UseRegularExpression_DisplayArg="" m_bTextLinkChange="False" />
+                <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="contains" Condition_DisplayArg="contains" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="1401,1156" MinRequiredVersion="2.16.0.1" Moniker="99a9977e-ce1a-4c51-822a-0677a3bd3eac" Result="[IfElse_Result_5]" ResultString="[IfElse_ResultString_5]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="\\" Value_Type="x:String" Variable="[FindTextInFile_Found_7]" Variable_DisplayArg="Find Text in File.Found" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:IfElse.ElseOption>
+                    <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="950,919" Name="SequenceActivity">
+                      <p:SequenceActivity.Activities>
+                        <p:FindTextInFile File_Item="{x:Null}" File_ItemProp="{x:Null}" SearchFor_Item="{x:Null}" SearchFor_ItemProp="{x:Null}" UseRegularExpression_Item="{x:Null}" UseRegularExpression_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Find Text in File" File="C:\IT\Scripts\lsv.txt" File_DisplayArg="C:\IT\Scripts\lsv.txt" Found="[FindTextInFile_Found_8]" sap:VirtualizedContainerService.HintSize="912,160" MinRequiredVersion="2.10.0.19" Moniker="86c10940-afdf-4f32-9f89-dd840608aa5a" Result="[FindTextInFile_Result_8]" ResultString="[FindTextInFile_ResultString_8]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" SearchFor="\\\\[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\\[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*\\?[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*" SearchFor_DisplayArg="\\\\[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\\[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*\\?[A-Z]*[a-z]*[0-9]*-*_* *[A-Z]*[a-z]*[0-9]*" TypeName="FindTextInFile" UseRegularExpression="True" UseRegularExpression_DisplayArg="" m_bTextLinkChange="False" />
+                        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="contains" Condition_DisplayArg="contains" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="912,569" MinRequiredVersion="2.16.0.1" Moniker="da948253-d894-4171-81ce-c03b11e8d0be" Result="[IfElse_Result_6]" ResultString="[IfElse_ResultString_6]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="\\" Value_Type="x:String" Variable="[FindTextInFile_Found_8]" Variable_DisplayArg="Find Text in File.Found" Variable_Type="x:String" m_bTextLinkChange="False">
+                          <p:IfElse.ElseOption>
+                            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="461,332" Name="SequenceActivity">
+                              <p:SequenceActivity.Activities>
+                                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="423,182" MinRequiredVersion="2.10.0.19" Moniker="5db2146f-d6cd-4b5f-afdc-9e63dcc190f3" Result="[Assignment_Result_9]" ResultString="[Assignment_ResultString_9]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Could not parse, see C:\IT\Scripts\lsv.txt for details" Value_Type="x:String" Variable="[LSVPath]" Variable_DisplayArg="Global Variables.LSV Backup Destination" Variable_Type="x:String" m_bTextLinkChange="False">
+                                  <p:Assignment.Value>
+                                    <InArgument x:TypeArguments="x:Object">
+                                      <p:ObjectLiteral Value="Could not parse, see C:\IT\Scripts\lsv.txt for details" />
+                                    </InArgument>
+                                  </p:Assignment.Value>
+                                </p:Assignment>
+                              </p:SequenceActivity.Activities>
+                              <p:SequenceActivity.Variables>
+                                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_9" />
+                                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_9" />
+                              </p:SequenceActivity.Variables>
+                            </p:SequenceActivity>
+                          </p:IfElse.ElseOption>
+                          <p:IfElse.IfOption>
+                            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="407,332" Name="SequenceActivity">
+                              <p:SequenceActivity.Activities>
+                                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="369,182" MinRequiredVersion="2.10.0.19" Moniker="4507f90b-207b-41c1-b025-bbedce60d263" Result="[Assignment_Result_12]" ResultString="[Assignment_ResultString_12]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value="[FindTextInFile_Found_8]" Value_DisplayArg="Find Text in File.Found" Value_Type="x:String" Variable="[LSVPath]" Variable_DisplayArg="Global Variables.LSV Backup Destination" Variable_Type="x:String" m_bTextLinkChange="False" />
+                              </p:SequenceActivity.Activities>
+                              <p:SequenceActivity.Variables>
+                                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_12" />
+                                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_12" />
+                              </p:SequenceActivity.Variables>
+                            </p:SequenceActivity>
+                          </p:IfElse.IfOption>
+                          <p:IfElse.Value>
+                            <InArgument x:TypeArguments="x:Object">
+                              <p:ObjectLiteral Value="\\" />
+                            </InArgument>
+                          </p:IfElse.Value>
+                        </p:IfElse>
+                      </p:SequenceActivity.Activities>
+                      <p:SequenceActivity.Variables>
+                        <Variable x:TypeArguments="x:String" Name="FindTextInFile_Found_8" />
+                        <Variable x:TypeArguments="x:Double" Name="FindTextInFile_Result_8" />
+                        <Variable x:TypeArguments="x:String" Name="FindTextInFile_ResultString_8" />
+                        <Variable x:TypeArguments="x:Double" Name="IfElse_Result_6" />
+                        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_6" />
+                      </p:SequenceActivity.Variables>
+                    </p:SequenceActivity>
+                  </p:IfElse.ElseOption>
+                  <p:IfElse.IfOption>
+                    <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="407,332" Name="SequenceActivity">
+                      <p:SequenceActivity.Activities>
+                        <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="369,182" MinRequiredVersion="2.10.0.19" Moniker="c219dd04-e296-4e8d-a0ac-6cb2ab717b39" Result="[Assignment_Result_11]" ResultString="[Assignment_ResultString_11]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value="[FindTextInFile_Found_7]" Value_DisplayArg="Find Text in File.Found" Value_Type="x:String" Variable="[LSVPath]" Variable_DisplayArg="Global Variables.LSV Backup Destination" Variable_Type="x:String" m_bTextLinkChange="False" />
+                      </p:SequenceActivity.Activities>
+                      <p:SequenceActivity.Variables>
+                        <Variable x:TypeArguments="x:Double" Name="Assignment_Result_11" />
+                        <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_11" />
+                      </p:SequenceActivity.Variables>
+                    </p:SequenceActivity>
+                  </p:IfElse.IfOption>
+                  <p:IfElse.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="\\" />
+                    </InArgument>
+                  </p:IfElse.Value>
+                </p:IfElse>
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="IfElse_Result_5" />
+                <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_5" />
+                <Variable x:TypeArguments="x:String" Name="FindTextInFile_Found_7" />
+                <Variable x:TypeArguments="x:Double" Name="FindTextInFile_Result_7" />
+                <Variable x:TypeArguments="x:String" Name="FindTextInFile_ResultString_7" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="407,332" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="369,182" MinRequiredVersion="2.10.0.19" Moniker="3fa4574b-4aa1-48da-803f-85d4c1bac1e4" Result="[Assignment_Result_10]" ResultString="[Assignment_ResultString_10]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value="[FindTextInFile_Found_6]" Value_DisplayArg="Find Text in File.Found" Value_Type="x:String" Variable="[LSVPath]" Variable_DisplayArg="Global Variables.LSV Backup Destination" Variable_Type="x:String" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_10" />
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_10" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value=":\" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+        <p:FindTextInFile File_Item="{x:Null}" File_ItemProp="{x:Null}" SearchFor_Item="{x:Null}" SearchFor_ItemProp="{x:Null}" UseRegularExpression_Item="{x:Null}" UseRegularExpression_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Find Text in File" File="C:\ProgramData\MXB\Backup Manager\StatusReport.xml" File_DisplayArg="C:\ProgramData\MXB\Backup Manager\StatusReport.xml" Found="[FindTextInFile_Found_5]" sap:VirtualizedContainerService.HintSize="1890,160" MinRequiredVersion="2.10.0.19" Moniker="f2a3d763-07a9-4b19-9a2c-4ad49aff4c9e" Result="[FindTextInFile_Result_5]" ResultString="[FindTextInFile_ResultString_5]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" SearchFor="&lt;LocalSpeedVaultEnabled&gt;[0-9]+&lt;/LocalSpeedVaultEnabled&gt;" SearchFor_DisplayArg="&lt;LocalSpeedVaultEnabled&gt;[0-9]+&lt;/LocalSpeedVaultEnabled&gt;" TypeName="FindTextInFile" UseRegularExpression="True" UseRegularExpression_DisplayArg="" m_bTextLinkChange="False" />
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="contains" Condition_DisplayArg="contains" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="1890,569" MinRequiredVersion="2.16.0.1" Moniker="b817962d-5620-40e1-a1ae-57276df1bc50" Result="[IfElse_Result_1]" ResultString="[IfElse_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="1" Value_Type="x:String" Variable="[FindTextInFile_Found_5]" Variable_DisplayArg="Find Text in File.Found" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="382,332" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="344,182" MinRequiredVersion="2.10.0.19" Moniker="c6672a1b-200f-46d2-8770-51648e7bc9dc" Result="[Assignment_Result_8]" ResultString="[Assignment_ResultString_8]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Disabled" Value_Type="x:String" Variable="[LSVStatus]" Variable_DisplayArg="Global Variables.LSV Status" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="Disabled" />
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_8" />
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_8" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="382,332" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="344,182" MinRequiredVersion="2.10.0.19" Moniker="63a8b95e-43f1-46c6-8bef-2f53a163b532" Result="[Assignment_Result_7]" ResultString="[Assignment_ResultString_7]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Enabled" Value_Type="x:String" Variable="[LSVStatus]" Variable_DisplayArg="Global Variables.LSV Status" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="Enabled" />
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_7" />
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_7" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="1" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+        <p:FindTextInFile File_Item="{x:Null}" File_ItemProp="{x:Null}" SearchFor_Item="{x:Null}" SearchFor_ItemProp="{x:Null}" UseRegularExpression_Item="{x:Null}" UseRegularExpression_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Find Text in File" File="C:\ProgramData\MXB\Backup Manager\StatusReport.xml" File_DisplayArg="C:\ProgramData\MXB\Backup Manager\StatusReport.xml" Found="[FindTextInFile_Found]" sap:VirtualizedContainerService.HintSize="1890,160" MinRequiredVersion="2.10.0.19" Moniker="e239ae73-48ae-4ec6-9639-461f75cdd45e" Result="[FindTextInFile_Result]" ResultString="[FindTextInFile_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" SearchFor="&lt;LocalSpeedVaultSynchronizationStatus&gt;failed&lt;/LocalSpeedVaultSynchronizationStatus&gt;" SearchFor_DisplayArg="&lt;LocalSpeedVaultSynchronizationStatus&gt;failed&lt;/LocalSpeedVaultSynchronizationStatus&gt;" TypeName="FindTextInFile" UseRegularExpression="False" UseRegularExpression_DisplayArg="" m_bTextLinkChange="False" />
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="contains" Condition_DisplayArg="contains" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="1890,3650" MinRequiredVersion="2.16.0.1" Moniker="e512387e-87bf-4233-b525-bff3101e8ab4" Result="[IfElse_Result]" ResultString="[IfElse_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="failed" Value_Type="x:String" Variable="[FindTextInFile_Found]" Variable_DisplayArg="Find Text in File.Found" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="1213,3413" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:FindTextInFile File_Item="{x:Null}" File_ItemProp="{x:Null}" SearchFor_Item="{x:Null}" SearchFor_ItemProp="{x:Null}" UseRegularExpression_Item="{x:Null}" UseRegularExpression_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Find Text in File" File="C:\ProgramData\MXB\Backup Manager\StatusReport.xml" File_DisplayArg="C:\ProgramData\MXB\Backup Manager\StatusReport.xml" Found="[FindTextInFile_Found_2]" sap:VirtualizedContainerService.HintSize="1175,160" MinRequiredVersion="2.10.0.19" Moniker="be9234d9-fd1f-43d5-84c1-46461544a747" Result="[FindTextInFile_Result_2]" ResultString="[FindTextInFile_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" SearchFor="&lt;LocalSpeedVaultSynchronizationStatus&gt;synchronized&lt;/LocalSpeedVaultSynchronizationStatus&gt;" SearchFor_DisplayArg="&lt;LocalSpeedVaultSynchronizationStatus&gt;synchronized&lt;/LocalSpeedVaultSynchronizationStatus&gt;" TypeName="FindTextInFile" UseRegularExpression="False" UseRegularExpression_DisplayArg="" m_bTextLinkChange="False" />
+                <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="contains" Condition_DisplayArg="contains" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="1175,3063" MinRequiredVersion="2.16.0.1" Moniker="f214f033-dc05-46be-971b-1ca6b41bb0c9" Result="[IfElse_Result_2]" ResultString="[IfElse_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="synchronized" Value_Type="x:String" Variable="[FindTextInFile_Found_2]" Variable_DisplayArg="Find Text in File.Found" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:IfElse.ElseOption>
+                    <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="743,2826" Name="SequenceActivity">
+                      <p:SequenceActivity.Activities>
+                        <p:FindTextInFile File_Item="{x:Null}" File_ItemProp="{x:Null}" SearchFor_Item="{x:Null}" SearchFor_ItemProp="{x:Null}" UseRegularExpression_Item="{x:Null}" UseRegularExpression_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Find Text in File" File="C:\ProgramData\MXB\Backup Manager\StatusReport.xml" File_DisplayArg="C:\ProgramData\MXB\Backup Manager\StatusReport.xml" Found="[FindTextInFile_Found_4]" sap:VirtualizedContainerService.HintSize="705,160" MinRequiredVersion="2.10.0.19" Moniker="c3a729f2-4b91-439a-83ef-23251fe5a940" Result="[FindTextInFile_Result_4]" ResultString="[FindTextInFile_ResultString_4]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" SearchFor="&lt;LocalSpeedVaultSynchronizationStatus&gt;[0-9]+\.[0-9]+%&lt;/LocalSpeedVaultSynchronizationStatus&gt;" SearchFor_DisplayArg="&lt;LocalSpeedVaultSynchronizationStatus&gt;[0-9]+\.[0-9]+%&lt;/LocalSpeedVaultSynchronizationStatus&gt;" TypeName="FindTextInFile" UseRegularExpression="True" UseRegularExpression_DisplayArg="" m_bTextLinkChange="False" />
+                        <p:SplitString Separator_Item="{x:Null}" Separator_ItemProp="{x:Null}" StringToSplit_Item="{x:Null}" StringToSplit_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Split String" sap:VirtualizedContainerService.HintSize="705,124" MinRequiredVersion="2.10.0.19" Moniker="e0ad8a50-cee8-41ba-a12d-620cd450904f" Result="[SplitString_Result_2]" ResultString="[SplitString_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" Separator="%" Separator_DisplayArg="%" StringToSplit="[FindTextInFile_Found_4]" StringToSplit_DisplayArg="Find Text in File.Found" Tokens="[SplitString_Tokens_2]" TypeName="SplitString" m_bTextLinkChange="False" />
+                        <p:ForEachLoop CollectionName_Item="{x:Null}" CollectionName_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CollectionName="[SplitString_Tokens_2]" CollectionName_DisplayArg="Split String.Tokens" DisplayName="ForEach" sap:VirtualizedContainerService.HintSize="705,2312" ItemValue="[ForEachLoop_ItemValue_2]" MinRequiredVersion="2.10.0.19" Moniker="b1072fdb-8d04-45e9-b493-ab37c264ebd8" Result="[ForEachLoop_Result_2]" ResultString="[ForEachLoop_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="ForEachLoop" m_bTextLinkChange="False">
+                          <p:ForEachLoop.Each>
+                            <p:ForEachSequence DisplayName="Each" sap:VirtualizedContainerService.HintSize="668,2212">
+                              <p:ForEachSequence.Activities>
+                                <p:SplitString Separator_Item="{x:Null}" Separator_ItemProp="{x:Null}" StringToSplit="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Split String" sap:VirtualizedContainerService.HintSize="630,124" MinRequiredVersion="2.10.0.19" Moniker="c91b55ea-ac41-4f8e-ac14-0d8f2a944e0d" Result="[SplitString_Result_3]" ResultString="[SplitString_ResultString_3]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" Separator="&gt;" Separator_DisplayArg="&gt;" StringToSplit_DisplayArg="ForEach.Split String.Tokens.Value" StringToSplit_Item="[ForEachLoop_ItemValue_2]" StringToSplit_ItemProp="Value" Tokens="[SplitString_Tokens_3]" TypeName="SplitString" m_bTextLinkChange="False" />
+                                <p:ForEachLoop CollectionName_Item="{x:Null}" CollectionName_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CollectionName="[SplitString_Tokens_3]" CollectionName_DisplayArg="Split String.Tokens" DisplayName="ForEach" sap:VirtualizedContainerService.HintSize="630,1898" ItemValue="[ForEachLoop_ItemValue_3]" MinRequiredVersion="2.10.0.19" Moniker="7a076aa4-4cb8-4d9c-83a6-cc7e7fad46df" Result="[ForEachLoop_Result_3]" ResultString="[ForEachLoop_ResultString_3]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="ForEachLoop" m_bTextLinkChange="False">
+                                  <p:ForEachLoop.Each>
+                                    <p:ForEachSequence DisplayName="Each" sap:VirtualizedContainerService.HintSize="598,1798">
+                                      <p:ForEachSequence.Activities>
+                                        <p:IfObject CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable="{x:Null}" VerboseOutput_Item="{x:Null}" VerboseOutput_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="contains" Condition_DisplayArg="contains" DisplayName="If" sap:VirtualizedContainerService.HintSize="560,1648" MinRequiredVersion="2.16.0.1" Moniker="7290293b-f64c-48a0-a817-11bb89b39d12" Result="[IfObject_Result_1]" ResultString="[IfObject_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfObject" Value_DisplayArg="." Value_Type="x:String" Variable_DisplayArg="ForEach.Split String.Tokens.Value" Variable_Item="[ForEachLoop_ItemValue_3]" Variable_ItemProp="Value" Variable_Type="x:String" VerboseOutput="False" VerboseOutput_DisplayArg="" m_bTextLinkChange="False">
+                                          <p:IfObject.IfOption>
+                                            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="528,1447" Name="SequenceActivity">
+                                              <p:SequenceActivity.Activities>
+                                                <p:SplitString Separator_Item="{x:Null}" Separator_ItemProp="{x:Null}" StringToSplit="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Split String" sap:VirtualizedContainerService.HintSize="490,124" MinRequiredVersion="2.10.0.19" Moniker="921213c5-20e2-4b41-a5ba-9dd2e016cfee" Result="[SplitString_Result_4]" ResultString="[SplitString_ResultString_4]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" Separator="." Separator_DisplayArg="." StringToSplit_DisplayArg="ForEach.Split String.Tokens.Value" StringToSplit_Item="[ForEachLoop_ItemValue_3]" StringToSplit_ItemProp="Value" Tokens="[SplitString_Tokens_4]" TypeName="SplitString" m_bTextLinkChange="False" />
+                                                <p:ForEachLoop CollectionName_Item="{x:Null}" CollectionName_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CollectionName="[SplitString_Tokens_4]" CollectionName_DisplayArg="Split String.Tokens" DisplayName="ForEach" sap:VirtualizedContainerService.HintSize="490,1133" ItemValue="[ForEachLoop_ItemValue_4]" MinRequiredVersion="2.10.0.19" Moniker="b973f0b6-5db9-4cc3-b746-3c069d78256d" Result="[ForEachLoop_Result_4]" ResultString="[ForEachLoop_ResultString_4]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="ForEachLoop" m_bTextLinkChange="False">
+                                                  <p:ForEachLoop.Each>
+                                                    <p:ForEachSequence DisplayName="Each" sap:VirtualizedContainerService.HintSize="458,1033">
+                                                      <p:ForEachSequence.Activities>
+                                                        <p:IfObject CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" VerboseOutput_Item="{x:Null}" VerboseOutput_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="true" Condition="equals" Condition_DisplayArg="equals" DisplayName="If" sap:VirtualizedContainerService.HintSize="420,883" MinRequiredVersion="2.16.0.1" Moniker="911f12be-ae35-4935-9654-3d01c8ef42a4" Result="[IfObject_Result_2]" ResultString="[IfObject_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfObject" Value_DisplayArg="0" Value_Type="x:Double" Variable="[SyncSwitch]" Variable_DisplayArg="Global Variables.Sync Switch" Variable_Type="x:Double" VerboseOutput="False" VerboseOutput_DisplayArg="" m_bTextLinkChange="False">
+                                                          <p:IfObject.IfOption>
+                                                            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="388,682" Name="SequenceActivity">
+                                                              <p:SequenceActivity.Activities>
+                                                                <p:ConvertStringToInteger String="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Convert String to Integer" sap:VirtualizedContainerService.HintSize="350,88" MinRequiredVersion="2.10.0.19" Moniker="597ac878-667a-4907-be60-55d2fa291a53" Number="[ConvertStringToInteger_Number_1]" Result="[ConvertStringToInteger_Result_1]" ResultString="[ConvertStringToInteger_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" String_DisplayArg="ForEach.Split String.Tokens.Value" String_Item="[ForEachLoop_ItemValue_4]" String_ItemProp="Value" TypeName="ConvertStringToInteger" m_bTextLinkChange="False" />
+                                                                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="350,182" MinRequiredVersion="2.10.0.19" Moniker="56bef4cc-1f36-4e16-a6bb-595f5012868a" Result="[Assignment_Result_2]" ResultString="[Assignment_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value="[ConvertStringToInteger_Number_1]" Value_DisplayArg="Convert String to Integer.Number" Value_Type="x:Double" Variable="[LSVSync]" Variable_DisplayArg="Global Variables.LSV Synchronization" Variable_Type="x:Double" m_bTextLinkChange="False" />
+                                                                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="350,182" MinRequiredVersion="2.10.0.19" Moniker="9fd34a92-cc9b-4f71-a1a3-6cd8be0f56ef" Result="[Assignment_Result_5]" ResultString="[Assignment_ResultString_5]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="1" Value_Type="x:Double" Variable="[SyncSwitch]" Variable_DisplayArg="Global Variables.Sync Switch" Variable_Type="x:Double" m_bTextLinkChange="False">
+                                                                  <p:Assignment.Value>
+                                                                    <InArgument x:TypeArguments="x:Object">
+                                                                      <p:ObjectLiteral>
+                                                                        <p:ObjectLiteral.Value>
+                                                                          <x:Double>1</x:Double>
+                                                                        </p:ObjectLiteral.Value>
+                                                                      </p:ObjectLiteral>
+                                                                    </InArgument>
+                                                                  </p:Assignment.Value>
+                                                                </p:Assignment>
+                                                              </p:SequenceActivity.Activities>
+                                                              <p:SequenceActivity.Variables>
+                                                                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_5" />
+                                                                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_5" />
+                                                                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_2" />
+                                                                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_2" />
+                                                                <Variable x:TypeArguments="x:Double" Name="ConvertStringToInteger_Number_1" />
+                                                                <Variable x:TypeArguments="x:String" Name="ConvertStringToInteger_ResultString_1" />
+                                                                <Variable x:TypeArguments="x:Double" Name="ConvertStringToInteger_Result_1" />
+                                                              </p:SequenceActivity.Variables>
+                                                            </p:SequenceActivity>
+                                                          </p:IfObject.IfOption>
+                                                          <p:IfObject.Value>
+                                                            <InArgument x:TypeArguments="x:Object">
+                                                              <p:ObjectLiteral>
+                                                                <p:ObjectLiteral.Value>
+                                                                  <x:Double>0</x:Double>
+                                                                </p:ObjectLiteral.Value>
+                                                              </p:ObjectLiteral>
+                                                            </InArgument>
+                                                          </p:IfObject.Value>
+                                                        </p:IfObject>
+                                                      </p:ForEachSequence.Activities>
+                                                      <p:ForEachSequence.Variables>
+                                                        <Variable x:TypeArguments="x:Double" Name="IfObject_Result_2" />
+                                                        <Variable x:TypeArguments="x:String" Name="IfObject_ResultString_2" />
+                                                      </p:ForEachSequence.Variables>
+                                                    </p:ForEachSequence>
+                                                  </p:ForEachLoop.Each>
+                                                </p:ForEachLoop>
+                                              </p:SequenceActivity.Activities>
+                                              <p:SequenceActivity.Variables>
+                                                <Variable x:TypeArguments="x:Double" Name="SplitString_Result_4" />
+                                                <Variable x:TypeArguments="x:String" Name="SplitString_ResultString_4" />
+                                                <Variable x:TypeArguments="scg:IEnumerable(x:Object)" Name="SplitString_Tokens_4" />
+                                                <Variable x:TypeArguments="x:Object" Name="ForEachLoop_ItemValue_4" />
+                                                <Variable x:TypeArguments="x:Double" Name="ForEachLoop_Result_4" />
+                                                <Variable x:TypeArguments="x:String" Name="ForEachLoop_ResultString_4" />
+                                              </p:SequenceActivity.Variables>
+                                            </p:SequenceActivity>
+                                          </p:IfObject.IfOption>
+                                          <p:IfObject.Value>
+                                            <InArgument x:TypeArguments="x:Object">
+                                              <p:ObjectLiteral Value="." />
+                                            </InArgument>
+                                          </p:IfObject.Value>
+                                        </p:IfObject>
+                                      </p:ForEachSequence.Activities>
+                                      <p:ForEachSequence.Variables>
+                                        <Variable x:TypeArguments="x:Double" Name="IfObject_Result_1" />
+                                        <Variable x:TypeArguments="x:String" Name="IfObject_ResultString_1" />
+                                      </p:ForEachSequence.Variables>
+                                    </p:ForEachSequence>
+                                  </p:ForEachLoop.Each>
+                                </p:ForEachLoop>
+                              </p:ForEachSequence.Activities>
+                              <p:ForEachSequence.Variables>
+                                <Variable x:TypeArguments="x:Double" Name="SplitString_Result_3" />
+                                <Variable x:TypeArguments="x:String" Name="SplitString_ResultString_3" />
+                                <Variable x:TypeArguments="scg:IEnumerable(x:Object)" Name="SplitString_Tokens_3" />
+                                <Variable x:TypeArguments="x:Object" Name="ForEachLoop_ItemValue_3" />
+                                <Variable x:TypeArguments="x:Double" Name="ForEachLoop_Result_3" />
+                                <Variable x:TypeArguments="x:String" Name="ForEachLoop_ResultString_3" />
+                              </p:ForEachSequence.Variables>
+                            </p:ForEachSequence>
+                          </p:ForEachLoop.Each>
+                        </p:ForEachLoop>
+                      </p:SequenceActivity.Activities>
+                      <p:SequenceActivity.Variables>
+                        <Variable x:TypeArguments="x:String" Name="FindTextInFile_Found_4" />
+                        <Variable x:TypeArguments="x:Double" Name="FindTextInFile_Result_4" />
+                        <Variable x:TypeArguments="x:String" Name="FindTextInFile_ResultString_4" />
+                        <Variable x:TypeArguments="x:Double" Name="SplitString_Result_2" />
+                        <Variable x:TypeArguments="x:String" Name="SplitString_ResultString_2" />
+                        <Variable x:TypeArguments="scg:IEnumerable(x:Object)" Name="SplitString_Tokens_2" />
+                        <Variable x:TypeArguments="x:Object" Name="ForEachLoop_ItemValue_2" />
+                        <Variable x:TypeArguments="x:Double" Name="ForEachLoop_Result_2" />
+                        <Variable x:TypeArguments="x:String" Name="ForEachLoop_ResultString_2" />
+                      </p:SequenceActivity.Variables>
+                    </p:SequenceActivity>
+                  </p:IfElse.ElseOption>
+                  <p:IfElse.IfOption>
+                    <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="388,332" Name="SequenceActivity">
+                      <p:SequenceActivity.Activities>
+                        <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="350,182" MinRequiredVersion="2.10.0.19" Moniker="3667be1e-8ec7-428a-bfe8-016917105865" Result="[Assignment_Result_4]" ResultString="[Assignment_ResultString_4]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="100" Value_Type="x:Double" Variable="[LSVSync]" Variable_DisplayArg="Global Variables.LSV Synchronization" Variable_Type="x:Double" m_bTextLinkChange="False">
+                          <p:Assignment.Value>
+                            <InArgument x:TypeArguments="x:Object">
+                              <p:ObjectLiteral>
+                                <p:ObjectLiteral.Value>
+                                  <x:Double>100</x:Double>
+                                </p:ObjectLiteral.Value>
+                              </p:ObjectLiteral>
+                            </InArgument>
+                          </p:Assignment.Value>
+                        </p:Assignment>
+                      </p:SequenceActivity.Activities>
+                      <p:SequenceActivity.Variables>
+                        <Variable x:TypeArguments="x:Double" Name="Assignment_Result_4" />
+                        <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_4" />
+                      </p:SequenceActivity.Variables>
+                    </p:SequenceActivity>
+                  </p:IfElse.IfOption>
+                  <p:IfElse.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="synchronized" />
+                    </InArgument>
+                  </p:IfElse.Value>
+                </p:IfElse>
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="IfElse_Result_2" />
+                <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_2" />
+                <Variable x:TypeArguments="x:String" Name="FindTextInFile_Found_2" />
+                <Variable x:TypeArguments="x:Double" Name="FindTextInFile_Result_2" />
+                <Variable x:TypeArguments="x:String" Name="FindTextInFile_ResultString_2" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="388,332" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.2.0.116, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="350,182" MinRequiredVersion="2.10.0.19" Moniker="8500e36e-8694-421d-8046-6a7355c3aefe" Result="[Assignment_Result]" ResultString="[Assignment_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="0" Value_Type="x:Double" Variable="[LSVSync]" Variable_DisplayArg="Global Variables.LSV Synchronization" Variable_Type="x:Double" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral>
+                        <p:ObjectLiteral.Value>
+                          <x:Double>0</x:Double>
+                        </p:ObjectLiteral.Value>
+                      </p:ObjectLiteral>
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="failed" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+      </p:PolicySequence.Activities>
+      <p:PolicySequence.Variables>
+        <Variable x:TypeArguments="x:String" Name="FindTextInFile_Found" />
+        <Variable x:TypeArguments="x:String" Name="FindTextInFile_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="FindTextInFile_Result" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result" />
+        <Variable x:TypeArguments="x:String" Name="FindTextInFile_Found_5" />
+        <Variable x:TypeArguments="x:Double" Name="FindTextInFile_Result_5" />
+        <Variable x:TypeArguments="x:String" Name="FindTextInFile_ResultString_5" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result_1" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_1" />
+        <Variable x:TypeArguments="x:String" Name="FindTextInFile_Found_6" />
+        <Variable x:TypeArguments="x:Double" Name="FindTextInFile_Result_6" />
+        <Variable x:TypeArguments="x:String" Name="FindTextInFile_ResultString_6" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result_4" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_4" />
+        <Variable x:TypeArguments="x:String" Default="Failed" Name="LSVStatus" />
+        <Variable x:TypeArguments="x:Double" Default="0" Name="LSVSync" />
+        <Variable x:TypeArguments="x:Double" Default="0" Name="SyncSwitch" />
+        <Variable x:TypeArguments="x:String" Name="LSVPath" />
+      </p:PolicySequence.Variables>
+    </p:PolicySequence>
+  </Activity>
+</Policy>

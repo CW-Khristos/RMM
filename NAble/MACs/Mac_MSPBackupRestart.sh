@@ -1,0 +1,1 @@
+#! /bin/bashlaunchctl unload -w /Library/LaunchDaemons/com.cloudbackup.BackupFP.plistlaunchctl load -w /Library/LaunchDaemons/com.cloudbackup.BackupFP.plist
