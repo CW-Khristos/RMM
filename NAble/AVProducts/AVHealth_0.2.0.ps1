@@ -823,11 +823,9 @@ if (-not ($global:blnAVXML)) {
               $compverkey = get-childitem -path "HKLM:$($i_compverkey)" -erroraction silentlycontinue
               foreach ($component in $compverkey) {
                 if (($component -ne $null) -and ($component -ne "")) {
-                  #write-host "Reading -path HKLM:$i_compverkey$($component.PSChildName)"
                   $longname = get-itemproperty -path "HKLM:$($i_compverkey)$($component.PSChildName)" -name "LongName" -erroraction silentlycontinue
                   $installver = get-itemproperty -path "HKLM:$($i_compverkey)$($component.PSChildName)" -name "InstalledVersion" -erroraction silentlycontinue
                   Pop-Components $global:compkey $($longname.LongName) $($installver.InstalledVersion)
-                  #$o_compver += "$($longname.LongName) Version : $($installver.InstalledVersion)`r`n"
                 }
               }
               $sort = $global:compkey.GetEnumerator() | sort -Property name
@@ -1061,7 +1059,7 @@ if (-not ($global:blnAVXML)) {
             }
           }
           if ($lastage -ne 0) {
-            $time1 = New-TimeSpan -days 2
+            $time1 = New-TimeSpan -days 5
             if ($lastage.compareto($time1) -le 0) {
               $scans += "Recently Scanned : $($true) (REG Check)"
             } elseif ($lastage.compareto($time1) -gt 0) {
