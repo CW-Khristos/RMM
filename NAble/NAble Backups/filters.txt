@@ -87,6 +87,7 @@ C:\wu_output|
 %PROGRAMDATA%\Microsoft\Windows\Windows Defender\Support|
 %PROGRAMDATA%\Microsoft\Windows\WER|
 %PROGRAMDATA%\Microsoft\XboxLive\NSALCache|
+%PROGRAMDATA%\MSPEcosystem\FileCache|
 %PROGRAMDATA%\MspPlatform\FileCacheServiceAgent\cache|
 %PROGRAMDATA%\MspPlatform\FileCacheServiceAgent\log|
 %PROGRAMDATA%\MspPlatform\Perun\temp|
