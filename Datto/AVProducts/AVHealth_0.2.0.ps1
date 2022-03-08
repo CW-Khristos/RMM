@@ -305,7 +305,7 @@
             $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
             $global:diag += "$($xmldiag)"
-            write-DRRMAlert "AV Health : Could not download $($srcAVP)"
+            write-DRRMAlert "AV Health : Could not download AV Product XML"
             write-DRMMDiag "$($global:diag)"
             $global:blnAVXML = $false
             $xmldiag = $null
