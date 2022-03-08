@@ -1119,7 +1119,7 @@ write-host $global:o_Notes -ForegroundColor Green
 $global:o_Notes = $global:o_Notes.replace("`r`n", "<br>")
 #DATTO OUTPUT
 if ($global:blnWARN) {
-  write-DRRMAlert "AD Security Check : Warning"
+  write-DRRMAlert "AD Security Check : Warning : Check Diagnostics and $($HealthReport) and $($Logfile) for full output"
   write-DRMMDiag "$($global:o_Notes)"
   exit 1
 } elseif (-not $global:blnWARN) {
