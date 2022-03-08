@@ -551,14 +551,19 @@
 $switch = $i_BackupCMD
 Send-APICredentialsCookie
 Write-Host $Script:strLineSeparator
-Write-Host "" 
+Write-Host ""
+# OBTAIN PARTNER AND BACKUP ACCOUNT ID
+[xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
+$xmlBackupID = $statusXML.Statistics.Account
+$xmlPartnerID = $statusXML.Statistics.PartnerName
+
 Send-GetPartnerInfo $Script:cred0
 #Send-EnumeratePartners
 if ((-not $AllPartners) -and ($i_BackupName -ne $null)) {
   Send-GetPartnerInfo $i_BackupName
 }
 $filter1 = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup.
-Send-GetDevices $partnerId
+Send-GetDevices $xmlPartnerID
 
 if ($AllDevices) {
   $script:SelectedDevices = $DeviceDetail | 
@@ -569,13 +574,10 @@ if ($AllDevices) {
   #$script:SelectedDevices = $DeviceDetail | 
   #  Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
   #  Out-GridView -title "Current Partner | $partnername" -OutputMode Multiple
-  # OBTAIN BACKUP ACCOUNT ID
-  [xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
-  $BackupID = $statusXML.Statistics.Account
-  if ($BackupID -ne $null) {
+  if ($xmlBackupID -ne $null) {
     $script:SelectedDevices = $DeviceDetail | 
       Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
-        Where-object {$_.DeviceName -eq $BackupID}
+        Where-object {$_.DeviceName -eq $xmlBackupID}
     Write-Host $Script:strLineSeparator
     Write-Host "  $($SelectedDevices.AccountId.count) Devices Selected"
   }
