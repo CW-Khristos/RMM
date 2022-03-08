@@ -37,84 +37,97 @@
 Remove-Variable * -ErrorAction SilentlyContinue
 
 #REGION ----- DECLARATIONS ----
+$global:blnWARN = $false
 #NOTES
-$global:o_Notes = " "
-$global:o_Domain = ""
-$global:o_PDC = ""
+$global:o_Notes = $null
+$global:o_Domain = $null
+$global:o_PDC = $null
 #PASSWORDS
-$global:o_PwdComplex = ""
-$global:o_MinPwdLen = ""
-$global:o_MinPwdAge = ""
+$global:o_PwdComplex = $null
+$global:o_MinPwdLen = $null
+$global:o_MinPwdAge = $null
 $global:o_MinPwdAgeFlag = $true
-$global:o_MaxPwdAge = ""
+$global:o_MaxPwdAge = $null
 $global:o_MaxPwdAgeFlag = $true
-$global:o_PwdHistory = ""
-$global:o_RevEncrypt = ""
+$global:o_PwdHistory = $null
+$global:o_RevEncrypt = $null
 #LOCKOUT
-$global:o_LockThreshold = ""
-$global:o_LockDuration = ""
+$global:o_LockThreshold = $null
+$global:o_LockDuration = $null
 $global:o_LockDurationFlag = $true
-$global:o_LockObserve = ""
+$global:o_LockObserve = $null
 $global:o_LockObserveFlag = $true
 #USERS
-$global:o_TotalUser = ""
-$global:o_EnabledUser = ""
-$global:o_DisabledUser = ""
-$global:o_InactiveUser = ""
-$global:o_PwdNoExpire = ""
-$global:o_SIDHistory = ""
-$global:o_RevEncryptUser = ""
-$global:o_PwdNoRequire = ""
-$global:o_KerbUser = ""
-$global:o_KerbPreAuthUser = ""
+$global:o_TotalUser = $null
+$global:o_EnabledUser = $null
+$global:o_DisabledUser = $null
+$global:o_InactiveUser = $null
+$global:o_PwdNoExpire = $null
+$global:o_SIDHistory = $null
+$global:o_RevEncryptUser = $null
+$global:o_PwdNoRequire = $null
+$global:o_KerbUser = $null
+$global:o_KerbPreAuthUser = $null
 $global:ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin","supervisor")
 #ENDREGION ----- DECLARATIONS ----
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
 # Functions Section
 #---------------------------------------------------------------------------------------------------------------------------------------------
-function Write-Log {
-    [CmdletBinding()]
-    param(
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [string]$Message,
- 
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [ValidateSet('Information','Warning','Error')]
-        [string]$Severity = 'Information'
+  function write-DRMMDiag ($messages) {
+    write-host  '<-Start Diagnostic->'
+    foreach ($Message in $Messages) {$Message}
+    write-host '<-End Diagnostic->'
+  } ## write-DRMMDiag
+  
+  function write-DRRMAlert ($message) {
+    write-host '<-Start Result->'
+    write-host "Alert=$($message)"
+    write-host '<-End Result->'
+  } ## write-DRRMAlert
+  
+  function Write-Log {
+      [CmdletBinding()]
+      param(
+          [Parameter()]
+          [ValidateNotNullOrEmpty()]
+          [string]$Message,
+   
+          [Parameter()]
+          [ValidateNotNullOrEmpty()]
+          [ValidateSet('Information','Warning','Error')]
+          [string]$Severity = 'Information'
+      )
+      $LogContent = (Get-Date -f g)+" " + $Severity +"  "+$Message
+      Add-Content -Path $logFile -Value $LogContent -PassThru | Write-Host
+
+  } ## Write-Log
+
+  #User priviledge changes
+  Function Get-PrivilegedGroupChanges {
+    Param(
+      $Server = "localhost",
+      $Hour = 24
     )
-    $LogContent = (Get-Date -f g)+" " + $Severity +"  "+$Message
-    Add-Content -Path $logFile -Value $LogContent -PassThru | Write-Host
 
-} ## Write-Log
-
-#User priviledge changes
-Function Get-PrivilegedGroupChanges {
-  Param(
-    $Server = "localhost",
-    $Hour = 24
-  )
-
-  $ProtectedGroups = Get-ADGroup -Filter 'AdminCount -eq 1' -Server $Server
-  $Members = @()
-  ForEach ($Group in $ProtectedGroups) {
-    try {
-      $Members += Get-ADReplicationAttributeMetadata -Server $Server -Object $Group.DistinguishedName -ShowAllLinkedValues | 
-        Where-Object {$_.IsLinkValue} | 
-          Select-Object @{name='GroupDN';expression={$Group.DistinguishedName}}, @{name='GroupName';expression={$Group.Name}}, *
-    } catch {
-      $Members = $Null
+    $ProtectedGroups = Get-ADGroup -Filter 'AdminCount -eq 1' -Server $Server
+    $Members = @()
+    ForEach ($Group in $ProtectedGroups) {
+      try {
+        $Members += Get-ADReplicationAttributeMetadata -Server $Server -Object $Group.DistinguishedName -ShowAllLinkedValues | 
+          Where-Object {$_.IsLinkValue} | 
+            Select-Object @{name='GroupDN';expression={$Group.DistinguishedName}}, @{name='GroupName';expression={$Group.Name}}, *
+      } catch {
+        $Members = $Null
+      }
     }
-  }
-  if ($Members -ne $Null) {
-    $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
-  } else {
-    write-host "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'." -foregroundcolor Red
-    $global:o_Notes = $global:o_Notes + "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
-  }
-} ## Get-PrivilegedGroupChanges
+    if ($Members -ne $Null) {
+      $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
+    } else {
+      write-host "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'." -foregroundcolor Red
+      $global:o_Notes += "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
+    }
+  } ## Get-PrivilegedGroupChanges
 #ENDREGION ----- FUNCTIONS ----
 
 #------------
@@ -156,6 +169,8 @@ try {
  Import-Module ActiveDirectory   
 } catch [System.Management.Automation.ParameterBindingException] {
   Write-Log -Message "Failed Importing Active Directory Module..!" -Severity Error
+  $global:o_Notes += "`r`nFailed Importing Active Directory Module..!"
+  $global:blnWARN = $true
   Break;
 }
 
@@ -485,12 +500,16 @@ try {
   $Domain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()  
 } catch { 
   Write-Log "Cannot connect to current Domain."
+  $global:o_Notes += "`r`nCannot connect to current Domain."
+  $global:blnWARN = $true
   Break;
 }
 $Domain.DomainControllers | ForEach-Object {$DCList += $_.Name}
 
 if (!$DCList) {
   Write-Log "No Domain Controller found. Run this solution on AD server. Please try again."
+  $global:o_Notes += "`r`nNo Domain Controller found. Run this solution on AD server. Please try again."
+  $global:blnWARN = $true
   Break;
 }
 Write-Log "List of Domain Controllers Discovered"
@@ -501,6 +520,7 @@ Add-Content $HealthReport $dataRow
 #Check if any domain controllers left
 if ($DCList.Count -eq 0) {
   Write-Log -Message "As no machines left script won't continue further" -Severity Error
+  $global:o_Notes += "`r`nAs no machines left script won't continue further"
   Break
 }
 #Start Container Div and Sub container div
@@ -516,8 +536,8 @@ try {
     SchemaMaster = "."
     DomainNamingMaster = "."
   }
-  write-host "`r`nGet-ADForest : Could not find a forest identified by: '$DCtoConnect'." -foregroundcolor Red
-  $global:o_Notes = $global:o_Notes + "`r`nGet-ADForest : Could not find a forest identified by: '$DCtoConnect'."
+  write-host "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'." -foregroundcolor Red
+  $global:o_Notes += "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'."
 }
 $domaininfo = Get-ADDomain -Server $DCtoConnect
 $dataRow += "<tr>
@@ -670,6 +690,7 @@ Add-Content $HealthReport "</tbody></table></div></div>" #End Sub Container Div 
 # Domain Password Policy 
 #-----------------------
 Write-Log -Message "Determining Domain Password Policy........... "
+$global:o_Notes += "`r`nDetermining Domain Password Policy........... "
 #Start Container and Sub Container Div
 $Pwdpoly = "<div id=container><div id=pwdplysubcontainer><table border=1px>
             <caption><h2><a name='Pwd Policy'>Domain Password Policy</h2></caption>"
@@ -678,13 +699,14 @@ Add-Content $HealthReport $Pwdpoly
 $props = @("ComplexityEnabled","DistinguishedName","LockoutDuration","LockoutObservationWindow","LockoutThreshold","MaxPasswordAge","MinPasswordAge","MinPasswordLength","PasswordHistoryCount","ReversibleEncryptionEnabled")
 foreach ($item in $props) {
   $flag= 'passed'
-  If (($item -eq 'ComplexityEnabled') -and ($DomainPasswordPolicy.ComplexityEnabled -ne 'True')) { $flag = "failed" }
-  If (($item -eq 'MinPasswordLength') -and $DomainPasswordPolicy.MinPasswordLength -le 14) { $flag = "failed" }
+  If (($item -eq 'ComplexityEnabled') -and ($DomainPasswordPolicy.ComplexityEnabled -ne 'True')) { $flag = "failed"; $global:blnWARN = $true }
+  If (($item -eq 'MinPasswordLength') -and $DomainPasswordPolicy.MinPasswordLength -le 14) { $flag = "failed"; $global:blnWARN = $true }
   If ($item -eq 'MinPasswordAge') { #-and $DomainPasswordPolicy.MinPasswordAge -lt 1) { $flag = "failed"; $global:o_MinPwdAgeFlag = $false }
     #CREATE A NEW-TIMESPAN '$time1' SET TO '1' DAYS
     $time1 = New-TimeSpan -days 1
     if ($DomainPasswordPolicy.MinPasswordAge.compareto($time1) -eq -1) {
       $flag = "failed"
+      $global:blnWARN = $true
       $global:o_MinPwdAgeFlag = $false
     }
   }
@@ -695,17 +717,19 @@ foreach ($item in $props) {
     $time1 = New-TimeSpan -days 60
     if ($DomainPasswordPolicy.MaxPasswordAge.compareto($time1) -gt 0) {
       $flag = "failed"
+      $global:blnWARN = $true
       $global:o_MaxPwdAgeFlag = $false
     }
   }
-  If (($item -eq 'PasswordHistoryCount') -and $DomainPasswordPolicy.PasswordHistoryCount -lt '10') { $flag = "failed" }
-  If (($item -eq 'ReversibleEncryptionEnabled') -and $DomainPasswordPolicy.ReversibleEncryptionEnabled -eq 'True') { $flag = "failed" }
-  If (($item -eq 'LockoutThreshold') -and ($DomainPasswordPolicy.LockoutThreshold -gt 10 -or $DomainPasswordPolicy.LockoutThreshold -eq 0)) { $flag = "failed" }
+  If (($item -eq 'PasswordHistoryCount') -and $DomainPasswordPolicy.PasswordHistoryCount -lt '10') { $flag = "failed"; $global:blnWARN = $true }
+  If (($item -eq 'ReversibleEncryptionEnabled') -and $DomainPasswordPolicy.ReversibleEncryptionEnabled -eq 'True') { $flag = "failed"; $global:blnWARN = $true }
+  If (($item -eq 'LockoutThreshold') -and ($DomainPasswordPolicy.LockoutThreshold -gt 10 -or $DomainPasswordPolicy.LockoutThreshold -eq 0)) { $flag = "failed";$global:blnWARN = $true }
   If ($item -eq 'LockoutDuration') { #-and $DomainPasswordPolicy.LockoutDuration -lt 15) { $flag = "failed"; $global:o_LockDurationFlag = $false }
     #CREATE A NEW-TIMESPAN '$time1' SET TO '15' MINUTES
     $time1 = New-TimeSpan -minutes 15
     if ($DomainPasswordPolicy.LockoutDuration.compareto($time1) -lt 0) {
       $flag = "failed"
+      $global:blnWARN = $true
       $global:o_LockDurationFlag = $false
     }
   }
@@ -714,6 +738,7 @@ foreach ($item in $props) {
     $time1 = New-TimeSpan -minutes 15
     if ($DomainPasswordPolicy.LockoutObservationWindow.compareto($time1) -lt 0) {
       $flag = "failed"
+      $global:blnWARN = $true
       $global:o_LockObserveFlag = $false
     }
   }
@@ -730,6 +755,7 @@ Add-Content $HealthReport "</table></Div>" #End Sub Container
 # Tombstone and Backup Information
 #---------------------------------------------------------------------------------------------------------------------------------------------
 Write-Log -Message "Checking Tombstone and Backup Information........"
+$global:o_Notes += "`r`nChecking Tombstone and Backup Information........"
 #Start Sub Container
 $tsbkp = "<Div id=TLBkbsubcontainer><table border=1px>
    <caption><h2><a name='tsbkp'>Tombstone & Partitions Backup</h2></caption>"
@@ -764,6 +790,7 @@ Add-Content $HealthReport "</table></Div></Div>" #End Sub Container and Containe
 # Kerberos Delegation Info
 #---------------------------------------------------------------------------------------------------------------------------------------------
 Write-Log -Message "Checking Kerberos delegation Info........"
+$global:o_Notes += "`r`nChecking Kerberos delegation Info........"
 #Start Container and Sub Container Div
 $krbtgtdel = "<div id=container><Div id=delegationsubcontainer><table border=1px>
    <caption><h2><a name='krbtgtdel'>Kerberos Delegation (Unconstrained)</h2></caption>
@@ -803,6 +830,7 @@ Add-Content $HealthReport "</table></Div>" #End Sub Container
 # Scan SYSVOL for Group Policy Preference Passwords
 #---------------------------------------------------------------------------------------------------------------------------------------------
 Write-Log -Message "Scan SYSVOL for Group Policy Preference Passwords......."
+$global:o_Notes += "`r`nScan SYSVOL for Group Policy Preference Passwords......."
 #Start Sub Container
 $gpppwd = "<Div id=gpppwdsubcontainer><table border=1px>
           <caption><h2><a name='krbtgtdel'>Scan SYSVOL for Group Policy Preference Passwords</h2></caption>"
@@ -814,7 +842,7 @@ $domainname = ($domaininfo.DistinguishedName.Replace("DC=","")).replace(",",".")
 $DomainSYSVOLShareScan = "\\$domainname\SYSVOL\$domainname\Policies\"
 Get-ChildItem $DomainSYSVOLShareScan -Filter *.xml -Recurse |  % {
   If (Select-String -Path $_.FullName -Pattern "Cpassword") {
-    $Passfoundfiles += $_.FullName + "</br>" ; $Count += 1; $flag= "failed"
+    $Passfoundfiles += $_.FullName + "</br>" ; $Count += 1; $flag= "failed"; $global:blnWARN = $true
   }
 }
 $gpppwdrow += "<tr>
@@ -828,6 +856,7 @@ Add-Content $HealthReport "</table></Div></Div>" #End Sub Container and Containe
 # KRBTGT Account Info
 #-------------------------------------
 Write-Log -Message "Checking KRBTGT account info........"
+$global:o_Notes += "`r`nChecking KRBTGT account info........"
 #Start Container and Sub Container Div
 $krbtgt = "<div id=container><div id=krbtgtcontainer><table border=1px>
    <caption><h2><a name='krbtgt'>KRBTGT Account Info</h2></caption>
@@ -844,6 +873,7 @@ Add-Content $HealthReport $krbtgt
 $DomainKRBTGTAccount = Get-ADUser 'krbtgt' -Server $DCtoConnect -Properties 'msds-keyversionnumber', Created, PasswordLastSet
 If ($(New-TimeSpan -Start ($DomainKRBTGTAccount.PasswordLastSet) -End $(Get-Date)).Days -gt 180) {
   $flag = "failed"
+  $global:blnWARN = $true
 } else {
   $flag = "passed"
 }
@@ -863,6 +893,7 @@ Add-Content $HealthReport "</tr></table></div></div>" #End Sub Container and Con
 # Privileged AD Group Report
 #-----------------------
 Write-Log -Message "Performing Privileged AD Group Report......."
+$global:o_Notes += "`r`nPerforming Privileged AD Group Report......."
 #Start Container and Sub Container Div
 $group = "<div id=container><div id=groupsubcontainer><table border=1px>
             <caption><h2>Privileged AD Group Info</h2></caption>
@@ -912,6 +943,7 @@ Add-Content $HealthReport "</table></div>" #End Sub Container
 # Misc. User Checks Report
 #-----------------------
 Write-Log -Message "Performing Misc. User Checks Report......."
+$global:o_Notes += "`r`nPerforming Misc. User Checks Report......."
 #Start Sub Container Div
 $userpriv = "<div id=DomainUserssubcontainer><table border=1px>
             <caption><h2>Misc. User Checks Info</h2></caption>
@@ -935,6 +967,7 @@ if (!$GroupChanges) {
   $GroupCheck = "No Privileged Group Changes Detected"
 } else {
   $GroupCheck = "$($GroupChanges.count) Group Changes Found"
+  $global:blnWARN = $true
 }
 $privrow += $GroupCheck
 $privrow += $GroupChanges
@@ -959,6 +992,7 @@ if (!$TemporaryUsersList) {
   $TempUserCheck = "No Temporary User Accounts Found"
 } else {
   $TempUserCheck = "$($TemporaryUsersList.count) Temporary User Accounts Found"
+  $global:blnWARN = $true
 }
 $temprow += $TempUserCheck
 $temprow += $TemporaryUsersList
@@ -981,6 +1015,7 @@ if (!$UserChanges) {
   $UserCheck = "No User Additions Detected Since $When"
 } else {
   $UserCheck = "$($UserChanges.count) New Users Found"
+  $global:blnWARN = $true
 }
 $newrow += $UserCheck
 $newrow += $UserChanges
@@ -1078,9 +1113,19 @@ $global:o_Notes = $global:o_Notes + "`r`nPRIVILEDGED GROUP CHANGES : " + $GroupC
 $global:o_Notes = $global:o_Notes + "`r`nTEMPORARY USER LIST : " + $TempUserCheck + "<br>" + $TemporaryUsersList
 $global:o_Notes = $global:o_Notes + "`r`nNEW DOMAIN USERS : " + $UserCheck + "<br>" + $UserChanges
 #NOTES
+Write-Log "Please find the report in C:\IT\Reports directory."
+$global:o_Notes += "`r`nPlease find the report in C:\IT\Reports directory."
 write-host $global:o_Notes -ForegroundColor Green
 $global:o_Notes = $global:o_Notes.replace("`r`n", "<br>")
-
-Write-Log "Please find the report in C:\IT\Reports directory."
+#DATTO OUTPUT
+if ($global:blnWARN) {
+  write-DRRMAlert "AD Security Check : Warning"
+  write-DRMMDiag "$($global:o_Notes)"
+  exit 1
+} elseif (-not $global:blnWARN) {
+  write-DRRMAlert "AD Security Check : Healthy"
+  write-DRMMDiag "$($global:o_Notes)"
+  exit 0
+}
 #END SCRIPT
 #------------
