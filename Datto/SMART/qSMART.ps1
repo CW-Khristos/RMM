@@ -598,14 +598,14 @@ foreach ($objDRV in $arrDRV) {
     $allout += "  - Critical Comp. Temp Time (NVMe) : $($global:arrDRV[$global:i].nvmecctemp)`r`n"
     write-host $allout -foregroundcolor $ccode
     #DATTO RMM OUTPUT
-    write-host 'DATTO OUTPUT :'
+    write-host "DATTO OUTPUT :"
     if ($global:blnWARN) {
       write-DRRMAlert "SMART Health : $($global:arrDRV[$global:i].drvID) : Warning"
       write-DRMMDiag $allout
       exit 1
     } elseif (-not $global:blnWARN) {
       if ($($global:arrDRV[$global:i].fail) -eq "N/A") {
-        write-DRRMAlert "SMART Health : No Data Returned : $($global:arrDRV[$global:i].drvID)"
+        write-DRRMAlert "SMART Health : $($global:arrDRV[$global:i].drvID) : No Data Returned"
       } elseif ($($global:arrDRV[$global:i].fail) -ne "N/A") {
         write-DRRMAlert "SMART Health : $($global:arrDRV[$global:i].drvID) : $($global:arrDRV[$global:i].fail)"
         write-DRMMDiag $allout
