@@ -6,7 +6,8 @@
   $global:i = -1
   $global:arrDRV = @()
   $global:blnWARN = $false
-  $global:selecteddrive = ""
+  $global:arrWARN = [System.Collections.ArrayList]@()
+  $global:selecteddrive = $null
   #SET TLS SECURITY FOR CONNECTING TO GITHUB
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 #ENDREGION ----- DECLARATIONS ----
@@ -29,7 +30,6 @@
       [Parameter(Mandatory=$true)]$FileName,
       $Args
     )
-
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo.WindowStyle = "Hidden"
     $process.StartInfo.CreateNoWindow = $true
@@ -314,39 +314,39 @@
   
   function chkSMART ($objDRV) {
     #BASIC HEALTH
-    if (($objDRV.fail -ne "N/A") -and ($objDRV.fail -ne "PASSED")) {$global:blnWARN = $true}
+    if (($objDRV.fail -ne "N/A") -and ($objDRV.fail -ne "PASSED")) {$global:blnWARN = $true; $global:arrWARN.add("  - SMART Health : $($global:arrDRV[$global:i].fail)`r`n")}
     #HDD ATTRIBUTES
-    if (($objDRV.id5 -ne "N/A") -and ([int]$objDRV.id5 -gt 100)) {$global:blnWARN = $true}
-    if (($objDRV.id10 -ne "N/A") -and ([int]$objDRV.id10 -gt 20)) {$global:blnWARN = $true}
-    if (($objDRV.id184 -ne "N/A") -and ([int]$objDRV.id184 -gt 0)) {$global:blnWARN = $true}
-    if (($objDRV.id187 -ne "N/A") -and ([int]$objDRV.id187 -gt 5)) {$global:blnWARN = $true}
-    if (($objDRV.id188 -ne "N/A") -and ([int]$objDRV.id188 -gt 0)) {$global:blnWARN = $true}
-    if (($objDRV.id194 -ne "N/A") -and ([int]$objDRV.id194 -gt 45)) {$global:blnWARN = $true}
-    if (($objDRV.id196 -ne "N/A") -and ([int]$objDRV.id196 -gt 200)) {$global:blnWARN = $true}
-    if (($objDRV.id197 -ne "N/A") -and ([int]$objDRV.id197 -gt 100)) {$global:blnWARN = $true}
-    if (($objDRV.id198 -ne "N/A") -and ([int]$objDRV.id198 -gt 0)) {$global:blnWARN = $true}
-    if (($objDRV.id201 -ne "N/A") -and ([int]$objDRV.id201 -gt 100)) {$global:blnWARN = $true}
+    if (($objDRV.id5 -ne "N/A") -and ([int]$objDRV.id5 -gt 100)) {$global:blnWARN = $true; $global:arrWARN.add("  - Reallocated Sectors (5) : $($global:arrDRV[$global:i].id5)`r`n")}
+    if (($objDRV.id10 -ne "N/A") -and ([int]$objDRV.id10 -gt 20)) {$global:blnWARN = $true; $global:arrWARN.add("  - Spin Retry Count (10) : $($global:arrDRV[$global:i].id10)`r`n")}
+    if (($objDRV.id184 -ne "N/A") -and ([int]$objDRV.id184 -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - End to End Error (184) : $($global:arrDRV[$global:i].id184)`r`n")}
+    if (($objDRV.id187 -ne "N/A") -and ([int]$objDRV.id187 -gt 5)) {$global:blnWARN = $true; $global:arrWARN.add("  - Uncorrectable Errors (187) : $($global:arrDRV[$global:i].id187)`r`n")}
+    if (($objDRV.id188 -ne "N/A") -and ([int]$objDRV.id188 -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - Command Timeout (188) : $($global:arrDRV[$global:i].id188)`r`n")}
+    if (($objDRV.id194 -ne "N/A") -and ([int]$objDRV.id194 -gt 45)) {$global:blnWARN = $true; $global:arrWARN.add("  - Temperature [C] (194) : $($global:arrDRV[$global:i].id194)`r`n")}
+    if (($objDRV.id196 -ne "N/A") -and ([int]$objDRV.id196 -gt 200)) {$global:blnWARN = $true; $global:arrWARN.add("  - Reallocation Events (196) : $($global:arrDRV[$global:i].id196)`r`n")}
+    if (($objDRV.id197 -ne "N/A") -and ([int]$objDRV.id197 -gt 100)) {$global:blnWARN = $true; $global:arrWARN.add("  - Pending Sectors (197) : $($global:arrDRV[$global:i].id197)`r`n")}
+    if (($objDRV.id198 -ne "N/A") -and ([int]$objDRV.id198 -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - Offline Uncorrectable Sectors (198) : $($global:arrDRV[$global:i].id198)`r`n")}
+    if (($objDRV.id201 -ne "N/A") -and ([int]$objDRV.id201 -gt 100)) {$global:blnWARN = $true; $global:arrWARN.add("  - Soft Read Error Rate (201) : $($global:arrDRV[$global:i].id201)`r`n")}
     #SSD ATTRIBUTES
-    if (($objDRV.id170 -ne "N/A") -and ([int]$objDRV.id170 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id171 -ne "N/A") -and ([int]$objDRV.id171 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id172 -ne "N/A") -and ([int]$objDRV.id172 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id173 -ne "N/A") -and ([int]$objDRV.id173 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id176 -ne "N/A") -and ([int]$objDRV.id176 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id177 -ne "N/A") -and ([int]$objDRV.id177 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id181 -ne "N/A") -and ([int]$objDRV.id181 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id182 -ne "N/A") -and ([int]$objDRV.id182 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id190 -ne "N/A") -and ([int]$objDRV.id190 -gt 45)) {$global:blnWARN = $true}
-    if (($objDRV.id230 -ne "N/A") -and ([int]$objDRV.id230 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id231 -ne "N/A") -and ([int]$objDRV.id231 -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.id232 -ne "N/A") -and ([int]$objDRV.id232 -le 50)) {$global:blnWARN = $true} 
+    if (($objDRV.id170 -ne "N/A") -and ([int]$objDRV.id170 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Available Space (170) : $($global:arrDRV[$global:i].id170)`r`n")}
+    if (($objDRV.id171 -ne "N/A") -and ([int]$objDRV.id171 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Program Fail (171) : $($global:arrDRV[$global:i].id171)`r`n")}
+    if (($objDRV.id172 -ne "N/A") -and ([int]$objDRV.id172 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Erase Fail (172) : $($global:arrDRV[$global:i].id172)`r`n")}
+    if (($objDRV.id173 -ne "N/A") -and ([int]$objDRV.id173 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Wear Leveling (173) : $($global:arrDRV[$global:i].id173)`r`n")}
+    if (($objDRV.id176 -ne "N/A") -and ([int]$objDRV.id176 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Erase Fail (176) : $($global:arrDRV[$global:i].id176)`r`n")}
+    if (($objDRV.id177 -ne "N/A") -and ([int]$objDRV.id177 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Wear Leveling (177) : $($global:arrDRV[$global:i].id177)`r`n")}
+    if (($objDRV.id181 -ne "N/A") -and ([int]$objDRV.id181 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Program Fail (181) : $($global:arrDRV[$global:i].id181)`r`n")}
+    if (($objDRV.id182 -ne "N/A") -and ([int]$objDRV.id182 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Erase Fail (182) : $($global:arrDRV[$global:i].id182)`r`n")}
+    if (($objDRV.id190 -ne "N/A") -and ([int]$objDRV.id190 -gt 45)) {$global:blnWARN = $true; $global:arrWARN.add("  - Airflow Temperature [C] (190) : $($global:arrDRV[$global:i].id190)`r`n")}
+    if (($objDRV.id230 -ne "N/A") -and ([int]$objDRV.id230 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Drive Life Protection (230) : $($global:arrDRV[$global:i].id230)`r`n")}
+    if (($objDRV.id231 -ne "N/A") -and ([int]$objDRV.id231 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - SSD Life Left (231) : $($global:arrDRV[$global:i].id231)`r`n")}
+    if (($objDRV.id232 -ne "N/A") -and ([int]$objDRV.id232 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Endurance Remaining (232) : $($global:arrDRV[$global:i].id232)`r`n")} 
     #NVME ATTRIBUTES
-    if (($objDRV.nvmewarn -ne "N/A") -and ([int]$objDRV.nvmewarn -gt 0)) {$global:blnWARN = $true}
-    if (($objDRV.nvmetemp -ne "N/A") -and ([int]$objDRV.nvmetemp -gt 50)) {$global:blnWARN = $true}
-    if (($objDRV.nvmeavail -ne "N/A") -and ([int]$objDRV.nvmeavail -le 50)) {$global:blnWARN = $true}
-    if (($objDRV.nvmemdi -ne "N/A") -and ([int]$objDRV.nvmemdi -gt 0)) {$global:blnWARN = $true}
-    #if (([int]$objDRV.nvmeerr -ne "N/A") -and ([int]$objDRV.nvmeerr -gt 100)) {$global:blnWARN = $true}
-    if (($objDRV.nvmewctemp -ne "N/A") -and ([int]$objDRV.nvmewctemp -gt 5)) {$global:blnWARN = $true}
-    if (($objDRV.nvmecctemp -ne "N/A") -and ([int]$objDRV.nvmecctemp -gt 5)) {$global:blnWARN = $true}
+    if (($objDRV.nvmewarn -ne "N/A") -and ([int]$objDRV.nvmewarn -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - Critical Warning (NVMe) : $($global:arrDRV[$global:i].nvmewarn)`r`n")}
+    if (($objDRV.nvmetemp -ne "N/A") -and ([int]$objDRV.nvmetemp -gt 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Temperature [C] (NVMe) : $($global:arrDRV[$global:i].nvmetemp)`r`n")}
+    if (($objDRV.nvmeavail -ne "N/A") -and ([int]$objDRV.nvmeavail -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Available Spare (NVMe) : $($global:arrDRV[$global:i].nvmeavail)`r`n")}
+    if (($objDRV.nvmemdi -ne "N/A") -and ([int]$objDRV.nvmemdi -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - Media / Data Integrity Errors (NVMe) : $($global:arrDRV[$global:i].nvmemdi)`r`n")}
+    if (($objDRV.nvmeerr -ne "N/A") -and ([int]$objDRV.nvmeerr -gt 100)) {$global:blnWARN = $true; $global:arrWARN.add("  - Error Info Log Entries (NVMe) : $($global:arrDRV[$global:i].nvmeerr)`r`n")}
+    if (($objDRV.nvmewctemp -ne "N/A") -and ([int]$objDRV.nvmewctemp -gt 5)) {$global:blnWARN = $true; $global:arrWARN.add("  - Warning Comp. Temp Time (NVMe) : $($global:arrDRV[$global:i].nvmewctemp)`r`n")}
+    if (($objDRV.nvmecctemp -ne "N/A") -and ([int]$objDRV.nvmecctemp -gt 5)) {$global:blnWARN = $true; $global:arrWARN.add("  - Critical Comp. Temp Time (NVMe) : $($global:arrDRV[$global:i].nvmecctemp)`r`n")}
   } ## chkSMART
 #ENDREGION ----- FUNCTIONS ----
 
@@ -538,8 +538,18 @@ foreach ($objDRV in $arrDRV) {
     foreach ($prop in $global:arrDRV[$global:i].psobject.properties) {
       if ($prop.value -eq $null) {$prop.value = "N/A"}
     }
+    #CHECK SMART ATTRIBUTE VALUES
+    chkSMART $global:arrDRV[$global:i]
     write-host " - SMART REPORT :" -ForegroundColor yellow
     $allout = " - SMART REPORT DRIVE : $($global:arrDRV[$global:i].drvID)`r`n"
+    if ($global:arrWARN.length -eq 0) {
+      $allout += "  - All SMART Attributes passed checks`r`n"
+    } elseif ($global:arrWARN.length -gt 0) {
+      $allout += "  - The following SMART Attributes did not pass :`r`n"
+      foreach ($warn in $global:arrWARN) {
+        $allout += "$($warn)"
+      }
+    }
     #GET DRIVE IDENTITY
     $output = Get-ProcessOutput -FileName $smartEXE -Args "-i $($objDRV.drvID)"
     #PARSE SMARTCTL OUTPUT LINE BY LINE
@@ -556,7 +566,7 @@ foreach ($objDRV in $arrDRV) {
     $allout += "  - SMART Health : $($global:arrDRV[$global:i].fail)`r`n"
     #HDD ATTRIBUTES
     $allout += "  - Reallocated Sectors (5) : $($global:arrDRV[$global:i].id5)`r`n"
-    $allout += "  - Spin Retry Count (10) : $($global:arrDrv[$global:i].id10)`r`n"
+    $allout += "  - Spin Retry Count (10) : $($global:arrDRV[$global:i].id10)`r`n"
     $allout += "  - End to End Error (184) : $($global:arrDRV[$global:i].id184)`r`n"
     $allout += "  - Uncorrectable Errors (187) : $($global:arrDRV[$global:i].id187)`r`n"
     $allout += "  - Command Timeout (188) : $($global:arrDRV[$global:i].id188)`r`n"
@@ -585,10 +595,9 @@ foreach ($objDRV in $arrDRV) {
     $allout += "  - Media / Data Integrity Errors (NVMe) : $($global:arrDRV[$global:i].nvmemdi)`r`n"
     $allout += "  - Error Info Log Entries (NVMe) : $($global:arrDRV[$global:i].nvmeerr)`r`n"
     $allout += "  - Warning Comp. Temp Time (NVMe) : $($global:arrDRV[$global:i].nvmewctemp)`r`n"
-    $allout += "  - Critical Comp. Temp Time (NVMe) : $($global:arrDRV[$global:i].nvmecctemp)"
+    $allout += "  - Critical Comp. Temp Time (NVMe) : $($global:arrDRV[$global:i].nvmecctemp)`r`n"
     write-host $allout -foregroundcolor $ccode
     #DATTO RMM OUTPUT
-    chkSMART $global:arrDRV[$global:i]
     write-host 'DATTO OUTPUT :'
     if ($global:blnWARN) {
       write-DRRMAlert "SMART Health : $($global:arrDRV[$global:i].drvID) : Warning"
