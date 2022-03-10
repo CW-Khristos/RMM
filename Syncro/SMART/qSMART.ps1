@@ -594,7 +594,6 @@ foreach ($objDRV in $arrDRV) {
       Log-Activity -Message "SMART Health : $($global:arrDRV[$global:i].drvID) : Warning" -EventName "SMART Health : $($global:arrDRV[$global:i].drvID)"
       # This creates an alert in Syncro and triggers the "New RMM Alert" in the Notification Center - automatically de-duping per asset.
       Rmm-Alert -Category "SMART Health : $($global:arrDRV[$global:i].drvID) : Warning" -Body "$($allout)"
-      exit 1
     } elseif (-not $global:blnWARN) {
       if ($($global:arrDRV[$global:i].fail) -eq "N/A") {
         # This logs an activity feed item on an Assets's Activity feed
@@ -603,7 +602,6 @@ foreach ($objDRV in $arrDRV) {
         # This logs an activity feed item on an Assets's Activity feed
         Log-Activity -Message "SMART Health : $($global:arrDRV[$global:i].drvID) : $($global:arrDRV[$global:i].fail)" -EventName "SMART Health : $($global:arrDRV[$global:i].drvID)"
       }
-      exit 0
     }
   }
 }
