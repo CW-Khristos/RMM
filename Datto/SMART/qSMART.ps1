@@ -321,7 +321,7 @@
     if (($objDRV.id184 -ne "N/A") -and ([int]$objDRV.id184 -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - End to End Error (184) : $($global:arrDRV[$global:i].id184)`r`n")}
     if (($objDRV.id187 -ne "N/A") -and ([int]$objDRV.id187 -gt 5)) {$global:blnWARN = $true; $global:arrWARN.add("  - Uncorrectable Errors (187) : $($global:arrDRV[$global:i].id187)`r`n")}
     if (($objDRV.id188 -ne "N/A") -and ([int]$objDRV.id188 -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - Command Timeout (188) : $($global:arrDRV[$global:i].id188)`r`n")}
-    if (($objDRV.id194 -ne "N/A") -and ([int]$objDRV.id194 -gt 45)) {$global:blnWARN = $true; $global:arrWARN.add("  - Temperature [C] (194) : $($global:arrDRV[$global:i].id194)`r`n")}
+    if (($objDRV.id194 -ne "N/A") -and ([int]$objDRV.id194 -gt 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Temperature [C] (194) : $($global:arrDRV[$global:i].id194)`r`n")}
     if (($objDRV.id196 -ne "N/A") -and ([int]$objDRV.id196 -gt 200)) {$global:blnWARN = $true; $global:arrWARN.add("  - Reallocation Events (196) : $($global:arrDRV[$global:i].id196)`r`n")}
     if (($objDRV.id197 -ne "N/A") -and ([int]$objDRV.id197 -gt 100)) {$global:blnWARN = $true; $global:arrWARN.add("  - Pending Sectors (197) : $($global:arrDRV[$global:i].id197)`r`n")}
     if (($objDRV.id198 -ne "N/A") -and ([int]$objDRV.id198 -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - Offline Uncorrectable Sectors (198) : $($global:arrDRV[$global:i].id198)`r`n")}
@@ -335,7 +335,7 @@
     if (($objDRV.id177 -ne "N/A") -and ([int]$objDRV.id177 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Wear Leveling (177) : $($global:arrDRV[$global:i].id177)`r`n")}
     if (($objDRV.id181 -ne "N/A") -and ([int]$objDRV.id181 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Program Fail (181) : $($global:arrDRV[$global:i].id181)`r`n")}
     if (($objDRV.id182 -ne "N/A") -and ([int]$objDRV.id182 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Erase Fail (182) : $($global:arrDRV[$global:i].id182)`r`n")}
-    if (($objDRV.id190 -ne "N/A") -and ([int]$objDRV.id190 -gt 45)) {$global:blnWARN = $true; $global:arrWARN.add("  - Airflow Temperature [C] (190) : $($global:arrDRV[$global:i].id190)`r`n")}
+    if (($objDRV.id190 -ne "N/A") -and ([int]$objDRV.id190 -gt 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Airflow Temperature [C] (190) : $($global:arrDRV[$global:i].id190)`r`n")}
     if (($objDRV.id230 -ne "N/A") -and ([int]$objDRV.id230 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Drive Life Protection (230) : $($global:arrDRV[$global:i].id230)`r`n")}
     if (($objDRV.id231 -ne "N/A") -and ([int]$objDRV.id231 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - SSD Life Left (231) : $($global:arrDRV[$global:i].id231)`r`n")}
     if (($objDRV.id232 -ne "N/A") -and ([int]$objDRV.id232 -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Endurance Remaining (232) : $($global:arrDRV[$global:i].id232)`r`n")} 
