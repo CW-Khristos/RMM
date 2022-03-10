@@ -598,7 +598,7 @@ foreach ($objDRV in $arrDRV) {
     } elseif (-not $global:blnWARN) {
       if ($($global:arrDRV[$global:i].fail) -eq "N/A") {
         # This logs an activity feed item on an Assets's Activity feed
-        Log-Activity -Message "SMART Health : $($global:arrDRV[$global:i].drvID) : No Data Returned" -EventName "SMART Health : $($global:arrDRV[$global:i].drvID"
+        Log-Activity -Message "SMART Health : $($global:arrDRV[$global:i].drvID) : No Data Returned" -EventName "SMART Health : $($global:arrDRV[$global:i].drvID)"
       } elseif ($($global:arrDRV[$global:i].fail) -ne "N/A") {
         # This logs an activity feed item on an Assets's Activity feed
         Log-Activity -Message "SMART Health : $($global:arrDRV[$global:i].drvID) : $($global:arrDRV[$global:i].fail)" -EventName "SMART Health : $($global:arrDRV[$global:i].drvID)"
