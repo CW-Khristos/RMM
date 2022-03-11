@@ -334,7 +334,7 @@
     if (($objDRV.nvmetemp -ne "N/A") -and ([int]$objDRV.nvmetemp -gt 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Temperature [C] (NVMe) : $($global:arrDRV[$global:i].nvmetemp)`r`n")}
     if (($objDRV.nvmeavail -ne "N/A") -and ([int]$objDRV.nvmeavail -le 50)) {$global:blnWARN = $true; $global:arrWARN.add("  - Available Spare (NVMe) : $($global:arrDRV[$global:i].nvmeavail)`r`n")}
     if (($objDRV.nvmemdi -ne "N/A") -and ([int]$objDRV.nvmemdi -gt 0)) {$global:blnWARN = $true; $global:arrWARN.add("  - Media / Data Integrity Errors (NVMe) : $($global:arrDRV[$global:i].nvmemdi)`r`n")}
-    if (($objDRV.nvmeerr -ne "N/A") -and ([int]$objDRV.nvmeerr -gt 100)) {$global:blnWARN = $true; $global:arrWARN.add("  - Error Info Log Entries (NVMe) : $($global:arrDRV[$global:i].nvmeerr)`r`n")}
+    #if (($objDRV.nvmeerr -ne "N/A") -and ([int]$objDRV.nvmeerr -gt 100)) {$global:blnWARN = $true; $global:arrWARN.add("  - Error Info Log Entries (NVMe) : $($global:arrDRV[$global:i].nvmeerr)`r`n")}
     if (($objDRV.nvmewctemp -ne "N/A") -and ([int]$objDRV.nvmewctemp -gt 5)) {$global:blnWARN = $true; $global:arrWARN.add("  - Warning Comp. Temp Time (NVMe) : $($global:arrDRV[$global:i].nvmewctemp)`r`n")}
     if (($objDRV.nvmecctemp -ne "N/A") -and ([int]$objDRV.nvmecctemp -gt 5)) {$global:blnWARN = $true; $global:arrWARN.add("  - Critical Comp. Temp Time (NVMe) : $($global:arrDRV[$global:i].nvmecctemp)`r`n")}
   } ## chkSMART
