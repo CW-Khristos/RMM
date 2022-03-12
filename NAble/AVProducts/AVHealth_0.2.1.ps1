@@ -11,10 +11,10 @@
     Script is intended to replace 'AV Status' VBS Monitoring Script
  
 .NOTES
-    Version        : 0.2.0 (04 March 2022)
+    Version        : 0.2.1 (12 March 2022)
     Creation Date  : 14 December 2021
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
-    File Name      : AVHealth_0.2.0.ps1 
+    File Name      : AVHealth_0.2.1.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Thanks         : Chris Reid (NAble) for the original 'AV Status' Script and sanity checks
                      Prejay Shah (Doherty Associates) for sanity checks and a second pair of eyes
@@ -75,6 +75,8 @@
         Do other AVs report individual Threat information in the registry? Sophos does; but if others don't will we be able to use this metric?
         Still need to determine if timestamps are possible for detected threats
     Need to create a 'Get-AVProducts' function and move looped 'detection' code into a function to call
+    Trend Micro continues to cause issues with properly evaluating if the core AV Client itself is up to date due to the number of 'duplicate' and inconsistent Registry Keys / Values that clutter their Registry Hive
+    
 #> 
 
 #REGION ----- DECLARATIONS ----
