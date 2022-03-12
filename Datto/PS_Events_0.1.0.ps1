@@ -10,13 +10,20 @@
     Version        : 0.1.0 (11 March 2022)
     Creation Date  : ???
     Purpose/Change : Assists you in finding machines that have ran dangerous commands
-    File Name      : PS_Events_0.1.0.ps1 
+    File Name      : PS_Events_0.1.0.ps1
+    Author         : Kelvin Tegelaar - https://www.cyberdrain.com
     Modifications  : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Supported OS   : Server 2012R2 and higher
     Requires       : PowerShell Version 2.0+ installed
 
 .CHANGELOG
     0.1.0 Modified original code from DattoRMM to actually be functional and report events properly to diagnostic output in DattoRMM
+      After speaking with Kelvin; this was apparently mostly due to a known write-host race condition with table formatted data that PowerShell outputs that later than other results
+      Regardless; I feel the modifications I made were warranted as noted below :
+        Removal of the 'DRMMDiag' call for Script Block Logging is appropriate since it will call 'DRMMAlert' if not enabled, reporting it being enabled to diagnostic is unnecessary
+        The advised fix for the 'DRMMDiag' call to log detected dangerous commands is to use 'write-DRMMDiag $PowerShellLogs | Select-Object TriggeredCommand, TimeCreated | format-list'
+        The above change will prevent the write-host race condition with table formatted data; regardless I've switched it to a nested hashtable now XD
+    0.1.1 Removed duplicate "Invoke-RestMethod" from '$DangerousCommands' array
     
 To Do:
 
@@ -27,7 +34,7 @@ To Do:
   $global:cmds = 0
   $global:diag = $null
   $global:hashCMD = @{}
-  $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest", "Invoke-RestMethod")
+  $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest")
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -67,14 +74,18 @@ $logInfo = @{
 $PowerShellEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction SilentlyContinue | Select-Object TimeCreated, message
 $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
   foreach ($command in $DangerousCommands) {
-    if ($Event.Message -like "*$Command*" -and $Event.Message -notlike "*DangerousCommands*") {
-      $global:cmds = $global:cmds + 1
-      $hash = @{
-          TimeCreated      = $event.TimeCreated
-          EventMessage     = $Event.message
-          TriggeredCommand = $command
-      }
-      $global:hashCMD.add($global:cmds, $hash)
+    #if ($Event.Message -like "*$Command*" -and $Event.Message -notlike "*DangerousCommands*") {
+    if ((($Event.Message -match "*$($Command) -") -or 
+      ($Event.Message -match "*$($Command) '") -or 
+      ($Event.Message -match "*$($Command) `"")) -and 
+      ($Event.Message -notmatch "*DangerousCommands*")) {
+        $global:cmds = $global:cmds + 1
+        $hash = @{
+            TimeCreated      = $event.TimeCreated
+            EventMessage     = $Event.message
+            TriggeredCommand = $command
+        }
+        $global:hashCMD.add($global:cmds, $hash)
     }
   }
 }
