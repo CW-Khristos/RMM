@@ -24,6 +24,7 @@
         The advised fix for the 'DRMMDiag' call to log detected dangerous commands is to use 'write-DRMMDiag $PowerShellLogs | Select-Object TriggeredCommand, TimeCreated | format-list'
         The above change will prevent the write-host race condition with table formatted data; regardless I've switched it to a nested hashtable now XD
     0.1.1 Removed duplicate "Invoke-RestMethod" from '$DangerousCommands' array
+      After a short inquiry with Prejay; added 'start-bitstransfer'
       Attempting some basic syntax matching with the items in the '$DangerousCommands' array to prevent unnecessary "false" Alerts
     
 To Do:
@@ -38,7 +39,7 @@ To Do:
   $global:cmds = 0
   $global:diag = $null
   $global:hashCMD = @{}
-  $DangerousCommands = @("Get-WinEvent", "iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest")
+  $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest", "DownloadString", "start-bitstransfer")
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -79,10 +80,11 @@ $logInfo = @{
 $PowerShellEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction SilentlyContinue | Select-Object TimeCreated, message
 $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
   foreach ($command in $DangerousCommands) {
-    #if ($Event.Message -like "*$Command*" -and $Event.Message -notlike "*DangerousCommands*") {
     if ((($Event.Message -like "*$Command -*") -or 
       ($Event.Message -like "*$Command '*") -or 
-      ($Event.Message -like "*$Command \`"*")) -and 
+      ($Event.Message -like "*$Command `"*") -or 
+      ($Event.Message -like "*$Command(*)*") -or 
+      ($Event.Message -like "*$Command `$")) -and 
       ($Event.Message -notlike "*DangerousCommands*")) {
         $global:cmds = $global:cmds + 1
         $hash = @{
