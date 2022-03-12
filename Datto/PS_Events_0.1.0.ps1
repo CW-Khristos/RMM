@@ -8,7 +8,7 @@
  
 .NOTES
     Version        : 0.1.0 (11 March 2022)
-    Creation Date  : ???
+    Creation Date  : 14 May 2020
     Purpose/Change : Assists you in finding machines that have ran dangerous commands
     File Name      : PS_Events_0.1.0.ps1
     Author         : Kelvin Tegelaar - https://www.cyberdrain.com
