@@ -1,13 +1,16 @@
 ***
 # **AVHealth**
   * **[AVHealth Project](https://github.com/CW-Khristos/scripts/projects/26)**
-  * **Current Validation : [Validated - v0.1.9]**
-  * **Current Branch : [master](https://github.com/CW-Khristos/scripts/tree/master) (Validated)**
+  * **Current Validation : [Testing - v0.2.1]**
+  * **Current Branch : [dev](https://github.com/CW-Khristos/scripts/tree/dev/AVProducts) (Testing)**
 ***
 ## **Script Details :**
-  * **NCentral AMP - [AVHealth.amp](https://github.com/CW-Khristos/scripts/blob/master/AVProducts/AV%20Health.amp)**
-  * **PS1 Script - [AVHealth_0.1.9.ps1](https://github.com/CW-Khristos/scripts/blob/master/AVProducts/AVHealth_0.1.9.ps1)**
-  * **Command :** `powershell -file .\AVHealth_0.1.9.ps1 -i_PAV "[AV Vendor]"`
+  * **Script Files :**
+    * Datto - [AVHealth_0.2.1.ps1](https://github.com/CW-Khristos/RMM/blob/dev/Datto/AVProducts/AVHealth_0.2.1.ps1)
+    * NCentral - [AVHealth_0.2.1.ps1](https://github.com/CW-Khristos/RMM/blob/dev/NAble/AVProducts/AVHealth_0.2.1.ps1)
+    * NCentral AMP - [AVHealth.amp](https://github.com/CW-Khristos/RMM/blob/dev/NAble/AVProducts/AV%20Health.amp)
+    * Syncro - [AVHealth_0.2.1.ps1](https://github.com/CW-Khristos/RMM/blob/dev/Syncro/AVProducts/AVHealth_0.2.1.ps1)
+  * **Command :** `powershell -file .\AVHealth_0.2.1.ps1 -i_PAV "[AV Vendor]"`
   * **Arguments :** 1, Required 1
     * **[i_PAV] - REQUIRED** - String, String to set AV Vendor to monitor for AV Health
 ***
@@ -23,10 +26,10 @@
     Script is intended to replace 'AV Status' VBS Monitoring Script
 ***
 ## .NOTES
-    Version        : 0.1.9 (22 February 2022)
+    Version        : 0.2.1 (12 March 2022)
     Creation Date  : 14 December 2021
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
-    File Name      : AVHealth_0.1.9.ps1 
+    File Name      : AVHealth_0.2.1.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Thanks         : Chris Reid (NAble) for the original 'AV Status' Script and sanity checks
                      Prejay Shah (Doherty Associates) for sanity checks and a second pair of eyes
@@ -34,6 +37,10 @@
                      Remco for helping test and validate and assistance with Symantec
     Requires       : PowerShell Version 2.0+ installed
 ***
+## .KNOWN ISSUES
+ - Sophos is currently the only AV Product fully supporting the "Active Detections" and "Detected Threats" metrics; Symantec and Trend Micro will at least indicate infection status in "Active Detections
+ - Trend Micro continues to cause issues with properly evaluating if the core AV Client itself is up to date due to the number of 'duplicate' and inconsistent Registry Keys / Values that clutter their Registry Hive
+*** 
 ## .OS COMPATIBILITY
  - Because this script will be making a secure SSL connection to GitHub; older OSes prior to Windows 10 may not successfully execute the script and you may receive a return of "Selected AV Product Not Found, Unable to download AV Vendor XML"
  - This is due to the OS SSL Cipher support not supporting TLS 1.2; for more information :
@@ -137,6 +144,15 @@ After creating the desired Custom Services; create Service Templates for your Wi
     - Began adding in checks for AV Components' Versions, Tamper Protection, Last Software Update Timestamp, Last Definition Update Timestamp, and Last Scan Timestamp
     - Added '$global:ncxml<vendor>' variables for assigning static 'fallback' sources for AV Product XMLs; XMLs should be uploaded to NC Script Repository and URLs updated (Begin Ln148)
       - The above 'Fallback' method is to allow for uploading AV Product XML files to NCentral Script Repository to attempt to support older OSes which cannot securely connect to GitHub (Requires using "Compatibility" mode for NC Network Security)
+ - 0.2.0
+    - Optimization and more bugfixes
+    - Forked script to implement 'AV Health' script into Datto RMM
+    - Planning to re-organize repo to account for implementation of scripts to multiple RMM platforms
+ - 0.2.1
+    - Optimization and more bugfixes; namely putting an end to populating the key '#comment' into Vendor AV Product and Product State hashtables due to how PS parses XML natively
+    - Copied and modified code to retrieve Vendor AV Product XML into 'Get-AVState' function to replace the hard-coded 'swtich' to interpret WMI AV Product States
+      - This implements similar XML method to interpret WMI AV Product States as with retrieving Vendor AV Product details
+      - This should facilitate easier community contributions to WMI AV Product States and with this change plan to leave the WMI checks in place
 ***
 # .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
@@ -145,6 +161,7 @@ After creating the desired Custom Services; create Service Templates for your Wi
         Do other AVs report individual Threat information in the registry? Sophos does; but if others don't will we be able to use this metric?
     If no AV is detected through WMI or 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\'; attempt to validate each of the supported Vendor AV Products
     Need to create a 'Get-AVProducts' function and move looped 'detection' code into a function to call
+    Trend Micro continues to cause issues with properly evaluating if the core AV Client itself is up to date due to the number of 'duplicate' and inconsistent Registry Keys / Values that clutter their Registry Hive
 ***
 ## Supported AV Products :
  - Sophos Anti-Virus
