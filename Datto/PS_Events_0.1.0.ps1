@@ -24,6 +24,7 @@
         The advised fix for the 'DRMMDiag' call to log detected dangerous commands is to use 'write-DRMMDiag $PowerShellLogs | Select-Object TriggeredCommand, TimeCreated | format-list'
         The above change will prevent the write-host race condition with table formatted data; regardless I've switched it to a nested hashtable now XD
     0.1.1 Removed duplicate "Invoke-RestMethod" from '$DangerousCommands' array
+      Switched to using '-match' and attempting some basic syntax matching with the items in the '$DangerousCommands' array to prevent unnecessary "false" Alerts
     
 To Do:
     Script still has undesired behavior of "detecting" dangerous commands being used; even when they are not
