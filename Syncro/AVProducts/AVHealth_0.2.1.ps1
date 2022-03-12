@@ -309,8 +309,12 @@
       }
     } elseif ($global:blnPSXML) {                                                                   #AV PRODUCT STATES ALREADY LOADED IN HASHTABLE
       #SET '$global:defstatus' AND '$global:rtstatus' TO INTERPRET PASSED PRODUCT STATE FROM POPULATED HASHTABLE
-      $global:defstatus = $global:pskey["ps$($state)"].defstatus
-      $global:rtstatus = $global:pskey["ps$($state)"].rtstatus
+      try {
+        $global:defstatus = $global:pskey["ps$($state)"].defstatus
+        $global:rtstatus = $global:pskey["ps$($state)"].rtstatus
+      } catch {
+        $global:defstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
+        $global:rtstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
     }
   } ## Get-AVState
   
