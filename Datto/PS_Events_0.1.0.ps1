@@ -26,7 +26,10 @@
     0.1.1 Removed duplicate "Invoke-RestMethod" from '$DangerousCommands' array
     
 To Do:
-
+    Script still has undesired behavior of "detecting" dangerous commands being used; even when they are not
+    An example of this would be if the word "confirm" where contained in  ascript (Prejay's 'Get-PMEServices' script was one I personally came across)
+    The above example would still cause an Alert due to the matching of 'irm' Alias in conf*irm*; this has the potential to cause a continual false "Alerts" in an RMM
+    While it is expected that techs would need to review the content of the Alert for confirmation; this would be highly in-efficient
 
 #>
 
@@ -42,7 +45,8 @@ To Do:
     write-host  '<-Start Diagnostic->'
     foreach ($Message in $Messages) { $Message }
     write-host '<-End Diagnostic->'
-  } 
+  }
+
   function write-DRRMAlert ($message) {
     write-host '<-Start Result->'
     write-host "Alert=$message"
@@ -54,8 +58,8 @@ To Do:
 #BEGIN SCRIPT
 $version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentVersion
 if ($Version -lt "6.2") {
-    write-DRRMAlert "Unsupported OS. Only Server 2012R2 and up are supported."
-    exit 1
+  write-DRRMAlert "Unsupported OS. Only Server 2012R2 and up are supported."
+  exit 1
 }
 
 $ScriptBlockLogging = get-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging"
@@ -67,9 +71,9 @@ if ($ScriptBlockLogging.EnableScriptBLockLogging -ne 1) {
 }
 
 $logInfo = @{ 
-    ProviderName = "Microsoft-Windows-PowerShell"
-    StartTime    = (get-date).AddHours(-2)
-    EndTime      = (get-date).AddMinutes(-5)
+  ProviderName = "Microsoft-Windows-PowerShell"
+  StartTime    = (get-date).AddHours(-2)
+  EndTime      = (get-date).AddMinutes(-5)
 }
 $PowerShellEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction SilentlyContinue | Select-Object TimeCreated, message
 $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
@@ -81,9 +85,9 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
       ($Event.Message -notmatch "*DangerousCommands*")) {
         $global:cmds = $global:cmds + 1
         $hash = @{
-            TimeCreated      = $event.TimeCreated
-            EventMessage     = $Event.message
-            TriggeredCommand = $command
+          TimeCreated      = $event.TimeCreated
+          EventMessage     = $Event.message
+          TriggeredCommand = $command
         }
         $global:hashCMD.add($global:cmds, $hash)
     }
@@ -96,7 +100,7 @@ if ($global:cmds -eq 0) {
 } else {
   write-DRRMAlert "Powershell Events : Not Healthy - Dangerous commands found in logs."
   foreach ($cmd in $global:hashCMD.Keys) {
-      $global:diag += "`r`nTriggered Command : $($global:hashCMD[$cmd].TriggeredCommand)`r`nTimestamp : $($global:hashCMD[$cmd].TimeCreated)`r`nDetails : $($global:hashCMD[$cmd].EventMessage)`r`n`r`n"
+    $global:diag += "`r`nTriggered Command : $($global:hashCMD[$cmd].TriggeredCommand)`r`nTimestamp : $($global:hashCMD[$cmd].TimeCreated)`r`nDetails : $($global:hashCMD[$cmd].EventMessage)`r`n`r`n"
   }
   write-DRMMDiag ($global:diag)
   exit 1
