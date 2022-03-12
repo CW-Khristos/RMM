@@ -7,10 +7,10 @@
     Assists you in finding machines that have ran dangerous commands such as invoke-expression, often used for attacks called 'Living off-the-Land'
  
 .NOTES
-    Version        : 0.1.0 (11 March 2022)
+    Version        : 0.1.1 (11 March 2022)
     Creation Date  : 14 May 2020
     Purpose/Change : Assists you in finding machines that have ran dangerous commands
-    File Name      : PS_Events_0.1.0.ps1
+    File Name      : PS_Events_0.1.1.ps1
     Author         : Kelvin Tegelaar - https://www.cyberdrain.com
     Modifications  : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Supported OS   : Server 2012R2 and higher
@@ -24,7 +24,7 @@
         The advised fix for the 'DRMMDiag' call to log detected dangerous commands is to use 'write-DRMMDiag $PowerShellLogs | Select-Object TriggeredCommand, TimeCreated | format-list'
         The above change will prevent the write-host race condition with table formatted data; regardless I've switched it to a nested hashtable now XD
     0.1.1 Removed duplicate "Invoke-RestMethod" from '$DangerousCommands' array
-      Switched to using '-match' and attempting some basic syntax matching with the items in the '$DangerousCommands' array to prevent unnecessary "false" Alerts
+      Attempting some basic syntax matching with the items in the '$DangerousCommands' array to prevent unnecessary "false" Alerts
     
 To Do:
     Script still has undesired behavior of "detecting" dangerous commands being used; even when they are not
@@ -38,7 +38,7 @@ To Do:
   $global:cmds = 0
   $global:diag = $null
   $global:hashCMD = @{}
-  $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest")
+  $DangerousCommands = @("Get-WinEvent", "iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest")
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -80,10 +80,10 @@ $PowerShellEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction Silently
 $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
   foreach ($command in $DangerousCommands) {
     #if ($Event.Message -like "*$Command*" -and $Event.Message -notlike "*DangerousCommands*") {
-    if ((($Event.Message -match "*$($Command) -") -or 
-      ($Event.Message -match "*$($Command) '") -or 
-      ($Event.Message -match "*$($Command) `"")) -and 
-      ($Event.Message -notmatch "*DangerousCommands*")) {
+    if ((($Event.Message -like "*$Command -*") -or 
+      ($Event.Message -like "*$Command '*") -or 
+      ($Event.Message -like "*$Command \`"*")) -and 
+      ($Event.Message -notlike "*DangerousCommands*")) {
         $global:cmds = $global:cmds + 1
         $hash = @{
           TimeCreated      = $event.TimeCreated
