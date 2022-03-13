@@ -314,6 +314,7 @@
       } catch {
         $global:defstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
         $global:rtstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
+      }
     }
   } ## Get-AVState
   
