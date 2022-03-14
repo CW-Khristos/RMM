@@ -199,34 +199,6 @@
     param (
       $dest, $state
     )
-    #Switch to determine the status of antivirus definitions and real-time protection.
-    #THIS COULD PROBABLY ALSO BE TURNED INTO A SIMPLE XML / JSON LOOKUP TO FACILITATE COMMUNITY CONTRIBUTION
-    #switch ($state) {
-    #  #AVG IS 2012 AV / CrowdStrike / Kaspersky
-    #  "262144" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  "266240" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Enabled (WMI Check)"}
-    #  #AVG IS 2012 FW
-    #  "266256" {$global:defstatus = "Out of date (WMI Check)" ;$global:rtstatus = "Enabled (WMI Check)"}
-    #  "262160" {$global:defstatus = "Out of date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  #MSSE
-    #  "393216" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  "397312" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Enabled (WMI Check)"}
-    #  #Windows Defender
-    #  "393472" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  "397584" {$global:defstatus = "Out of date (WMI Check)" ;$global:rtstatus = "Enabled (WMI Check)"}
-    #  "397568" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Enabled (WMI Check)"}
-    #  "401664" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  #
-    #  "393232" {$global:defstatus = "Out of date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  "393488" {$global:defstatus = "Out of date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  "397328" {$global:defstatus = "Out of date (WMI Check)" ;$global:rtstatus = "Enabled (WMI Check)"}
-    #  #Sophos
-    #  "331776" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Enabled (WMI Check)"}
-    #  "335872" {$global:defstatus = "Up to date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  #Norton Security
-    #  "327696" {$global:defstatus = "Out of date (WMI Check)" ;$global:rtstatus = "Disabled (WMI Check)"}
-    #  default {$global:defstatus = "Unknown (WMI Check)" ;$global:rtstatus = "Unknown (WMI Check)"}
-    #}
     if (-not $global:blnPSXML) {                                                                    #AV PRODUCT STATES NOT LOADED INTO HASHTABLE
       #$dest = @{}
       $global:blnPSXML = $true
