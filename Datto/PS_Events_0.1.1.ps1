@@ -1,4 +1,4 @@
-<# 
+<#
 .SYNOPSIS 
     Assists you in finding machines that have ran dangerous commands such as invoke-expression, often used for attacks called 'Living off-the-Land'
     Related blog: https://www.cyberdrain.com/monitoring-with-powershell-preventing-powershell-based-attacks-lolbas/
@@ -27,16 +27,19 @@
           After a short inquiry with Prejay; added 'start-bitstransfer'
           Attempting some basic syntax matching with the items in the '$DangerousCommands' array to prevent unnecessary "false" Alerts
           As of this version I have reviewed over 15k lines of output and verified the "detected" code using commands in '$DangerousCommands' was 100% accurate! (ALL of it ws my own code XD)
+          Script will track the number of instances of '$DangerousCommands' were detected and how many Script Blocks were detected
     
 To Do:
     Script still had undesired behavior of "detecting" dangerous commands being used; even when they are not
     An example of this would be if the word "confirm" where contained in  ascript (Prejay's 'Get-PMEServices' script was one I personally came across)
     The above example would still cause an Alert due to the matching of 'irm' Alias in conf*irm*; this has the potential to cause a continual false "Alerts" in an RMM
     While it is expected that techs would need to review the content of the Alert for confirmation; this would be highly in-efficient
-    Need to implement a method of defining list of "safe" scripts that this will still "alet" on in the output; but will omit their code to reduce amount of output
 
 #>
 
+#First Clear any variables
+Remove-Variable * -ErrorAction SilentlyContinue
+  
 #REGION ----- DECLARATIONS ----
   $global:cmds = 0
   $global:diag = $null
@@ -98,15 +101,15 @@ if ($Version -lt "6.2") {
 try {
   $ScriptBlockLogging = get-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -erroraction stop
   if ($ScriptBlockLogging.EnableScriptBLockLogging -ne 1) {
-    $global:diag += "  - Error - Script Block Logging is not enabled`r`nEnabling Script Block Logging`r`n"
-    write-host "  - Error - Script Block Logging is not enabled`r`nEnabling Script Block Logging" -foregroundcolor red
+    $global:diag += "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging`r`n"
+    write-host "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging" -foregroundcolor red
     try {
       Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -Name "EnableScriptBLockLogging" -Value 1
       $global:diag += "  - Information - Script Block Logging Enabled`r`n"
       write-host "  - Information - Script Block Logging Enabled" -foregroundcolor yellow
     } catch {
-      $global:diag += "  - Error - Script Block Logging is not enabled`r`nUnable to Enable Script Block Logging`r`n"
-      write-host "  - Error - Script Block Logging is not enabled`r`nUnable to Enable Script Block Logging" -foregroundcolor red
+      $global:diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
+      write-host "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging" -foregroundcolor red
       Write-DRMMAlert "Error - Script Block Logging is not enabled"
       Write-DRMMDiag $($global:diag)
       exit 1
@@ -116,8 +119,8 @@ try {
     write-host "  - Information - Script Block Logging is enabled" -foregroundcolor yellow 
   }
 } catch {
-  $global:diag += "  - Error - Script Block Logging is not enabled`r`nEnabling Script Block Logging`r`n"
-  write-host "  - Error - Script Block Logging is not enabled`r`nEnabling Script Block Logging" -foregroundcolor red
+  $global:diag += "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging`r`n"
+  write-host "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging" -foregroundcolor red
   try {
     New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\" -Value "default value" -force
     New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -Value "default value" -force
@@ -125,8 +128,8 @@ try {
     $global:diag += "  - Information - Script Block Logging Enabled`r`n"
     write-host "  - Information - Script Block Logging Enabled" -foregroundcolor yellow
   } catch {
-    $global:diag += "  - Error - Script Block Logging is not enabled`r`nUnable to Enable Script Block Logging`r`n"
-    write-host "  - Error - Script Block Logging is not enabled`r`nUnable to Enable Script Block Logging" -foregroundcolor red
+    $global:diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
+    write-host "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging" -foregroundcolor red
     Write-DRMMAlert "Error - Script Block Logging is not enabled"
     Write-DRMMDiag $($global:diag)
     exit 1
@@ -151,21 +154,23 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
         $global:cmds = $global:cmds + 1
         $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
         $details = Split-StringOnLiteralString $($details[1]) "Path: "
-        if ($dest.containskey($($details[1]))) {
-          continue
-        } elseif (-not $dest.containskey($($details[1]))) {
-          $hash = @{
-            TimeCreated      = $Event.TimeCreated
-            EventMessage     = $Event.message
-            TriggeredCommand = $command
-            ScriptBlockID    = $($details[0])
-            Path             = $($details[1])
+        if (($details[1] -ne $null) -and ($details[1] -ne "")) {
+          if ($global:hashCMD.containskey($($details[1]))) {
+            continue
+          } elseif (-not $global:hashCMD.containskey($($details[1]))) {
+            $hash = @{
+              TimeCreated      = $Event.TimeCreated
+              EventMessage     = $Event.message
+              TriggeredCommand = $command
+              ScriptBlockID    = $($details[0])
+              Path             = $($details[1])
+            }
+            $global:hashCMD.add($($details[1]), $hash)
+            $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
+            $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
+            write-host "  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
+            write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor red
           }
-          $global:hashCMD.add($($details[1]), $hash)
-          $global:diag += "  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
-          $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
-          write-host "  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
-          write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor red
         }
     } elseif ((($Event.Message -like "*$($command) -*") -or 
       ($Event.Message -like "*$($command) '*") -or 
@@ -191,10 +196,10 @@ if ($global:cmds -eq 0) {
   exit 0
 } else {
   foreach ($cmd in $global:hashCMD.Keys) {
-    $global:diag += "  - $($global:hashCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($global:hashCMD[$cmd].TriggeredCommand) found in script block :`r`n"
+    $global:diag += "`r`n  - $($global:hashCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($global:hashCMD[$cmd].TriggeredCommand) found in script block :`r`n"
     $global:diag += "    - ScriptBlock ID : $($global:hashCMD[$cmd].ScriptBlockID)    - Path : $($global:hashCMD[$cmd].Path)`r`nDetails : $($global:hashCMD[$cmd].EventMessage)`r`n"
   }
-  write-DRRMAlert "Powershell Events : Not Healthy - Dangerous commands found in logs."
+  write-DRRMAlert "Powershell Events : Not Healthy - $($global:cmds) Dangerous commands executed by $($global:hashCMD.count) Scripts found in logs."
   write-DRMMDiag $($global:diag)
   exit 1
 }
