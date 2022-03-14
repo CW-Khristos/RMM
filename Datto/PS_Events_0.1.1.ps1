@@ -149,16 +149,24 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
       ($Event.Message -like "*$($command) `$")) -and 
       ($Event.Message -notlike "*$($global:slkey)*")) {
         $global:cmds = $global:cmds + 1
-        $hash = @{
-          TimeCreated      = $Event.TimeCreated
-          EventMessage     = $Event.message
-          TriggeredCommand = $command
+        $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
+        $details = Split-StringOnLiteralString $($details[1]) "Path: "
+        if ($dest.containskey($($details[1]))) {
+          continue
+        } elseif (-not $dest.containskey($($details[1]))) {
+          $hash = @{
+            TimeCreated      = $Event.TimeCreated
+            EventMessage     = $Event.message
+            TriggeredCommand = $command
+            ScriptBlockID    = $($details[0])
+            Path             = $($details[1])
+          }
+          $global:hashCMD.add($($details[1]), $hash)
+          $global:diag += "  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
+          $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
+          write-host "  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
+          write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor red
         }
-        $global:hashCMD.add($global:cmds, $hash)
-        $global:diag += "  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
-        $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
-        write-host "  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
-        write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor red
     } elseif ((($Event.Message -like "*$($command) -*") -or 
       ($Event.Message -like "*$($command) '*") -or 
       ($Event.Message -like "*$($command) `"*") -or 
@@ -183,7 +191,8 @@ if ($global:cmds -eq 0) {
   exit 0
 } else {
   foreach ($cmd in $global:hashCMD.Keys) {
-    $global:diag += "`r`n`r`nTriggered Command : $($global:hashCMD[$cmd].TriggeredCommand)`r`nTimestamp : $($global:hashCMD[$cmd].TimeCreated)`r`nDetails : $($global:hashCMD[$cmd].EventMessage)"
+    $global:diag += "  - $($global:hashCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($global:hashCMD[$cmd].TriggeredCommand) found in script block :`r`n"
+    $global:diag += "    - ScriptBlock ID : $($global:hashCMD[$cmd].ScriptBlockID)    - Path : $($global:hashCMD[$cmd].Path)`r`nDetails : $($global:hashCMD[$cmd].EventMessage)`r`n"
   }
   write-DRRMAlert "Powershell Events : Not Healthy - Dangerous commands found in logs."
   write-DRMMDiag $($global:diag)
