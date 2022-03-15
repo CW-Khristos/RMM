@@ -34,6 +34,10 @@
                      Remco for helping test and validate and assistance with Symantec
     Requires       : PowerShell Version 2.0+ installed
 ***
+## .KNOWN ISSUES
+ - Sophos is currently the only AV Product fully supporting the "Active Detections" and "Detected Threats" metrics; Symantec and Trend Micro will at least indicate infection status in "Active Detections
+ - Trend Micro continues to cause issues with properly evaluating if the core AV Client itself is up to date due to the number of 'duplicate' and inconsistent Registry Keys / Values that clutter their Registry Hive
+***
 ## .OS COMPATIBILITY
  - Because this script will be making a secure SSL connection to GitHub; older OSes prior to Windows 10 may not successfully execute the script and you may receive a return of "Selected AV Product Not Found, Unable to download AV Vendor XML"
  - This is due to the OS SSL Cipher support not supporting TLS 1.2; for more information :
