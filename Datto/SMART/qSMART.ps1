@@ -1,5 +1,6 @@
 #REGION ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
+  #UNCOMMENT BELOW PARAM() AND RENAME '$env:i_drive' TO '$i_drive' TO UTILIZE IN CLI
   #Param (
   #  [Parameter(Mandatory=$true)]$i_drive
   #)
