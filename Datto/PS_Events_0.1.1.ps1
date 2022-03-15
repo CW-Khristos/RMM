@@ -46,7 +46,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $global:diag = $null
   $global:hashDCMD = @{}
   $global:hashSCMD = @{}
-  $global:slkey = @()
+  $global:slkey = @("##########")
+  $arrSyntax = @(" `'", " `"", "(*)", " (*)", " -", " `$")
   $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest", "DownloadString", "start-bitstransfer")
 #ENDREGION ----- DECLARATIONS ----
 
@@ -145,66 +146,66 @@ $logInfo = @{
 $PowerShellEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction SilentlyContinue | Select-Object TimeCreated, message
 $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
   foreach ($command in $DangerousCommands) {
-    if ((($Event.Message -like "*$($command) -*") -or 
-      ($Event.Message -like "*$($command) '*") -or 
-      ($Event.Message -like "*$($command) `"*") -or 
-      ($Event.Message -like "*$($command)(*)*") -or 
-      ($Event.Message -like "*$($command) (*)*") -or 
-      ($Event.Message -like "*$($command) `$")) -and 
-      ($Event.Message -notlike "*$($global:slkey)*")) {
-        $global:dcmds = $global:dcmds + 1
-        $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
-        $details = Split-StringOnLiteralString $($details[1]) "Path: "
-        if (($details[1] -ne $null) -and ($details[1] -ne "")) {
-          if ($global:hashDCMD.containskey($($details[1]))) {
-            continue
-          } elseif (-not $global:hashDCMD.containskey($($details[1]))) {
-            $hash = @{
-              TimeCreated      = $Event.TimeCreated
-              EventMessage     = $Event.message
-              TriggeredCommand = $command
-              ScriptBlockID    = $($details[0])
-              Path             = $($details[1])
+    foreach ($syntax in $arrSyntax) {
+      if (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -notlike "*$($global:slkey)*")) {
+          $global:dcmds = $global:dcmds + 1
+          $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
+          $details = Split-StringOnLiteralString $($details[1]) "Path: "
+          if (($details[1] -ne $null) -and ($details[1] -ne "")) {
+            if ($global:hashDCMD.containskey($($details[1]))) {
+              continue
+            } elseif (-not $global:hashDCMD.containskey($($details[1]))) {
+              $hash = @{
+                TimeCreated      = $Event.TimeCreated
+                EventMessage     = $Event.message
+                TriggeredCommand = $command
+                ScriptBlockID    = $($details[0])
+                Path             = $($details[1])
+              }
+              $global:scripts = $global:scripts + 1
+              $global:hashDCMD.add($($details[1]), $hash)
+              $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
+              $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
+              write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
+              write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor red
             }
-            $global:scripts = $global:scripts + 1
-            $global:hashDCMD.add($($details[1]), $hash)
-            $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
-            $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
-            write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
-            write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor red
           }
-        }
-    } elseif ((($Event.Message -like "*$($command) -*") -or 
-      ($Event.Message -like "*$($command) '*") -or 
-      ($Event.Message -like "*$($command) `"*") -or 
-      ($Event.Message -like "*$($command)(*)*") -or 
-      ($Event.Message -like "*$($command) (*)*") -or 
-      ($Event.Message -like "*$($command) `$")) -and 
-      ($Event.Message -like "*$($global:slkey)*")) {
-        $global:scmds = $global:scmds + 1
-        $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
-        $details = Split-StringOnLiteralString $($details[1]) "Path: "
-        if (($details[1] -ne $null) -and ($details[1] -ne "")) {
-          if ($global:hashSCMD.containskey($($details[1]))) {
-            continue
-          } elseif (-not $global:hashSCMD.containskey($($details[1]))) {
-            $hash = @{
-              TimeCreated      = $Event.TimeCreated
-              EventMessage     = $Event.message
-              TriggeredCommand = $command
-              ScriptBlockID    = $($details[0])
-              Path             = $($details[1])
+      } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -like "*$($global:slkey)*")) { 
+          $global:scmds = $global:scmds + 1
+          $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
+          $details = Split-StringOnLiteralString $($details[1]) "Path: "
+          if (($details[1] -ne $null) -and ($details[1] -ne "")) {
+            if ($global:hashSCMD.containskey($($details[1]))) {
+              continue
+            } elseif (-not $global:hashSCMD.containskey($($details[1]))) {
+              $hash = @{
+                TimeCreated      = $Event.TimeCreated
+                EventMessage     = $Event.message
+                TriggeredCommand = $command
+                ScriptBlockID    = $($details[0])
+                Path             = $($details[1])
+              }
+              $global:scripts = $global:scripts + 1
+              $global:hashSCMD.add($($details[1]), $hash)
+              $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block marked 'safe' :`r`n"
+              $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
+              write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block marked 'safe' :" -foregroundcolor yellow
+              write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor yellow
             }
-            $global:scripts = $global:scripts + 1
-            $global:hashSCMD.add($($details[1]), $hash)
-            $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block marked 'safe' :`r`n"
-            $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
-            write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block marked 'safe' :" -foregroundcolor yellow
-            write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor yellow
           }
-        }
+      }
     }
   }
+}
+foreach ($cmd in $global:hashDCMD.Keys) {
+  $global:diag += "`r`n  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($global:hashDCMD[$cmd].TriggeredCommand) found in script block :`r`n"
+  $global:diag += "    - ScriptBlock ID : $($global:hashDCMD[$cmd].ScriptBlockID)    - Path : $($global:hashDCMD[$cmd].Path)`r`n    - Details : $($global:hashDCMD[$cmd].EventMessage)`r`n"
+  #write-host $($global:diag)
+}
+if ($global:dcmds -eq 0) {
+  write-host "`r`n  - Powershell Events : Healthy - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs." -foregroundcolor green
+} elseif ($global:dcmds -gt 0) {
+  write-host "`r`n  - Powershell Events : Healthy - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs." -foregroundcolor red
 }
 #DATTO OUTPUT
 write-host "`r`nDATTO OUTPUT :" -foregroundcolor yellow
@@ -212,11 +213,7 @@ if ($global:dcmds -eq 0) {
   write-DRRMAlert "Powershell Events : Healthy - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs."
   write-DRMMDiag $($global:diag)
   exit 0
-} else {
-  foreach ($cmd in $global:hashCMD.Keys) {
-    $global:diag += "`r`n  - $($global:hashCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($global:hashCMD[$cmd].TriggeredCommand) found in script block :`r`n"
-    $global:diag += "    - ScriptBlock ID : $($global:hashCMD[$cmd].ScriptBlockID)    - Path : $($global:hashCMD[$cmd].Path)`r`nDetails : $($global:hashCMD[$cmd].EventMessage)`r`n"
-  }
+} elseif ($global:dcmds -gt 0) {
   write-DRRMAlert "Powershell Events : Not Healthy - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs."
   write-DRMMDiag $($global:diag)
   exit 1
