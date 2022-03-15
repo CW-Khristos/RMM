@@ -1,13 +1,13 @@
 ***
 # **AVHealth**
   * **[AVHealth Project](https://github.com/CW-Khristos/scripts/projects/26)**
-  * **Current Validation : [Validated - v0.1.9]**
+  * **Current Validation : [Validated - v0.2.0]**
   * **Current Branch : [master](https://github.com/CW-Khristos/scripts/tree/master) (Validated)**
 ***
 ## **Script Details :**
-  * **NCentral AMP - [AVHealth.amp](https://github.com/CW-Khristos/scripts/blob/master/AVProducts/AV%20Health.amp)**
-  * **PS1 Script - [AVHealth_0.1.9.ps1](https://github.com/CW-Khristos/scripts/blob/master/AVProducts/AVHealth_0.1.9.ps1)**
-  * **Command :** `powershell -file .\AVHealth_0.1.9.ps1 -i_PAV "[AV Vendor]"`
+  * **NCentral AMP - [AVHealth.amp](https://github.com/CW-Khristos/scripts/blob/master/NAble/AVProducts/AV%20Health.amp)**
+  * **PS1 Script - [AVHealth_0.2.0.ps1](https://github.com/CW-Khristos/scripts/blob/master/NAble/AVProducts/AVHealth_0.2.0.ps1)**
+  * **Command :** `powershell -file .\AVHealth_0.2.0.ps1 -i_PAV "[AV Vendor]"`
   * **Arguments :** 1, Required 1
     * **[i_PAV] - REQUIRED** - String, String to set AV Vendor to monitor for AV Health
 ***
@@ -23,10 +23,10 @@
     Script is intended to replace 'AV Status' VBS Monitoring Script
 ***
 ## .NOTES
-    Version        : 0.1.9 (22 February 2022)
+    Version        : 0.2.0 (04 March 2022)
     Creation Date  : 14 December 2021
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
-    File Name      : AVHealth_0.1.9.ps1 
+    File Name      : AVHealth_0.2.0.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Thanks         : Chris Reid (NAble) for the original 'AV Status' Script and sanity checks
                      Prejay Shah (Doherty Associates) for sanity checks and a second pair of eyes
@@ -85,7 +85,7 @@ After creating the desired Custom Services; create Service Templates for your Wi
  - **Note :** Workstations / Laptops - Thresholds for AV Path, Competitor AV, and Competitor Path should be set to "Off"
  - **Note :** Servers - Thresholds for AV Path, Competitor AV, and Competitor Path should be set to "Off"
    - Setting Definition Status Thresholds to "Off" is only a temporary measure until the script fully supports retrieving these values on Servers
- - **Note :** I have included Service Template exports available in this repo (configured for Sophos; but these can easily be modified per below settings)
+ - **Note :** I have included Service Template exports available in this repo (configured for Sophos; but these can easily be modified per above settings)
 
 ![image](https://user-images.githubusercontent.com/10928642/147269271-11f3a13e-f09d-48ad-bab8-192c673cafdb.png)
 ***
@@ -137,6 +137,10 @@ After creating the desired Custom Services; create Service Templates for your Wi
     - Began adding in checks for AV Components' Versions, Tamper Protection, Last Software Update Timestamp, Last Definition Update Timestamp, and Last Scan Timestamp
     - Added '$global:ncxml<vendor>' variables for assigning static 'fallback' sources for AV Product XMLs; XMLs should be uploaded to NC Script Repository and URLs updated (Begin Ln148)
       - The above 'Fallback' method is to allow for uploading AV Product XML files to NCentral Script Repository to attempt to support older OSes which cannot securely connect to GitHub (Requires using "Compatibility" mode for NC Network Security)
+ - 0.2.0
+    - Optimization and more bugfixes
+    - Forked script to implement 'AV Health' script into Datto RMM
+    - Planning to re-organize repo to account for implementation of scripts to multiple RMM platforms
 ***
 # .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
