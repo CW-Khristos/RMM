@@ -198,26 +198,31 @@
     param (
       $dest, $state
     )
+    $xmldiag = $null
     if (-not $global:blnPSXML) {                                                                    #AV PRODUCT STATES NOT LOADED INTO HASHTABLE
       #$dest = @{}
       $global:blnPSXML = $true
       #RETRIEVE AV PRODUCT STATE XML FROM GITHUB
+      $xmldiag += "Loading : AV Product State XML`r`n"
       write-host "Loading : AV Product State XML" -foregroundcolor yellow
       $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/dev/AVProducts/productstate.xml"
       try {
         $psXML = New-Object System.Xml.XmlDocument
         $psXML.Load($srcAVP)
       } catch {
+        $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
         write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
         try {
           $web = new-object system.net.webclient
           [xml]$psXML = $web.DownloadString($srcAVP)
         } catch {
+          $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
           write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
           try {
             start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
             [xml]$psXML = "C:\IT\Scripts\productstate.xml"
           } catch {
+            $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
             $global:blnPSXML = $false
           }
@@ -225,6 +230,8 @@
       }
       #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
       if (-not $global:blnPSXML) {
+        $xmldiag += "`r`nFailed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
+        $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
         write-host "Failed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
         write-host "Loading : AV Product State XML" -foregroundcolor yellow
         $srcAVP = $global:ncxmlPRODUCTSTATE
@@ -233,18 +240,21 @@
           $psXML.Load($srcAVP)
           $global:blnPSXML = $true
         } catch {
+          $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
           write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
           try {
             $web = new-object system.net.webclient
             [xml]$psXML = $web.DownloadString($srcAVP)
             $global:blnPSXML = $true
           } catch {
+            $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
             write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
             try {
               start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
               [xml]$psXML = "C:\IT\Scripts\productstate.xml"
               $global:blnPSXML = $true
             } catch {
+              $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
               write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
               $global:defstatus = "Unknown (WMI Check)`r`nUnable to download AV Product State XML"
               $global:rtstatus = "Unknown (WMI Check)`r`nUnable to download AV Product State XML"
@@ -288,6 +298,8 @@
         $global:rtstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
       }
     }
+    $global:diag += "$($xmldiag)"
+    $xmldiag = $null
   } ## Get-AVState
   
   function Get-AVXML {                                                                              #RETRIEVE AV VENDOR XML FROM GITHUB
@@ -295,24 +307,29 @@
       $src, $dest
     )
     #$dest = @{}
+    $xmldiag = $null
     $global:blnAVXML = $true
     #RETRIEVE AV VENDOR XML FROM GITHUB
+    $xmldiag+= "Loading : '$($src)' AV Product XML`r`n"
     write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
     $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/AVProducts/" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
     try {
       $avXML = New-Object System.Xml.XmlDocument
       $avXML.Load($srcAVP)
     } catch {
+      $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
       write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
       try {
         $web = new-object system.net.webclient
         [xml]$avXML = $web.DownloadString($srcAVP)
       } catch {
+        $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
         write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
         try {
           start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
           [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
         } catch {
+          $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
           write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
           $global:blnAVXML = $false
         }
@@ -320,6 +337,8 @@
     }
     #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
     if (-not $global:blnAVXML) {
+      $xmldiag += "`r`nFailed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
+      $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
       write-host "Failed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
       write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
       switch ($src) {
@@ -333,18 +352,21 @@
         $avXML.Load($srcAVP)
         $global:blnAVXML = $true
       } catch {
+        $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
         write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
         try {
           $web = new-object system.net.webclient
           [xml]$avXML = $web.DownloadString($srcAVP)
           $global:blnAVXML = $true
         } catch {
+          $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
           write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
           try {
             start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
             [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
             $global:blnAVXML = $true
           } catch {
+            $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
             $global:blnAVXML = $false
           }
@@ -398,6 +420,8 @@
       write-host $_.scriptstacktrace
       write-host $_
     }
+    $global:diag += "$($xmldiag)"
+    $xmldiag = $null
   } ## Get-AVXML
   
   function Pop-Components {                                                                         #POPULATE AV COMPONENT VERSIONS
