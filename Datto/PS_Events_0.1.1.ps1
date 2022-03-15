@@ -48,7 +48,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $global:hashSCMD = @{}
   $global:slkey = @("##########")
   $arrSyntax = @(" `'", " `"", "(*)", " (*)", " -", " `$")
-  $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest", "DownloadString", "start-bitstransfer")
+  $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest", "DownloadString", "start-bitstransfer", "downloadfile")
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -205,7 +205,7 @@ foreach ($cmd in $global:hashDCMD.Keys) {
 if ($global:dcmds -eq 0) {
   write-host "`r`n  - Powershell Events : Healthy - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs." -foregroundcolor green
 } elseif ($global:dcmds -gt 0) {
-  write-host "`r`n  - Powershell Events : Healthy - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs." -foregroundcolor red
+  write-host "`r`n  - Powershell Events : Warning - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs." -foregroundcolor red
 }
 #DATTO OUTPUT
 write-host "`r`nDATTO OUTPUT :" -foregroundcolor yellow
@@ -214,7 +214,7 @@ if ($global:dcmds -eq 0) {
   write-DRMMDiag $($global:diag)
   exit 0
 } elseif ($global:dcmds -gt 0) {
-  write-DRRMAlert "Powershell Events : Not Healthy - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs."
+  write-DRRMAlert "Powershell Events : Warning - $($global:dcmds) Dangerous commands executed by $($global:scripts) Scripts found in logs."
   write-DRMMDiag $($global:diag)
   exit 1
 }
