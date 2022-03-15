@@ -153,6 +153,7 @@ After creating the desired Custom Services; create Service Templates for your Wi
         Do other AVs report individual Threat information in the registry? Sophos does; but if others don't will we be able to use this metric?
     If no AV is detected through WMI or 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\'; attempt to validate each of the supported Vendor AV Products
     Need to create a 'Get-AVProducts' function and move looped 'detection' code into a function to call
+    Trend Micro continues to cause issues with properly evaluating if the core AV Client itself is up to date due to the number of 'duplicate' and inconsistent Registry Keys / Values that clutter their Registry Hive
 ***
 ## Supported AV Products :
  - Sophos Anti-Virus
