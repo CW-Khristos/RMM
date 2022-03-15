@@ -2,11 +2,11 @@
 # **AVHealth**
   * **[AVHealth Project](https://github.com/CW-Khristos/scripts/projects/26)**
   * **Current Validation : [Validated - v0.2.0]**
-  * **Current Branch : [master](https://github.com/CW-Khristos/scripts/tree/main/NAble/AVProducts) (Validated)**
+  * **Current Branch : [master](https://github.com/CW-Khristos/RMM/tree/main/NAble/AVProducts) (Validated)**
 ***
 ## **Script Details :**
-  * **NCentral AMP - [AVHealth.amp](https://github.com/CW-Khristos/scripts/blob/main/NAble/AVProducts/AV%20Health.amp)**
-  * **PS1 Script - [AVHealth_0.2.0.ps1](https://github.com/CW-Khristos/scripts/blob/main/NAble/AVProducts/AVHealth_0.2.0.ps1)**
+  * **NCentral AMP - [AVHealth.amp](https://github.com/CW-Khristos/RMM/blob/main/NAble/AVProducts/AV%20Health.amp)**
+  * **PS1 Script - [AVHealth_0.2.0.ps1](https://github.com/CW-Khristos/RMM/blob/main/NAble/AVProducts/AVHealth_0.2.0.ps1)**
   * **Command :** `powershell -file .\AVHealth_0.2.0.ps1 -i_PAV "[AV Vendor]"`
   * **Arguments :** 1, Required 1
     * **[i_PAV] - REQUIRED** - String, String to set AV Vendor to monitor for AV Health
