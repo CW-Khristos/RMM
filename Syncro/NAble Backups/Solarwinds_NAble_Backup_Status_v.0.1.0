@@ -19,9 +19,10 @@
 .CHANGELOG
     0.1.0 Modified original code from DattoRMM to function within SyncroRMM
     
-To Do:
+.TODO
 
 #>
+
 #REGION ----- DECLARATIONS ----
   Import-Module $env:SyncroModule
   $global:bitarch = $null
