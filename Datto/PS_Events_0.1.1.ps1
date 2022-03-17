@@ -153,10 +153,12 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
           $global:dcmds = $global:dcmds + 1
           $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
           $details = Split-StringOnLiteralString $($details[1]) "Path: "
-          if (($details[1] -ne $null) -and ($details[1] -ne "")) {
-            if ($global:hashDCMD.containskey("$($details[1]) - $($command)$($syntax)")) {
+          $details[0] = $details[0].trim()
+          $details[1] = $details[1].trim()
+          if ((($details[0] -ne $null) -and ($details[0] -ne "")) -or (($details[1] -ne $null) -and ($details[1] -ne ""))) {
+            if ($global:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
               continue
-            } elseif (-not $global:hashDCMD.containskey("$($details[1]) - $($command)$($syntax)")) {
+            } elseif (-not $global:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
               $hash = @{
                 TimeCreated      = $Event.TimeCreated
                 EventMessage     = $Event.message
@@ -165,21 +167,23 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
                 Path             = $($details[1])
               }
               $global:dscripts = $global:dscripts + 1
-              $global:hashDCMD.add("$($details[1]) - $($command)$($syntax)", $hash)
+              $global:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
               $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
-              $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
+              $global:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
               write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
-              write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor red
+              write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
             }
           }
       } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -like "*$($global:slkey)*")) { 
           $global:scmds = $global:scmds + 1
           $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
           $details = Split-StringOnLiteralString $($details[1]) "Path: "
-          if (($details[1] -ne $null) -and ($details[1] -ne "")) {
-            if ($global:hashSCMD.containskey("$($details[1]) - $($command)$($syntax)")) {
+          $details[0] = $details[0].trim()
+          $details[1] = $details[1].trim()
+          if ((($details[0] -ne $null) -and ($details[0] -ne "")) -or (($details[1] -ne $null) -and ($details[1] -ne ""))) {
+            if ($global:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
               continue
-            } elseif (-not $global:hashSCMD.containskey("$($details[1]) - $($command)$($syntax)")) {
+            } elseif (-not $global:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
               $hash = @{
                 TimeCreated      = $Event.TimeCreated
                 EventMessage     = $Event.message
@@ -188,11 +192,11 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
                 Path             = $($details[1])
               }
               $global:sscripts = $global:sscripts + 1
-              $global:hashSCMD.add("$($details[1]) - $($command)$($syntax)", $hash)
+              $global:hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
               $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block marked 'safe' :`r`n"
-              $global:diag += "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])`r`n"
+              $global:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
               write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block marked 'safe' :" -foregroundcolor yellow
-              write-host "    - ScriptBlock ID : $($details[0])    - Path : $($details[1])" -foregroundcolor yellow
+              write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor yellow
             }
           }
       }
