@@ -98,7 +98,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
 clear-host
 $version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentVersion
 if ($Version -lt "6.2") {
-  $global:diag += "Error - Unsupported OS. Only Server 2012R2 and up are supported."
+  $global:diag += "Informational - Unsupported OS. Only Server 2012R2 and up are supported."
 }
 
 try {
