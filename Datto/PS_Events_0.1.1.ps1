@@ -95,11 +95,10 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
 #------------
 #BEGIN SCRIPT
-#clear-host
+clear-host
 $version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentVersion
 if ($Version -lt "6.2") {
-  write-DRRMAlert "Error - Unsupported OS. Only Server 2012R2 and up are supported."
-  exit 1
+  $global:diag += "Error - Unsupported OS. Only Server 2012R2 and up are supported."
 }
 
 try {
@@ -150,34 +149,37 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
   foreach ($command in $DangerousCommands) {
     foreach ($syntax in $arrSyntax) {
       if (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -notlike "*$($global:slkey)*")) {
-          $global:dcmds = $global:dcmds + 1
           $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
           $details = Split-StringOnLiteralString $($details[1]) "Path: "
           $details[0] = $details[0].trim()
           $details[1] = $details[1].trim()
-          if ($global:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
-            continue
-          } elseif (-not $global:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
-            $hash = @{
-              TimeCreated      = $Event.TimeCreated
-              EventMessage     = $Event.message
-              TriggeredCommand = $command
-              ScriptBlockID    = $($details[0])
-              Path             = $($details[1])
+          if (($details[1] -ne $null) -and ($details[1] -ne "")) {
+            $global:dcmds = $global:dcmds + 1
+            if ($global:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+              continue
+            } elseif (-not $global:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+              $hash = @{
+                TimeCreated      = $Event.TimeCreated
+                EventMessage     = $Event.message
+                TriggeredCommand = $command
+                ScriptBlockID    = $($details[0])
+                Path             = $($details[1])
+              }
+              $global:dscripts = $global:dscripts + 1
+              $global:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
+              $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
+              $global:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
+              write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
+              write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
             }
-            $global:dscripts = $global:dscripts + 1
-            $global:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-            $global:diag += "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :`r`n"
-            $global:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
-            write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block :" -foregroundcolor red
-            write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
           }
       } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -like "*$($global:slkey)*")) { 
+        $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
+        $details = Split-StringOnLiteralString $($details[1]) "Path: "
+        $details[0] = $details[0].trim()
+        $details[1] = $details[1].trim()
+        if (($details[1] -ne $null) -and ($details[1] -ne "")) {
           $global:scmds = $global:scmds + 1
-          $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
-          $details = Split-StringOnLiteralString $($details[1]) "Path: "
-          $details[0] = $details[0].trim()
-          $details[1] = $details[1].trim()
           if ($global:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             continue
           } elseif (-not $global:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
@@ -195,6 +197,7 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
             write-host "`r`n  - $($event.TimeCreated)`r`n  - Dangerous Command : $($command) found in script block marked 'safe' :" -foregroundcolor yellow
             write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor yellow
           }
+        }
       }
     }
   }
