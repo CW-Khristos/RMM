@@ -67,9 +67,6 @@
           Copied and modified code to retrieve Vendor AV Product XML into 'Get-AVState' function to replace the hard-coded 'swtich' to interpret WMI AV Product States
             This implements similar XML method to interpret WMI AV Product States as with retrieving Vendor AV Product details
             This should facilitate easier community contributions to WMI AV Product States and with this change plan to leave the WMI checks in place
-    0.2.2 Optimization and more bugfixes; code cleanup and enhanced diagnostic output
-          Added call to 'Log-Activity' to record results to Syncro Device Activity Log for historical monitoring purposes
-          Added 'Pop-Warnings' function to populate '$global:avwarn' hashtable for tracking AV details which did not pass checks
 
 .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
