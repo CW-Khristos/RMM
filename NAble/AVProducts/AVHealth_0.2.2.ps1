@@ -58,7 +58,7 @@
           'AV Product Status', 'Real-Time Scanning', and 'Definition Status' will now report how script obtained information; either from WMI '(WMI Check)' or from Registry '(REG Check)'
           Workstations will still report the Real-Time Scanning and Definitions status via WMI; but plan to remove this output entirely
           Began adding in checks for AV Components' Versions, Tamper Protection, Last Software Update Timestamp, Last Definition Update Timestamp, and Last Scan Timestamp
-          Added '$global:ncxml<vendor>' variables for assigning static 'fallback' sources for AV Product XMLs; XMLs should be uploaded to NC Script Repository and URLs updated (Begin Ln159)
+          Added '$global:ncxml<vendor>' variables for assigning static 'fallback' sources for AV Product XMLs; XMLs should be uploaded to NC Script Repository and URLs updated (Begin Ln164)
             The above 'Fallback' method is to allow for uploading AV Product XML files to NCentral Script Repository to attempt to support older OSes which cannot securely connect to GitHub (Requires using "Compatibility" mode for NC Network Security)
     0.2.0 Optimization and more bugfixes
           Forked script to implement 'AV Health' script into Datto RMM
@@ -317,7 +317,7 @@
     #RETRIEVE AV VENDOR XML FROM GITHUB
     $xmldiag+= "Loading : '$($src)' AV Product XML`r`n"
     write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
-    $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/AVProducts/" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
+    $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/dev/AVProducts/" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
     try {
       $avXML = New-Object System.Xml.XmlDocument
       $avXML.Load($srcAVP)
@@ -981,8 +981,9 @@ if (-not ($global:blnAVXML)) {
                 $o_compver += "$($component.name) Version : $($component.value)`r`n"
               }
             } elseif ($i_PAV -match "Trend Micro") {                                                #CURSED TREND MICRO
-              $compverkey = get-childitem -path "HKLM:$($i_compverkey)" -name "$($i_compverval)" -erroraction silentlycontinue
+              $compverkey = get-itemproperty -path "HKLM:$($i_compverkey)" -name "$($i_compverval)" -erroraction silentlycontinue
               $compverkey = $compverkey.$i_compverval.split("/")
+              $o_compver += "VC Version : $($compverkey[1])`r`n"
             }
           } catch {
             if ($i_PAV -match "Sophos") {
@@ -990,7 +991,7 @@ if (-not ($global:blnAVXML)) {
             } elseif ($i_PAV -notmatch "Sophos") {
               write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($avs[$av].display)'" -foregroundcolor red
             }
-            $o_compver = "Components : N/A"
+            $o_compver = "Components : N/A`r`n"
             write-host $_.scriptstacktrace
             write-host $_
           }
@@ -1174,7 +1175,7 @@ if (-not ($global:blnAVXML)) {
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $global:o_AVStatus += "Tamper Protection : $($tamper)`r`n"
+          $global:o_AVStatus += "Tamper Protection : $($tamper)"
           #GET PRIMARY AV PRODUCT LAST SCAN DETAILS
           $lastage = 0
           if ($avs[$av].display -match "Windows Defender") {                                        #WINDOWS DEFENDER SCAN DATA
