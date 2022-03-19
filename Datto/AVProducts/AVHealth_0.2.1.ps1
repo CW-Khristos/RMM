@@ -261,8 +261,8 @@
               $global:blnPSXML = $true
             } catch {
               write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-              $global:defstatus = "Unknown (WMI Check)`r`nUnable to download AV Product State XML"
-              $global:rtstatus = "Unknown (WMI Check)`r`nUnable to download AV Product State XML"
+              $global:defstatus = "Definition Status : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
+              $global:rtstatus = "Real-Time Scanning : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
               $global:blnPSXML = $false
             }
           }
@@ -296,11 +296,11 @@
     } elseif ($global:blnPSXML) {                                                                   #AV PRODUCT STATES ALREADY LOADED IN HASHTABLE
       #SET '$global:defstatus' AND '$global:rtstatus' TO INTERPRET PASSED PRODUCT STATE FROM POPULATED HASHTABLE
       try {
-        $global:defstatus = $global:pskey["ps$($state)"].defstatus
-        $global:rtstatus = $global:pskey["ps$($state)"].rtstatus
+        $global:defstatus = "Definition Status : $($global:pskey["ps$($state)"].defstatus)"
+        $global:rtstatus = "Real-Time Scanning : $($global:pskey["ps$($state)"].rtstatus)"
       } catch {
-        $global:defstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
-        $global:rtstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
+        $global:defstatus = "Definition Status : Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
+        $global:rtstatus = "Real-Time Scanning : Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
       }
     }
   } ## Get-AVState
@@ -1124,28 +1124,28 @@ if (-not ($global:blnAVXML)) {
               $global:diag += "$($avs[$av].display) reports '$($rtkey.$i_rtval)' for 'Real-Time Scanning' (Expected : '0')`r`n"
               write-host "$($avs[$av].display) reports '$($rtkey.$i_rtval)' for 'Real-Time Scanning' (Expected : '0')" -foregroundcolor yellow
               if ($rtkey.$i_rtval -eq 0) {
-                $global:o_RTstate = "Enabled (REG Check)`r`n"
+                $global:o_RTstate = "Real-Time Scanning : Enabled (REG Check)`r`n"
               } elseif ($rtkey.$i_rtval -eq 1) {
                 $global:blnWARN = $true
-                $global:o_RTstate = "Disabled (REG Check)`r`n"
+                $global:o_RTstate = "Real-Time Scanning : Disabled (REG Check)`r`n"
                 Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_RTstate)`r`n"
               } else {
                 $global:blnWARN = $true
-                $global:o_RTstate = "Unknown (REG Check)`r`n"
+                $global:o_RTstate = "Real-Time Scanning : Unknown (REG Check)`r`n"
                 Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_RTstate)`r`n"
               }
             } elseif ($global:zRealTime -notcontains $avs[$av].display) {                           #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
               $global:diag += "$($avs[$av].display) reports '$($rtkey.$i_rtval)' for 'Real-Time Scanning' (Expected : '1')`r`n"
               write-host "$($avs[$av].display) reports '$($rtkey.$i_rtval)' for 'Real-Time Scanning' (Expected : '1')" -foregroundcolor yellow
               if ($rtkey.$i_rtval -eq 1) {
-                $global:o_RTstate = "Enabled (REG Check)`r`n"
+                $global:o_RTstate = "Real-Time Scanning : Enabled (REG Check)`r`n"
               } elseif ($rtkey.$i_rtval -eq 0) {
                 $global:blnWARN = $true
-                $global:o_RTstate = "Disabled (REG Check)`r`n"
+                $global:o_RTstate = "Real-Time Scanning : Disabled (REG Check)`r`n"
                 Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_RTstate)`r`n"
               } else {
                 $global:blnWARN = $true
-                $global:o_RTstate = "Unknown (REG Check)`r`n"
+                $global:o_RTstate = "Real-Time Scanning : Unknown (REG Check)`r`n"
                 Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_RTstate)`r`n"
               }
             }
@@ -1153,12 +1153,12 @@ if (-not ($global:blnAVXML)) {
             $global:blnWARN = $true
             $global:diag += "Could not validate Registry data : -path 'HKLM:$($i_rtkey)' -name '$($i_rtval)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
             write-host "Could not validate Registry data : -path 'HKLM:$($i_rtkey)' -name '$($i_rtval)'" -foregroundcolor red
-            $global:o_RTstate = "N/A (REG Check)`r`n"
+            $global:o_RTstate = "Real-Time Scanning : N/A (REG Check)`r`n"
             Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_RTstate)`r`n"
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $global:o_AVStatus += "Real-Time Status : $($global:o_RTstate)"
+          $global:o_AVStatus += "$($global:o_RTstate)"
           #GET PRIMARY AV PRODUCT TAMPER PROTECTION STATUS
           try {
             if ($avs[$av].display -notmatch "Sophos Intercept X") {
@@ -1181,41 +1181,41 @@ if (-not ($global:blnAVXML)) {
               $global:diag += "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '5')`r`n"
               write-host "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '5')" -foregroundcolor yellow
               if ($tval -eq 5) {
-                $tamper = "$($true) (REG Check)"
+                $tamper = "Tamper Protection : $($true) (REG Check)"
               } elseif ($tval -le 4) {
-                $tamper = "$($false) (REG Check)"
+                $tamper = "Tamper Protection : $($false) (REG Check)"
               } else {
-                $tamper = "Unknown (REG Check)"
+                $tamper = "Tamper Protection : Unknown (REG Check)"
               }
             } elseif ($global:zTamper -contains $avs[$av].display) {                                #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'TAMPER PROTECTION'
               $global:diag += "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '0')`r`n"
               write-host "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '0')" -foregroundcolor yellow
               if ($tval -eq 0) {
-                $tamper = "$($true) (REG Check)"
+                $tamper = "Tamper Protection : $($true) (REG Check)"
               } elseif ($tval -eq 1) {
-                $tamper = "$($false) (REG Check)"
+                $tamper = "Tamper Protection : $($false) (REG Check)"
               } else {
-                $tamper = "Unknown (REG Check)"
+                $tamper = "Tamper Protection : Unknown (REG Check)"
               }
             } elseif ($global:zTamper -notcontains $avs[$av].display) {                             #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'TAMPER PROTECTION'
               $global:diag += "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '1')`r`n"
               write-host "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '1')" -foregroundcolor yellow
               if ($tval -eq 1) {
-                $tamper = "$($true) (REG Check)"
+                $tamper = "Tamper Protection : $($true) (REG Check)"
               } elseif ($tval -eq 0) {
-                $tamper = "$($false) (REG Check)"
+                $tamper = "Tamper Protection : $($false) (REG Check)"
               } else {
-                $tamper = "Unknown (REG Check)"
+                $tamper = "Tamper Protection : Unknown (REG Check)"
               }
             }
           } catch {
             $global:diag += "Could not validate Registry data : -path 'HKLM:$($i_tamper)' -name '$($i_tamperval)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
             write-host "Could not validate Registry data : -path 'HKLM:$($i_tamper)' -name '$($i_tamperval)'" -foregroundcolor red
-            $tamper = "Unknown (REG Check)"
+            $tamper = "Tamper Protection : Unknown (REG Check)"
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $global:o_AVStatus += "Tamper Protection : $($tamper)`r`n"
+          $global:o_AVStatus += "$($tamper)`r`n"
           #GET PRIMARY AV PRODUCT LAST SCAN DETAILS
           $lastage = 0
           if ($avs[$av].display -match "Windows Defender") {                                        #WINDOWS DEFENDER SCAN DATA
@@ -1309,7 +1309,7 @@ if (-not ($global:blnAVXML)) {
             Get-AVState $global:pskey $avs[$av].stat
             $global:o_DefStatus = "$($global:defstatus)`r`n"
           } elseif (-not $global:blnWMI) {
-            $global:o_DefStatus = "N/A (WMI Check)`r`n"
+            $global:o_DefStatus = "Definition Status : N/A (WMI Check)`r`n"
           }
           try {
             $time1 = New-TimeSpan -days 1
@@ -1322,26 +1322,26 @@ if (-not ($global:blnAVXML)) {
               $update = Get-Date($time)
               $age = new-timespan -start $update -end (Get-Date)
               if ($age.compareto($time1) -le 0) {
-                $global:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                $global:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
               } elseif ($age.compareto($time1) -gt 0) {
-                $global:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                $global:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
               }
               $global:o_DefStatus += "Last Definition Update : $($update)`r`n"
             } elseif ($avs[$av].display -notmatch "Windows Defender") {                             #ALL OTHER AV DEFINITION UPDATE TIMESTAMP
               if ($avs[$av].display -match "Symantec") {                                            #SYMANTEC DEFINITION UPDATE TIMESTAMP
                 $age = new-timespan -start ($defkey.$i_defupdateval) -end (Get-Date)
                 if ($age.compareto($time1) -le 0) {
-                  $global:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                  $global:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
                 } elseif ($age.compareto($time1) -gt 0) {
-                  $global:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                  $global:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
                 }
                 $global:o_DefStatus += "Last Definition Update : $($defkey.$i_defupdateval)`r`n"
               } elseif ($avs[$av].display -notmatch "Symantec") {                                   #NON-SYMANTEC DEFINITION UPDATE TIMESTAMP
                 $age = new-timespan -start (Get-EpochDate($defkey.$i_defupdateval)("sec")) -end (Get-Date)
                 if ($age.compareto($time1) -le 0) {
-                  $global:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                  $global:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
                 } elseif ($age.compareto($time1) -gt 0) {
-                  $global:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                  $global:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
                 }
                 $global:o_DefStatus += "Last Definition Update : $(Get-EpochDate($($defkey.$i_defupdateval))("sec"))`r`n"
               }
@@ -1350,7 +1350,7 @@ if (-not ($global:blnAVXML)) {
           } catch {
             $global:diag += "Could not validate Registry data : -path 'HKLM:$($i_defupdate)' -name '$($i_defupdateval)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
             write-host "Could not validate Registry data : -path 'HKLM:$($i_defupdate)' -name '$($i_defupdateval)'" -foregroundcolor red
-            $global:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+            $global:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
             $global:o_DefStatus += "Last Definition Update : N/A`r`n"
             $global:o_DefStatus += "Definition Age (DD:HH:MM) : N/A"
             write-host $_.scriptstacktrace
@@ -1547,7 +1547,7 @@ $global:o_AVStatus += "`r`n`r`n$($o_compver)`r`n"
 #REAL-TIME SCANNING & DEFINITIONS
 $global:diag += "Definitions :`r`nStatus : $($global:o_DefStatus)`r`n"
 write-host "Definitions :" -foregroundcolor yellow
-write-host "Status : $($global:o_DefStatus)" -foregroundcolor $ccode
+write-host "$($global:o_DefStatus)" -foregroundcolor $ccode
 #THREATS
 $global:diag += "`r`nActive Detections :$($global:o_Infect)`r`n$($global:o_Threats)`r`n"
 write-host "`r`nActive Detections :" -foregroundcolor yellow
