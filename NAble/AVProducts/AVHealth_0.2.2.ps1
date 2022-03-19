@@ -412,6 +412,7 @@
                 infect = "$($itm.$global:bitarch.infect)"
                 infectval = "$($itm.$global:bitarch.infectval)"
                 threat = "$($itm.$global:bitarch.threat)"
+              }
             } elseif ($i_PAV -match "Trend Micro") {                                                #BUILD HASHTABLE FOR CURSED TREND MICRO
               $hash = @{
                 display = "$($itm.$global:bitarch.display)"
