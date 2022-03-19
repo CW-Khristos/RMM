@@ -446,6 +446,7 @@
                 infectval = "$($itm.$global:bitarch.infectval)"
                 threat = "$($itm.$global:bitarch.threat)"
               }
+            }
             if ($dest.containskey($itm.name)) {
               continue
             } elseif (-not $dest.containskey($itm.name)) {
