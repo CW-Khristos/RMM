@@ -11,10 +11,10 @@
     Script is intended to replace 'AV Status' VBS Monitoring Script
  
 .NOTES
-    Version        : 0.2.2 (18 March 2022)
+    Version        : 0.2.1 (12 March 2022)
     Creation Date  : 14 December 2021
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
-    File Name      : AVHealth_0.2.2.ps1 
+    File Name      : AVHealth_0.2.1.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Thanks         : Chris Reid (NAble) for the original 'AV Status' Script and sanity checks
                      Prejay Shah (Doherty Associates) for sanity checks and a second pair of eyes
@@ -67,19 +67,14 @@
           Copied and modified code to retrieve Vendor AV Product XML into 'Get-AVState' function to replace the hard-coded 'swtich' to interpret WMI AV Product States
             This implements similar XML method to interpret WMI AV Product States as with retrieving Vendor AV Product details
             This should facilitate easier community contributions to WMI AV Product States and with this change plan to leave the WMI checks in place
-    0.2.2 Implementing unique hashtable for 'Trend Micro' in 'Get-AVXML' function to test producing more varied data structures to account for differences between the various AV Products
-            Planning to allow for creation of Vendor-specific hashtables being built; this also will allow for a greater flexibility in accounting for instances when 'LCD' type logic simply will not suffice
-            Hoping this will not lead down the same rabbit hole as the 'AV Status' VBS script faced with a multitude of differing 'branches' of code which could end up in a 'dead-end'
-          Switched to target '\SOFTWARE\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\UpgradeVersion' for dtermining if 'Trend Micro' AV Product is up-to-date
-            This is mostly due to 'Trend Micro' 'ClientUpgradeStatus' values being deemed unreliable for accurately determining if the AV Product itself is up-to-date and thus the need to use an completely different method from other AV Products
 
 .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
-    Need to obtain version and calculate date timestamps for AV Product updates, Definition updates, and Last Scan - Partially Implemented
+    Need to obtain version and calculate date timestamps for AV Product updates, Definition updates, and Last Scan
     Need to obtain Infection Status and Detected Threats; bonus for timestamps for these metrics - Partially Complete (Sophos - full support; Trend Micro - 'Active Detections Present / Count')
         Do other AVs report individual Threat information in the registry? Sophos does; but if others don't will we be able to use this metric?
-        Still need to determine if timestamps are possible for detected threats - Believe this is likely a 'no-go'
-    Need to create a 'Get-AVProducts' function and move looped 'detection' code into a function to call - This just isn't priority atm since the code does appear to be detecting multiple AV Products without issue currently
+        Still need to determine if timestamps are possible for detected threats
+    Need to create a 'Get-AVProducts' function and move looped 'detection' code into a function to call
     Trend Micro continues to cause issues with properly evaluating if the core AV Client itself is up to date due to the number of 'duplicate' and inconsistent Registry Keys / Values that clutter their Registry Hive
     
 #> 
@@ -383,68 +378,35 @@
       if ($global:blnAVXML) {
         foreach ($itm in $avXML.NODE.ChildNodes) {
           if ($itm.name -notmatch "#comment") {                                                     #AVOID 'BUG' WITH A KEY AS '#comment'
-            if ($i_PAV -notmatch "Trend Micro") {                                                   #BUILD HASHTABLE FOR ALL AV PRODUCTS EXCEPT TREND MICRO
-              $hash = @{
-                display = "$($itm.$global:bitarch.display)"
-                displayval = "$($itm.$global:bitarch.displayval)"
-                path = "$($itm.$global:bitarch.path)"
-                pathval = "$($itm.$global:bitarch.pathval)"
-                ver = "$($itm.$global:bitarch.ver)"
-                verval = "$($itm.$global:bitarch.verval)"
-                compver = "$($itm.$global:bitarch.compver)"
-                stat = "$($itm.$global:bitarch.stat)"
-                statval = "$($itm.$global:bitarch.statval)"
-                update = "$($itm.$global:bitarch.update)"
-                updateval = "$($itm.$global:bitarch.updateval)"
-                source = "$($itm.$global:bitarch.source)"
-                sourceval = "$($itm.$global:bitarch.sourceval)"
-                defupdate = "$($itm.$global:bitarch.defupdate)"
-                defupdateval = "$($itm.$global:bitarch.defupdateval)"
-                tamper = "$($itm.$global:bitarch.tamper)"
-                tamperval = "$($itm.$global:bitarch.tamperval)"
-                rt = "$($itm.$global:bitarch.rt)"
-                rtval = "$($itm.$global:bitarch.rtval)"
-                scan = "$($itm.$global:bitarch.scan)"
-                scantype = "$($itm.$global:bitarch.scantype)"
-                scanval = "$($itm.$global:bitarch.scanval)"
-                alert = "$($itm.$global:bitarch.alert)"
-                alertval = "$($itm.$global:bitarch.alertval)"
-                infect = "$($itm.$global:bitarch.infect)"
-                infectval = "$($itm.$global:bitarch.infectval)"
-                threat = "$($itm.$global:bitarch.threat)"
-            } elseif ($i_PAV -match "Trend Micro") {                                                #BUILD HASHTABLE FOR CURSED TREND MICRO
-              $hash = @{
-                display = "$($itm.$global:bitarch.display)"
-                displayval = "$($itm.$global:bitarch.displayval)"
-                path = "$($itm.$global:bitarch.path)"
-                pathval = "$($itm.$global:bitarch.pathval)"
-                corever = "$($itm.$global:bitarch.corever)"
-                coreverval = "$($itm.$global:bitarch.coreverval)"
-                vcver = "$($itm.$global:bitarch.vcver)"
-                vcverval = "$($itm.$global:bitarch.vcverval)"
-                compver = "$($itm.$global:bitarch.compver)"
-                compverval = "$($itm.$global:bitarch.compverval)"
-                stat = "$($itm.$global:bitarch.stat)"
-                statval = "$($itm.$global:bitarch.statval)"
-                update = "$($itm.$global:bitarch.update)"
-                updateval = "$($itm.$global:bitarch.updateval)"
-                source = "$($itm.$global:bitarch.source)"
-                sourceval = "$($itm.$global:bitarch.sourceval)"
-                defupdate = "$($itm.$global:bitarch.defupdate)"
-                defupdateval = "$($itm.$global:bitarch.defupdateval)"
-                tamper = "$($itm.$global:bitarch.tamper)"
-                tamperval = "$($itm.$global:bitarch.tamperval)"
-                rt = "$($itm.$global:bitarch.rt)"
-                rtval = "$($itm.$global:bitarch.rtval)"
-                scan = "$($itm.$global:bitarch.scan)"
-                scantype = "$($itm.$global:bitarch.scantype)"
-                scanval = "$($itm.$global:bitarch.scanval)"
-                alert = "$($itm.$global:bitarch.alert)"
-                alertval = "$($itm.$global:bitarch.alertval)"
-                infect = "$($itm.$global:bitarch.infect)"
-                infectval = "$($itm.$global:bitarch.infectval)"
-                threat = "$($itm.$global:bitarch.threat)"
-              }
+            $hash = @{
+              display = "$($itm.$global:bitarch.display)"
+              displayval = "$($itm.$global:bitarch.displayval)"
+              path = "$($itm.$global:bitarch.path)"
+              pathval = "$($itm.$global:bitarch.pathval)"
+              ver = "$($itm.$global:bitarch.ver)"
+              verval = "$($itm.$global:bitarch.verval)"
+              compver = "$($itm.$global:bitarch.compver)"
+              stat = "$($itm.$global:bitarch.stat)"
+              statval = "$($itm.$global:bitarch.statval)"
+              update = "$($itm.$global:bitarch.update)"
+              updateval = "$($itm.$global:bitarch.updateval)"
+              source = "$($itm.$global:bitarch.source)"
+              sourceval = "$($itm.$global:bitarch.sourceval)"
+              defupdate = "$($itm.$global:bitarch.defupdate)"
+              defupdateval = "$($itm.$global:bitarch.defupdateval)"
+              tamper = "$($itm.$global:bitarch.tamper)"
+              tamperval = "$($itm.$global:bitarch.tamperval)"
+              rt = "$($itm.$global:bitarch.rt)"
+              rtval = "$($itm.$global:bitarch.rtval)"
+              scan = "$($itm.$global:bitarch.scan)"
+              scantype = "$($itm.$global:bitarch.scantype)"
+              scanval = "$($itm.$global:bitarch.scanval)"
+              alert = "$($itm.$global:bitarch.alert)"
+              alertval = "$($itm.$global:bitarch.alertval)"
+              infect = "$($itm.$global:bitarch.infect)"
+              infectval = "$($itm.$global:bitarch.infectval)"
+              threat = "$($itm.$global:bitarch.threat)"
+            }
             if ($dest.containskey($itm.name)) {
               continue
             } elseif (-not $dest.containskey($itm.name)) {
@@ -906,20 +868,10 @@ if (-not ($global:blnAVXML)) {
           $global:o_AVname = $avs[$av].display
           $global:o_AVpath = $avs[$av].path
           #AV PRODUCT VERSION
-          if ($i_PAV -notmatch "Trend Micro") {
-            $i_verkey = $global:pavkey[$node].ver
-            $i_verval = $global:pavkey[$node].verval
-          } elseif ($i_PAV -match "Trend Micro") {
-            $i_verkey = $global:pavkey[$node].corever
-            $i_verval = $global:pavkey[$node].coreverval
-            $i_vckey = $global:pavkey[$node].vcver
-            $i_vcval = $global:pavkey[$node].vcverval
-          }
+          $i_verkey = $global:pavkey[$node].ver
+          $i_verval = $global:pavkey[$node].verval
           #AV PRODUCT COMPONENTS VERSIONS
           $i_compverkey = $global:pavkey[$node].compver
-          if ($i_PAV -match "Trend Micro") {
-            $i_compverval = $global:pavkey[$node].compverval
-          }
           #AV PRODUCT STATE
           $i_statkey = $global:pavkey[$node].stat
           $i_statval = $global:pavkey[$node].statval
@@ -954,18 +906,18 @@ if (-not ($global:blnAVXML)) {
           try {
             write-host "Reading : -path 'HKLM:$($i_verkey)' -name '$($i_verval)'" -foregroundcolor yellow
             $global:o_AVVersion = get-itemproperty -path "HKLM:$($i_verkey)" -name "$($i_verval)" -erroraction stop
-            $global:o_AVVersion = "$($global:o_AVVersion.$i_verval)"
           } catch {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_verkey)' -name '$($i_verval)'" -foregroundcolor red
             $global:o_AVVersion = "."
             write-host $_.scriptstacktrace
             write-host $_
           }
+          $global:o_AVVersion = "$($global:o_AVVersion.$i_verval)"
           #GET PRIMARY AV PRODUCT COMPONENT VERSIONS
           $o_compver = "Core Version : $($global:o_AVVersion)`r`n"
           try {
             write-host "Reading : -path 'HKLM:$($i_compverkey)'" -foregroundcolor yellow
-            if ($i_PAV -match "Sophos") {                                                           #SOPHOS COMPONENT VERSIONS
+            if ($i_PAV -match "Sophos") {
               $compverkey = get-childitem -path "HKLM:$($i_compverkey)" -erroraction silentlycontinue
               foreach ($component in $compverkey) {
                 if (($component -ne $null) -and ($component -ne "")) {
@@ -978,16 +930,9 @@ if (-not ($global:blnAVXML)) {
               foreach ($component in $sort) {
                 $o_compver += "$($component.name) Version : $($component.value)`r`n"
               }
-            } elseif ($i_PAV -match "Trend Micro") {                                                #CURSED TREND MICRO
-              $compverkey = get-childitem -path "HKLM:$($i_compverkey)" -name "$($i_compverval)" -erroraction silentlycontinue
-              $compverkey = $compverkey.$i_compverval.split("/")
             }
           } catch {
-            if ($i_PAV -match "Sophos") {
-              write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($component.PSChildName)'" -foregroundcolor red
-            } elseif ($i_PAV -notmatch "Sophos") {
-              write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($avs[$av].display)'" -foregroundcolor red
-            }
+            write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($component.PSChildName)'" -foregroundcolor red
             $o_compver = "Components : N/A"
             write-host $_.scriptstacktrace
             write-host $_
@@ -1004,64 +949,30 @@ if (-not ($global:blnAVXML)) {
             write-host $_
           }
           #GET PRIMARY AV PRODUCT STATUS VIA REGISTRY
-          #TREND MICRO'S 'ClientUpgradeStatus' VALUES FOUND UNDER THE FOLLOWING REG KEYS HAVE BEEN CONFIRMED TO BE ENTIRELY UNRELIABLE THROUGH MULTIPLE TESTS ACROSS MULTIPLE DEVICES
-          # 'HKLM\SOFTWARE\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\'
-          # 'HKLM\SOFTWARE\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\'
-          #AND UNSURPRISINGLY TREND MICRO SUPPORT WAS UNABLE / UNWILLING TO PROVIDE ADDITIONAL GUIDANCE ABOUT KEYS CURRENTLY IN USE AND THE POSSIBLE VALUES THAT COULD BE MONITORED
-          #FURTHER TESTING IS WARRANTED TO MONITOR KEY CHANGES WHEN THEY OCCUR; THE ADDITIONAL KEY VALUES FOUND AT THE FOLLOWING LOCATIONS COULD PROVIDE  MORE DETAILS
-          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\IsClientUpgradeFailed=dword:00000000
-          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\ClientUpgradeStatus=dword:00000000
-          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\ClientUpgradeStatus=dword:00000000
-          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\UpdateAgent=dword:00000000
-          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\UpdateOngoing=dword:00000000
-          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\Updating=dword:00000000
-          if ($i_PAV -notmatch "Trend Micro") {                                                     #HANDLE ALL AV PRODUCTS EXCEPT TREND MICRO
-            try {
-              write-host "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor yellow
-              $statkey = get-itemproperty -path "HKLM:$($i_statkey)" -name "$($i_statval)" -erroraction stop
-              #INTERPRET 'AVSTATUS' BASED ON ANY AV PRODUCT VALUE REPRESENTATION
-              if ($global:zUpgrade -contains $avs[$av].display) {                                   #AV PRODUCTS TREATING '0' AS 'UPTODATE'
-                write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '0')" -foregroundcolor yellow
-                if ($statkey.$i_statval -eq "0") {
-                  $global:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
-                } else {
-                  $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
-                }
-              } elseif ($global:zUpgrade -notcontains $avs[$av].display) {                          #AV PRODUCTS TREATING '1' AS 'UPTODATE'
-                write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '1')" -foregroundcolor yellow
-                if ($statkey.$i_statval -eq "1") {
-                  $global:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
-                } else {
-                  $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
-                }
+          try {
+            write-host "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor yellow
+            $statkey = get-itemproperty -path "HKLM:$($i_statkey)" -name "$($i_statval)" -erroraction stop
+            #INTERPRET 'AVSTATUS' BASED ON ANY AV PRODUCT VALUE REPRESENTATION
+            if ($global:zUpgrade -contains $avs[$av].display) {                                     #AV PRODUCTS TREATING '0' AS 'UPTODATE'
+              write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '0')" -foregroundcolor yellow
+              if ($statkey.$i_statval -eq "0") {
+                $global:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
+              } else {
+                $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
               }
-            } catch {
-              write-host "Could not validate Registry data : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor red
-              $global:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
-              write-host $_.scriptstacktrace
-              write-host $_
-            }
-          } elseif ($i_PAV -match "Trend Micro") {                                                  #HANDLE TREND MICRO AV PRODUCT
-            try {
-              write-host "'Trend Micro' Detected : Reading : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor yellow
-              $vckey = get-itemproperty -path "HKLM:$($i_vckey)" -name "$($i_vcval)" -erroraction stop
-              write-host "$($avs[$av].display) reports '$($global:o_AVVersion)' for 'Up-To-Date' (Expected : '$($compverkey[0])')" -foregroundcolor yellow
-              write-host "$($avs[$av].display) reports '$($vckey.$i_vcval)' for 'Up-To-Date' (Expected : '$($compverkey[1])')" -foregroundcolor yellow
-              if (([version]$($global:o_AVVersion) -ge [version]$($compverkey[0])) -and 
-                ([version]$($vckey.$i_vcval) -ge [version]$($compverkey[1]))) {
-                  $global:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
-              } elseif (([version]$($global:o_AVVersion) -lt [version]$($compverkey[0])) -or 
-                ([version]$($vckey.$i_vcval) -lt [version]$($compverkey[1]))) {
-                  $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
+            } elseif ($global:zUpgrade -notcontains $avs[$av].display) {                            #AV PRODUCTS TREATING '1' AS 'UPTODATE'
+              write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '1')" -foregroundcolor yellow
+              if ($statkey.$i_statval -eq "1") {
+                $global:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
+              } else {
+                $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
               }
-              $global:o_AVStatus += "Core Version : $($global:o_AVVersion) - Expected : '$($compverkey[0])'`r`n"
-              $global:o_AVStatus += "VC Version : $($global:o_AVVersion) - Expected : '$($compverkey[1])'`r`n"
-            } catch {
-              write-host "Could not validate Registry data : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor red
-              $global:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
-              write-host $_.scriptstacktrace
-              write-host $_
             }
+          } catch {
+            write-host "Could not validate Registry data : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor red
+            $global:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
+            write-host $_.scriptstacktrace
+            write-host $_
           }
           #GET PRIMARY AV PRODUCT LAST UPDATE TIMESTAMP VIA REGISTRY
           try {
