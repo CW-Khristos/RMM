@@ -1124,7 +1124,7 @@ if (-not ($global:blnAVXML)) {
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $global:o_AVStatus += "Real-Time Status : $($global:o_RTstate)"
+          $global:o_AVStatus += "Real-Time Scanning : $($global:o_RTstate)"
           #GET PRIMARY AV PRODUCT TAMPER PROTECTION STATUS
           try {
             if ($avs[$av].display -notmatch "Sophos Intercept X") {
@@ -1275,26 +1275,26 @@ if (-not ($global:blnAVXML)) {
               $update = Get-Date($time)
               $age = new-timespan -start $update -end (Get-Date)
               if ($age.compareto($time1) -le 0) {
-                $global:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                $global:o_DefStatus += "Up to date (REG Check)`r`n"
               } elseif ($age.compareto($time1) -gt 0) {
-                $global:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                $global:o_DefStatus += "Out of date (REG Check)`r`n"
               }
               $global:o_DefStatus += "Last Definition Update : $($update)`r`n"
             } elseif ($avs[$av].display -notmatch "Windows Defender") {                             #ALL OTHER AV DEFINITION UPDATE TIMESTAMP
               if ($avs[$av].display -match "Symantec") {                                            #SYMANTEC DEFINITION UPDATE TIMESTAMP
                 $age = new-timespan -start ($defkey.$i_defupdateval) -end (Get-Date)
                 if ($age.compareto($time1) -le 0) {
-                  $global:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                  $global:o_DefStatus += "Up to date (REG Check)`r`n"
                 } elseif ($age.compareto($time1) -gt 0) {
-                  $global:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                  $global:o_DefStatus += "Out of date (REG Check)`r`n"
                 }
                 $global:o_DefStatus += "Last Definition Update : $($defkey.$i_defupdateval)`r`n"
               } elseif ($avs[$av].display -notmatch "Symantec") {                                   #NON-SYMANTEC DEFINITION UPDATE TIMESTAMP
                 $age = new-timespan -start (Get-EpochDate($defkey.$i_defupdateval)("sec")) -end (Get-Date)
                 if ($age.compareto($time1) -le 0) {
-                  $global:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                  $global:o_DefStatus += "Up to date (REG Check)`r`n"
                 } elseif ($age.compareto($time1) -gt 0) {
-                  $global:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                  $global:o_DefStatus += "Out of date (REG Check)`r`n"
                 }
                 $global:o_DefStatus += "Last Definition Update : $(Get-EpochDate($($defkey.$i_defupdateval))("sec"))`r`n"
               }
@@ -1302,12 +1302,13 @@ if (-not ($global:blnAVXML)) {
             $global:o_DefStatus += "Definition Age (DD:HH:MM) : $($age.tostring("dd\:hh\:mm"))"
           } catch {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_defupdate)' -name '$($i_defupdateval)'" -foregroundcolor red
-            $global:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+            $global:o_DefStatus += "Out of date (REG Check)`r`n"
             $global:o_DefStatus += "Last Definition Update : N/A`r`n"
             $global:o_DefStatus += "Definition Age (DD:HH:MM) : N/A"
             write-host $_.scriptstacktrace
             write-host $_
           }
+          $global:o_DefStatus = "Definition Status : $($global:o_DefStatus)"
           #GET PRIMARY AV PRODUCT DETECTED ALERTS VIA REGISTRY
           if ($global:zNoAlert -notcontains $i_PAV) {
             if ($i_PAV -match "Sophos") {
