@@ -49,7 +49,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $global:diag = $null
   $global:hashDCMD = @{}
   $global:hashSCMD = @{}
-  $global:slkey = @("##########")
+  $global:slkey = @(##########")
   $arrSyntax = @(" `'", " `"", "(*)", " (*)", " -", " `$")
   $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest", "DownloadString", "start-bitstransfer", "downloadfile")
 #ENDREGION ----- DECLARATIONS ----
@@ -179,9 +179,9 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
               }
               $global:dscripts = $global:dscripts + 1
               $global:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-              $global:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : `$($command)$($syntax)` found in script block :`r`n"
+              $global:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :`r`n"
               $global:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
-              write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : `$($command)$($syntax)` found in script block :" -foregroundcolor red
+              write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :" -foregroundcolor red
               write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
             }
           }
@@ -204,9 +204,9 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
             }
             $global:sscripts = $global:sscripts + 1
             $global:hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-            $global:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : `$($command)$($syntax)` found in script block marked 'safe' :`r`n"
+            $global:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :`r`n"
             $global:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
-            write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : `$($command)$($syntax)` found in script block marked 'safe' :" -foregroundcolor yellow
+            write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :" -foregroundcolor yellow
             write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor yellow
           }
         }
@@ -226,10 +226,10 @@ if ($global:dcmds -eq 0) {
   write-host "`r`nThe following Script Blocks contain dangerous commands :" -foregroundcolor yellow
   $global:diag += "`r`nThe following Script Blocks contain dangerous commands :"
   foreach ($cmd in $global:hashDCMD.keys) {
-    $global:diag += "`r`n  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : `$($global:hashDCMD[$cmd].TriggeredCommand)` found in script block :`r`n"
+    $global:diag += "`r`n  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($global:hashDCMD[$cmd].TriggeredCommand)`` found in script block :`r`n"
     $global:diag += "    - ScriptBlock ID : $($global:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($global:hashDCMD[$cmd].Path)`r`n"
     $global:diag += "$($global:hashDCMD[$cmd].EventMessage)`r`n"
-    write-host "  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : `$($global:hashDCMD[$cmd].TriggeredCommand)` found in script block :" -foregroundcolor red
+    write-host "  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($global:hashDCMD[$cmd].TriggeredCommand)`` found in script block :" -foregroundcolor red
     write-host "    - ScriptBlock ID : $($global:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($global:hashDCMD[$cmd].Path)" -foregroundcolor red
     write-host "$($global:hashDCMD[$cmd].EventMessage)`r`n" -foregroundcolor red
   }
