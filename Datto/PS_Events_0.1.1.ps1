@@ -139,6 +139,17 @@ try {
   }
 }
 
+$log = Get-WinEvent -ListLog "Microsoft-Windows-PowerShell/Operational"
+$log.MaximumSizeInBytes = 1gb
+try{
+  $log.SaveChanges()
+  Get-WinEvent -ListLog "Microsoft-Windows-PowerShell/Operational" | Format-List -Property *
+} catch [System.UnauthorizedAccessException] {
+  $global:diag += "You do not have permission to configure this log!`r`n"
+  $global:diag += "Try running this script with administrator privileges.`r`n"
+  $global:diag += "$($_.Exception.Message)`r`n"
+  Write-Error $global:diag
+}
 $logInfo = @{ 
   ProviderName = "Microsoft-Windows-PowerShell"
   StartTime    = (get-date).AddHours(-2)
