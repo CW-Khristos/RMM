@@ -1,4 +1,5 @@
 <#
+#DO NOT COMMIT TO GITHUB - HAS 'SECURE' STRING SIGNING SCRIPT AS 'SAFE'#
 .SYNOPSIS 
     Assists you in finding machines that have ran dangerous commands such as invoke-expression, often used for attacks called 'Living off-the-Land'
     Related blog: https://www.cyberdrain.com/monitoring-with-powershell-preventing-powershell-based-attacks-lolbas/
@@ -7,10 +8,10 @@
     Assists you in finding machines that have ran dangerous commands such as invoke-expression, often used for attacks called 'Living off-the-Land'
  
 .NOTES
-    Version        : 0.1.1 (11 March 2022)
+    Version        : 0.1.2 (21 March 2022)
     Creation Date  : 14 May 2020
     Purpose/Change : Assists you in finding machines that have ran dangerous commands
-    File Name      : PS_Events_0.1.1.ps1
+    File Name      : PS_Events_0.1.2.ps1
     Author         : Kelvin Tegelaar - https://www.cyberdrain.com
     Modifications  : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Supported OS   : Server 2012R2 and higher
@@ -28,6 +29,7 @@
           Attempting some basic syntax matching with the items in the '$DangerousCommands' array to prevent unnecessary "false" Alerts
           As of this version I have reviewed over 15k lines of output and verified the "detected" code using commands in '$DangerousCommands' was 100% accurate! (ALL of it ws my own code XD)
           Script will track the number of instances of '$DangerousCommands' were detected and how many Script Blocks were detected
+    0.1.2 Modtly just output formatting
     
 To Do:
     Script still had undesired behavior of "detecting" dangerous commands being used; even when they are not
@@ -222,6 +224,16 @@ if ($global:dcmds -eq 0) {
   exit 0
 } elseif ($global:dcmds -gt 0) {
   write-host "`r`n  - Powershell Events : Warning - $($global:dcmds) Dangerous commands executed by $($global:dscripts) Scripts found in logs." -foregroundcolor red
+  write-host "`r`nThe following Script Blocks contain dangerous commands :" -foregroundcolor yellow
+  $global:diag += "`r`nThe following Script Blocks contain dangerous commands :"
+  foreach ($cmd in $global:hashDCMD) {
+    $global:diag += "`r`n  - $($cmd.TimeCreated)`r`n  - Dangerous Command : $($cmd.TriggeredCommand) found in script block :`r`n"
+    $global:diag += "    - ScriptBlock ID : $($cmd.ScriptBlockID)`r`n    - Path : $($cmd.Path)`r`n"
+    $global:diag += "$($cmd.EventMessage)`r`n"
+    write-host "  - $($cmd.TimeCreated)`r`n  - Dangerous Command : $($cmd.TriggeredCommand) found in script block :" -foregroundcolor red
+    write-host "    - ScriptBlock ID : $($cmd.ScriptBlockID)`r`n    - Path : $($cmd.Path)" -foregroundcolor red
+    write-host "$($cmd.EventMessage)`r`n" -foregroundcolor red
+  }
   write-DRRMAlert "Powershell Events : Warning - $($global:dcmds) Dangerous commands executed by $($global:dscripts) Scripts found in logs."
   write-DRMMDiag $($global:diag)
   exit 1
