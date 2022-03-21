@@ -226,13 +226,13 @@ if ($global:dcmds -eq 0) {
   write-host "`r`n  - Powershell Events : Warning - $($global:dcmds) Dangerous commands executed by $($global:dscripts) Scripts found in logs." -foregroundcolor red
   write-host "`r`nThe following Script Blocks contain dangerous commands :" -foregroundcolor yellow
   $global:diag += "`r`nThe following Script Blocks contain dangerous commands :"
-  foreach ($cmd in $global:hashDCMD) {
-    $global:diag += "`r`n  - $($cmd.TimeCreated)`r`n  - Dangerous Command : $($cmd.TriggeredCommand) found in script block :`r`n"
-    $global:diag += "    - ScriptBlock ID : $($cmd.ScriptBlockID)`r`n    - Path : $($cmd.Path)`r`n"
+  foreach ($cmd in $global:hashDCMD.keys) {
+    $global:diag += "`r`n  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($global:hashDCMD[$cmd].TriggeredCommand) found in script block :`r`n"
+    $global:diag += "    - ScriptBlock ID : $($global:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($global:hashDCMD[$cmd].Path)`r`n"
     $global:diag += "$($cmd.EventMessage)`r`n"
-    write-host "  - $($cmd.TimeCreated)`r`n  - Dangerous Command : $($cmd.TriggeredCommand) found in script block :" -foregroundcolor red
+    write-host "  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($global:hashDCMD[$cmd].TriggeredCommand) found in script block :" -foregroundcolor red
     write-host "    - ScriptBlock ID : $($cmd.ScriptBlockID)`r`n    - Path : $($cmd.Path)" -foregroundcolor red
-    write-host "$($cmd.EventMessage)`r`n" -foregroundcolor red
+    write-host "$($global:hashDCMD[$cmd].EventMessage)`r`n" -foregroundcolor red
   }
   write-DRRMAlert "Powershell Events : Warning - $($global:dcmds) Dangerous commands executed by $($global:dscripts) Scripts found in logs."
   write-DRMMDiag $($global:diag)
