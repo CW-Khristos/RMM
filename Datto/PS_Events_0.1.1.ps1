@@ -49,8 +49,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $global:diag = $null
   $global:hashDCMD = @{}
   $global:hashSCMD = @{}
-  $global:slkey = @(##########")
-  $arrSyntax = @(" `'", " `"", "(*)", " (*)", " -", " `$")
+  $global:slkey = @("##########")
+  $arrSyntax = @(" `'", " `"", "(*)", " (*)", " -", " `$", "(`$)", " (`$)")
   $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest", "DownloadString", "start-bitstransfer", "downloadfile")
 #ENDREGION ----- DECLARATIONS ----
 
@@ -160,7 +160,7 @@ $PowerShellEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction Silently
 $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
   foreach ($command in $DangerousCommands) {
     foreach ($syntax in $arrSyntax) {
-      if (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -notlike "*$($global:slkey)*")) {
+      if (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -notmatch ($global:slkey -join '|'))) { 
           $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
           $details = Split-StringOnLiteralString $($details[1]) "Path: "
           $details[0] = $details[0].trim()
@@ -185,7 +185,7 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
               write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
             }
           }
-      } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -like "*$($global:slkey)*")) { 
+      } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -match ($global:slkey -join '|'))) { 
         $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
         $details = Split-StringOnLiteralString $($details[1]) "Path: "
         $details[0] = $details[0].trim()
