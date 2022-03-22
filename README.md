@@ -1,3 +1,10 @@
+# Update : 20220304
+As it happens we are in the process of migrating RMM systems from NAble to Datto
+
+I am currently re-organizing my GitHub repos to better organize scripts according to their functions / implementation
+ - If you are looking for the latest versions of RMM related scripts; please check this repo : https://github.com/CW-Khristos/RMM
+ - Previous / Current copies of all scripts still exist under the "scripts" repo to avoid breaking links used in some scripts
+
 # RMM
 RMM Scripts
 
