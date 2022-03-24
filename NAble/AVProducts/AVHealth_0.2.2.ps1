@@ -72,6 +72,7 @@
             Hoping this will not lead down the same rabbit hole as the 'AV Status' VBS script faced with a multitude of differing 'branches' of code which could end up in a 'dead-end'
           Switched to target '\SOFTWARE\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\UpgradeVersion' for dtermining if 'Trend Micro' AV Product is up-to-date
             This is mostly due to 'Trend Micro' 'ClientUpgradeStatus' values being deemed unreliable for accurately determining if the AV Product itself is up-to-date and thus the need to use an completely different method from other AV Products
+          Added retrieval for 'Trend Micro' 'VCVersion' and proper comparison to determine if both Core AV and VC components are up-to-date with their respective expected versions
 
 .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
@@ -1058,7 +1059,7 @@ if (-not ($global:blnAVXML)) {
                   $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
               }
               $global:o_AVStatus += "Core Version : $($global:o_AVVersion) - Expected : '$($compverkey[0])'`r`n"
-              $global:o_AVStatus += "VC Version : $($global:o_AVVersion) - Expected : '$($compverkey[1])'`r`n"
+              $global:o_AVStatus += "VC Version : $($vckey.$i_vcval) - Expected : '$($compverkey[1])'`r`n"
             } catch {
               write-host "Could not validate Registry data : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor red
               $global:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
