@@ -1257,7 +1257,7 @@ if (-not ($global:blnAVXML)) {
               $scans += "Recently Scanned : $($false) (REG Check)"
             }
           }
-          $global:o_AVStatus += $scans
+          $global:o_AVStatus += "`r`n$($scans)"
           #GET PRIMARY AV PRODUCT DEFINITIONS / SIGNATURES / PATTERN
           if ($global:blnWMI) {
             #will still return if it is unknown, etc. if it is unknown look at the code it returns, then look up the status and add it above
