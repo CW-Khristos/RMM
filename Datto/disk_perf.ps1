@@ -121,71 +121,76 @@ $sw = [Diagnostics.Stopwatch]::StartNew()
 
 $ldisks = Get-CimInstance 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' | where Name -match ":"
 
+$idisks = 0
 foreach ($disk in $ldisks) {
-  write-host "`r`nPOLLING DISK : $($disk.name)`r`n"
+  $idisks += 1
+  write-host "`r`nPOLLING DISK : $($disk.name)`r`n" -foregroundcolor yellow
   $dque = $disk.CurrentDiskQueueLength
-  write-host ("Current Disk Queue : $($dque)").toupper()
+  $diskdiag += ("Current Disk Queue : $($dque)`r`n").toupper()
   $daque = $disk.AvgDiskQueueLength
-  write-host ("Avg. Disk Queue : $($daque)").toupper()
+  $diskdiag += ("Avg. Disk Queue : $($daque)`r`n").toupper()
   $darque = $disk.AvgDiskReadQueueLength
-  write-host ("Avg. Disk Read Queue : $($darque)").toupper()
+  $diskdiag += ("Avg. Disk Read Queue : $($darque)`r`n").toupper()
   $dawque = $disk.AvgDiskWriteQueueLength
-  write-host ("Avg. Disk Write Queue : $($dawque)").toupper()
+  $diskdiag += ("Avg. Disk Write Queue : $($dawque)`r`n").toupper()
 
   $dtime = $disk.PercentDiskTime
-  write-host ("Disk Time (%) : $($dtime)%").toupper()
+  $diskdiag += ("Disk Time (%) : $($dtime) %`r`n").toupper()
   $drtime = $disk.PercentDiskReadTime
-  write-host ("Disk Read Time (%) : $($dque ) %").toupper()
+  $diskdiag += ("Disk Read Time (%) : $($dque ) %`r`n").toupper()
   $dwtime = $disk.PercentDiskWriteTime
-  write-host ("Disk Write Time (%) : $($dwtime) %").toupper()
+  $diskdiag += ("Disk Write Time (%) : $($dwtime) %`r`n").toupper()
   $didle = $disk.PercentIdleTime
-  write-host ("Idle Time (%) : $($didle) %").toupper()
+  $diskdiag += ("Idle Time (%) : $($didle) %`r`n").toupper()
   $dio = $disk.SplitIOPerSec
-  write-host ("Split IO/Sec : $($dio)").toupper()
+  $diskdiag += ("Split IO/Sec : $($dio)`r`n").toupper()
 
   $drsec = $disk.DiskReadsPersec
-  write-host ("Disk Reads/sec : $($drsec)").toupper()
+  $diskdiag += ("Disk Reads/sec : $($drsec)`r`n").toupper()
   $dasr = $disk.AvgDisksecPerRead
-  write-host ("Avg. Disk sec/Read : $($dasr)").toupper()
+  $diskdiag += ("Avg. Disk sec/Read : $($dasr)`r`n").toupper()
   $dabr = ($disk.AvgDiskBytesPerRead / 1024)
-  write-host ("Avg. Disk Bytes/Read : $($dabr)").toupper()
+  $diskdiag += ("Avg. Disk Bytes/Read : $($dabr)`r`n").toupper()
 
   $dwsec = $disk.DiskWritesPersec
-  write-host ("Disk Writes/sec : $($dwsec)").toupper()
+  $diskdiag += ("Disk Writes/sec : $($dwsec)`r`n").toupper()
   $dasw = $disk.AvgDisksecPerWrite
-  write-host ("Avg. Disk sec/Write : $($dasw)").toupper()
+  $diskdiag += ("Avg. Disk sec/Write : $($dasw)`r`n").toupper()
   $dabw = ($disk.AvgDiskBytesPerWrite / 1024)
-  write-host ("Avg. Disk Bytes/Write : $($dabw)").toupper()
+  $diskdiag += ("Avg. Disk Bytes/Write : $($dabw)`r`n").toupper()
 
   $dbsec = ($disk.DiskBytesPersec / 1024)
-  write-host ("Disk Bytes/sec : $($dbsec)").toupper()
+  $diskdiag += ("Disk Bytes/sec : $($dbsec)`r`n").toupper()
   $drbs = ($disk.DiskReadBytesPersec / 1024)
-  write-host ("Disk Read Bytes/sec : $($drbs)").toupper()
+  $diskdiag += ("Disk Read Bytes/sec : $($drbs)`r`n").toupper()
   $dwbs = ($disk.DiskWriteBytesPersec / 1024)
-  write-host ("Disk Write Bytes/sec: $($dwbs)").toupper()
+  $diskdiag += ("Disk Write Bytes/sec: $($dwbs)`r`n").toupper()
 
   $dtsec = $disk.DiskTransfersPersec
-  write-host ("Disk Transfers/sec : $($dtsec)").toupper()
+  $diskdiag += ("Disk Transfers/sec : $($dtsec)`r`n").toupper()
   $dast = $disk.AvgDisksecPerTransfer
-  write-host ("Avg. Disk sec/Transfer : $($dast)").toupper()
+  $diskdiag += ("Avg. Disk sec/Transfer : $($dast)`r`n").toupper()
   $dabt = ($disk.AvgDiskBytesPerTransfer / 1024)
-  write-host ("Avg. Disk Bytes/Transfer : $($dabt)").toupper()
+  $diskdiag += ("Avg. Disk Bytes/Transfer : $($dabt)`r`n").toupper()
   #CHECK DRIVE PERFORMANCE VALUES
   chkPERF $disk
+  write-host $diskdiag
   write-host " - DRIVE REPORT : $($disk.name)" -ForegroundColor yellow
-  $global:diag += " - DRIVE REPORT $($disk.name):`r`n"
+  $diskdiag += " - DRIVE REPORT $($disk.name):`r`n"
   if ($global:arrWARN.length -eq 0) {
     write-host "  - All Drive Performance values passed checks`r`n" -ForegroundColor green
-    $global:diag += "  - All Drive Performance values passed checks`r`n"
+    $diskdiag += "  - All Drive Performance values passed checks`r`n"
   } elseif ($global:arrWARN.length -gt 0) {
     write-host "  - The following Drive Performance values did not pass :`r`n" -ForegroundColor red
-    $global:diag += "  - The following Drive Performance values did not pass :`r`n"
+    $diskdiag += "  - The following Drive Performance values did not pass :`r`n"
     foreach ($warn in $global:arrWARN) {
       write-host "$($warn)" -ForegroundColor red
-      $global:diag += "$($warn)"
+      $diskdiag += "$($warn)"
     }
     $global:arrWARN.clear()
   }
+  $global:diag += "`r`nPOLLING DISK : $($disk.name)`r`n$($diskdiag)"
+  $diskdiag = $null
 }
 #Stop script execution time calculation
 $sw.Stop()
@@ -196,26 +201,25 @@ $Seconds = $sw.Elapsed.Seconds
 $Milliseconds = $sw.Elapsed.Milliseconds
 $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
-$average = (($total / 1) / 1000)
+$average = (($total / $idisks) / 1000)
 $mill = [string]$average
 $mill = $mill.split(".")[1]
 $mill = $mill.SubString(0,[math]::min(3,$mill.length))
 $global:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
 $global:diag += "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call`r`n"
-write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
-write-host "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call"
 #DATTO OUTPUT
-write-host 'DATTO OUTPUT :'
-if ($global:blnWARN) {
+$global:diag += 'DATTO OUTPUT :'
+#if ($global:blnWARN) {
   write-DRRMAlert "Disk Performance : Warning"
   write-DRMMDiag "$($global:diag)"
   $global:diag = $null
   exit 1
-} elseif (-not $global:blnWARN) {
-  write-DRRMAlert "Disk Performance : Healthy"
-  write-DRMMDiag "$($global:diag)"
-  $global:diag = $null
-  exit 0
-}
+#} elseif (-not $global:blnWARN) {
+#  write-DRRMAlert "Disk Performance : Healthy"
+#  write-DRMMDiag "$($global:diag)"
+#  $global:diag = $null
+#  exit 0
+#}
+write-host $global:diag
 #END SCRIPT
 #------------
