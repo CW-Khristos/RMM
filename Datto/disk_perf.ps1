@@ -208,18 +208,18 @@ $mill = $mill.SubString(0,[math]::min(3,$mill.length))
 $global:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
 $global:diag += "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call`r`n"
 #DATTO OUTPUT
-$global:diag += 'DATTO OUTPUT :'
-#if ($global:blnWARN) {
+write-host  "DATTO OUTPUT :"
+if ($global:blnWARN) {
   write-DRRMAlert "Disk Performance : Warning"
   write-DRMMDiag "$($global:diag)"
   $global:diag = $null
   exit 1
-#} elseif (-not $global:blnWARN) {
-#  write-DRRMAlert "Disk Performance : Healthy"
-#  write-DRMMDiag "$($global:diag)"
-#  $global:diag = $null
-#  exit 0
-#}
+} elseif (-not $global:blnWARN) {
+  write-DRRMAlert "Disk Performance : Healthy"
+  write-DRMMDiag "$($global:diag)"
+  $global:diag = $null
+  exit 0
+}
 write-host $global:diag
 #END SCRIPT
 #------------
