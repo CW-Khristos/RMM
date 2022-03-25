@@ -18,12 +18,15 @@
 
 .TODO
     Current plans are to test overall execution performance of using array vs. hashtable for collecting and returning statistics to Datto
+    Benefit to using hashtable for populating Disk information would be being able to report Disks with warnings in Alert text
+    Plan to allow for passing of configurable thresholds
 
 #> 
 
 #REGION ----- DECLARATIONS ----
   $global:diag = $null
   $global:blnADD = $false
+  $global:blnWMI = $false
   $global:blnWARN = $false
   $global:disks = @{}
   $global:arrWARN = [System.Collections.ArrayList]@()
@@ -119,7 +122,21 @@ Remove-Variable * -ErrorAction SilentlyContinue
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $sw = [Diagnostics.Stopwatch]::StartNew()
 
-$ldisks = Get-CimInstance 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' | where Name -match ":"
+try {
+  $ldisks = Get-CimInstance 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where Name -match ":"
+} catch {
+  try {
+    $global:blnWMI = $true
+    $global:diag += "Unable to poll Drive Statistics via CIM`r`nAttempting to use WMI instead`r`n"
+    $ldisks = Get-WMIObject 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where Name -match ":"
+  } catch {
+    $global:diag += "Unable to query Drive Statistics via CIM or WMI`r`n"
+    write-DRRMAlert "Disk Performance : Warning : Monitoring Failure"
+    write-DRMMDiag "$($global:diag)"
+    $global:diag = $null
+    exit 1
+  }
+}
 
 $idisks = 0
 foreach ($disk in $ldisks) {
@@ -215,7 +232,7 @@ if ($global:blnWARN) {
   $global:diag = $null
   exit 1
 } elseif (-not $global:blnWARN) {
-  write-DRRMAlert "Disk Performance : Healthy"
+  write-DRRMAlert "Disk Performance : Healthy : $($idisks) Disk(s) Within Performance Thresholds"
   write-DRMMDiag "$($global:diag)"
   $global:diag = $null
   exit 0
