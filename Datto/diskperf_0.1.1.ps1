@@ -95,7 +95,7 @@
     if (($objDRV.PercentDiskTime -ne $null) -and ($objDRV.PercentDiskTime -ge $env:varPercentDiskTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskTime (Current Threshold : $($env:varPercentDiskTime))`r`n"}
     if (($objDRV.PercentDiskReadTime -ne $null) -and ($objDRV.PercentDiskReadTime -ge $env:varPercentDiskReadTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskReadTime (Current Threshold : $($env:varPercentDiskReadTime))`r`n"}
     if (($objDRV.PercentDiskWriteTime -ne $null) -and ($objDRV.PercentDiskWriteTime -ge $env:varPercentDiskWriteTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskWriteTime (Current Threshold : $($env:varPercentDiskWriteTime))`r`n"}
-    if (($objDRV.PercentIdleTime -ne $null) -and ($objDRV.PercentIdleTime -ge $env:varPercentIdleTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentIdleTime (Current Threshold : $($env:varPercentIdleTime))`r`n"}
+    if (($objDRV.PercentIdleTime -ne $null) -and ($objDRV.PercentIdleTime -le $env:varPercentIdleTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentIdleTime (Current Threshold : $($env:varPercentIdleTime))`r`n"}
     if (($objDRV.SplitIOPerSec -ne $null) -and ($objDRV.SplitIOPerSec -gt $env:varSplitIOPerSec)) {Pop-Warnings $global:disks $objDRV.name "  - SplitIOPerSec (Current Threshold : $($env:varSplitIOPerSec))`r`n"}
 
     if (($objDRV.DiskReadsPersec -ne $null) -and ($objDRV.DiskReadsPersec -gt $env:varDiskReadsPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskReadsPersec (Current Threshold : $($env:varDiskReadsPersec))`r`n"}
