@@ -87,32 +87,32 @@
   } ## Pop-Warnings
 
   function chkPERF ($objDRV) {
-    if (($objDRV.CurrentDiskQueueLength -ne $null) -and ($objDRV.CurrentDiskQueueLength -gt $env:varCurrentDiskQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - CurrentDiskQueueLength`r`n"}
-    if (($objDRV.AvgDiskQueueLength -ne $null) -and ($objDRV.AvgDiskQueueLength -gt $env:varAvgDiskQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskQueueLength`r`n"}
-    if (($objDRV.AvgDiskReadQueueLength -ne $null) -and ($objDRV.AvgDiskReadQueueLength -gt $env:varAvgDiskReadQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskReadQueueLength`r`n"}
-    if (($objDRV.AvgDiskWriteQueueLength -ne $null) -and ($objDRV.AvgDiskWriteQueueLength -gt $env:varAvgDiskWriteQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskWriteQueueLength`r`n"}
+    if (($objDRV.CurrentDiskQueueLength -ne $null) -and ($objDRV.CurrentDiskQueueLength -gt $env:varCurrentDiskQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - CurrentDiskQueueLength (Current Threshold : $($env:varCurrentDiskQueueLength))`r`n"}
+    if (($objDRV.AvgDiskQueueLength -ne $null) -and ($objDRV.AvgDiskQueueLength -gt $env:varAvgDiskQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskQueueLength (Current Threshold : $($env:varAvgDiskQueueLength))`r`n"}
+    if (($objDRV.AvgDiskReadQueueLength -ne $null) -and ($objDRV.AvgDiskReadQueueLength -gt $env:varAvgDiskReadQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskReadQueueLength (Current Threshold : $($env:varAvgDiskReadQueueLength))`r`n"}
+    if (($objDRV.AvgDiskWriteQueueLength -ne $null) -and ($objDRV.AvgDiskWriteQueueLength -gt $env:varAvgDiskWriteQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskWriteQueueLength (Current Threshold : $($env:varAvgDiskWriteQueueLength))`r`n"}
 
-    if (($objDRV.PercentDiskTime -ne $null) -and ($objDRV.PercentDiskTime -ge $env:varPercentDiskTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskTime`r`n"}
-    if (($objDRV.PercentDiskReadTime -ne $null) -and ($objDRV.PercentDiskReadTime -ge $env:varPercentDiskReadTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskReadTime`r`n"}
-    if (($objDRV.PercentDiskWriteTime -ne $null) -and ($objDRV.PercentDiskWriteTime -ge $env:varPercentDiskWriteTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskWriteTime`r`n"}
-    if (($objDRV.PercentIdleTime -ne $null) -and ($objDRV.PercentIdleTime -ge $env:varPercentIdleTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentIdleTime`r`n"}
-    if (($objDRV.SplitIOPerSec -ne $null) -and ($objDRV.SplitIOPerSec -gt $env:varSplitIOPerSec)) {Pop-Warnings $global:disks $objDRV.name "  - SplitIOPerSec`r`n"}
+    if (($objDRV.PercentDiskTime -ne $null) -and ($objDRV.PercentDiskTime -ge $env:varPercentDiskTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskTime (Current Threshold : $($env:varPercentDiskTime))`r`n"}
+    if (($objDRV.PercentDiskReadTime -ne $null) -and ($objDRV.PercentDiskReadTime -ge $env:varPercentDiskReadTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskReadTime (Current Threshold : $($env:varPercentDiskReadTime))`r`n"}
+    if (($objDRV.PercentDiskWriteTime -ne $null) -and ($objDRV.PercentDiskWriteTime -ge $env:varPercentDiskWriteTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskWriteTime (Current Threshold : $($env:varPercentDiskWriteTime))`r`n"}
+    if (($objDRV.PercentIdleTime -ne $null) -and ($objDRV.PercentIdleTime -ge $env:varPercentIdleTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentIdleTime (Current Threshold : $($env:varPercentIdleTime))`r`n"}
+    if (($objDRV.SplitIOPerSec -ne $null) -and ($objDRV.SplitIOPerSec -gt $env:varSplitIOPerSec)) {Pop-Warnings $global:disks $objDRV.name "  - SplitIOPerSec (Current Threshold : $($env:varSplitIOPerSec))`r`n"}
 
-    if (($objDRV.DiskReadsPersec -ne $null) -and ($objDRV.DiskReadsPersec -gt $env:varDiskReadsPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskReadsPersec`r`n"}
-    #if (($objDRV.AvgDisksecPerRead -ne $null) -and ($objDRV.AvgDisksecPerRead -gt $env:varAvgDisksecPerRead)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerRead`r`n"}
-    if (($objDRV.AvgDiskBytesPerRead -ne $null) -and ($objDRV.AvgDiskBytesPerRead -gt $env:varAvgDiskBytesPerRead)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerRead`r`n"}
+    if (($objDRV.DiskReadsPersec -ne $null) -and ($objDRV.DiskReadsPersec -gt $env:varDiskReadsPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskReadsPersec (Current Threshold : $($env:varDiskReadsPersec))`r`n"}
+    #if (($objDRV.AvgDisksecPerRead -ne $null) -and ($objDRV.AvgDisksecPerRead -gt $env:varAvgDisksecPerRead)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerRead (Current Threshold : $($env:varAvgDisksecPerRead))`r`n"}
+    if (($objDRV.AvgDiskBytesPerRead -ne $null) -and ($objDRV.AvgDiskBytesPerRead -gt $env:varAvgDiskBytesPerRead)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerRead (Current Threshold : $($env:varAvgDiskBytesPerRead))`r`n"}
 
-    if (($objDRV.DiskWritesPersec -ne $null) -and ($objDRV.DiskWritesPersec -gt $env:varDiskWritesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskWritesPersec`r`n"}
-    #if (($objDRV.AvgDisksecPerWrite -ne $null) -and ($objDRV.AvgDisksecPerWrite -gt $env:varAvgDisksecPerWrite)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerWrite`r`n"}
-    if (($objDRV.AvgDiskBytesPerWrite -ne $null) -and ($objDRV.AvgDiskBytesPerWrite -gt $env:varAvgDiskBytesPerWrite)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerWrite`r`n"}
+    if (($objDRV.DiskWritesPersec -ne $null) -and ($objDRV.DiskWritesPersec -gt $env:varDiskWritesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskWritesPersec (Current Threshold : $($env:varDiskWritesPersec))`r`n"}
+    #if (($objDRV.AvgDisksecPerWrite -ne $null) -and ($objDRV.AvgDisksecPerWrite -gt $env:varAvgDisksecPerWrite)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerWrite (Current Threshold : $($env:varAvgDisksecPerWrite))`r`n"}
+    if (($objDRV.AvgDiskBytesPerWrite -ne $null) -and ($objDRV.AvgDiskBytesPerWrite -gt $env:varAvgDiskBytesPerWrite)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerWrite (Current Threshold : $($env:varAvgDiskBytesPerWrite))`r`n"}
 
-    if (($objDRV.DiskBytesPersec -ne $null) -and ($objDRV.DiskBytesPersec -gt $env:varDiskBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskBytesPersec`r`n"}
-    if (($objDRV.DiskReadBytesPersec -ne $null) -and ($objDRV.DiskReadBytesPersec -gt $env:varDiskReadBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskReadBytesPersec`r`n"}
-    if (($objDRV.DiskWriteBytesPersec -ne $null) -and ($objDRV.DiskWriteBytesPersec -gt $env:varDiskWriteBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskWriteBytesPersec`r`n"}
+    if (($objDRV.DiskBytesPersec -ne $null) -and ($objDRV.DiskBytesPersec -gt $env:varDiskBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskBytesPersec (Current Threshold : $($env:varDiskBytesPersec))`r`n"}
+    if (($objDRV.DiskReadBytesPersec -ne $null) -and ($objDRV.DiskReadBytesPersec -gt $env:varDiskReadBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskReadBytesPersec (Current Threshold : $($env:varDiskReadBytesPersec))`r`n"}
+    if (($objDRV.DiskWriteBytesPersec -ne $null) -and ($objDRV.DiskWriteBytesPersec -gt $env:varDiskWriteBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskWriteBytesPersec (Current Threshold : $($env:varDiskWriteBytesPersec))`r`n"}
 
-    if (($objDRV.DiskTransfersPersec -ne $null) -and ($objDRV.DiskTransfersPersec -gt $env:varDiskTransfersPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskTransfersPersec`r`n"}
-    #if (($objDRV.AvgDisksecPerTransfer -ne $null) -and ($objDRV.AvgDisksecPerTransfer -gt $env:varAvgDisksecPerTransfer)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerTransfer`r`n"}
-    if (($objDRV.AvgDiskBytesPerTransfer -ne $null) -and ($objDRV.AvgDiskBytesPerTransfer -gt $env:varAvgDiskBytesPerTransfer)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerTransfer`r`n"}
+    if (($objDRV.DiskTransfersPersec -ne $null) -and ($objDRV.DiskTransfersPersec -gt $env:varDiskTransfersPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskTransfersPersec (Current Threshold : $($env:varDiskTransfersPersec))`r`n"}
+    #if (($objDRV.AvgDisksecPerTransfer -ne $null) -and ($objDRV.AvgDisksecPerTransfer -gt $env:varAvgDisksecPerTransfer)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerTransfer (Current Threshold : $($env:varAvgDisksecPerTransfer))`r`n"}
+    if (($objDRV.AvgDiskBytesPerTransfer -ne $null) -and ($objDRV.AvgDiskBytesPerTransfer -gt $env:varAvgDiskBytesPerTransfer)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerTransfer (Current Threshold : $($env:varAvgDiskBytesPerTransfer))`r`n"}
   } ## chkSMART
 #ENDREGION ----- FUNCTIONS ----
 
