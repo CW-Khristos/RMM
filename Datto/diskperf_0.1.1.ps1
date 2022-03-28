@@ -254,12 +254,12 @@ $global:diag += "Avg. Execution Time - $([math]::round($average / 60)) Minutes :
 #DATTO OUTPUT
 write-host  "DATTO OUTPUT :"
 if ($global:blnWARN) {
-  write-DRRMAlert "Disk Performance : Warning : $($global:disks.count) Disk(s) Exceeded Performance Thresholds"
+  write-DRRMAlert "Warning : $($global:disks.count) Disk(s) Exceeded Performance Thresholds"
   write-DRMMDiag "$($global:diag)"
   $global:diag = $null
   exit 1
 } elseif (-not $global:blnWARN) {
-  write-DRRMAlert "Disk Performance : Healthy : $($idisks) Disk(s) Within Performance Thresholds"
+  write-DRRMAlert "Healthy : $($idisks) Disk(s) Within Performance Thresholds"
   write-DRMMDiag "$($global:diag)"
   $global:diag = $null
   exit 0
