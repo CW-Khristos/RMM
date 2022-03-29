@@ -62,6 +62,9 @@
             $global:blnADD = $false
           }
           if ($global:blnADD) {
+            foreach ($itms in $prev) {
+              $new.add("$($itm)`r`n")
+            }
             $new.add("$($warn)`r`n")
             $dest.remove($disk)
             $dest.add($disk, $new)
@@ -158,7 +161,7 @@ try {
     $ldisks = Get-WMIObject 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where Name -match ":"
   } catch {
     $global:diag += "Unable to query Drive Statistics via CIM or WMI`r`n"
-    write-DRRMAlert "Disk Performance : Warning : Monitoring Failure"
+    write-DRRMAlert "Warning : Monitoring Failure"
     write-DRMMDiag "$($global:diag)"
     $global:diag = $null
     exit 1
