@@ -467,6 +467,9 @@
             $blnADD = $false
           }
           if ($blnADD) {
+            foreach ($itms in $prev) {
+              $new.add("$($itm)`r`n")
+            }
             $new.add("$($warn)`r`n")
             $dest.remove($av)
             $dest.add($av, $new)
@@ -906,7 +909,7 @@ if (-not ($global:blnAVXML)) {
               $global:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
             }
           }
-          Pop-Warnings $global:avwarn $i_PAV "AV Health : AV Conflict detected`r`n"
+          Pop-Warnings $global:avwarn $i_PAV "AV Conflict detected`r`n"
         }
         #PRIMARY AV PRODUCT
         if (($avs[$av].display -match $i_PAV) -or 
@@ -1009,7 +1012,7 @@ if (-not ($global:blnAVXML)) {
               } else {
                 $updWARN = $true
                 $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
-                Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_AVStatus)`r`n"
+                Pop-Warnings $global:avwarn $($avs[$av].display) "$($global:o_AVStatus)`r`n"
               }
             } elseif ($global:zUpgrade -notcontains $avs[$av].display) {                            #AV PRODUCTS TREATING '1' AS 'UPTODATE'
               write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '1')" -foregroundcolor yellow
@@ -1018,14 +1021,14 @@ if (-not ($global:blnAVXML)) {
               } else {
                 $updWARN = $true
                 $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
-                Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_AVStatus)`r`n"
+                Pop-Warnings $global:avwarn $($avs[$av].display) "$($global:o_AVStatus)`r`n"
               }
             }
           } catch {
             $updWARN = $true
             write-host "Could not validate Registry data : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor red
             $global:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_AVStatus)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "$($global:o_AVStatus)`r`n"
             write-host $_.scriptstacktrace
             write-host $_
           }
@@ -1054,14 +1057,14 @@ if (-not ($global:blnAVXML)) {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_update)' -name '$($i_updateval)'" -foregroundcolor red
             $global:o_AVStatus += "Last Major Update : N/A`r`n"
             $global:o_AVStatus += "Days Since Update (DD:HH:MM) : N/A`r`n"
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_AVStatus)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "$($global:o_AVStatus)`r`n"
             write-host $_.scriptstacktrace
             write-host $_
           }
           if ($updWARN) {
             $updWARN = $false
             $global:blnWARN = $true
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : $($global:o_AVStatus)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "$($global:o_AVStatus)`r`n"
           }
           #GET PRIMARY AV PRODUCT REAL-TIME SCANNING
           $rtWARN = $false
@@ -1104,7 +1107,7 @@ if (-not ($global:blnAVXML)) {
           if ($rtWARN) {
             $rtWARN = $false
             $global:blnWARN = $true
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : Real-Time Scanning :`r`m$($global:o_RTstate)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "Real-Time Scanning :`r`m$($global:o_RTstate)`r`n"
           }
           #GET PRIMARY AV PRODUCT TAMPER PROTECTION STATUS
           $tamperWARN = $false
@@ -1169,7 +1172,7 @@ if (-not ($global:blnAVXML)) {
           if ($tamperWARN) {
             $tamperWARN = $false
             $global:blnWARN = $true
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : Tamper Protection :`r`n$($tamper)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "Tamper Protection :`r`n$($tamper)`r`n"
           }
           #GET PRIMARY AV PRODUCT LAST SCAN DETAILS
           $lastage = 0
@@ -1260,7 +1263,7 @@ if (-not ($global:blnAVXML)) {
           if ($scanWARN) {
             $scanWARN = $false
             $global:blnWARN = $true
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : Last Scan :`r`n$($scans)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "Last Scan :`r`n$($scans)`r`n"
           }
           $global:o_AVStatus += $scans
           #GET PRIMARY AV PRODUCT DEFINITIONS / SIGNATURES / PATTERN
@@ -1322,7 +1325,7 @@ if (-not ($global:blnAVXML)) {
           if ($defWARN) {
             $defWARN = $false
             $global:blnWARN = $true
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : Definition Status :`r`n$($global:o_DefStatus)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "Definition Status :`r`n$($global:o_DefStatus)`r`n"
           }
           #GET PRIMARY AV PRODUCT DETECTED ALERTS VIA REGISTRY
           if ($global:zNoAlert -notcontains $i_PAV) {
@@ -1441,7 +1444,7 @@ if (-not ($global:blnAVXML)) {
           if ($infectWARN) {
             $infectWARN = $false
             $global:blnWARN = $true
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : Active Detections :`r`n$($global:o_Infect)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "Active Detections :`r`n$($global:o_Infect)`r`n"
           }
           #GET PRIMARY AV PRODUCT DETECTED THREATS VIA REGISTRY
           $threatWARN = $false
@@ -1483,7 +1486,7 @@ if (-not ($global:blnAVXML)) {
           if ($threatWARN) {
             $threatWARN = $false
             $global:blnWARN = $true
-            Pop-Warnings $global:avwarn $($avs[$av].display) "AV Health : Detected Threats :`r`n$($global:o_Threats)`r`n"
+            Pop-Warnings $global:avwarn $($avs[$av].display) "Detected Threats :`r`n$($global:o_Threats)`r`n"
           }
         #SAVE WINDOWS DEFENDER FOR LAST - TO PREVENT SCRIPT CONSIDERING IT 'COMPETITOR AV' WHEN SET AS PRIMARY AV
         } elseif ($avs[$av].display -eq "Windows Defender") {
