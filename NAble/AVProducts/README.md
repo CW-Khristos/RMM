@@ -1,13 +1,13 @@
 ***
 # **AVHealth**
   * **[AVHealth Project](https://github.com/CW-Khristos/scripts/projects/26)**
-  * **Current Validation : [Validated - v0.2.0]**
+  * **Current Validation : [Validated - v0.2.1]**
   * **Current Branch : [master](https://github.com/CW-Khristos/RMM/tree/main/NAble/AVProducts) (Validated)**
 ***
 ## **Script Details :**
   * **NCentral AMP - [AVHealth.amp](https://github.com/CW-Khristos/RMM/blob/main/NAble/AVProducts/AV%20Health.amp)**
-  * **PS1 Script - [AVHealth_0.2.0.ps1](https://github.com/CW-Khristos/RMM/blob/main/NAble/AVProducts/AVHealth_0.2.0.ps1)**
-  * **Command :** `powershell -file .\AVHealth_0.2.0.ps1 -i_PAV "[AV Vendor]"`
+  * **PS1 Script - [AVHealth_0.2.1.ps1](https://github.com/CW-Khristos/RMM/blob/main/NAble/AVProducts/AVHealth_0.2.1.ps1)**
+  * **Command :** `powershell -file .\AVHealth_0.2.1.ps1 -i_PAV "[AV Vendor]"`
   * **Arguments :** 1, Required 1
     * **[i_PAV] - REQUIRED** - String, String to set AV Vendor to monitor for AV Health
 ***
@@ -23,10 +23,10 @@
     Script is intended to replace 'AV Status' VBS Monitoring Script
 ***
 ## .NOTES
-    Version        : 0.2.0 (04 March 2022)
+    Version        : 0.2.1 (12 March 2022)
     Creation Date  : 14 December 2021
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
-    File Name      : AVHealth_0.2.0.ps1 
+    File Name      : AVHealth_0.2.1.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Thanks         : Chris Reid (NAble) for the original 'AV Status' Script and sanity checks
                      Prejay Shah (Doherty Associates) for sanity checks and a second pair of eyes
@@ -56,7 +56,8 @@ Import "AV Health.amp" AMP in NC Script/Software Repository
  - **Note :** As of 'AVHealth_0.1.8'; 2 new metrics were added to the monitor; 'Active Detections' and 'Detected Threats'
    - If you had previously imported the AMP from any previous versions; you will need to remove the previous "AV Health.amp" and import the latest version of the AMP to enable these new metrics (this process may require removal of the previous Custom Services / Service Templates)
  - **Note :** As of 'AVHealth_0.1.9'; new details were added to the script; 'Tamper Protection', 'Last Scan Type', 'Last Scan Time', 'Recently Scanned", 'Last Definition Update", and 'Definition Age'. These outputs will be returned under 'AV Status' and 'Definitions' metrics in the AMP monitor
-   - If you had previously imported the AMP from any previous versions; you will need to remove the previous "AV Health.amp" and import the latest version of the AMP to enable these new metrics (this process may require removal of the previous Custom Services / Service Templates)
+ - **Note :** As of 'AVHealth_0.2.0'; with the addition of the 'Real-Time Scanning' an 'Tamper Protection' outputs to the 'AV Product Status' metric; you should change the status evaluation for this threshold to "Normal" if String does not contain "False" and "Warning/Failed" if String does contain "False". These changes are included in the latest copies of the Service Template exports in this repo
+   - If you had previously imported the AMP from any previous versions; I would recommend removing the previous "AV Health.amp" and importing the latest version of the AMP to enable these new metrics (this process will require removal of the previous Custom Services / Service Templates)
 
 After importing the AV Health AMP; multiple Custom Services can be created for each desired AV Product to be monitored
 ![image](https://user-images.githubusercontent.com/10928642/147266859-583eccc5-cc72-40ad-a8b8-43d6d0c461a2.png)
@@ -145,13 +146,16 @@ After creating the desired Custom Services; create Service Templates for your Wi
     - Optimization and more bugfixes
     - Forked script to implement 'AV Health' script into Datto RMM
     - Planning to re-organize repo to account for implementation of scripts to multiple RMM platforms
+ - 0.2.1
+    - Optimization and more bugfixes; namely putting an end to populating the key '#comment' into Vendor AV Product and Product State hashtables due to how PS parses XML natively
+    - Copied and modified code to retrieve Vendor AV Product XML into 'Get-AVState' function to replace the hard-coded 'swtich' to interpret WMI AV Product States
+    - This implements similar XML method to interpret WMI AV Product States as with retrieving Vendor AV Product details
+    - This should facilitate easier community contributions to WMI AV Product States and with this change plan to leave the WMI checks in place
 ***
 # .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
-    Need to obtain version and calculate date timestamps for AV Product updates, Definition updates, and Last Scan
     Need to obtain Infection Status and Detected Threats; bonus for timestamps for these metrics
         Do other AVs report individual Threat information in the registry? Sophos does; but if others don't will we be able to use this metric?
-    If no AV is detected through WMI or 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\'; attempt to validate each of the supported Vendor AV Products
     Need to create a 'Get-AVProducts' function and move looped 'detection' code into a function to call
     Trend Micro continues to cause issues with properly evaluating if the core AV Client itself is up to date due to the number of 'duplicate' and inconsistent Registry Keys / Values that clutter their Registry Hive
 ***
