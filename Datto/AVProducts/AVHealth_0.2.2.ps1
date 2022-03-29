@@ -496,6 +496,9 @@
             $blnADD = $false
           }
           if ($blnADD) {
+            foreach ($itms in $prev) {
+              $new.add("$($itm)`r`n")
+            }
             $new.add("$($warn)`r`n")
             $dest.remove($av)
             $dest.add($av, $new)
