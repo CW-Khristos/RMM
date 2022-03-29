@@ -237,7 +237,7 @@
             start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
             [xml]$psXML = "C:\IT\Scripts\productstate.xml"
           } catch {
-            $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
+            $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
             $global:blnPSXML = $false
           }
