@@ -23,10 +23,10 @@
 #>
 
 #REGION ----- DECLARATIONS ----
-  $intLN = 0
-  $diag = $null
-  $arrCHG = [System.Collections.ArrayList]@()
-  $arrHOST = [System.Collections.ArrayList]@()
+  $global:intLN = 0
+  $global:diag = $null
+  $global:arrCHG = [System.Collections.ArrayList]@()
+  $global:arrHOST = [System.Collections.ArrayList]@()
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -48,18 +48,18 @@
 if ((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime -gt $((Get-Date).AddDays(-1))) {
   #COMPARE BACKUP TO CURRENT MODIFIED HOSTS FILE
   Get-Content "C:\IT\hosts" | ForEach-Object {
-    $arrHOST.add($_)
+    $global:arrHOST.add($_)
   }
   Get-Content "$env:SystemRoot\System32\drivers\etc\hosts" | ForEach-Object {
-    if ($_ -ne $arrHOST[$intLN]) {
+    if ($_ -ne $global:arrHOST[$global:intLN]) {
       #FLAG CHANGE
       write-host "DETECTED CHANGE : $($_)"
-      $diag += "DETECTED CHANGE : $($_)`r`n"
+      $global:diag += "DETECTED CHANGE : $($_)`r`n"
     }
-    $intLN += 1
+    $global:intLN += 1
   }
   write-DRMMAlert "HOSTS modified within the last 24 hours. Last modification @ $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)"
-  write-DRMMDiag "$($diag)"
+  write-DRMMDiag "$($global:diag)"
   Exit 1
 } else {
   #WRITE HOSTS BACKUP
