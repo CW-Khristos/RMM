@@ -42,14 +42,14 @@ To Do:
 Remove-Variable * -ErrorAction SilentlyContinue
   
 #REGION ----- DECLARATIONS ----
-  $global:dcmds = 0
-  $global:scmds = 0
-  $global:dscripts = 0
-  $global:sscripts = 0
-  $global:diag = $null
-  $global:hashDCMD = @{}
-  $global:hashSCMD = @{}
-  $global:slkey = @("##########")
+  $dcmds = 0
+  $scmds = 0
+  $dscripts = 0
+  $sscripts = 0
+  $diag = $null
+  $hashDCMD = @{}
+  $hashSCMD = @{}
+  $slkey = @("##########")
   $arrSyntax = @(" `'", " `"", "(*)", " (*)", " -", " `$", "(`$)", " (`$)")
   $DangerousCommands = @("iwr", "irm", "curl", "saps","sal", "iex","set-alias", "Invoke-Expression", "Invoke-RestMethod", "Invoke-WebRequest", "DownloadString", "start-bitstransfer", "downloadfile")
 #ENDREGION ----- DECLARATIONS ----
@@ -99,43 +99,43 @@ Remove-Variable * -ErrorAction SilentlyContinue
 clear-host
 $version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentVersion
 if ($Version -lt "6.2") {
-  $global:diag += "Informational - Unsupported OS. Only Server 2012R2 and up are supported."
+  $diag += "Informational - Unsupported OS. Only Server 2012R2 and up are supported."
 }
 
 try {
   $ScriptBlockLogging = get-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -erroraction stop
   if ($ScriptBlockLogging.EnableScriptBLockLogging -ne 1) {
-    $global:diag += "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging`r`n"
+    $diag += "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging`r`n"
     write-host "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging" -foregroundcolor red
     try {
       Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -Name "EnableScriptBLockLogging" -Value 1
-      $global:diag += "  - Information - Script Block Logging Enabled`r`n"
+      $diag += "  - Information - Script Block Logging Enabled`r`n"
       write-host "  - Information - Script Block Logging Enabled" -foregroundcolor yellow
     } catch {
-      $global:diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
+      $diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
       write-host "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging" -foregroundcolor red
       Write-DRMMAlert "Error - Script Block Logging is not enabled"
-      Write-DRMMDiag $($global:diag)
+      Write-DRMMDiag $($diag)
       exit 1
     }
   } else {
-    $global:diag += "  - Information - Script Block Logging is enabled`r`n" 
+    $diag += "  - Information - Script Block Logging is enabled`r`n" 
     write-host "  - Information - Script Block Logging is enabled" -foregroundcolor yellow 
   }
 } catch {
-  $global:diag += "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging`r`n"
+  $diag += "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging`r`n"
   write-host "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging" -foregroundcolor red
   try {
     New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\" -Value "default value" -force
     New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -Value "default value" -force
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -Name "EnableScriptBLockLogging" -Value 1
-    $global:diag += "  - Information - Script Block Logging Enabled`r`n"
+    $diag += "  - Information - Script Block Logging Enabled`r`n"
     write-host "  - Information - Script Block Logging Enabled" -foregroundcolor yellow
   } catch {
-    $global:diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
+    $diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
     write-host "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging" -foregroundcolor red
     Write-DRMMAlert "Error - Script Block Logging is not enabled"
-    Write-DRMMDiag $($global:diag)
+    Write-DRMMDiag $($diag)
     exit 1
   }
 }
@@ -146,10 +146,10 @@ try{
   $log.SaveChanges()
   Get-WinEvent -ListLog "Microsoft-Windows-PowerShell/Operational" | Format-List -Property *
 } catch [System.UnauthorizedAccessException] {
-  $global:diag += "You do not have permission to configure this log!`r`n"
-  $global:diag += "Try running this script with administrator privileges.`r`n"
-  $global:diag += "$($_.Exception.Message)`r`n"
-  Write-Error $global:diag
+  $diag += "You do not have permission to configure this log!`r`n"
+  $diag += "Try running this script with administrator privileges.`r`n"
+  $diag += "$($_.Exception.Message)`r`n"
+  Write-Error $diag
 }
 $logInfo = @{ 
   ProviderName = "Microsoft-Windows-PowerShell"
@@ -160,16 +160,16 @@ $PowerShellEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction Silently
 $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
   foreach ($command in $DangerousCommands) {
     foreach ($syntax in $arrSyntax) {
-      if (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -notmatch ($global:slkey -join '|'))) { 
+      if (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -notmatch ($slkey -join '|'))) { 
           $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
           $details = Split-StringOnLiteralString $($details[1]) "Path: "
           $details[0] = $details[0].trim()
           $details[1] = $details[1].trim()
           if (($details[1] -ne $null) -and ($details[1] -ne "")) {
-            $global:dcmds = $global:dcmds + 1
-            if ($global:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+            $dcmds = $dcmds + 1
+            if ($hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
               continue
-            } elseif (-not $global:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+            } elseif (-not $hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
               $hash = @{
                 TimeCreated      = $Event.TimeCreated
                 EventMessage     = $Event.message
@@ -177,24 +177,24 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
                 ScriptBlockID    = $($details[0])
                 Path             = $($details[1])
               }
-              $global:dscripts = $global:dscripts + 1
-              $global:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-              $global:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :`r`n"
-              $global:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
+              $dscripts = $dscripts + 1
+              $hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
+              $diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :`r`n"
+              $diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
               write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :" -foregroundcolor red
               write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
             }
           }
-      } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -match ($global:slkey -join '|'))) { 
+      } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -match ($slkey -join '|'))) { 
         $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
         $details = Split-StringOnLiteralString $($details[1]) "Path: "
         $details[0] = $details[0].trim()
         $details[1] = $details[1].trim()
         if (($details[1] -ne $null) -and ($details[1] -ne "")) {
-          $global:scmds = $global:scmds + 1
-          if ($global:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+          $scmds = $scmds + 1
+          if ($hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             continue
-          } elseif (-not $global:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+          } elseif (-not $hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             $hash = @{
               TimeCreated      = $Event.TimeCreated
               EventMessage     = $Event.message
@@ -202,10 +202,10 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
               ScriptBlockID    = $($details[0])
               Path             = $($details[1])
             }
-            $global:sscripts = $global:sscripts + 1
-            $global:hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-            $global:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :`r`n"
-            $global:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
+            $sscripts = $sscripts + 1
+            $hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
+            $diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :`r`n"
+            $diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
             write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :" -foregroundcolor yellow
             write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor yellow
           }
@@ -216,25 +216,25 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
 }
 #DATTO OUTPUT
 write-host "`r`nDATTO OUTPUT :" -foregroundcolor yellow
-if ($global:dcmds -eq 0) {
-  write-host "`r`n  - Powershell Events : Healthy - $($global:dcmds) Dangerous commands executed by $($global:dscripts) Scripts found in logs." -foregroundcolor green
-  write-DRRMAlert "Powershell Events : Healthy - $($global:dcmds) Dangerous commands executed by $($global:dscripts) Scripts found in logs."
-  write-DRMMDiag $($global:diag)
+if ($dcmds -eq 0) {
+  write-host "`r`n  - Powershell Events : Healthy - $($dcmds) Dangerous commands executed by $($dscripts) Scripts found in logs." -foregroundcolor green
+  write-DRRMAlert "Powershell Events : Healthy - $($dcmds) Dangerous commands executed by $($dscripts) Scripts found in logs."
+  write-DRMMDiag $($diag)
   exit 0
-} elseif ($global:dcmds -gt 0) {
-  write-host "`r`n  - Powershell Events : Warning - $($global:dcmds) Dangerous commands executed by $($global:dscripts) Scripts found in logs." -foregroundcolor red
+} elseif ($dcmds -gt 0) {
+  write-host "`r`n  - Powershell Events : Warning - $($dcmds) Dangerous commands executed by $($dscripts) Scripts found in logs." -foregroundcolor red
   write-host "`r`nThe following Script Blocks contain dangerous commands :" -foregroundcolor yellow
-  $global:diag += "`r`nThe following Script Blocks contain dangerous commands :"
-  foreach ($cmd in $global:hashDCMD.keys) {
-    $global:diag += "`r`n  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($global:hashDCMD[$cmd].TriggeredCommand)`` found in script block :`r`n"
-    $global:diag += "    - ScriptBlock ID : $($global:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($global:hashDCMD[$cmd].Path)`r`n"
-    $global:diag += "$($global:hashDCMD[$cmd].EventMessage)`r`n"
-    write-host "  - $($global:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($global:hashDCMD[$cmd].TriggeredCommand)`` found in script block :" -foregroundcolor red
-    write-host "    - ScriptBlock ID : $($global:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($global:hashDCMD[$cmd].Path)" -foregroundcolor red
-    write-host "$($global:hashDCMD[$cmd].EventMessage)`r`n" -foregroundcolor red
+  $diag += "`r`nThe following Script Blocks contain dangerous commands :"
+  foreach ($cmd in $hashDCMD.keys) {
+    $diag += "`r`n  - $($hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($hashDCMD[$cmd].TriggeredCommand)`` found in script block :`r`n"
+    $diag += "    - ScriptBlock ID : $($hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($hashDCMD[$cmd].Path)`r`n"
+    $diag += "$($hashDCMD[$cmd].EventMessage)`r`n"
+    write-host "  - $($hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($hashDCMD[$cmd].TriggeredCommand)`` found in script block :" -foregroundcolor red
+    write-host "    - ScriptBlock ID : $($hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($hashDCMD[$cmd].Path)" -foregroundcolor red
+    write-host "$($hashDCMD[$cmd].EventMessage)`r`n" -foregroundcolor red
   }
-  write-DRRMAlert "Powershell Events : Warning - $($global:dcmds) Dangerous commands executed by $($global:dscripts) Scripts found in logs."
-  write-DRMMDiag $($global:diag)
+  write-DRRMAlert "Powershell Events : Warning - $($dcmds) Dangerous commands executed by $($dscripts) Scripts found in logs."
+  write-DRMMDiag $($diag)
   exit 1
 }
 #END SCRIPT
