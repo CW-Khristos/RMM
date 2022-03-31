@@ -25,7 +25,7 @@ clear-host
 
 # -----------------------------------------------------------#>
 
-$fail = $null
+$global:fail = $null
 
 Function Convert-FromUnixDate ($UnixDate) {
    [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($UnixDate))
@@ -38,14 +38,14 @@ function CheckSync {
 	#Report results
 	if($BackupServSync -eq "Failed") {
 		Write-Host "Backup Synchronization Failed"
-		$failed = 1
+		$global:failed = 1
 	} elseif ($BackupServSync -eq "Synchronized") {
 		Write-Host "Backup Synchronized"
 	} elseif ($BackupServSync -like '*%') {
 		Write-Host "Backup Synchronization: $BackupServSync"
 	} else {
 		Write-Host "Backup Synchronization Data Invalid or Not Found"
-		$failed = 1
+		$global:failed = 1
 	}
 	
 	#Get Data for LocalSpeedVaultSynchronizationStatus
@@ -53,14 +53,14 @@ function CheckSync {
 	#Report results
 	if($LSVSync -eq "Failed") {
 		Write-Host "LocalSpeedVault Synchronization Failed"
-		$failed = 1
+		$global:failed = 1
 	} elseif($LSVSync -eq "Synchronized") {
 		Write-Host "LocalSpeedVault Synchronized"
 	} elseif($LSVSync -like '*%') {
 		Write-Host "LocalSpeedVault Synchronization: $LSVSync"
 	} else {
 		Write-Host "LocalSpeedVault Synchronization Data Invalid or Not Found"
-		$failed = 1
+		$global:failed = 1
 	}
 }
 
@@ -124,7 +124,7 @@ If ($test_MOB -eq $True -And $test_SA -eq $True) {
 #If none exist, report & fail check
 } else {
 	Write-Host "StatusReport.xml Not Found"
-	$failed = 1
+	$global:failed = 1
 }
 
 #If true_path is not null, get XML data
@@ -135,7 +135,7 @@ if ($true_path) {
 	#If LocalSpeedVaultEnabled is 0, report not enabled
 	if ($LSV_Enabled -eq "0") {
 		Write-Host "LocalSpeedVault is not Enabled"
-		$failed = 1
+		$global:failed = 1
 	#If LocalSpeedVaultEnabled is 1, report enabled and go to CheckSync function
 	} elseIf ($LSV_Enabled -eq "1") {
 		Write-Host "LocalSpeedVault is Enabled"
@@ -166,8 +166,8 @@ if ($true_path) {
 	Write-Host "IpAddress: $IpAddress"
 }
 
-#If $failed is 1, cause scriptcheck to fail in dashboard
-if ($failed -eq 1) {
+#If $global:failed is 1, cause scriptcheck to fail in dashboard
+if ($global:failed -eq 1) {
 	Exit 1001
 } else {
 	Exit 0

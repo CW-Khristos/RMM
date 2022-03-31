@@ -23,45 +23,45 @@ $old_VerbosePreference = $VerbosePreference
 $VerbosePreference = "Continue"
 $DebugPreference = "Continue"
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
-$serviceStatusLegend = "0-normal,1-warning,2-failure"
+$global:serviceStatusLegend = "0-normal,1-warning,2-failure"
 
 $MSPB_truePath = $null
 $runTimeException = 0
 
-$LSV_EnabledMessage = "Unknown"
-$LSV_EnabledStatus = 2
+$global:LSV_EnabledMessage = "Unknown"
+$global:LSV_EnabledStatus = 2
 
-$LSVSyncMessage = "Unknown"
-$LSVSyncStatus = 0
+$global:LSVSyncMessage = "Unknown"
+$global:LSVSyncStatus = 0
 
-$LSVLocation = "Unknown"
+$global:LSVLocation = "Unknown"
 
-$MSPB_cloudSyncMessage = "Unknown"
-#$MSPB_cloudSyncStatus = 2
+$global:MSPB_cloudSyncMessage = "Unknown"
+#$global:MSPB_cloudSyncStatus = 2
 
-$MSPB_logPath = "Unknown"
+$global:MSPB_logPath = "Unknown"
 
-#$LocalSpeedVaultUnavailabilityTimeoutInDays_Default = 14
-#$LocalSpeedVaultDaysSinceSelfHealingTrigger = $LocalSpeedVaultUnavailabilityTimeoutInDays_Default
-$LSV_SelfHealingCountdownTrigger = $false
+#$global:LocalSpeedVaultUnavailabilityTimeoutInDays_Default = 14
+#$global:LocalSpeedVaultDaysSinceSelfHealingTrigger = $global:LocalSpeedVaultUnavailabilityTimeoutInDays_Default
+$global:LSV_SelfHealingCountdownTrigger = $false
 
-$MSPB_configINIfileLocation = "C:/Program Files/Backup Manager/config.ini"
+$global:MSPB_configINIfileLocation = "C:/Program Files/Backup Manager/config.ini"
 
 
-$agentVersion = "default"
-$agentCDPVersionMin = "12.1.0.744"
+$global:agentVersion = "default"
+$global:agentCDPVersionMin = "12.1.0.744"
 
-$propertyName1 = "MSPB_selfHealingTriggerDate"
-$propertyName1_value = "not triggered"
+$global:propertyName1 = "MSPB_selfHealingTriggerDate"
+$global:propertyName1_value = "not triggered"
 
-$ncentralServer = $i_ncentralServer
-$ncentralUserName = $i_ncentralUserName
-$ncentralPassword = $i_ncentralPassword
+$global:ncentralServer = $i_ncentralServer
+$global:ncentralUserName = $i_ncentralUserName
+$global:ncentralPassword = $i_ncentralPassword
 
-$origPropertyValue = $null
+$global:origPropertyValue = $null
 
-$bindingURL = $null
-$nws = $null
+$global:bindingURL = $null
+$global:nws = $null
 
 
 
@@ -78,7 +78,7 @@ Function getDeviceID
 	{
 		Write-Debug "Starting getDeviceId"
 		#get the object type
-		$namespace = $nws.getType().namespace
+		$namespace = $global:nws.getType().namespace
 		
 	    # get appliance id
 	    $ApplianceConfig = ("{0}\N-able Technologies\Windows Agent\config\ApplianceConfig.xml" -f ${Env:ProgramFiles(x86)})
@@ -93,7 +93,7 @@ Function getDeviceID
 	    $keyPairs += $keyPair
 
         #API call
-		$deviceList = $nws.deviceGet($ncentralUserName, $ncentralPassword, $keyPairs)
+		$deviceList = $global:nws.deviceGet($global:ncentralUserName, $global:ncentralPassword, $keyPairs)
         
         #How many issues were found:
         #Write-Host $rc.count "issues found" `r`n
@@ -129,7 +129,7 @@ Function getDeviceProperties
 		Try 
 		{
 			Write-Debug "Starting getDeviceProperties"
-			$nws.devicePropertyList($ncentralUserName, $ncentralPassword, $deviceIds, $null, $null, $null, $false)
+			$global:nws.devicePropertyList($global:ncentralUserName, $global:ncentralPassword, $deviceIds, $null, $null, $null, $false)
 		}
 		Finally
 		{
@@ -172,13 +172,13 @@ Function Update-CDPs(){
 		Write-Debug ("Starting Update-CDPs ")
         #Get-NCentralSvr
         #Get-webservice
-        $bindingURL = "https://" + $ncentralServer + "/dms2/services2/ServerEI2?wsdl"
+        $bindingURL = "https://" + $global:ncentralServer + "/dms2/services2/ServerEI2?wsdl"
         
-        $secpasswd = ConvertTo-SecureString $ncentralPassword -AsPlainText -Force
+        $secpasswd = ConvertTo-SecureString $global:ncentralPassword -AsPlainText -Force
         #create the webservice to access the NCentral server
-        $creds = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $ncentralUserName, $secpasswd
-        $nws = new-webserviceproxy $bindingURL -credential $creds 
-        $nws.Timeout = 300000 #added/changed in 2018 as script began timing out with the default 100s
+        $creds = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $global:ncentralUserName, $secpasswd
+        $global:nws = new-webserviceproxy $bindingURL -credential $creds 
+        $global:nws.Timeout = 300000 #added/changed in 2018 as script began timing out with the default 100s
 
         $device = getDeviceID
 		$deviceId = $device.'device.deviceid'
@@ -194,21 +194,21 @@ Function Update-CDPs(){
 			Write-Debug ("Device Name: {0}" -f $device.deviceName)
 			foreach($property in $device.properties)
 			{
-				$origPropertyValue = $property.value 
+				$global:origPropertyValue = $property.value 
 				switch($property.label)
 				{
 					$propertyName1 {
-                        If ( ($property.value -eq 'not triggered') -and ($LSV_SelfHealingCountdownTrigger -eq $True) ){ 
-                            $property.value = $propertyName1_value 
+                        If ( ($property.value -eq 'not triggered') -and ($global:LSV_SelfHealingCountdownTrigger -eq $True) ){ 
+                            $property.value = $global:propertyName1_value 
                         }
                         #retreive the value to update the timing/timer
-                        ElseIf($LSV_SelfHealingCountdownTrigger -eq $False){
-                            $propertyName1_value = "not triggered"
-                            $property.value = $propertyName1_value
+                        ElseIf($global:LSV_SelfHealingCountdownTrigger -eq $False){
+                            $global:propertyName1_value = "not triggered"
+                            $property.value = $global:propertyName1_value
                         }
                         #retrieve the MSPB_selfHealingTriggerDate property if it's already set, to calculate the updated days since metric
                         Else{
-                            $propertyName1_value = $property.value
+                            $global:propertyName1_value = $property.value
                         }
                     }
 				}
@@ -245,30 +245,30 @@ Function CheckLSVsync {
 	Param ([xml]$StatusReport)
 	
 	#Get Data for LocalSpeedVaultSynchronizationStatus
-	$LSVSync = $StatusReport.Statistics.LocalSpeedVaultSynchronizationStatus
+	$global:LSVSync = $StatusReport.Statistics.LocalSpeedVaultSynchronizationStatus
 	Write-Host "ready"
     #Report results
 	If($LSVSync -match ".*(f|F)ailed.*") {
-      $LSVSyncMessage = "error, $LSVSync"
-      $LSVSyncStatus = 0
+      $global:LSVSyncMessage = "error, $global:LSVSync"
+      $global:LSVSyncStatus = 0
 	} 
   Elseif($LSVSync -match ".*(s|S)ynchronized.*") {
-      $LSVSyncMessage = $LSVSync
-      $LSVSyncStatus = 100
+      $global:LSVSyncMessage = $global:LSVSync
+      $global:LSVSyncStatus = 100
 	} 
   Elseif( ($LSVSync -match ".*(s|S)ynchronizing.*") -or ($LSVSync -match ".*%.*") ){
-      $LSVSyncMessage = $LSVSync
+      $global:LSVSyncMessage = $global:LSVSync
       If($LSVSync.indexof(".") -ne -1) {
         $stat = Split-StringOnLiteralString $LSVSync "."
-        $LSVSyncStatus = $stat[0]
+        $global:LSVSyncStatus = $stat[0]
       }
       Elseif($LSVSync.indexof(".") -eq -1) {
-        $LSVSyncStatus = $LSVSync
+        $global:LSVSyncStatus = $global:LSVSync
       }
 	} 
     Else {
-        $LSVSyncMessage = "error, data Invalid or Not Found"
-        $LSVSyncStatus = 0
+        $global:LSVSyncMessage = "error, data Invalid or Not Found"
+        $global:LSVSyncStatus = 0
 	}
 }
 
@@ -277,10 +277,10 @@ Function CheckLSVselfHealingStatus {
     #Get Data for BackupServerSynchronizationStatus
     $MSPB_cloudSyncStatusMessage = $StatusReport.Statistics.BackupServerSynchronizationStatus
     
-    If ( ($MSPB_cloudSyncStatusMessage -notmatch ".*(s|S)ynchronized.*") -and ($LSVSyncStatus -eq 2) ) {
-        $LSV_SelfHealingCountdownTrigger = $True
+    If ( ($MSPB_cloudSyncStatusMessage -notmatch ".*(s|S)ynchronized.*") -and ($global:LSVSyncStatus -eq 2) ) {
+        $global:LSV_SelfHealingCountdownTrigger = $True
         [string]$now = Get-Date
-        $propertyName1_value = $now
+        $global:propertyName1_value = $now
         #JRremoved to reduce complexity and handle with service thresholds        
         <#
         #check for a LocalSpeedVaultUnavailabilityTimeoutInDays entry in config.ini, otherwise use default (14d, set by var)
@@ -291,13 +291,13 @@ Function CheckLSVselfHealingStatus {
             $LocalSpeedVaultUnavailabilityTimeoutInDays_Default = $configFileParseSplit[1]
         }
         Else {
-            $LocalSpeedVaultDaysSinceSelfHealingTrigger = $LocalSpeedVaultUnavailabilityTimeoutInDays_Default
+            $global:LocalSpeedVaultDaysSinceSelfHealingTrigger = $global:LocalSpeedVaultUnavailabilityTimeoutInDays_Default
         }
         #>
     }
     Else{
-        $LSV_SelfHealingCountdownTrigger = $False
-        $propertyName1_value = "not triggered"
+        $global:LSV_SelfHealingCountdownTrigger = $False
+        $global:propertyName1_value = "not triggered"
     }
         #check NC CDP support via Agent version, assumes Agents are up-to-date
 	    $ApplianceConfig = ("{0}\N-able Technologies\Windows Agent\config\ApplianceConfig.xml" -f ${Env:ProgramFiles(x86)})
@@ -312,16 +312,16 @@ Function CheckLSVselfHealingStatus {
         Else{
             Update-CDPs
         }
-        If ($propertyName1_value -ne "not triggered"){
-            [datetime]$start = $propertyName1_value
-            $LSV_daysSinceSelfHealingTrigger = New-TimeSpan -Start $start -End $now
-            $LocalSpeedVaultDaysSinceSelfHealingTrigger = $LSV_daysSinceSelfHealingTrigger.Days 
+        If ($global:propertyName1_value -ne "not triggered"){
+            [datetime]$start = $global:propertyName1_value
+            $global:LSV_daysSinceSelfHealingTrigger = New-TimeSpan -Start $start -End $now
+            $global:LocalSpeedVaultDaysSinceSelfHealingTrigger = $global:LSV_daysSinceSelfHealingTrigger.Days 
             #do the math to see how much time is left
-            $LSV_SelfHealingCountdownTrigger = $True
+            $global:LSV_SelfHealingCountdownTrigger = $True
         }
         Else{
-            $LocalSpeedVaultDaysSinceSelfHealingTrigger = -1
-            $LSV_daysSinceSelfHealingTrigger = "not triggered"
+            $global:LocalSpeedVaultDaysSinceSelfHealingTrigger = -1
+            $global:LSV_daysSinceSelfHealingTrigger = "not triggered"
         }
 }
 
@@ -384,21 +384,21 @@ Try{
     	$lm_SA =  [datetime](Get-ItemProperty -Path $SA_path -Name LastWriteTime).lastwritetime
     	If ((Get-Date $lm_MOB) -gt (Get-Date $lm_SA)) {
     		$MSPB_truePath = $MOB_path
-            $MSPB_logPath = "$MOB_rootPath\logs\BackupFP"
+            $global:MSPB_logPath = "$MOB_rootPath\logs\BackupFP"
     	} 
         Else {
     		$MSPB_truePath = $SA_path
-            $MSPB_logPath = "$SA_rootPath\logs\BackupFP"
+            $global:MSPB_logPath = "$SA_rootPath\logs\BackupFP"
     	}
     } 
     Elseif ($test_SA -eq $True) {
     	$MSPB_truePath = $SA_path
-        $MSPB_logPath = "$SA_rootPath\logs\BackupFP"
+        $global:MSPB_logPath = "$SA_rootPath\logs\BackupFP"
 
     } 
     Elseif ($test_MOB -eq $True) {
     	$MSPB_truePath = $MOB_path
-        $MSPB_logPath = "$MOB_rootPath\logs\BackupFP"
+        $global:MSPB_logPath = "$MOB_rootPath\logs\BackupFP"
     }
     
 	#get Data for LSV synchronization
@@ -410,22 +410,22 @@ Try{
     $test = [String]$test
     $items = Split-StringOnLiteralString $test "LocalSpeedVaultLocation "
     $items = Split-StringOnLiteralString $items[1] "LocalSpeedVaultPassword "
-    $LSVLocation = $items[0]
+    $global:LSVLocation = $items[0]
 
-    if ($LSV_SelfHealingCountdownTrigger -eq $True){
-        $LSV_SelfHealingCountdownTrigger = "True"
+    if ($global:LSV_SelfHealingCountdownTrigger -eq $True){
+        $global:LSV_SelfHealingCountdownTrigger = "True"
     }
     Else{
-        $LSV_SelfHealingCountdownTrigger = "not triggered"
+        $global:LSV_SelfHealingCountdownTrigger = "not triggered"
     }   
         
     #return metric data to policy/service
-    $o_statusLegend = $serviceStatusLegend
-    $o_LSVSyncMessage = $LSVSyncMessage
-    $o_LSVSyncStatus = $LSVSyncStatus
-    $o_LSVselfHealingTrigger = $LSV_SelfHealingCountdownTrigger
-    $o_LSVdaysSinceSelfHealingTrigger = $LocalSpeedVaultDaysSinceSelfHealingTrigger
-    $o_LSVLocation = $LSVLocation
+    $o_statusLegend = $global:serviceStatusLegend
+    $o_LSVSyncMessage = $global:LSVSyncMessage
+    $o_LSVSyncStatus = $global:LSVSyncStatus
+    $o_LSVselfHealingTrigger = $global:LSV_SelfHealingCountdownTrigger
+    $o_LSVdaysSinceSelfHealingTrigger = $global:LocalSpeedVaultDaysSinceSelfHealingTrigger
+    $o_LSVLocation = $global:LSVLocation
 
     Write-Debug "LSV_SyncMessage: $o_LSVSyncMessage"
     Write-Debug "LSV_SyncStatus : $o_LSVSyncStatus"

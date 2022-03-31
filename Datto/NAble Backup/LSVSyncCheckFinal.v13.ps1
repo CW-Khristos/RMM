@@ -23,10 +23,10 @@
 # -----------------------------------------------------------#>
 
 #REGION ----- DECLARATIONS ----
-$diag = $null
-$lsv = $null
-$remote = $null
-$blnWARN = $false
+$global:diag = $null
+$global:lsv = $null
+$global:remote = $null
+$global:blnWARN = $false
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -53,22 +53,22 @@ $blnWARN = $false
     #Report results
     if ($BackupServSync -eq "Failed") {
       Write-Host "Remote Synchronization Failed"
-      $remote = "Remote Sync : Failed"
-      $diag += "Remote Synchronization Failed`r`n"
-      $blnWARN = $true
+      $global:remote = "Remote Sync : Failed"
+      $global:diag += "Remote Synchronization Failed`r`n"
+      $global:blnWARN = $true
     } elseif ($BackupServSync -eq "Synchronized") {
       Write-Host "Remote Synchronized"
-      $remote = "Remote Sync : 100%"
-      $diag += "Remote Synchronized`r`n"
+      $global:remote = "Remote Sync : 100%"
+      $global:diag += "Remote Synchronized`r`n"
     } elseif ($BackupServSync -like '*%') {
       Write-Host "Remote Synchronization: $($BackupServSync)"
-      $remote = "Remote Sync : $($BackupServSync)"
-      $diag += "Remote Synchronization: $($BackupServSync)`r`n"
+      $global:remote = "Remote Sync : $($BackupServSync)"
+      $global:diag += "Remote Synchronization: $($BackupServSync)`r`n"
     } else {
       Write-Host "Remote Synchronization Data Invalid or Not Found"
-      $remote = "Remote Sync : Data Invalid or Not Found"
-      $diag += "Remote Synchronization Data Invalid or Not Found`r`n"
-      $blnWARN = $true
+      $global:remote = "Remote Sync : Data Invalid or Not Found"
+      $global:diag += "Remote Synchronization Data Invalid or Not Found`r`n"
+      $global:blnWARN = $true
     }
     
     #Get Data for LocalSpeedVaultSynchronizationStatus
@@ -77,25 +77,25 @@ $blnWARN = $false
       #Report results
       if ($LSVSync -eq "Failed") {
         Write-Host "LocalSpeedVault Synchronization Failed"
-        $lsv = "LSV Sync : Failed"
-        $diag += "LocalSpeedVault Synchronization Failed`r`n"
-        $blnWARN = $true
+        $global:lsv = "LSV Sync : Failed"
+        $global:diag += "LocalSpeedVault Synchronization Failed`r`n"
+        $global:blnWARN = $true
       } elseif ($LSVSync -eq "Synchronized") {
         Write-Host "LocalSpeedVault Synchronized"
-        $lsv = "LSV Sync : 100%"
-        $diag += "LocalSpeedVault Synchronized`r`n"
+        $global:lsv = "LSV Sync : 100%"
+        $global:diag += "LocalSpeedVault Synchronized`r`n"
       } elseif ($LSVSync -like '*%') {
         Write-Host "LocalSpeedVault Synchronization: $($LSVSync)"
-        $lsv = "LSV Sync : $($LSVSync)"
-        $diag += "LocalSpeedVault Synchronization: $($LSVSync)`r`n"
+        $global:lsv = "LSV Sync : $($LSVSync)"
+        $global:diag += "LocalSpeedVault Synchronization: $($LSVSync)`r`n"
       } else {
         Write-Host "LocalSpeedVault Synchronization Data Invalid or Not Found"
-        $lsv = "LSV Sync : Data Invalid or Not Found"
-        $diag += "LocalSpeedVault Synchronization Data Invalid or Not Found`r`n"
-        $blnWARN = $true
+        $global:lsv = "LSV Sync : Data Invalid or Not Found"
+        $global:diag += "LocalSpeedVault Synchronization Data Invalid or Not Found`r`n"
+        $global:blnWARN = $true
       }
     } elseif ($LSV_Enabled -eq "Disabled") {
-      $lsv = "LSV Sync : N/A"
+      $global:lsv = "LSV Sync : N/A"
     }
   }
 
@@ -159,8 +159,8 @@ If ($test_MOB -eq $True -And $test_SA -eq $True) {
 #If none exist, report & fail check
 } else {
 	Write-Host "StatusReport.xml Not Found"
-  $diag += "StatusReport.xml Not Found`r`n"
-  $blnWARN = $true
+  $global:diag += "StatusReport.xml Not Found`r`n"
+  $global:blnWARN = $true
 }
 
 #If true_path is not null, get XML data
@@ -171,13 +171,13 @@ if ($true_path) {
 	#If LocalSpeedVaultEnabled is 0, report not enabled
 	if ($LSV_Enabled -eq "0") {
     Write-Host "LocalSpeedVault is not Enabled`r`n"
-    $diag += "LocalSpeedVault is not Enabled`r`n"
+    $global:diag += "LocalSpeedVault is not Enabled`r`n"
     $LSV_Enabled = "Disabled"
     $LSV_Location = "N/A"
 	#If LocalSpeedVaultEnabled is 1, report enabled
 	} elseIf ($LSV_Enabled -eq "1") {
 		Write-Host "LocalSpeedVault is Enabled"
-    $diag += "LocalSpeedVault is Enabled`r`n"
+    $global:diag += "LocalSpeedVault is Enabled`r`n"
     $LSV_Enabled = "Enabled"
     #Retrieve the LSV Location from ClientTool
     $test = & cmd.exe /c `"$CLI_path`" control.setting.list
@@ -197,31 +197,31 @@ if ($true_path) {
 	$OsVersion = $StatusReport.Statistics.OsVersion
 	$IpAddress = $StatusReport.Statistics.IpAddress
 	Write-Host "TimeStamp: $($TimeStamp) Local Device Time"
-  $diag += "`r`nTimeStamp: $($TimeStamp) Local Device Time`r`n"
+  $global:diag += "`r`nTimeStamp: $($TimeStamp) Local Device Time`r`n"
 	Write-Host "PartnerName: $($PartnerName)"
-  $diag += "PartnerName: $($PartnerName)`r`n"
+  $global:diag += "PartnerName: $($PartnerName)`r`n"
 	Write-Host "Account: $($Account)"
-  $diag += "Account: $($Account)`r`n"
+  $global:diag += "Account: $($Account)`r`n"
 	Write-Host "MachineName: $($MachineName)"
-  $diag += "MachineName: $($MachineName)`r`n"
+  $global:diag += "MachineName: $($MachineName)`r`n"
 	Write-Host "ClientVersion: $($ClientVersion)"
-  $diag += "ClientVersion: $($ClientVersion)`r`n"
+  $global:diag += "ClientVersion: $($ClientVersion)`r`n"
 	Write-Host "OsVersion: $($OsVersion)"
-  $diag += "OsVersion: $($OsVersion)`r`n"
+  $global:diag += "OsVersion: $($OsVersion)`r`n"
 	Write-Host "IpAddress: $($IpAddress)"
-  $diag += "IpAddress: $($IpAddress)`r`n"
+  $global:diag += "IpAddress: $($IpAddress)`r`n"
 }
 #DATTO OUTPUT
 write-host 'DATTO OUTPUT :'
-if ($blnWARN) {
-  write-DRRMAlert "MSP Backup Sync : Warning - $($remote) - LSV : $($LSV_Enabled) - $($lsv) - LSV Location : $($LSV_Location)"
-  write-DRMMDiag "$($diag)"
-  $diag = $null
+if ($global:blnWARN) {
+  write-DRRMAlert "MSP Backup Sync : Warning - $($global:remote) - LSV : $($LSV_Enabled) - $($global:lsv) - LSV Location : $($LSV_Location)"
+  write-DRMMDiag "$($global:diag)"
+  $global:diag = $null
   exit 1
-} elseif (-not $blnWARN) {
-  write-DRRMAlert "MSP Backup Sync : Healthy - $($remote) - LSV : $($LSV_Enabled) - $($lsv) - LSV Location : $($LSV_Location)"
-  write-DRMMDiag "$($diag)"
-  $diag = $null
+} elseif (-not $global:blnWARN) {
+  write-DRRMAlert "MSP Backup Sync : Healthy - $($global:remote) - LSV : $($LSV_Enabled) - $($global:lsv) - LSV Location : $($LSV_Location)"
+  write-DRMMDiag "$($global:diag)"
+  $global:diag = $null
   exit 0
 }
 #END SCRIPT

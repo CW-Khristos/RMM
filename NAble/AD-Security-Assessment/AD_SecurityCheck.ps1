@@ -38,36 +38,36 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
 #REGION ----- DECLARATIONS ----
 #NOTES
-$o_Notes = " "
-$o_Domain = ""
-$o_PDC = ""
+$global:o_Notes = " "
+$global:o_Domain = ""
+$global:o_PDC = ""
 #PASSWORDS
-$o_PwdComplex = ""
-$o_MinPwdLen = ""
-$o_MinPwdAge = ""
-$o_MinPwdAgeFlag = $true
-$o_MaxPwdAge = ""
-$o_MaxPwdAgeFlag = $true
-$o_PwdHistory = ""
-$o_RevEncrypt = ""
+$global:o_PwdComplex = ""
+$global:o_MinPwdLen = ""
+$global:o_MinPwdAge = ""
+$global:o_MinPwdAgeFlag = $true
+$global:o_MaxPwdAge = ""
+$global:o_MaxPwdAgeFlag = $true
+$global:o_PwdHistory = ""
+$global:o_RevEncrypt = ""
 #LOCKOUT
-$o_LockThreshold = ""
-$o_LockDuration = ""
-$o_LockDurationFlag = $true
-$o_LockObserve = ""
-$o_LockObserveFlag = $true
+$global:o_LockThreshold = ""
+$global:o_LockDuration = ""
+$global:o_LockDurationFlag = $true
+$global:o_LockObserve = ""
+$global:o_LockObserveFlag = $true
 #USERS
-$o_TotalUser = ""
-$o_EnabledUser = ""
-$o_DisabledUser = ""
-$o_InactiveUser = ""
-$o_PwdNoExpire = ""
-$o_SIDHistory = ""
-$o_RevEncryptUser = ""
-$o_PwdNoRequire = ""
-$o_KerbUser = ""
-$o_KerbPreAuthUser = ""
-$ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin","supervisor")
+$global:o_TotalUser = ""
+$global:o_EnabledUser = ""
+$global:o_DisabledUser = ""
+$global:o_InactiveUser = ""
+$global:o_PwdNoExpire = ""
+$global:o_SIDHistory = ""
+$global:o_RevEncryptUser = ""
+$global:o_PwdNoRequire = ""
+$global:o_KerbUser = ""
+$global:o_KerbPreAuthUser = ""
+$global:ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin","supervisor")
 #ENDREGION ----- DECLARATIONS ----
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ Function Get-PrivilegedGroupChanges {
     $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
   } else {
     write-host "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'." -foregroundcolor Red
-    $o_Notes = $o_Notes + "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
+    $global:o_Notes = $global:o_Notes + "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
   }
 } ## Get-PrivilegedGroupChanges
 #ENDREGION ----- FUNCTIONS ----
@@ -517,7 +517,7 @@ try {
     DomainNamingMaster = "."
   }
   write-host "`r`nGet-ADForest : Could not find a forest identified by: '$DCtoConnect'." -foregroundcolor Red
-  $o_Notes = $o_Notes + "`r`nGet-ADForest : Could not find a forest identified by: '$DCtoConnect'."
+  $global:o_Notes = $global:o_Notes + "`r`nGet-ADForest : Could not find a forest identified by: '$DCtoConnect'."
 }
 $domaininfo = Get-ADDomain -Server $DCtoConnect
 $dataRow += "<tr>
@@ -680,41 +680,41 @@ foreach ($item in $props) {
   $flag= 'passed'
   If (($item -eq 'ComplexityEnabled') -and ($DomainPasswordPolicy.ComplexityEnabled -ne 'True')) { $flag = "failed" }
   If (($item -eq 'MinPasswordLength') -and $DomainPasswordPolicy.MinPasswordLength -le 14) { $flag = "failed" }
-  If ($item -eq 'MinPasswordAge') { #-and $DomainPasswordPolicy.MinPasswordAge -lt 1) { $flag = "failed"; $o_MinPwdAgeFlag = $false }
+  If ($item -eq 'MinPasswordAge') { #-and $DomainPasswordPolicy.MinPasswordAge -lt 1) { $flag = "failed"; $global:o_MinPwdAgeFlag = $false }
     #CREATE A NEW-TIMESPAN '$time1' SET TO '1' DAYS
     $time1 = New-TimeSpan -days 1
     if ($DomainPasswordPolicy.MinPasswordAge.compareto($time1) -eq -1) {
       $flag = "failed"
-      $o_MinPwdAgeFlag = $false
+      $global:o_MinPwdAgeFlag = $false
     }
   }
-  If ($item -eq 'MaxPasswordAge') { #-and $DomainPasswordPolicy.MaxPasswordAge -gt 60) { $flag = "failed"; $o_MaxPwdAgeFlag = $false }
+  If ($item -eq 'MaxPasswordAge') { #-and $DomainPasswordPolicy.MaxPasswordAge -gt 60) { $flag = "failed"; $global:o_MaxPwdAgeFlag = $false }
     #CREATE A NEW-TIMESPAN '$time1' SET TO '60' DAYS
     #SINCE '$DomainPasswordPolicy.MaxPasswordAge' IS ALREADY A TIMESPAN OBJECT WE CAN USE 'TIMESPAN.COMPARETO()' METHOD
     # I honestly don't know why I had to do this! Powershell stopped comparing '$DomainPasswordPolicy.MaxPasswordAge' to '60' properly despite this seemingly still working for '$DomainPasswordPolicy.MinPasswordAge'!
     $time1 = New-TimeSpan -days 60
     if ($DomainPasswordPolicy.MaxPasswordAge.compareto($time1) -gt 0) {
       $flag = "failed"
-      $o_MaxPwdAgeFlag = $false
+      $global:o_MaxPwdAgeFlag = $false
     }
   }
   If (($item -eq 'PasswordHistoryCount') -and $DomainPasswordPolicy.PasswordHistoryCount -lt '10') { $flag = "failed" }
   If (($item -eq 'ReversibleEncryptionEnabled') -and $DomainPasswordPolicy.ReversibleEncryptionEnabled -eq 'True') { $flag = "failed" }
   If (($item -eq 'LockoutThreshold') -and ($DomainPasswordPolicy.LockoutThreshold -gt 10 -or $DomainPasswordPolicy.LockoutThreshold -eq 0)) { $flag = "failed" }
-  If ($item -eq 'LockoutDuration') { #-and $DomainPasswordPolicy.LockoutDuration -lt 15) { $flag = "failed"; $o_LockDurationFlag = $false }
+  If ($item -eq 'LockoutDuration') { #-and $DomainPasswordPolicy.LockoutDuration -lt 15) { $flag = "failed"; $global:o_LockDurationFlag = $false }
     #CREATE A NEW-TIMESPAN '$time1' SET TO '15' MINUTES
     $time1 = New-TimeSpan -minutes 15
     if ($DomainPasswordPolicy.LockoutDuration.compareto($time1) -lt 0) {
       $flag = "failed"
-      $o_LockDurationFlag = $false
+      $global:o_LockDurationFlag = $false
     }
   }
-  If ($item -eq 'LockoutObservationWindow') { #-and $DomainPasswordPolicy.LockoutObservationWindow -le 15) { $flag = "failed"; $o_LockObserveFlag = $false }
+  If ($item -eq 'LockoutObservationWindow') { #-and $DomainPasswordPolicy.LockoutObservationWindow -le 15) { $flag = "failed"; $global:o_LockObserveFlag = $false }
     #CREATE A NEW-TIMESPAN '$time1' SET TO '15' MINUTES
     $time1 = New-TimeSpan -minutes 15
     if ($DomainPasswordPolicy.LockoutObservationWindow.compareto($time1) -lt 0) {
       $flag = "failed"
-      $o_LockObserveFlag = $false
+      $global:o_LockObserveFlag = $false
     }
   }
 
@@ -946,7 +946,7 @@ $TemporaryUsersList = @()
 $temprow += "<tr>
   <td class=bold_class>Temporary Users</td>
   <td style= 'text-align: center'>"
-foreach ($Name in $ArrayOfNames) {
+foreach ($Name in $global:ArrayOfNames) {
   $filter =  'Name -like "*'+ $($Name) + '*"'
   $TempUsers = Get-ADUser -Filter $filter -Properties whenCreated
   if ($TempUsers -ne $null) {
@@ -1028,58 +1028,58 @@ Add-Content $HealthReport "</table></div>"
 #---------------------------------------------------------------------------------------------------------------------------------------------
 #OUTPUT
 #---------------------------------------------------------------------------------------------------------------------------------------------
-$o_Domain = $forestinfo.Name.ToUpper()
-$o_Notes = $o_Notes + "`r`nDOMAIN : " + $o_Domain
-$o_PDC = $domaininfo.PDCEmulator.ToUpper()
-$o_Notes = $o_Notes + "`r`nPDC : " + $o_PDC
+$global:o_Domain = $forestinfo.Name.ToUpper()
+$global:o_Notes = $global:o_Notes + "`r`nDOMAIN : " + $global:o_Domain
+$global:o_PDC = $domaininfo.PDCEmulator.ToUpper()
+$global:o_Notes = $global:o_Notes + "`r`nPDC : " + $global:o_PDC
 #PASSWORDS
-$o_PwdComplex = $DomainPasswordPolicy.ComplexityEnabled
-$o_Notes = $o_Notes + "`r`nPASSWORD COMPLEXITY : " + $o_PwdComplex
-$o_MinPwdLen = $DomainPasswordPolicy.MinPasswordLength
-$o_Notes = $o_Notes + "`r`nMIN PASSWORD LENGTH : " + $o_MinPwdLen
-$o_MinPwdAge = $DomainPasswordPolicy.MinPasswordAge
-$o_Notes = $o_Notes + "`r`nMIN PASSWORD AGE : " + $o_MinPwdAgeFlag + " - " + $o_MinPwdAge
-$o_MaxPwdAge = $DomainPasswordPolicy.MaxPasswordAge
-$o_Notes = $o_Notes + "`r`nMAX PASSWORD AGE : " + $o_MaxPwdAgeFlag + " - " + $o_MaxPwdAge
-$o_PwdHistory = $DomainPasswordPolicy.PasswordHistoryCount
-$o_Notes = $o_Notes + "`r`nPASSWORD HISTORY COUNT : " + $o_PwdHistory
-$o_RevEncrypt = $DomainPasswordPolicy.ReversibleEncryptionEnabled
-$o_Notes = $o_Notes + "`r`nREVERSIBLE ENCRYPTION : " + $o_RevEncrypt
+$global:o_PwdComplex = $DomainPasswordPolicy.ComplexityEnabled
+$global:o_Notes = $global:o_Notes + "`r`nPASSWORD COMPLEXITY : " + $global:o_PwdComplex
+$global:o_MinPwdLen = $DomainPasswordPolicy.MinPasswordLength
+$global:o_Notes = $global:o_Notes + "`r`nMIN PASSWORD LENGTH : " + $global:o_MinPwdLen
+$global:o_MinPwdAge = $DomainPasswordPolicy.MinPasswordAge
+$global:o_Notes = $global:o_Notes + "`r`nMIN PASSWORD AGE : " + $global:o_MinPwdAgeFlag + " - " + $global:o_MinPwdAge
+$global:o_MaxPwdAge = $DomainPasswordPolicy.MaxPasswordAge
+$global:o_Notes = $global:o_Notes + "`r`nMAX PASSWORD AGE : " + $global:o_MaxPwdAgeFlag + " - " + $global:o_MaxPwdAge
+$global:o_PwdHistory = $DomainPasswordPolicy.PasswordHistoryCount
+$global:o_Notes = $global:o_Notes + "`r`nPASSWORD HISTORY COUNT : " + $global:o_PwdHistory
+$global:o_RevEncrypt = $DomainPasswordPolicy.ReversibleEncryptionEnabled
+$global:o_Notes = $global:o_Notes + "`r`nREVERSIBLE ENCRYPTION : " + $global:o_RevEncrypt
 #LOCKOUT
-$o_LockThreshold = $DomainPasswordPolicy.LockoutThreshold
-$o_Notes = $o_Notes + "`r`nLOCKOUT THRESHOLD : " + $o_LockThreshold
-$o_LockDuration = $DomainPasswordPolicy.LockoutDuration
-$o_Notes = $o_Notes + "`r`nLOCKOUT DURATION : " + $o_LockDurationFlag + " - " + $o_LockDuration
-$o_LockObserve = $DomainPasswordPolicy.LockoutObservationWindow
-$o_Notes = $o_Notes + "`r`nLOCKOUT OBSERVATION WINDOW : " + $o_LockObserveFlag + " - " + $o_LockObserve
+$global:o_LockThreshold = $DomainPasswordPolicy.LockoutThreshold
+$global:o_Notes = $global:o_Notes + "`r`nLOCKOUT THRESHOLD : " + $global:o_LockThreshold
+$global:o_LockDuration = $DomainPasswordPolicy.LockoutDuration
+$global:o_Notes = $global:o_Notes + "`r`nLOCKOUT DURATION : " + $global:o_LockDurationFlag + " - " + $global:o_LockDuration
+$global:o_LockObserve = $DomainPasswordPolicy.LockoutObservationWindow
+$global:o_Notes = $global:o_Notes + "`r`nLOCKOUT OBSERVATION WINDOW : " + $global:o_LockObserveFlag + " - " + $global:o_LockObserve
 #USERS
-$o_TotalUser = $DomainUsers.Count
-$o_Notes = $o_Notes + "`r`nTOTAL USERS : " + $o_TotalUser
-$o_EnabledUser = $DomainEnabledUsers.Count
-$o_Notes = $o_Notes + "`r`nENABLED USERS : " + $o_EnabledUser
-$o_DisabledUser = $DomainDisabledUsers.Count
-$o_Notes = $o_Notes + "`r`nDISABLED USERS : " + $o_DisabledUser
-$o_InactiveUser = $DomainEnabledInactiveUsers.Count
-$o_Notes = $o_Notes + "`r`nINACTIVE USERS : " + $o_InactiveUser
-$o_PwdNoExpire = $DomainUserPasswordNeverExpiresArray.Count
-$o_Notes = $o_Notes + "`r`nUSERS W/ PASSWORD NEVER EXPIRES : " + $o_PwdNoExpire
-$o_PwdNoRequire = $DomainUserPasswordNotRequiredArray.Count
-$o_Notes = $o_Notes + "`r`nUSERS W/ PASSWORD NOT REQUIRED : " + $o_PwdNoRequire
-$o_RevEncryptUser = $DomainUsersWithReversibleEncryptionPasswordArray.Count
-$o_Notes = $o_Notes + "`r`nUSERS W/ REVERSIBLE ENCRYPTION : " + $o_RevEncryptUser
-$o_SIDHistory = $DomainUsersWithSIDHistoryArray.Count
-$o_Notes = $o_Notes + "`r`nUSERS W/ SID HISTORY : " + $o_SIDHistory
-$o_KerbUser = $DomainKerberosDESUsersArray.Count
-$o_Notes = $o_Notes + "`r`nUSERS W/ KERBEROS DES : " + $o_KerbUser
-$o_KerbPreAuthUser = $DomainUserDoesNotRequirePreAuthArray.Count
-$o_Notes = $o_Notes + "`r`nUSERS W/ KERBEROS PRE-AUTH NOT REQUIRED : " + $o_KerbPreAuthUser
+$global:o_TotalUser = $DomainUsers.Count
+$global:o_Notes = $global:o_Notes + "`r`nTOTAL USERS : " + $global:o_TotalUser
+$global:o_EnabledUser = $DomainEnabledUsers.Count
+$global:o_Notes = $global:o_Notes + "`r`nENABLED USERS : " + $global:o_EnabledUser
+$global:o_DisabledUser = $DomainDisabledUsers.Count
+$global:o_Notes = $global:o_Notes + "`r`nDISABLED USERS : " + $global:o_DisabledUser
+$global:o_InactiveUser = $DomainEnabledInactiveUsers.Count
+$global:o_Notes = $global:o_Notes + "`r`nINACTIVE USERS : " + $global:o_InactiveUser
+$global:o_PwdNoExpire = $DomainUserPasswordNeverExpiresArray.Count
+$global:o_Notes = $global:o_Notes + "`r`nUSERS W/ PASSWORD NEVER EXPIRES : " + $global:o_PwdNoExpire
+$global:o_PwdNoRequire = $DomainUserPasswordNotRequiredArray.Count
+$global:o_Notes = $global:o_Notes + "`r`nUSERS W/ PASSWORD NOT REQUIRED : " + $global:o_PwdNoRequire
+$global:o_RevEncryptUser = $DomainUsersWithReversibleEncryptionPasswordArray.Count
+$global:o_Notes = $global:o_Notes + "`r`nUSERS W/ REVERSIBLE ENCRYPTION : " + $global:o_RevEncryptUser
+$global:o_SIDHistory = $DomainUsersWithSIDHistoryArray.Count
+$global:o_Notes = $global:o_Notes + "`r`nUSERS W/ SID HISTORY : " + $global:o_SIDHistory
+$global:o_KerbUser = $DomainKerberosDESUsersArray.Count
+$global:o_Notes = $global:o_Notes + "`r`nUSERS W/ KERBEROS DES : " + $global:o_KerbUser
+$global:o_KerbPreAuthUser = $DomainUserDoesNotRequirePreAuthArray.Count
+$global:o_Notes = $global:o_Notes + "`r`nUSERS W/ KERBEROS PRE-AUTH NOT REQUIRED : " + $global:o_KerbPreAuthUser
 #MISC
-$o_Notes = $o_Notes + "`r`nPRIVILEDGED GROUP CHANGES : " + $GroupCheck + "<br>" + $GroupChanges
-$o_Notes = $o_Notes + "`r`nTEMPORARY USER LIST : " + $TempUserCheck + "<br>" + $TemporaryUsersList
-$o_Notes = $o_Notes + "`r`nNEW DOMAIN USERS : " + $UserCheck + "<br>" + $UserChanges
+$global:o_Notes = $global:o_Notes + "`r`nPRIVILEDGED GROUP CHANGES : " + $GroupCheck + "<br>" + $GroupChanges
+$global:o_Notes = $global:o_Notes + "`r`nTEMPORARY USER LIST : " + $TempUserCheck + "<br>" + $TemporaryUsersList
+$global:o_Notes = $global:o_Notes + "`r`nNEW DOMAIN USERS : " + $UserCheck + "<br>" + $UserChanges
 #NOTES
-write-host $o_Notes -ForegroundColor Green
-$o_Notes = $o_Notes.replace("`r`n", "<br>")
+write-host $global:o_Notes -ForegroundColor Green
+$global:o_Notes = $global:o_Notes.replace("`r`n", "<br>")
 
 Write-Log "Please find the report in C:\IT\Reports directory."
 #END SCRIPT
