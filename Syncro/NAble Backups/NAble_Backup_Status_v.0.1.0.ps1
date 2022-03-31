@@ -25,11 +25,11 @@
 
 #REGION ----- DECLARATIONS ----
   Import-Module $env:SyncroModule
-  $global:bitarch = $null
-  $global:OSCaption = $null
-  $global:OSVersion = $null
-  $global:producttype = $null
-  $global:computername = $env:computername
+  $script:bitarch = $null
+  $script:OSCaption = $null
+  $script:OSVersion = $null
+  $script:producttype = $null
+  $script:computername = $env:computername
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -37,18 +37,18 @@
     #OS Bit Architecture
     $osarch = (get-wmiobject win32_operatingsystem).osarchitecture
     if ($osarch -like '*64*') {
-      $global:bitarch = "bit64"
+      $script:bitarch = "bit64"
     } elseif ($osarch -like '*32*') {
-      $global:bitarch = "bit32"
+      $script:bitarch = "bit32"
     }
     #OS Type & Version
-    $global:OSCaption = (Get-WmiObject Win32_OperatingSystem).Caption
-    $global:OSVersion = (Get-WmiObject Win32_OperatingSystem).Version
+    $script:OSCaption = (Get-WmiObject Win32_OperatingSystem).Caption
+    $script:OSVersion = (Get-WmiObject Win32_OperatingSystem).Version
     $osproduct = (Get-WmiObject -class Win32_OperatingSystem).Producttype
     Switch ($osproduct) {
-      "1" {$global:producttype = "Workstation"}
-      "2" {$global:producttype = "DC"}
-      "3" {$global:producttype = "Server"}
+      "1" {$script:producttype = "Workstation"}
+      "2" {$script:producttype = "DC"}
+      "3" {$script:producttype = "Server"}
     }
   } ## Get-OSArch
 #ENDREGION ----- FUNCTIONS ----
@@ -57,9 +57,9 @@
 #BEGIN SCRIPT
 #DETERMINE OS TYPE SINCE OUR BACKUP SCHEDULES DIFFER
 Get-OSArch
-if ($global:producttype -eq "Workstation") {
+if ($script:producttype -eq "Workstation") {
   $Date = (get-date).AddHours(-8)
-} elseif ($global:producttype -ne "Workstation") {
+} elseif ($script:producttype -ne "Workstation") {
   $Date = (get-date).AddHours(-24)
 }
 #RETRIEVE SESSION LIST FROM WITHIN ELECTED TIME RANGE ABOVE AND ONLY RETURN 'FAILED' BACKUPS

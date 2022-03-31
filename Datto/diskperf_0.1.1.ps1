@@ -24,12 +24,12 @@
 #>
 
 #REGION ----- DECLARATIONS ----
-  $global:disks = @{}
-  $global:diag = $null
-  $global:blnADD = $false
-  $global:blnWMI = $false
-  $global:blnWARN = $false
-  $global:diskWARN = $false
+  $script:disks = @{}
+  $script:diag = $null
+  $script:blnADD = $false
+  $script:blnWMI = $false
+  $script:blnWARN = $false
+  $script:diskWARN = $false
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -55,28 +55,28 @@
         if ($dest.containskey($disk)) {
           $new = [System.Collections.ArrayList]@()
           $prev = [System.Collections.ArrayList]@()
-          $global:blnADD = $true
+          $script:blnADD = $true
           $prev = $dest[$disk]
           $prev = $prev.split("`r`n",[System.StringSplitOptions]::RemoveEmptyEntries)
           if ($prev -contains $warn) {
-            $global:blnADD = $false
+            $script:blnADD = $false
           }
-          if ($global:blnADD) {
+          if ($script:blnADD) {
             foreach ($itms in $prev) {
               $new.add("$($itm)`r`n")
             }
             $new.add("$($warn)`r`n")
             $dest.remove($disk)
             $dest.add($disk, $new)
-            $global:blnWARN = $true
-            $global:diskWARN = $true
+            $script:blnWARN = $true
+            $script:diskWARN = $true
           }
         } elseif (-not $dest.containskey($disk)) {
           $new = [System.Collections.ArrayList]@()
           $new = "$($warn)`r`n"
           $dest.add($disk, $new)
-          $global:blnWARN = $true
-          $global:diskWARN = $true
+          $script:blnWARN = $true
+          $script:diskWARN = $true
         }
       }
     } catch {
@@ -84,38 +84,38 @@
       write-host "Disk Performance : Error populating warnings for $($disk)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       write-host $_.scriptstacktrace
       write-host $_
-      $global:diag += "$($warndiag)"
+      $script:diag += "$($warndiag)"
       $warndiag = $null
     }
   } ## Pop-Warnings
 
   function chkPERF ($objDRV) {
-    if (($objDRV.CurrentDiskQueueLength -ne $null) -and ($objDRV.CurrentDiskQueueLength -gt $env:varCurrentDiskQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - CurrentDiskQueueLength (Current Threshold : $($env:varCurrentDiskQueueLength))`r`n"}
-    if (($objDRV.AvgDiskQueueLength -ne $null) -and ($objDRV.AvgDiskQueueLength -gt $env:varAvgDiskQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskQueueLength (Current Threshold : $($env:varAvgDiskQueueLength))`r`n"}
-    if (($objDRV.AvgDiskReadQueueLength -ne $null) -and ($objDRV.AvgDiskReadQueueLength -gt $env:varAvgDiskReadQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskReadQueueLength (Current Threshold : $($env:varAvgDiskReadQueueLength))`r`n"}
-    if (($objDRV.AvgDiskWriteQueueLength -ne $null) -and ($objDRV.AvgDiskWriteQueueLength -gt $env:varAvgDiskWriteQueueLength)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskWriteQueueLength (Current Threshold : $($env:varAvgDiskWriteQueueLength))`r`n"}
+    if (($objDRV.CurrentDiskQueueLength -ne $null) -and ($objDRV.CurrentDiskQueueLength -gt $env:varCurrentDiskQueueLength)) {Pop-Warnings $script:disks $objDRV.name "  - CurrentDiskQueueLength (Current Threshold : $($env:varCurrentDiskQueueLength))`r`n"}
+    if (($objDRV.AvgDiskQueueLength -ne $null) -and ($objDRV.AvgDiskQueueLength -gt $env:varAvgDiskQueueLength)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDiskQueueLength (Current Threshold : $($env:varAvgDiskQueueLength))`r`n"}
+    if (($objDRV.AvgDiskReadQueueLength -ne $null) -and ($objDRV.AvgDiskReadQueueLength -gt $env:varAvgDiskReadQueueLength)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDiskReadQueueLength (Current Threshold : $($env:varAvgDiskReadQueueLength))`r`n"}
+    if (($objDRV.AvgDiskWriteQueueLength -ne $null) -and ($objDRV.AvgDiskWriteQueueLength -gt $env:varAvgDiskWriteQueueLength)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDiskWriteQueueLength (Current Threshold : $($env:varAvgDiskWriteQueueLength))`r`n"}
 
-    if (($objDRV.PercentDiskTime -ne $null) -and ($objDRV.PercentDiskTime -ge $env:varPercentDiskTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskTime (Current Threshold : $($env:varPercentDiskTime))`r`n"}
-    if (($objDRV.PercentDiskReadTime -ne $null) -and ($objDRV.PercentDiskReadTime -ge $env:varPercentDiskReadTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskReadTime (Current Threshold : $($env:varPercentDiskReadTime))`r`n"}
-    if (($objDRV.PercentDiskWriteTime -ne $null) -and ($objDRV.PercentDiskWriteTime -ge $env:varPercentDiskWriteTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentDiskWriteTime (Current Threshold : $($env:varPercentDiskWriteTime))`r`n"}
-    if (($objDRV.PercentIdleTime -ne $null) -and ($objDRV.PercentIdleTime -le $env:varPercentIdleTime)) {Pop-Warnings $global:disks $objDRV.name "  - PercentIdleTime (Current Threshold : $($env:varPercentIdleTime))`r`n"}
-    if (($objDRV.SplitIOPerSec -ne $null) -and ($objDRV.SplitIOPerSec -gt $env:varSplitIOPerSec)) {Pop-Warnings $global:disks $objDRV.name "  - SplitIOPerSec (Current Threshold : $($env:varSplitIOPerSec))`r`n"}
+    if (($objDRV.PercentDiskTime -ne $null) -and ($objDRV.PercentDiskTime -ge $env:varPercentDiskTime)) {Pop-Warnings $script:disks $objDRV.name "  - PercentDiskTime (Current Threshold : $($env:varPercentDiskTime))`r`n"}
+    if (($objDRV.PercentDiskReadTime -ne $null) -and ($objDRV.PercentDiskReadTime -ge $env:varPercentDiskReadTime)) {Pop-Warnings $script:disks $objDRV.name "  - PercentDiskReadTime (Current Threshold : $($env:varPercentDiskReadTime))`r`n"}
+    if (($objDRV.PercentDiskWriteTime -ne $null) -and ($objDRV.PercentDiskWriteTime -ge $env:varPercentDiskWriteTime)) {Pop-Warnings $script:disks $objDRV.name "  - PercentDiskWriteTime (Current Threshold : $($env:varPercentDiskWriteTime))`r`n"}
+    if (($objDRV.PercentIdleTime -ne $null) -and ($objDRV.PercentIdleTime -le $env:varPercentIdleTime)) {Pop-Warnings $script:disks $objDRV.name "  - PercentIdleTime (Current Threshold : $($env:varPercentIdleTime))`r`n"}
+    if (($objDRV.SplitIOPerSec -ne $null) -and ($objDRV.SplitIOPerSec -gt $env:varSplitIOPerSec)) {Pop-Warnings $script:disks $objDRV.name "  - SplitIOPerSec (Current Threshold : $($env:varSplitIOPerSec))`r`n"}
 
-    if (($objDRV.DiskReadsPersec -ne $null) -and ($objDRV.DiskReadsPersec -gt $env:varDiskReadsPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskReadsPersec (Current Threshold : $($env:varDiskReadsPersec))`r`n"}
-    #if (($objDRV.AvgDisksecPerRead -ne $null) -and ($objDRV.AvgDisksecPerRead -gt $env:varAvgDisksecPerRead)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerRead (Current Threshold : $($env:varAvgDisksecPerRead))`r`n"}
-    if (($objDRV.AvgDiskBytesPerRead -ne $null) -and ($objDRV.AvgDiskBytesPerRead -gt $env:varAvgDiskBytesPerRead)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerRead (Current Threshold : $($env:varAvgDiskBytesPerRead))`r`n"}
+    if (($objDRV.DiskReadsPersec -ne $null) -and ($objDRV.DiskReadsPersec -gt $env:varDiskReadsPersec)) {Pop-Warnings $script:disks $objDRV.name "  - DiskReadsPersec (Current Threshold : $($env:varDiskReadsPersec))`r`n"}
+    #if (($objDRV.AvgDisksecPerRead -ne $null) -and ($objDRV.AvgDisksecPerRead -gt $env:varAvgDisksecPerRead)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDisksecPerRead (Current Threshold : $($env:varAvgDisksecPerRead))`r`n"}
+    if (($objDRV.AvgDiskBytesPerRead -ne $null) -and ($objDRV.AvgDiskBytesPerRead -gt $env:varAvgDiskBytesPerRead)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDiskBytesPerRead (Current Threshold : $($env:varAvgDiskBytesPerRead))`r`n"}
 
-    if (($objDRV.DiskWritesPersec -ne $null) -and ($objDRV.DiskWritesPersec -gt $env:varDiskWritesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskWritesPersec (Current Threshold : $($env:varDiskWritesPersec))`r`n"}
-    #if (($objDRV.AvgDisksecPerWrite -ne $null) -and ($objDRV.AvgDisksecPerWrite -gt $env:varAvgDisksecPerWrite)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerWrite (Current Threshold : $($env:varAvgDisksecPerWrite))`r`n"}
-    if (($objDRV.AvgDiskBytesPerWrite -ne $null) -and ($objDRV.AvgDiskBytesPerWrite -gt $env:varAvgDiskBytesPerWrite)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerWrite (Current Threshold : $($env:varAvgDiskBytesPerWrite))`r`n"}
+    if (($objDRV.DiskWritesPersec -ne $null) -and ($objDRV.DiskWritesPersec -gt $env:varDiskWritesPersec)) {Pop-Warnings $script:disks $objDRV.name "  - DiskWritesPersec (Current Threshold : $($env:varDiskWritesPersec))`r`n"}
+    #if (($objDRV.AvgDisksecPerWrite -ne $null) -and ($objDRV.AvgDisksecPerWrite -gt $env:varAvgDisksecPerWrite)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDisksecPerWrite (Current Threshold : $($env:varAvgDisksecPerWrite))`r`n"}
+    if (($objDRV.AvgDiskBytesPerWrite -ne $null) -and ($objDRV.AvgDiskBytesPerWrite -gt $env:varAvgDiskBytesPerWrite)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDiskBytesPerWrite (Current Threshold : $($env:varAvgDiskBytesPerWrite))`r`n"}
 
-    if (($objDRV.DiskBytesPersec -ne $null) -and ($objDRV.DiskBytesPersec -gt $env:varDiskBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskBytesPersec (Current Threshold : $($env:varDiskBytesPersec))`r`n"}
-    if (($objDRV.DiskReadBytesPersec -ne $null) -and ($objDRV.DiskReadBytesPersec -gt $env:varDiskReadBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskReadBytesPersec (Current Threshold : $($env:varDiskReadBytesPersec))`r`n"}
-    if (($objDRV.DiskWriteBytesPersec -ne $null) -and ($objDRV.DiskWriteBytesPersec -gt $env:varDiskWriteBytesPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskWriteBytesPersec (Current Threshold : $($env:varDiskWriteBytesPersec))`r`n"}
+    if (($objDRV.DiskBytesPersec -ne $null) -and ($objDRV.DiskBytesPersec -gt $env:varDiskBytesPersec)) {Pop-Warnings $script:disks $objDRV.name "  - DiskBytesPersec (Current Threshold : $($env:varDiskBytesPersec))`r`n"}
+    if (($objDRV.DiskReadBytesPersec -ne $null) -and ($objDRV.DiskReadBytesPersec -gt $env:varDiskReadBytesPersec)) {Pop-Warnings $script:disks $objDRV.name "  - DiskReadBytesPersec (Current Threshold : $($env:varDiskReadBytesPersec))`r`n"}
+    if (($objDRV.DiskWriteBytesPersec -ne $null) -and ($objDRV.DiskWriteBytesPersec -gt $env:varDiskWriteBytesPersec)) {Pop-Warnings $script:disks $objDRV.name "  - DiskWriteBytesPersec (Current Threshold : $($env:varDiskWriteBytesPersec))`r`n"}
 
-    if (($objDRV.DiskTransfersPersec -ne $null) -and ($objDRV.DiskTransfersPersec -gt $env:varDiskTransfersPersec)) {Pop-Warnings $global:disks $objDRV.name "  - DiskTransfersPersec (Current Threshold : $($env:varDiskTransfersPersec))`r`n"}
-    #if (($objDRV.AvgDisksecPerTransfer -ne $null) -and ($objDRV.AvgDisksecPerTransfer -gt $env:varAvgDisksecPerTransfer)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDisksecPerTransfer (Current Threshold : $($env:varAvgDisksecPerTransfer))`r`n"}
-    if (($objDRV.AvgDiskBytesPerTransfer -ne $null) -and ($objDRV.AvgDiskBytesPerTransfer -gt $env:varAvgDiskBytesPerTransfer)) {Pop-Warnings $global:disks $objDRV.name "  - AvgDiskBytesPerTransfer (Current Threshold : $($env:varAvgDiskBytesPerTransfer))`r`n"}
+    if (($objDRV.DiskTransfersPersec -ne $null) -and ($objDRV.DiskTransfersPersec -gt $env:varDiskTransfersPersec)) {Pop-Warnings $script:disks $objDRV.name "  - DiskTransfersPersec (Current Threshold : $($env:varDiskTransfersPersec))`r`n"}
+    #if (($objDRV.AvgDisksecPerTransfer -ne $null) -and ($objDRV.AvgDisksecPerTransfer -gt $env:varAvgDisksecPerTransfer)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDisksecPerTransfer (Current Threshold : $($env:varAvgDisksecPerTransfer))`r`n"}
+    if (($objDRV.AvgDiskBytesPerTransfer -ne $null) -and ($objDRV.AvgDiskBytesPerTransfer -gt $env:varAvgDiskBytesPerTransfer)) {Pop-Warnings $script:disks $objDRV.name "  - AvgDiskBytesPerTransfer (Current Threshold : $($env:varAvgDiskBytesPerTransfer))`r`n"}
   } ## chkSMART
 #ENDREGION ----- FUNCTIONS ----
 
@@ -156,14 +156,14 @@ try {
   $ldisks = Get-CimInstance 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where Name -match ":"
 } catch {
   try {
-    $global:blnWMI = $true
-    $global:diag += "Unable to poll Drive Statistics via CIM`r`nAttempting to use WMI instead`r`n"
+    $script:blnWMI = $true
+    $script:diag += "Unable to poll Drive Statistics via CIM`r`nAttempting to use WMI instead`r`n"
     $ldisks = Get-WMIObject 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where Name -match ":"
   } catch {
-    $global:diag += "Unable to query Drive Statistics via CIM or WMI`r`n"
+    $script:diag += "Unable to query Drive Statistics via CIM or WMI`r`n"
     write-DRRMAlert "Warning : Monitoring Failure"
-    write-DRMMDiag "$($global:diag)"
-    $global:diag = $null
+    write-DRMMDiag "$($script:diag)"
+    $script:diag = $null
     exit 1
   }
 }
@@ -224,19 +224,19 @@ foreach ($disk in $ldisks) {
   write-host $diskdiag
   write-host " - DRIVE REPORT : $($disk.name)" -ForegroundColor yellow
   $diskdiag += " - DRIVE REPORT $($disk.name):`r`n"
-  if (-not $global:diskWARN) {
+  if (-not $script:diskWARN) {
     write-host "  - All Drive Performance values passed checks" -ForegroundColor green
     $diskdiag += "  - All Drive Performance values passed checks`r`n"
-  } elseif ($global:diskWARN) {
+  } elseif ($script:diskWARN) {
     write-host "  - The following Drive Performance values did not pass :" -ForegroundColor red
     $diskdiag += "  - The following Drive Performance values did not pass :`r`n"
-    foreach ($warn in $global:disks[$disk.name]) {
+    foreach ($warn in $script:disks[$disk.name]) {
       write-host "$($warn)" -ForegroundColor red
       $diskdiag += "$($warn)"
     }
-    $global:diskWARN = $false
+    $script:diskWARN = $false
   }
-  $global:diag += "`r`nPOLLING DISK : $($disk.name)`r`n$($diskdiag)"
+  $script:diag += "`r`nPOLLING DISK : $($disk.name)`r`n$($diskdiag)"
   $diskdiag = $null
 }
 #Stop script execution time calculation
@@ -252,21 +252,21 @@ $average = (($total / $idisks) / 1000)
 $mill = [string]$average
 $mill = $mill.split(".")[1]
 $mill = $mill.SubString(0,[math]::min(3,$mill.length))
-$global:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-$global:diag += "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call`r`n"
+$script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+$script:diag += "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call`r`n"
 #DATTO OUTPUT
 write-host  "DATTO OUTPUT :"
-if ($global:blnWARN) {
-  write-DRRMAlert "Warning : $($global:disks.count) Disk(s) Exceeded Performance Thresholds"
-  write-DRMMDiag "$($global:diag)"
-  $global:diag = $null
+if ($script:blnWARN) {
+  write-DRRMAlert "Warning : $($script:disks.count) Disk(s) Exceeded Performance Thresholds"
+  write-DRMMDiag "$($script:diag)"
+  $script:diag = $null
   exit 1
-} elseif (-not $global:blnWARN) {
+} elseif (-not $script:blnWARN) {
   write-DRRMAlert "Healthy : $($idisks) Disk(s) Within Performance Thresholds"
-  write-DRMMDiag "$($global:diag)"
-  $global:diag = $null
+  write-DRMMDiag "$($script:diag)"
+  $script:diag = $null
   exit 0
 }
-write-host $global:diag
+write-host $script:diag
 #END SCRIPT
 #------------

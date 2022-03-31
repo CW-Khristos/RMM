@@ -58,7 +58,7 @@
           'AV Product Status', 'Real-Time Scanning', and 'Definition Status' will now report how script obtained information; either from WMI '(WMI Check)' or from Registry '(REG Check)'
           Workstations will still report the Real-Time Scanning and Definitions status via WMI; but plan to remove this output entirely
           Began adding in checks for AV Components' Versions, Tamper Protection, Last Software Update Timestamp, Last Definition Update Timestamp, and Last Scan Timestamp
-          Added '$global:ncxml<vendor>' variables for assigning static 'fallback' sources for AV Product XMLs; XMLs should be uploaded to NC Script Repository and URLs updated (Begin Ln164)
+          Added '$script:ncxml<vendor>' variables for assigning static 'fallback' sources for AV Product XMLs; XMLs should be uploaded to NC Script Repository and URLs updated (Begin Ln164)
             The above 'Fallback' method is to allow for uploading AV Product XML files to NCentral Script Repository to attempt to support older OSes which cannot securely connect to GitHub (Requires using "Compatibility" mode for NC Network Security)
     0.2.0 Optimization and more bugfixes
           Forked script to implement 'AV Health' script into Datto RMM
@@ -91,43 +91,43 @@
   #Param(
   #  [Parameter(Mandatory=$true)]$i_PAV
   #)
-  $global:bitarch = $null
-  $global:OSCaption = $null
-  $global:OSVersion = $null
-  $global:producttype = $null
-  $global:computername = $null
-  $global:blnWMI = $true
-  $global:blnPAV = $false
-  $global:blnAVXML = $true
-  $global:blnPSXML = $false
-  $global:avs = @{}
-  $global:pskey = @{}
-  $global:pavkey = @{}
-  $global:vavkey = @{}
-  $global:compkey = @{}
-  $global:o_AVname = "Selected AV Product Not Found"
-  $global:o_AVVersion = "Selected AV Product Not Found"
-  $global:o_AVpath = "Selected AV Product Not Found"
-  $global:o_AVStatus = "Selected AV Product Not Found"
-  $global:rtstatus = "Unknown"
-  $global:o_RTstate = "Unknown"
-  $global:defstatus = "Unknown"
-  $global:o_DefStatus = "Unknown"
-  $global:o_Infect = $null
-  $global:o_Threats = $null
-  $global:o_AVcon = 0
-  $global:o_CompAV = $null
-  $global:o_CompPath = $null
-  $global:o_CompState = $null
+  $script:bitarch = $null
+  $script:OSCaption = $null
+  $script:OSVersion = $null
+  $script:producttype = $null
+  $script:computername = $null
+  $script:blnWMI = $true
+  $script:blnPAV = $false
+  $script:blnAVXML = $true
+  $script:blnPSXML = $false
+  $script:avs = @{}
+  $script:pskey = @{}
+  $script:pavkey = @{}
+  $script:vavkey = @{}
+  $script:compkey = @{}
+  $script:o_AVname = "Selected AV Product Not Found"
+  $script:o_AVVersion = "Selected AV Product Not Found"
+  $script:o_AVpath = "Selected AV Product Not Found"
+  $script:o_AVStatus = "Selected AV Product Not Found"
+  $script:rtstatus = "Unknown"
+  $script:o_RTstate = "Unknown"
+  $script:defstatus = "Unknown"
+  $script:o_DefStatus = "Unknown"
+  $script:o_Infect = $null
+  $script:o_Threats = $null
+  $script:o_AVcon = 0
+  $script:o_CompAV = $null
+  $script:o_CompPath = $null
+  $script:o_CompState = $null
   #SUPPORTED AV VENDORS
-  $global:avVendors = @(
+  $script:avVendors = @(
     "Sophos"
     "Symantec"
     "Trend Micro"
     "Windows Defender"
   )
   #AV PRODUCTS USING '0' FOR 'UP-TO-DATE' PRODUCT STATUS
-  $global:zUpgrade = @(
+  $script:zUpgrade = @(
     "Sophos Intercept X"
     "Symantec Endpoint Protection"
     "Trend Micro Security Agent"
@@ -135,39 +135,39 @@
     "Windows Defender"
   )
   #AV PRODUCTS USING '0' FOR 'REAL-TIME SCANNING' STATUS
-  $global:zRealTime = @(
+  $script:zRealTime = @(
     "Symantec Endpoint Protection"
     "Windows Defender"
   )
   #AV PRODUCTS USING '0' FOR 'TAMPER PROTECTION' STATUS
-  $global:zTamper = @(
+  $script:zTamper = @(
     "Sophos Anti-Virus"
     "Symantec Endpoint Protection"
     "Windows Defender"
   )
   #AV PRODUCTS NOT SUPPORTING ALERTS DETECTIONS
-  $global:zNoAlert = @(
+  $script:zNoAlert = @(
     "Symantec Endpoint Protection"
     "Windows Defender"
   )
   #AV PRODUCTS NOT SUPPORTING INFECTION DETECTIONS
-  $global:zNoInfect = @(
+  $script:zNoInfect = @(
     "Symantec Endpoint Protection"
     "Windows Defender"
   )
   #AV PRODUCTS NOT SUPPORTING THREAT DETECTIONS
-  $global:zNoThreat = @(
+  $script:zNoThreat = @(
     "Symantec Endpoint Protection"
     "Trend Micro Security Agent"
     "Worry-Free Business Security"
     "Windows Defender"
   )
   #AV PRODUCT XML NC REPOSITORY URLS FOR FALLBACK - CHANGE THESE TO MATCH YOUR NCENTRAL URLS AFTER UPLOADING EACH XML TO REPO
-  $global:ncxmlSOPHOS = "https://nableserver/download/repository/1639682702/sophos.xml"
-  $global:ncxmlSYMANTEC = "https://nableserver/download/repository/1238159723/symantec.xml"
-  $global:ncxmlTRENDMICRO = "https://nableserver/download/repository/308457410/trendmicro.xml"
-  $global:ncxmlWINDEFEND = "https://nableserver/download/repository/968395355/windowsdefender.xml"
-  $global:ncxmlPRODUCTSTATE = "https://nableserver/download/repository/968395355/productstate.xml"
+  $script:ncxmlSOPHOS = "https://nableserver/download/repository/1639682702/sophos.xml"
+  $script:ncxmlSYMANTEC = "https://nableserver/download/repository/1238159723/symantec.xml"
+  $script:ncxmlTRENDMICRO = "https://nableserver/download/repository/308457410/trendmicro.xml"
+  $script:ncxmlWINDEFEND = "https://nableserver/download/repository/968395355/windowsdefender.xml"
+  $script:ncxmlPRODUCTSTATE = "https://nableserver/download/repository/968395355/productstate.xml"
   #SET TLS SECURITY FOR CONNECTING TO GITHUB
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 #ENDREGION ----- DECLARATIONS ----
@@ -184,19 +184,19 @@
     #OS Bit Architecture
     $osarch = (get-wmiobject win32_operatingsystem).osarchitecture
     if ($osarch -like '*64*') {
-      $global:bitarch = "bit64"
+      $script:bitarch = "bit64"
     } elseif ($osarch -like '*32*') {
-      $global:bitarch = "bit32"
+      $script:bitarch = "bit32"
     }
     #OS Type & Version
-    $global:computername = $env:computername
-    $global:OSCaption = (Get-WmiObject Win32_OperatingSystem).Caption
-    $global:OSVersion = (Get-WmiObject Win32_OperatingSystem).Version
+    $script:computername = $env:computername
+    $script:OSCaption = (Get-WmiObject Win32_OperatingSystem).Caption
+    $script:OSVersion = (Get-WmiObject Win32_OperatingSystem).Version
     $osproduct = (Get-WmiObject -class Win32_OperatingSystem).Producttype
     Switch ($osproduct) {
-      "1" {$global:producttype = "Workstation"}
-      "2" {$global:producttype = "DC"}
-      "3" {$global:producttype = "Server"}
+      "1" {$script:producttype = "Workstation"}
+      "2" {$script:producttype = "DC"}
+      "3" {$script:producttype = "Server"}
     }
   } ## Get-OSArch
 
@@ -205,9 +205,9 @@
       $dest, $state
     )
     $xmldiag = $null
-    if (-not $global:blnPSXML) {                                                                    #AV PRODUCT STATES NOT LOADED INTO HASHTABLE
+    if (-not $script:blnPSXML) {                                                                    #AV PRODUCT STATES NOT LOADED INTO HASHTABLE
       #$dest = @{}
-      $global:blnPSXML = $true
+      $script:blnPSXML = $true
       #RETRIEVE AV PRODUCT STATE XML FROM GITHUB
       $xmldiag += "Loading : AV Product State XML`r`n"
       write-host "Loading : AV Product State XML" -foregroundcolor yellow
@@ -230,48 +230,48 @@
           } catch {
             $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-            $global:blnPSXML = $false
+            $script:blnPSXML = $false
           }
         }
       }
       #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
-      if (-not $global:blnPSXML) {
+      if (-not $script:blnPSXML) {
         $xmldiag += "`r`nFailed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
         $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
         write-host "Failed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
         write-host "Loading : AV Product State XML" -foregroundcolor yellow
-        $srcAVP = $global:ncxmlPRODUCTSTATE
+        $srcAVP = $script:ncxmlPRODUCTSTATE
         try {
           $psXML = New-Object System.Xml.XmlDocument
           $psXML.Load($srcAVP)
-          $global:blnPSXML = $true
+          $script:blnPSXML = $true
         } catch {
           $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
           write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
           try {
             $web = new-object system.net.webclient
             [xml]$psXML = $web.DownloadString($srcAVP)
-            $global:blnPSXML = $true
+            $script:blnPSXML = $true
           } catch {
             $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
             write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
             try {
               start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
               [xml]$psXML = "C:\IT\Scripts\productstate.xml"
-              $global:blnPSXML = $true
+              $script:blnPSXML = $true
             } catch {
               $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
               write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-              $global:defstatus = "Unknown (WMI Check)`r`nUnable to download AV Product State XML"
-              $global:rtstatus = "Unknown (WMI Check)`r`nUnable to download AV Product State XML"
-              $global:blnPSXML = $false
+              $script:defstatus = "Unknown (WMI Check)`r`nUnable to download AV Product State XML"
+              $script:rtstatus = "Unknown (WMI Check)`r`nUnable to download AV Product State XML"
+              $script:blnPSXML = $false
             }
           }
         }
       }
       #READ AV PRODUCT STATE XML DATA INTO NESTED HASHTABLE FOR LATER USE
       try {
-        if ($global:blnPSXML) {
+        if ($script:blnPSXML) {
           foreach ($itm in $psXML.NODE.ChildNodes) {
             if ($itm.name -notmatch "#comment") {                                                   #AVOID 'BUG' WITH A KEY AS '#comment'
               $hash = @{
@@ -290,21 +290,21 @@
           Get-AVState $dest $state
         }
       } catch {
-        $global:blnPSXML = $false
+        $script:blnPSXML = $false
         write-host $_.scriptstacktrace
         write-host $_
       }
-    } elseif ($global:blnPSXML) {                                                                   #AV PRODUCT STATES ALREADY LOADED IN HASHTABLE
-      #SET '$global:defstatus' AND '$global:rtstatus' TO INTERPRET PASSED PRODUCT STATE FROM POPULATED HASHTABLE
+    } elseif ($script:blnPSXML) {                                                                   #AV PRODUCT STATES ALREADY LOADED IN HASHTABLE
+      #SET '$script:defstatus' AND '$script:rtstatus' TO INTERPRET PASSED PRODUCT STATE FROM POPULATED HASHTABLE
       try {
-        $global:defstatus = $global:pskey["ps$($state)"].defstatus
-        $global:rtstatus = $global:pskey["ps$($state)"].rtstatus
+        $script:defstatus = $script:pskey["ps$($state)"].defstatus
+        $script:rtstatus = $script:pskey["ps$($state)"].rtstatus
       } catch {
-        $global:defstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
-        $global:rtstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
+        $script:defstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
+        $script:rtstatus = "Unknown (WMI Check)`r`nAV Product State Unknown : $($state)"
       }
     }
-    $global:diag += "$($xmldiag)"
+    $script:diag += "$($xmldiag)"
     $xmldiag = $null
   } ## Get-AVState
   
@@ -314,7 +314,7 @@
     )
     #$dest = @{}
     $xmldiag = $null
-    $global:blnAVXML = $true
+    $script:blnAVXML = $true
     #RETRIEVE AV VENDOR XML FROM GITHUB
     $xmldiag+= "Loading : '$($src)' AV Product XML`r`n"
     write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
@@ -337,115 +337,115 @@
         } catch {
           $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
           write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-          $global:blnAVXML = $false
+          $script:blnAVXML = $false
         }
       }
     }
     #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
-    if (-not $global:blnAVXML) {
+    if (-not $script:blnAVXML) {
       $xmldiag += "`r`nFailed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
       $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
       write-host "Failed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
       write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
       switch ($src) {
-        "Sophos" {$srcAVP = $global:ncxmlSOPHOS}
-        "Symantec" {$srcAVP = $global:ncxmlSYMANTEC}
-        "Trend Micro" {$srcAVP = $global:ncxmlTRENDMICRO}
-        "Windows Defender" {$srcAVP = $global:ncxmlWINDEFEND}
+        "Sophos" {$srcAVP = $script:ncxmlSOPHOS}
+        "Symantec" {$srcAVP = $script:ncxmlSYMANTEC}
+        "Trend Micro" {$srcAVP = $script:ncxmlTRENDMICRO}
+        "Windows Defender" {$srcAVP = $script:ncxmlWINDEFEND}
       }
       try {
         $avXML = New-Object System.Xml.XmlDocument
         $avXML.Load($srcAVP)
-        $global:blnAVXML = $true
+        $script:blnAVXML = $true
       } catch {
         $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
         write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
         try {
           $web = new-object system.net.webclient
           [xml]$avXML = $web.DownloadString($srcAVP)
-          $global:blnAVXML = $true
+          $script:blnAVXML = $true
         } catch {
           $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
           write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
           try {
             start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
             [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
-            $global:blnAVXML = $true
+            $script:blnAVXML = $true
           } catch {
             $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-            $global:blnAVXML = $false
+            $script:blnAVXML = $false
           }
         }
       }
     }
     #READ PRIMARY AV PRODUCT VENDOR XML DATA INTO NESTED HASHTABLE FOR LATER USE
     try {
-      if ($global:blnAVXML) {
+      if ($script:blnAVXML) {
         foreach ($itm in $avXML.NODE.ChildNodes) {
           if ($itm.name -notmatch "#comment") {                                                     #AVOID 'BUG' WITH A KEY AS '#comment'
             if ($i_PAV -notmatch "Trend Micro") {                                                   #BUILD HASHTABLE FOR ALL AV PRODUCTS EXCEPT TREND MICRO
               $hash = @{
-                display = "$($itm.$global:bitarch.display)"
-                displayval = "$($itm.$global:bitarch.displayval)"
-                path = "$($itm.$global:bitarch.path)"
-                pathval = "$($itm.$global:bitarch.pathval)"
-                ver = "$($itm.$global:bitarch.ver)"
-                verval = "$($itm.$global:bitarch.verval)"
-                compver = "$($itm.$global:bitarch.compver)"
-                stat = "$($itm.$global:bitarch.stat)"
-                statval = "$($itm.$global:bitarch.statval)"
-                update = "$($itm.$global:bitarch.update)"
-                updateval = "$($itm.$global:bitarch.updateval)"
-                source = "$($itm.$global:bitarch.source)"
-                sourceval = "$($itm.$global:bitarch.sourceval)"
-                defupdate = "$($itm.$global:bitarch.defupdate)"
-                defupdateval = "$($itm.$global:bitarch.defupdateval)"
-                tamper = "$($itm.$global:bitarch.tamper)"
-                tamperval = "$($itm.$global:bitarch.tamperval)"
-                rt = "$($itm.$global:bitarch.rt)"
-                rtval = "$($itm.$global:bitarch.rtval)"
-                scan = "$($itm.$global:bitarch.scan)"
-                scantype = "$($itm.$global:bitarch.scantype)"
-                scanval = "$($itm.$global:bitarch.scanval)"
-                alert = "$($itm.$global:bitarch.alert)"
-                alertval = "$($itm.$global:bitarch.alertval)"
-                infect = "$($itm.$global:bitarch.infect)"
-                infectval = "$($itm.$global:bitarch.infectval)"
-                threat = "$($itm.$global:bitarch.threat)"
+                display = "$($itm.$script:bitarch.display)"
+                displayval = "$($itm.$script:bitarch.displayval)"
+                path = "$($itm.$script:bitarch.path)"
+                pathval = "$($itm.$script:bitarch.pathval)"
+                ver = "$($itm.$script:bitarch.ver)"
+                verval = "$($itm.$script:bitarch.verval)"
+                compver = "$($itm.$script:bitarch.compver)"
+                stat = "$($itm.$script:bitarch.stat)"
+                statval = "$($itm.$script:bitarch.statval)"
+                update = "$($itm.$script:bitarch.update)"
+                updateval = "$($itm.$script:bitarch.updateval)"
+                source = "$($itm.$script:bitarch.source)"
+                sourceval = "$($itm.$script:bitarch.sourceval)"
+                defupdate = "$($itm.$script:bitarch.defupdate)"
+                defupdateval = "$($itm.$script:bitarch.defupdateval)"
+                tamper = "$($itm.$script:bitarch.tamper)"
+                tamperval = "$($itm.$script:bitarch.tamperval)"
+                rt = "$($itm.$script:bitarch.rt)"
+                rtval = "$($itm.$script:bitarch.rtval)"
+                scan = "$($itm.$script:bitarch.scan)"
+                scantype = "$($itm.$script:bitarch.scantype)"
+                scanval = "$($itm.$script:bitarch.scanval)"
+                alert = "$($itm.$script:bitarch.alert)"
+                alertval = "$($itm.$script:bitarch.alertval)"
+                infect = "$($itm.$script:bitarch.infect)"
+                infectval = "$($itm.$script:bitarch.infectval)"
+                threat = "$($itm.$script:bitarch.threat)"
               }
             } elseif ($i_PAV -match "Trend Micro") {                                                #BUILD HASHTABLE FOR CURSED TREND MICRO
               $hash = @{
-                display = "$($itm.$global:bitarch.display)"
-                displayval = "$($itm.$global:bitarch.displayval)"
-                path = "$($itm.$global:bitarch.path)"
-                pathval = "$($itm.$global:bitarch.pathval)"
-                corever = "$($itm.$global:bitarch.corever)"
-                coreverval = "$($itm.$global:bitarch.coreverval)"
-                vcver = "$($itm.$global:bitarch.vcver)"
-                vcverval = "$($itm.$global:bitarch.vcverval)"
-                compver = "$($itm.$global:bitarch.compver)"
-                compverval = "$($itm.$global:bitarch.compverval)"
-                stat = "$($itm.$global:bitarch.stat)"
-                statval = "$($itm.$global:bitarch.statval)"
-                update = "$($itm.$global:bitarch.update)"
-                updateval = "$($itm.$global:bitarch.updateval)"
-                source = "$($itm.$global:bitarch.source)"
-                sourceval = "$($itm.$global:bitarch.sourceval)"
-                defupdate = "$($itm.$global:bitarch.defupdate)"
-                defupdateval = "$($itm.$global:bitarch.defupdateval)"
-                tamper = "$($itm.$global:bitarch.tamper)"
-                tamperval = "$($itm.$global:bitarch.tamperval)"
-                rt = "$($itm.$global:bitarch.rt)"
-                rtval = "$($itm.$global:bitarch.rtval)"
-                scan = "$($itm.$global:bitarch.scan)"
-                scantype = "$($itm.$global:bitarch.scantype)"
-                scanval = "$($itm.$global:bitarch.scanval)"
-                alert = "$($itm.$global:bitarch.alert)"
-                alertval = "$($itm.$global:bitarch.alertval)"
-                infect = "$($itm.$global:bitarch.infect)"
-                infectval = "$($itm.$global:bitarch.infectval)"
-                threat = "$($itm.$global:bitarch.threat)"
+                display = "$($itm.$script:bitarch.display)"
+                displayval = "$($itm.$script:bitarch.displayval)"
+                path = "$($itm.$script:bitarch.path)"
+                pathval = "$($itm.$script:bitarch.pathval)"
+                corever = "$($itm.$script:bitarch.corever)"
+                coreverval = "$($itm.$script:bitarch.coreverval)"
+                vcver = "$($itm.$script:bitarch.vcver)"
+                vcverval = "$($itm.$script:bitarch.vcverval)"
+                compver = "$($itm.$script:bitarch.compver)"
+                compverval = "$($itm.$script:bitarch.compverval)"
+                stat = "$($itm.$script:bitarch.stat)"
+                statval = "$($itm.$script:bitarch.statval)"
+                update = "$($itm.$script:bitarch.update)"
+                updateval = "$($itm.$script:bitarch.updateval)"
+                source = "$($itm.$script:bitarch.source)"
+                sourceval = "$($itm.$script:bitarch.sourceval)"
+                defupdate = "$($itm.$script:bitarch.defupdate)"
+                defupdateval = "$($itm.$script:bitarch.defupdateval)"
+                tamper = "$($itm.$script:bitarch.tamper)"
+                tamperval = "$($itm.$script:bitarch.tamperval)"
+                rt = "$($itm.$script:bitarch.rt)"
+                rtval = "$($itm.$script:bitarch.rtval)"
+                scan = "$($itm.$script:bitarch.scan)"
+                scantype = "$($itm.$script:bitarch.scantype)"
+                scanval = "$($itm.$script:bitarch.scanval)"
+                alert = "$($itm.$script:bitarch.alert)"
+                alertval = "$($itm.$script:bitarch.alertval)"
+                infect = "$($itm.$script:bitarch.infect)"
+                infectval = "$($itm.$script:bitarch.infectval)"
+                threat = "$($itm.$script:bitarch.threat)"
               }
             }
             if ($dest.containskey($itm.name)) {
@@ -457,11 +457,11 @@
         }
       }
     } catch {
-      $global:blnAVXML = $false
+      $script:blnAVXML = $false
       write-host $_.scriptstacktrace
       write-host $_
     }
-    $global:diag += "$($xmldiag)"
+    $script:diag += "$($xmldiag)"
     $xmldiag = $null
   } ## Get-AVXML
   
@@ -513,48 +513,48 @@
 #------------
 #BEGIN SCRIPT
 Get-OSArch
-Get-AVXML $i_PAV $global:pavkey
-if (-not ($global:blnAVXML)) {
+Get-AVXML $i_PAV $script:pavkey
+if (-not ($script:blnAVXML)) {
   #AV DETAILS
-  $global:o_AVname = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  $global:o_AVVersion = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  $global:o_AVpath = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  $global:o_AVStatus = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_AVname = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_AVVersion = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_AVpath = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_AVStatus = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   #REAL-TIME SCANNING & DEFINITIONS
-  $global:o_RTstate = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  $global:o_DefStatus = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_RTstate = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_DefStatus = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   #THREATS
-  $global:o_Infect = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  $global:o_Threats = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_Infect = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_Threats = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   #COMPETITOR AV
-  $global:o_CompAV = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  $global:o_CompPath = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  $global:o_CompState = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-} elseif ($global:blnAVXML) {
+  $script:o_CompAV = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_CompPath = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  $script:o_CompState = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+} elseif ($script:blnAVXML) {
   #QUERY WMI SECURITYCENTER NAMESPACE FOR AV PRODUCT DETAILS
-  if ([system.version]$global:OSVersion -ge [system.version]'6.0.0.0') {
+  if ([system.version]$script:OSVersion -ge [system.version]'6.0.0.0') {
     write-verbose "OS Windows Vista/Server 2008 or newer detected."
     try {
-      $AntiVirusProduct = get-wmiobject -Namespace "root\SecurityCenter2" -Class "AntiVirusProduct" -ComputerName "$($global:computername)" -ErrorAction Stop
+      $AntiVirusProduct = get-wmiobject -Namespace "root\SecurityCenter2" -Class "AntiVirusProduct" -ComputerName "$($script:computername)" -ErrorAction Stop
     } catch {
-      $global:blnWMI = $false
+      $script:blnWMI = $false
     }
-  } elseif ([system.version]$global:OSVersion -lt [system.version]'6.0.0.0') {
+  } elseif ([system.version]$script:OSVersion -lt [system.version]'6.0.0.0') {
     write-verbose "Windows 2000, 2003, XP detected" 
     try {
-      $AntiVirusProduct = get-wmiobject -Namespace "root\SecurityCenter" -Class "AntiVirusProduct"  -ComputerName "$($global:computername)" -ErrorAction Stop
+      $AntiVirusProduct = get-wmiobject -Namespace "root\SecurityCenter" -Class "AntiVirusProduct"  -ComputerName "$($script:computername)" -ErrorAction Stop
     } catch {
-      $global:blnWMI = $false
+      $script:blnWMI = $false
     }
   }
-  if (-not $global:blnWMI) {                                                                        #FAILED TO RETURN WMI SECURITYCENTER NAMESPACE
+  if (-not $script:blnWMI) {                                                                        #FAILED TO RETURN WMI SECURITYCENTER NAMESPACE
     try {
       write-host "`r`nFailed to query WMI SecurityCenter Namespace" -foregroundcolor red
       write-host "Possibly Server, attempting to fallback to using 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' registry key" -foregroundcolor red
       try {                                                                                         #QUERY 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' AND SEE IF AN AV IS REGISTRERED THERE
-        if ($global:bitarch = "bit64") {
+        if ($script:bitarch = "bit64") {
           $AntiVirusProduct = (get-itemproperty -path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Security Center\Monitoring\*" -ErrorAction Stop).PSChildName
-        } elseif ($global:bitarch = "bit32") {
+        } elseif ($script:bitarch = "bit32") {
           $AntiVirusProduct = (get-itemproperty -path "HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\*" -ErrorAction Stop).PSChildName
         }
       } catch {
@@ -569,34 +569,34 @@ if (-not ($global:blnAVXML)) {
         foreach ($av in $AntiVirusProduct) {
           #PRIMARY AV REGISTERED UNDER 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\'
           if ($av -match $i_PAV) {
-            $global:blnPAV = $true
+            $script:blnPAV = $true
           } elseif (($i_PAV -eq "Trend Micro") -and ($av -match "Worry-Free Business Security")) {
-            $global:blnPAV = $true
+            $script:blnPAV = $true
           }
           write-host "`r`nFound 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\$($av)'" -foregroundcolor yellow
           #RETRIEVE DETECTED AV PRODUCT VENDOR XML
-          foreach ($vendor in $global:avVendors) {
+          foreach ($vendor in $script:avVendors) {
             if ($av -match $vendor) {
-              Get-AVXML $vendor $global:vavkey
+              Get-AVXML $vendor $script:vavkey
               break
             } elseif ($av -match "Worry-Free Business Security") {
-              Get-AVXML "Trend Micro" $global:vavkey
+              Get-AVXML "Trend Micro" $script:vavkey
               break
             }
           }
           #SEARCH PASSED PRIMARY AV VENDOR XML
-          foreach ($key in $global:vavkey.keys) {                                                   #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
+          foreach ($key in $script:vavkey.keys) {                                                   #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
             if ($av.replace(" ", "").replace("-", "").toupper() -eq $key.toupper()) {
               write-host "Matched AV : '$($av)' - '$($key)' AV Product" -foregroundcolor yellow
               $strName = $null
-              $regDisplay = "$($global:vavkey[$key].display)"
-              $regDisplayVal = "$($global:vavkey[$key].displayval)"
-              $regPath = "$($global:vavkey[$key].path)"
-              $regPathVal = "$($global:vavkey[$key].pathval)"
-              $regStat = "$($global:vavkey[$key].stat)"
-              $regStatVal = "$($global:vavkey[$key].statval)"
-              $regRealTime = "$($global:vavkey[$key].rt)"
-              $regRTVal = "$($global:vavkey[$key].rtval)"
+              $regDisplay = "$($script:vavkey[$key].display)"
+              $regDisplayVal = "$($script:vavkey[$key].displayval)"
+              $regPath = "$($script:vavkey[$key].path)"
+              $regPathVal = "$($script:vavkey[$key].pathval)"
+              $regStat = "$($script:vavkey[$key].stat)"
+              $regStatVal = "$($script:vavkey[$key].statval)"
+              $regRealTime = "$($script:vavkey[$key].rt)"
+              $regRTVal = "$($script:vavkey[$key].rtval)"
               break
             }
           }
@@ -638,26 +638,26 @@ if (-not ($global:blnAVXML)) {
           }
         }
       }
-      if (($AntiVirusProduct -eq $null) -or (-not $global:blnPAV)) {                                #FAILED TO RETURN 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
+      if (($AntiVirusProduct -eq $null) -or (-not $script:blnPAV)) {                                #FAILED TO RETURN 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
         $strDisplay = $null
         $blnSecMon = $true
         #RETRIEVE EACH VENDOR XML AND CHECK FOR ALL SUPPORTED AV PRODUCTS
         write-host "`r`nPrimary AV Product not found / No AV Products found; will check each AV Product in all Vendor XMLs" -foregroundcolor yellow
-        foreach ($vendor in $global:avVendors) {
-          Get-AVXML $vendor $global:vavkey
+        foreach ($vendor in $script:avVendors) {
+          Get-AVXML $vendor $script:vavkey
         }
-        foreach ($key in $global:vavkey.keys) {                                                     #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
+        foreach ($key in $script:vavkey.keys) {                                                     #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
           if ($key -notmatch "#comment") {                                                          #AVOID ODD 'BUG' WITH A KEY AS '#comment' WHEN SWITCHING AV VENDOR XMLS
             write-host "Attempting to detect AV Product : '$($key)'" -foregroundcolor yellow
             $strName = $null
-            $regDisplay = "$($global:vavkey[$key].display)"
-            $regDisplayVal = "$($global:vavkey[$key].displayval)"
-            $regPath = "$($global:vavkey[$key].path)"
-            $regPathVal = "$($global:vavkey[$key].pathval)"
-            $regStat = "$($global:vavkey[$key].stat)"
-            $regStatVal = "$($global:vavkey[$key].statval)"
-            $regRealTime = "$($global:vavkey[$key].rt)"
-            $regRTVal = "$($global:vavkey[$key].rtval)"
+            $regDisplay = "$($script:vavkey[$key].display)"
+            $regDisplayVal = "$($script:vavkey[$key].displayval)"
+            $regPath = "$($script:vavkey[$key].path)"
+            $regPathVal = "$($script:vavkey[$key].pathval)"
+            $regStat = "$($script:vavkey[$key].stat)"
+            $regStatVal = "$($script:vavkey[$key].statval)"
+            $regRealTime = "$($script:vavkey[$key].rt)"
+            $regRTVal = "$($script:vavkey[$key].rtval)"
             try {
               if (test-path "HKLM:$($regDisplay)") {                                                #VALIDATE INSTALLED AV PRODUCT BY TESTING READING A KEY
                 write-host "Found 'HKLM:$($regDisplay)' for product : $($key)" -foregroundcolor yellow
@@ -677,13 +677,13 @@ if (-not ($global:blnAVXML)) {
                   $strPath = "$($strPath)$($keyval2.$regPathVal), "
                   $strStat = "$($strStat)$($keyval3.$regStatVal.tostring()), "
                   #INTERPRET REAL-TIME SCANNING STATUS
-                  if ($global:zRealTime -contains $global:vavkey[$key].display) {                   #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
+                  if ($script:zRealTime -contains $script:vavkey[$key].display) {                   #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
                     if ($keyval4.$regRTVal = "0") {
                       $strRealTime = "$($strRealTime)Enabled (REG Check), "
                     } elseif ($keyval4.$regRTVal = "1") {
                       $strRealTime = "$($strRealTime)Disabled (REG Check), "
                     }
-                  } elseif ($global:zRealTime -notcontains $global:vavkey[$key].display) {          #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
+                  } elseif ($script:zRealTime -notcontains $script:vavkey[$key].display) {          #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
                     if ($keyval4.$regRTVal = "1") {
                       $strRealTime = "$($strRealTime)Enabled (REG Check), "
                     } elseif ($keyval4.$regRTVal = "0") {
@@ -693,7 +693,7 @@ if (-not ($global:blnAVXML)) {
                   #FABRICATE 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
                   if ($blnSecMon) {
                     write-host "Creating Registry Key HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\$strName for product : $($strName)" -foregroundcolor red
-                    if ($global:bitarch = "bit64") {
+                    if ($script:bitarch = "bit64") {
                       try {
                         new-item -path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Security Center\Monitoring\" -name "$($strName)" -value "$($strName)" -force
                       } catch {
@@ -701,7 +701,7 @@ if (-not ($global:blnAVXML)) {
                         write-host $_.scriptstacktrace
                         write-host $_
                       }
-                    } elseif ($global:bitarch = "bit32") {
+                    } elseif ($script:bitarch = "bit32") {
                       try {
                         new-item -path "HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\" -name "$($strName)" -value "$($strName)" -force
                       } catch {
@@ -736,7 +736,7 @@ if (-not ($global:blnAVXML)) {
       write-host $_.scriptstacktrace
       write-host $_
     }
-  } elseif ($global:blnWMI) {                                                                       #RETURNED WMI SECURITYCENTER NAMESPACE
+  } elseif ($script:blnWMI) {                                                                       #RETURNED WMI SECURITYCENTER NAMESPACE
     #SEPARATE RETURNED WMI AV PRODUCT INSTANCES
     if ($AntiVirusProduct -ne $null) {                                                              #RETURNED WMI AV PRODUCT DATA
       $tmpavs = $AntiVirusProduct.displayName -split ", "
@@ -746,21 +746,21 @@ if (-not ($global:blnAVXML)) {
       $strDisplay = ""
       #RETRIEVE EACH VENDOR XML AND CHECK FOR ALL SUPPORTED AV PRODUCTS
       write-host "`r`nPrimary AV Product not found / No AV Products found; will check each AV Product in all Vendor XMLs" -foregroundcolor yellow
-      foreach ($vendor in $global:avVendors) {
-        Get-AVXML $vendor $global:vavkey
+      foreach ($vendor in $script:avVendors) {
+        Get-AVXML $vendor $script:vavkey
       }
-      foreach ($key in $global:vavkey.keys) {                                                       #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
+      foreach ($key in $script:vavkey.keys) {                                                       #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
         if ($key -notmatch "#comment") {                                                            #AVOID ODD 'BUG' WITH A KEY AS '#comment' WHEN SWITCHING AV VENDOR XMLS
           write-host "Attempting to detect AV Product : '$($key)'" -foregroundcolor yellow
           $strName = $null
-          $regDisplay = "$($global:vavkey[$key].display)"
-          $regDisplayVal = "$($global:vavkey[$key].displayval)"
-          $regPath = "$($global:vavkey[$key].path)"
-          $regPathVal = "$($global:vavkey[$key].pathval)"
-          $regStat = "$($global:vavkey[$key].stat)"
-          $regStatVal = "$($global:vavkey[$key].statval)"
-          $regRealTime = "$($global:vavkey[$key].rt)"
-          $regRTVal = "$($global:vavkey[$key].rtval)"
+          $regDisplay = "$($script:vavkey[$key].display)"
+          $regDisplayVal = "$($script:vavkey[$key].displayval)"
+          $regPath = "$($script:vavkey[$key].path)"
+          $regPathVal = "$($script:vavkey[$key].pathval)"
+          $regStat = "$($script:vavkey[$key].stat)"
+          $regStatVal = "$($script:vavkey[$key].statval)"
+          $regRealTime = "$($script:vavkey[$key].rt)"
+          $regRTVal = "$($script:vavkey[$key].rtval)"
           try {
             if (test-path "HKLM:$($regDisplay)") {                                                  #VALIDATE INSTALLED AV PRODUCT BY TESTING READING A KEY
               write-host "Found 'HKLM:$($regDisplay)' for product : $($key)" -foregroundcolor yellow
@@ -780,13 +780,13 @@ if (-not ($global:blnAVXML)) {
                 $strPath = "$($strPath)$($keyval2.$regPathVal), "
                 $strStat = "$($strStat)$($keyval3.$regStatVal.tostring()), "
                 #INTERPRET REAL-TIME SCANNING STATUS
-                if ($global:zRealTime -contains $global:vavkey[$key].display) {                     #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
+                if ($script:zRealTime -contains $script:vavkey[$key].display) {                     #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
                   if ($keyval4.$regRTVal = "0") {
                     $strRealTime = "$($strRealTime)Enabled (REG Check), "
                   } elseif ($keyval4.$regRTVal = "1") {
                     $strRealTime = "$($strRealTime)Disabled (REG Check), "
                   }
-                } elseif ($global:zRealTime -notcontains $global:vavkey[$key].display) {            #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
+                } elseif ($script:zRealTime -notcontains $script:vavkey[$key].display) {            #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
                   if ($keyval4.$regRTVal = "1") {
                     $strRealTime = "$($strRealTime)Enabled (REG Check), "
                   } elseif ($keyval4.$regRTVal = "0") {
@@ -866,37 +866,37 @@ if (-not ($global:blnAVXML)) {
   if ($AntiVirusProduct -eq $null) {                                                                #NO AV PRODUCT FOUND
     $AntiVirusProduct
     write-host "Could not find any AV Product registered" -foregroundcolor red
-    $global:o_AVname = "No AV Product Found"
-    $global:o_AVVersion = $null
-    $global:o_AVpath = $null
-    $global:o_AVStatus = "Unknown"
-    $global:o_RTstate = "Unknown"
-    $global:o_DefStatus = "Unknown"
-    $global:o_AVcon = 0
+    $script:o_AVname = "No AV Product Found"
+    $script:o_AVVersion = $null
+    $script:o_AVpath = $null
+    $script:o_AVStatus = "Unknown"
+    $script:o_RTstate = "Unknown"
+    $script:o_DefStatus = "Unknown"
+    $script:o_AVcon = 0
   } elseif ($AntiVirusProduct -ne $null) {                                                          #FOUND AV PRODUCTS
     foreach ($av in $avs.keys) {                                                                    #ITERATE THROUGH EACH FOUND AV PRODUCT
       if (($avs[$av].display -ne $null) -and ($avs[$av].display -ne "")) {
         #NEITHER PRIMARY AV PRODUCT NOR WINDOWS DEFENDER
         if (($avs[$av].display -notmatch $i_PAV) -and ($avs[$av].display -notmatch "Windows Defender")) {
           if (($i_PAV -eq "Trend Micro") -and (($avs[$av].display -notmatch "Trend Micro") -and ($avs[$av].display -notmatch "Worry-Free Business Security"))) {
-            $global:o_AVcon = 1
-            $global:o_CompAV += "$($avs[$av].display)`r`n"
-            $global:o_CompPath += "$($avs[$av].path)`r`n"
-            if ($global:blnWMI) {
-              Get-AVState $global:pskey $avs[$av].stat
-              $global:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($global:rtstatus) - Definitions : $($global:defstatus)`r`n"
-            } elseif (-not $global:blnWMI) {
-              $global:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
+            $script:o_AVcon = 1
+            $script:o_CompAV += "$($avs[$av].display)`r`n"
+            $script:o_CompPath += "$($avs[$av].path)`r`n"
+            if ($script:blnWMI) {
+              Get-AVState $script:pskey $avs[$av].stat
+              $script:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($script:rtstatus) - Definitions : $($script:defstatus)`r`n"
+            } elseif (-not $script:blnWMI) {
+              $script:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
             }
           } elseif ($i_PAV -ne "Trend Micro") {
-            $global:o_AVcon = 1
-            $global:o_CompAV += "$($avs[$av].display)`r`n"
-            $global:o_CompPath += "$($avs[$av].path)`r`n"
-            if ($global:blnWMI) {
-              Get-AVState $global:pskey $avs[$av].stat
-              $global:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($global:rtstatus) - Definitions : $($global:defstatus)`r`n"
-            } elseif (-not $global:blnWMI) {
-              $global:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
+            $script:o_AVcon = 1
+            $script:o_CompAV += "$($avs[$av].display)`r`n"
+            $script:o_CompPath += "$($avs[$av].path)`r`n"
+            if ($script:blnWMI) {
+              Get-AVState $script:pskey $avs[$av].stat
+              $script:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($script:rtstatus) - Definitions : $($script:defstatus)`r`n"
+            } elseif (-not $script:blnWMI) {
+              $script:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
             }
           }
         }
@@ -906,66 +906,66 @@ if (-not ($global:blnAVXML)) {
           #PARSE XML FOR SPECIFIC VENDOR AV PRODUCT
           $node = $avs[$av].display.replace(" ", "").replace("-", "").toupper()
           #AV DETAILS
-          $global:o_AVname = $avs[$av].display
-          $global:o_AVpath = $avs[$av].path
+          $script:o_AVname = $avs[$av].display
+          $script:o_AVpath = $avs[$av].path
           #AV PRODUCT VERSION
           if ($i_PAV -notmatch "Trend Micro") {
-            $i_verkey = $global:pavkey[$node].ver
-            $i_verval = $global:pavkey[$node].verval
+            $i_verkey = $script:pavkey[$node].ver
+            $i_verval = $script:pavkey[$node].verval
           } elseif ($i_PAV -match "Trend Micro") {
-            $i_verkey = $global:pavkey[$node].corever
-            $i_verval = $global:pavkey[$node].coreverval
-            $i_vckey = $global:pavkey[$node].vcver
-            $i_vcval = $global:pavkey[$node].vcverval
+            $i_verkey = $script:pavkey[$node].corever
+            $i_verval = $script:pavkey[$node].coreverval
+            $i_vckey = $script:pavkey[$node].vcver
+            $i_vcval = $script:pavkey[$node].vcverval
           }
           #AV PRODUCT COMPONENTS VERSIONS
-          $i_compverkey = $global:pavkey[$node].compver
+          $i_compverkey = $script:pavkey[$node].compver
           if ($i_PAV -match "Trend Micro") {
-            $i_compverval = $global:pavkey[$node].compverval
+            $i_compverval = $script:pavkey[$node].compverval
           }
           #AV PRODUCT STATE
-          $i_statkey = $global:pavkey[$node].stat
-          $i_statval = $global:pavkey[$node].statval
+          $i_statkey = $script:pavkey[$node].stat
+          $i_statval = $script:pavkey[$node].statval
           #AV PRODUCT LAST UPDATE TIMESTAMP
-          $i_update = $global:pavkey[$node].update
-          $i_updateval = $global:pavkey[$node].updateval
+          $i_update = $script:pavkey[$node].update
+          $i_updateval = $script:pavkey[$node].updateval
           #AV PRODUCT UPDATE SOURCE
-          $i_source = $global:pavkey[$node].source
-          $i_sourceval = $global:pavkey[$node].sourceval
+          $i_source = $script:pavkey[$node].source
+          $i_sourceval = $script:pavkey[$node].sourceval
           #AV PRODUCT REAL-TIME SCANNING
-          $i_rtkey = $global:pavkey[$node].rt
-          $i_rtval = $global:pavkey[$node].rtval
+          $i_rtkey = $script:pavkey[$node].rt
+          $i_rtval = $script:pavkey[$node].rtval
           #AV PRODUCT DEFINITIONS
-          $i_defupdate = $global:pavkey[$node].defupdate
-          $i_defupdateval = $global:pavkey[$node].defupdateval
+          $i_defupdate = $script:pavkey[$node].defupdate
+          $i_defupdateval = $script:pavkey[$node].defupdateval
           #AV PRODUCT TAMPER PROTECTION
-          $i_tamper = $global:pavkey[$node].tamper
-          $i_tamperval = $global:pavkey[$node].tamperval
+          $i_tamper = $script:pavkey[$node].tamper
+          $i_tamperval = $script:pavkey[$node].tamperval
           #AV PRODUCT SCANS
-          $i_scan = $global:pavkey[$node].scan
-          $i_scantype = $global:pavkey[$node].scantype
-          $i_scanval = $global:pavkey[$node].scanval
+          $i_scan = $script:pavkey[$node].scan
+          $i_scantype = $script:pavkey[$node].scantype
+          $i_scanval = $script:pavkey[$node].scanval
           #AV PRODUCT ALERTS
-          $i_alert = $global:pavkey[$node].alert
-          $i_alertval = $global:pavkey[$node].alertval
+          $i_alert = $script:pavkey[$node].alert
+          $i_alertval = $script:pavkey[$node].alertval
           #AV PRODUCT INFECTIONS
-          $i_infect = $global:pavkey[$node].infect
-          $i_infectval = $global:pavkey[$node].infectval
+          $i_infect = $script:pavkey[$node].infect
+          $i_infectval = $script:pavkey[$node].infectval
           #AV PRODUCT THREATS
-          $i_threat = $global:pavkey[$node].threat
+          $i_threat = $script:pavkey[$node].threat
           #GET PRIMARY AV PRODUCT VERSION VIA REGISTRY
           try {
             write-host "Reading : -path 'HKLM:$($i_verkey)' -name '$($i_verval)'" -foregroundcolor yellow
-            $global:o_AVVersion = get-itemproperty -path "HKLM:$($i_verkey)" -name "$($i_verval)" -erroraction stop
-            $global:o_AVVersion = "$($global:o_AVVersion.$i_verval)"
+            $script:o_AVVersion = get-itemproperty -path "HKLM:$($i_verkey)" -name "$($i_verval)" -erroraction stop
+            $script:o_AVVersion = "$($script:o_AVVersion.$i_verval)"
           } catch {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_verkey)' -name '$($i_verval)'" -foregroundcolor red
-            $global:o_AVVersion = "."
+            $script:o_AVVersion = "."
             write-host $_.scriptstacktrace
             write-host $_
           }
           #GET PRIMARY AV PRODUCT COMPONENT VERSIONS
-          $o_compver = "Core Version : $($global:o_AVVersion)`r`n"
+          $o_compver = "Core Version : $($script:o_AVVersion)`r`n"
           try {
             write-host "Reading : -path 'HKLM:$($i_compverkey)'" -foregroundcolor yellow
             if ($i_PAV -match "Sophos") {                                                           #SOPHOS COMPONENT VERSIONS
@@ -974,10 +974,10 @@ if (-not ($global:blnAVXML)) {
                 if (($component -ne $null) -and ($component -ne "")) {
                   $longname = get-itemproperty -path "HKLM:$($i_compverkey)$($component.PSChildName)" -name "LongName" -erroraction silentlycontinue
                   $installver = get-itemproperty -path "HKLM:$($i_compverkey)$($component.PSChildName)" -name "InstalledVersion" -erroraction silentlycontinue
-                  Pop-Components $global:compkey $($longname.LongName) $($installver.InstalledVersion)
+                  Pop-Components $script:compkey $($longname.LongName) $($installver.InstalledVersion)
                 }
               }
-              $sort = $global:compkey.GetEnumerator() | sort -Property name
+              $sort = $script:compkey.GetEnumerator() | sort -Property name
               foreach ($component in $sort) {
                 $o_compver += "$($component.name) Version : $($component.value)`r`n"
               }
@@ -1000,10 +1000,10 @@ if (-not ($global:blnAVXML)) {
           try {
             write-host "Reading : -path 'HKLM:$($i_source)' -name '$($i_sourceval)'" -foregroundcolor yellow
             $sourcekey = get-itemproperty -path "HKLM:$($i_source)" -name "$($i_sourceval)" -erroraction stop
-            $global:o_AVStatus = "Update Source : $($sourcekey.$i_sourceval)`r`n"
+            $script:o_AVStatus = "Update Source : $($sourcekey.$i_sourceval)`r`n"
           } catch {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_source)' -name '$($i_sourceval)'" -foregroundcolor red
-            $global:o_AVStatus = "Update Source : Unknown`r`n"
+            $script:o_AVStatus = "Update Source : Unknown`r`n"
             write-host $_.scriptstacktrace
             write-host $_
           }
@@ -1024,24 +1024,24 @@ if (-not ($global:blnAVXML)) {
               write-host "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor yellow
               $statkey = get-itemproperty -path "HKLM:$($i_statkey)" -name "$($i_statval)" -erroraction stop
               #INTERPRET 'AVSTATUS' BASED ON ANY AV PRODUCT VALUE REPRESENTATION
-              if ($global:zUpgrade -contains $avs[$av].display) {                                   #AV PRODUCTS TREATING '0' AS 'UPTODATE'
+              if ($script:zUpgrade -contains $avs[$av].display) {                                   #AV PRODUCTS TREATING '0' AS 'UPTODATE'
                 write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '0')" -foregroundcolor yellow
                 if ($statkey.$i_statval -eq "0") {
-                  $global:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
+                  $script:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
                 } else {
-                  $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
+                  $script:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
                 }
-              } elseif ($global:zUpgrade -notcontains $avs[$av].display) {                          #AV PRODUCTS TREATING '1' AS 'UPTODATE'
+              } elseif ($script:zUpgrade -notcontains $avs[$av].display) {                          #AV PRODUCTS TREATING '1' AS 'UPTODATE'
                 write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '1')" -foregroundcolor yellow
                 if ($statkey.$i_statval -eq "1") {
-                  $global:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
+                  $script:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
                 } else {
-                  $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
+                  $script:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
                 }
               }
             } catch {
               write-host "Could not validate Registry data : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor red
-              $global:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
+              $script:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
               write-host $_.scriptstacktrace
               write-host $_
             }
@@ -1049,20 +1049,20 @@ if (-not ($global:blnAVXML)) {
             try {
               write-host "'Trend Micro' Detected : Reading : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor yellow
               $vckey = get-itemproperty -path "HKLM:$($i_vckey)" -name "$($i_vcval)" -erroraction stop
-              write-host "$($avs[$av].display) reports '$($global:o_AVVersion)' for 'Up-To-Date' (Expected : '$($compverkey[0])')" -foregroundcolor yellow
+              write-host "$($avs[$av].display) reports '$($script:o_AVVersion)' for 'Up-To-Date' (Expected : '$($compverkey[0])')" -foregroundcolor yellow
               write-host "$($avs[$av].display) reports '$($vckey.$i_vcval)' for 'Up-To-Date' (Expected : '$($compverkey[1])')" -foregroundcolor yellow
-              if (([version]$($global:o_AVVersion) -ge [version]$($compverkey[0])) -and 
+              if (([version]$($script:o_AVVersion) -ge [version]$($compverkey[0])) -and 
                 ([version]$($vckey.$i_vcval) -ge [version]$($compverkey[1]))) {
-                  $global:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
-              } elseif (([version]$($global:o_AVVersion) -lt [version]$($compverkey[0])) -or 
+                  $script:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
+              } elseif (([version]$($script:o_AVVersion) -lt [version]$($compverkey[0])) -or 
                 ([version]$($vckey.$i_vcval) -lt [version]$($compverkey[1]))) {
-                  $global:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
+                  $script:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
               }
-              $global:o_AVStatus += "Core Version : $($global:o_AVVersion) - Expected : '$($compverkey[0])'`r`n"
-              $global:o_AVStatus += "VC Version : $($vckey.$i_vcval) - Expected : '$($compverkey[1])'`r`n"
+              $script:o_AVStatus += "Core Version : $($script:o_AVVersion) - Expected : '$($compverkey[0])'`r`n"
+              $script:o_AVStatus += "VC Version : $($vckey.$i_vcval) - Expected : '$($compverkey[1])'`r`n"
             } catch {
               write-host "Could not validate Registry data : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor red
-              $global:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
+              $script:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
               write-host $_.scriptstacktrace
               write-host $_
             }
@@ -1075,22 +1075,22 @@ if (-not ($global:blnAVXML)) {
               $Int64Value = [System.BitConverter]::ToInt64($updatekey.$i_updateval, 0)
               $time = [DateTime]::FromFileTime($Int64Value)
               $update = Get-Date($time)
-              $global:o_AVStatus += "Last Major Update : $(Get-EpochDate($($update))("sec"))`r`n"
+              $script:o_AVStatus += "Last Major Update : $(Get-EpochDate($($update))("sec"))`r`n"
               $age = new-timespan -start $update -end (Get-Date)
             } elseif ($avs[$av].display -notmatch "Windows Defender") {                             #ALL OTHER AV LAST UPDATE TIMESTAMP
               if ($avs[$av].display -match "Symantec") {                                            #SYMANTEC AV UPDATE TIMESTAMP
-                $global:o_AVStatus += "Last Major Update : $(Get-EpochDate($($updatekey.$i_updateval))("msec"))`r`n"
+                $script:o_AVStatus += "Last Major Update : $(Get-EpochDate($($updatekey.$i_updateval))("msec"))`r`n"
                 $age = new-timespan -start (Get-EpochDate($updatekey.$i_updateval)("msec")) -end (Get-Date)
               } elseif ($avs[$av].display -notmatch "Symantec") {                                   #ALL OTHER AV LAST UPDATE TIMESTAMP
-                $global:o_AVStatus += "Last Major Update : $(Get-EpochDate($($updatekey.$i_updateval))("sec"))`r`n"
+                $script:o_AVStatus += "Last Major Update : $(Get-EpochDate($($updatekey.$i_updateval))("sec"))`r`n"
                 $age = new-timespan -start (Get-EpochDate($updatekey.$i_updateval)("sec")) -end (Get-Date)
               }
             }
-            $global:o_AVStatus += "Days Since Update (DD:HH:MM) : $($age.tostring("dd\:hh\:mm"))`r`n"
+            $script:o_AVStatus += "Days Since Update (DD:HH:MM) : $($age.tostring("dd\:hh\:mm"))`r`n"
           } catch {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_update)' -name '$($i_updateval)'" -foregroundcolor red
-            $global:o_AVStatus += "Last Major Update : N/A`r`n"
-            $global:o_AVStatus += "Days Since Update (DD:HH:MM) : N/A`r`n"
+            $script:o_AVStatus += "Last Major Update : N/A`r`n"
+            $script:o_AVStatus += "Days Since Update (DD:HH:MM) : N/A`r`n"
             write-host $_.scriptstacktrace
             write-host $_
           }
@@ -1098,34 +1098,34 @@ if (-not ($global:blnAVXML)) {
           try {
             write-host "Reading : -path 'HKLM:$($i_rtkey)' -name '$($i_rtval)'" -foregroundcolor yellow
             $rtkey = get-itemproperty -path "HKLM:$($i_rtkey)" -name "$($i_rtval)" -erroraction stop
-            $global:o_RTstate = "$($rtkey.$i_rtval)"
+            $script:o_RTstate = "$($rtkey.$i_rtval)"
             #INTERPRET 'REAL-TIME SCANNING' STATUS BASED ON ANY AV PRODUCT VALUE REPRESENTATION
-            if ($global:zRealTime -contains $avs[$av].display) {                                    #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
+            if ($script:zRealTime -contains $avs[$av].display) {                                    #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
               write-host "$($avs[$av].display) reports '$($rtkey.$i_rtval)' for 'Real-Time Scanning' (Expected : '0')" -foregroundcolor yellow
               if ($rtkey.$i_rtval -eq 0) {
-                $global:o_RTstate = "Enabled (REG Check)`r`n"
+                $script:o_RTstate = "Enabled (REG Check)`r`n"
               } elseif ($rtkey.$i_rtval -eq 1) {
-                $global:o_RTstate = "Disabled (REG Check)`r`n"
+                $script:o_RTstate = "Disabled (REG Check)`r`n"
               } else {
-                $global:o_RTstate = "Unknown (REG Check)`r`n"
+                $script:o_RTstate = "Unknown (REG Check)`r`n"
               }
-            } elseif ($global:zRealTime -notcontains $avs[$av].display) {                           #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
+            } elseif ($script:zRealTime -notcontains $avs[$av].display) {                           #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
               write-host "$($avs[$av].display) reports '$($rtkey.$i_rtval)' for 'Real-Time Scanning' (Expected : '1')" -foregroundcolor yellow
               if ($rtkey.$i_rtval -eq 1) {
-                $global:o_RTstate = "Enabled (REG Check)`r`n"
+                $script:o_RTstate = "Enabled (REG Check)`r`n"
               } elseif ($rtkey.$i_rtval -eq 0) {
-                $global:o_RTstate = "Disabled (REG Check)`r`n"
+                $script:o_RTstate = "Disabled (REG Check)`r`n"
               } else {
-                $global:o_RTstate = "Unknown (REG Check)`r`n"
+                $script:o_RTstate = "Unknown (REG Check)`r`n"
               }
             }
           } catch {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_rtkey)' -name '$($i_rtval)'" -foregroundcolor red
-            $global:o_RTstate = "N/A (REG Check)`r`n"
+            $script:o_RTstate = "N/A (REG Check)`r`n"
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $global:o_AVStatus += "Real-Time Scanning : $($global:o_RTstate)"
+          $script:o_AVStatus += "Real-Time Scanning : $($script:o_RTstate)"
           #GET PRIMARY AV PRODUCT TAMPER PROTECTION STATUS
           try {
             if ($avs[$av].display -notmatch "Sophos Intercept X") {
@@ -1151,7 +1151,7 @@ if (-not ($global:blnAVXML)) {
               } else {
                 $tamper = "Unknown (REG Check)"
               }
-            } elseif ($global:zTamper -contains $avs[$av].display) {                                #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'TAMPER PROTECTION'
+            } elseif ($script:zTamper -contains $avs[$av].display) {                                #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'TAMPER PROTECTION'
               write-host "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '0')" -foregroundcolor yellow
               if ($tval -eq 0) {
                 $tamper = "$($true) (REG Check)"
@@ -1160,7 +1160,7 @@ if (-not ($global:blnAVXML)) {
               } else {
                 $tamper = "Unknown (REG Check)"
               }
-            } elseif ($global:zTamper -notcontains $avs[$av].display) {                             #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'TAMPER PROTECTION'
+            } elseif ($script:zTamper -notcontains $avs[$av].display) {                             #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'TAMPER PROTECTION'
               write-host "$($avs[$av].display) reports '$($tval)' for 'Tamper Protection' (Expected : '1')" -foregroundcolor yellow
               if ($tval -eq 1) {
                 $tamper = "$($true) (REG Check)"
@@ -1176,7 +1176,7 @@ if (-not ($global:blnAVXML)) {
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $global:o_AVStatus += "Tamper Protection : $($tamper)"
+          $script:o_AVStatus += "Tamper Protection : $($tamper)"
           #GET PRIMARY AV PRODUCT LAST SCAN DETAILS
           $lastage = 0
           if ($avs[$av].display -match "Windows Defender") {                                        #WINDOWS DEFENDER SCAN DATA
@@ -1257,14 +1257,14 @@ if (-not ($global:blnAVXML)) {
               $scans += "Recently Scanned : $($false) (REG Check)"
             }
           }
-          $global:o_AVStatus += "`r`n$($scans)"
+          $script:o_AVStatus += "`r`n$($scans)"
           #GET PRIMARY AV PRODUCT DEFINITIONS / SIGNATURES / PATTERN
-          if ($global:blnWMI) {
+          if ($script:blnWMI) {
             #will still return if it is unknown, etc. if it is unknown look at the code it returns, then look up the status and add it above
-            Get-AVState $global:pskey $avs[$av].stat
-            $global:o_DefStatus = "$($global:defstatus)`r`n"
-          } elseif (-not $global:blnWMI) {
-            $global:o_DefStatus = "N/A (WMI Check)`r`n"
+            Get-AVState $script:pskey $avs[$av].stat
+            $script:o_DefStatus = "$($script:defstatus)`r`n"
+          } elseif (-not $script:blnWMI) {
+            $script:o_DefStatus = "N/A (WMI Check)`r`n"
           }
           try {
             $time1 = New-TimeSpan -days 1
@@ -1276,42 +1276,42 @@ if (-not ($global:blnAVXML)) {
               $update = Get-Date($time)
               $age = new-timespan -start $update -end (Get-Date)
               if ($age.compareto($time1) -le 0) {
-                $global:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
+                $script:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
               } elseif ($age.compareto($time1) -gt 0) {
-                $global:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
+                $script:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
               }
-              $global:o_DefStatus += "Last Definition Update : $($update)`r`n"
+              $script:o_DefStatus += "Last Definition Update : $($update)`r`n"
             } elseif ($avs[$av].display -notmatch "Windows Defender") {                             #ALL OTHER AV DEFINITION UPDATE TIMESTAMP
               if ($avs[$av].display -match "Symantec") {                                            #SYMANTEC DEFINITION UPDATE TIMESTAMP
                 $age = new-timespan -start ($defkey.$i_defupdateval) -end (Get-Date)
                 if ($age.compareto($time1) -le 0) {
-                  $global:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
+                  $script:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
                 } elseif ($age.compareto($time1) -gt 0) {
-                  $global:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
+                  $script:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
                 }
-                $global:o_DefStatus += "Last Definition Update : $($defkey.$i_defupdateval)`r`n"
+                $script:o_DefStatus += "Last Definition Update : $($defkey.$i_defupdateval)`r`n"
               } elseif ($avs[$av].display -notmatch "Symantec") {                                   #NON-SYMANTEC DEFINITION UPDATE TIMESTAMP
                 $age = new-timespan -start (Get-EpochDate($defkey.$i_defupdateval)("sec")) -end (Get-Date)
                 if ($age.compareto($time1) -le 0) {
-                  $global:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
+                  $script:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
                 } elseif ($age.compareto($time1) -gt 0) {
-                  $global:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
+                  $script:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
                 }
-                $global:o_DefStatus += "Last Definition Update : $(Get-EpochDate($($defkey.$i_defupdateval))("sec"))`r`n"
+                $script:o_DefStatus += "Last Definition Update : $(Get-EpochDate($($defkey.$i_defupdateval))("sec"))`r`n"
               }
             }
-            $global:o_DefStatus += "Definition Age (DD:HH:MM) : $($age.tostring("dd\:hh\:mm"))"
+            $script:o_DefStatus += "Definition Age (DD:HH:MM) : $($age.tostring("dd\:hh\:mm"))"
           } catch {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_defupdate)' -name '$($i_defupdateval)'" -foregroundcolor red
-            $global:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
-            $global:o_DefStatus += "Last Definition Update : N/A`r`n"
-            $global:o_DefStatus += "Definition Age (DD:HH:MM) : N/A"
+            $script:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
+            $script:o_DefStatus += "Last Definition Update : N/A`r`n"
+            $script:o_DefStatus += "Definition Age (DD:HH:MM) : N/A"
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $global:o_DefStatus = "Definition Status : $($global:o_DefStatus)"
+          $script:o_DefStatus = "Definition Status : $($script:o_DefStatus)"
           #GET PRIMARY AV PRODUCT DETECTED ALERTS VIA REGISTRY
-          if ($global:zNoAlert -notcontains $i_PAV) {
+          if ($script:zNoAlert -notcontains $i_PAV) {
             if ($i_PAV -match "Sophos") {
               try {
                 write-host "Reading : -path 'HKLM:$($i_alert)'" -foregroundcolor yellow
@@ -1319,26 +1319,26 @@ if (-not ($global:blnAVXML)) {
                 foreach ($alert in $alertkey.psobject.Properties) {
                   if (($alert.name -notlike "PS*") -and ($alert.name -notlike "(default)")) {
                     if ($alert.value -eq 0) {
-                      $global:o_Infect += "Type - $($alert.name) : $($false)`r`n"
+                      $script:o_Infect += "Type - $($alert.name) : $($false)`r`n"
                     } elseif ($alert.value -eq 1) {
-                      $global:o_Infect += "Type - $($alert.name) : $($true)`r`n"
+                      $script:o_Infect += "Type - $($alert.name) : $($true)`r`n"
                     }
                   }
                 }
               } catch {
                 write-host "Could not validate Registry data : 'HKLM:$($i_alert)'" -foregroundcolor red
-                $global:o_Infect = "N/A`r`n"
+                $script:o_Infect = "N/A`r`n"
                 write-host $_.scriptstacktrace
                 write-host $_
               }
             }
             # NOT ACTUAL DETECTIONS - SAVE BELOW CODE FOR 'CONFIGURED ALERTS' METRIC
             #elseif ($i_PAV -match "Trend Micro") {
-            #  if ($global:producttype -eq "Workstation") {
+            #  if ($script:producttype -eq "Workstation") {
             #    $i_alert += "Client"
             #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
             #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
-            #  } elseif (($global:producttype -eq "Server") -or ($global:producttype -eq "DC")) {
+            #  } elseif (($script:producttype -eq "Server") -or ($script:producttype -eq "DC")) {
             #    $i_alert += "Server"
             #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
             #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
@@ -1346,16 +1346,16 @@ if (-not ($global:blnAVXML)) {
             #  foreach ($alert in $alertkey.psobject.Properties) {
             #    if (($alert.name -notlike "PS*") -and ($alert.name -notlike "(default)")) {
             #      if ($alert.value -eq 0) {
-            #        $global:o_Infect += "Type - $($alert.name) : $false`r`n"
+            #        $script:o_Infect += "Type - $($alert.name) : $false`r`n"
             #      } elseif ($alert.value -eq 1) {
-            #        $global:o_Infect += "Type - $($alert.name) : $true`r`n"
+            #        $script:o_Infect += "Type - $($alert.name) : $true`r`n"
             #      }
             #    }
             #  }
             #}
           }
           #GET PRIMARY AV PRODUCT DETECTED INFECTIONS VIA REGISTRY
-          if ($global:zNoInfect -notcontains $i_PAV) {
+          if ($script:zNoInfect -notcontains $i_PAV) {
             if ($i_PAV -match "Sophos") {                                                           #SOPHOS DETECTED INFECTIONS
               try {
                 write-host "Reading : -path 'HKLM:$($i_infect)'" -foregroundcolor yellow
@@ -1363,15 +1363,15 @@ if (-not ($global:blnAVXML)) {
                 foreach ($infect in $infectkey.psobject.Properties) {                               #ENUMERATE EACH DETECTED INFECTION
                   if (($infect.name -notlike "PS*") -and ($infect.name -notlike "(default)")) {
                     if ($infect.value -eq 0) {
-                      $global:o_Infect += "Type - $($infect.name) : $($false)`r`n"
+                      $script:o_Infect += "Type - $($infect.name) : $($false)`r`n"
                     } elseif ($infect.value -eq 1) {
-                      $global:o_Infect += "Type - $($infect.name) : $($true)`r`n"
+                      $script:o_Infect += "Type - $($infect.name) : $($true)`r`n"
                     }
                   }
                 }
               } catch {
                 write-host "Could not validate Registry data : 'HKLM:$($i_infect)'" -foregroundcolor red
-                $global:o_Infect += "Virus/Malware Present : N/A`r`n"
+                $script:o_Infect += "Virus/Malware Present : N/A`r`n"
                 write-host $_.scriptstacktrace
                 write-host $_
               }
@@ -1380,13 +1380,13 @@ if (-not ($global:blnAVXML)) {
                 write-host "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor yellow
                 $infectkey = get-ItemProperty -path "HKLM:$($i_infect)" -name "$($i_infectval)" -erroraction silentlycontinue
                 if ($infectkey.$i_infectval -eq 0) {                                                #NO DETECTED INFECTIONS
-                  $global:o_Infect += "Virus/Malware Present : $($false)`r`nVirus/Malware Count : $($infectkey.$i_infectval)`r`n"
+                  $script:o_Infect += "Virus/Malware Present : $($false)`r`nVirus/Malware Count : $($infectkey.$i_infectval)`r`n"
                 } elseif ($infectkey.$i_infectval -gt 0) {                                          #DETECTED INFECTIONS
-                  $global:o_Infect += "Virus/Malware Present : $($true)`r`nVirus/Malware Count : $($infectkey.$i_infectval)`r`n"
+                  $script:o_Infect += "Virus/Malware Present : $($true)`r`nVirus/Malware Count : $($infectkey.$i_infectval)`r`n"
                 }
               } catch {
                 write-host "Could not validate Registry data : 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor red
-                $global:o_Infect += "Virus/Malware Present : N/A`r`n"
+                $script:o_Infect += "Virus/Malware Present : N/A`r`n"
                 write-host $_.scriptstacktrace
                 write-host $_
               }
@@ -1395,7 +1395,7 @@ if (-not ($global:blnAVXML)) {
                 write-host "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor yellow
                 $infectkey = get-ItemProperty -path "HKLM:$($i_infect)" -name "$($i_infectval)" -erroraction silentlycontinue
                 if ($infectkey.$i_infectval -eq 0) {                                                #NO DETECTED INFECTIONS
-                  $global:o_Infect += "Virus/Malware Present : $($false)`r`n"
+                  $script:o_Infect += "Virus/Malware Present : $($false)`r`n"
                 } elseif ($infectkey.$i_infectval -gt 0) {                                          #DETECTED INFECTIONS
                   try {
                     write-host "Reading : -path 'HKLM:$($i_scan)' -name 'WorstInfectionType'" -foregroundcolor yellow
@@ -1407,18 +1407,18 @@ if (-not ($global:blnAVXML)) {
                     write-host $_.scriptstacktrace
                     write-host $_
                   }
-                  $global:o_Infect += "Virus/Malware Present : $($true)`r`nWorst Infection Type : $($worst)`r`n"
+                  $script:o_Infect += "Virus/Malware Present : $($true)`r`nWorst Infection Type : $($worst)`r`n"
                 }
               } catch {
                 write-host "Could not validate Registry data : 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor red
-                $global:o_Infect += "Virus/Malware Present : N/A`r`nWorst Infection Type : N/A`r`n"
+                $script:o_Infect += "Virus/Malware Present : N/A`r`nWorst Infection Type : N/A`r`n"
                 write-host $_.scriptstacktrace
                 write-host $_
               }
             }
           }
           #GET PRIMARY AV PRODUCT DETECTED THREATS VIA REGISTRY
-          if ($global:zNoThreat -notcontains $i_PAV) {
+          if ($script:zNoThreat -notcontains $i_PAV) {
             try {
               write-host "Reading : -path 'HKLM:$($i_threat)'" -foregroundcolor yellow
               $threatkey = get-childitem -path "HKLM:$($i_threat)" -erroraction silentlycontinue
@@ -1427,39 +1427,39 @@ if (-not ($global:blnAVXML)) {
                   foreach ($threat in $threatkey) {
                     $threattype = get-itemproperty -path "HKLM:$($i_threat)\$($threat.PSChildName)\" -name "Type" -erroraction silentlycontinue
                     $threatfile = get-childitem -path "HKLM:$($i_threat)\$($threat.PSChildName)\Files\" -erroraction silentlycontinue
-                    $global:o_Threats += "Threat : $($threat.PSChildName) - Type : $($threattype.type) - Path : "
+                    $script:o_Threats += "Threat : $($threat.PSChildName) - Type : $($threattype.type) - Path : "
                     foreach ($detection in $threatfile) {
                       try {
                         $threatpath = get-itemproperty -path "HKLM:$($i_threat)\$($threat.PSChildName)\Files\$($threatfile.PSChildName)\" -name "Path" -erroraction silentlycontinue
-                        $global:o_Threats += "$($threatpath.path)"
+                        $script:o_Threats += "$($threatpath.path)"
                       } catch {
-                        $global:o_Threats += "N/A"
+                        $script:o_Threats += "N/A"
                         write-host $_.scriptstacktrace
                         write-host $_
                       }
                     }
-                    $global:o_Threats += "`r`n"
+                    $script:o_Threats += "`r`n"
                   }
                 } elseif ($threatkey.count -le 0) {
-                  $global:o_Threats += "N/A`r`n"
+                  $script:o_Threats += "N/A`r`n"
                 }
               }
             } catch {
               write-host "Could not validate Registry data : 'HKLM:$($i_threat)'" -foregroundcolor red
-              $global:o_Threats = "N/A`r`n"
+              $script:o_Threats = "N/A`r`n"
               write-host $_.scriptstacktrace
               write-host $_
             }
           }
         #SAVE WINDOWS DEFENDER FOR LAST - TO PREVENT SCRIPT CONSIDERING IT 'COMPETITOR AV' WHEN SET AS PRIMARY AV
         } elseif ($avs[$av].display -eq "Windows Defender") {
-          $global:o_CompAV += "$($avs[$av].display)`r`n"
-          $global:o_CompPath += "$($avs[$av].path)`r`n"
-          if ($global:blnWMI) {
-            Get-AVState $global:pskey $avs[$av].stat
-            $global:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($global:rtstatus) - Definitions : $($global:defstatus)`r`n"
-          } elseif (-not $global:blnWMI) {
-            $global:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
+          $script:o_CompAV += "$($avs[$av].display)`r`n"
+          $script:o_CompPath += "$($avs[$av].path)`r`n"
+          if ($script:blnWMI) {
+            Get-AVState $script:pskey $avs[$av].stat
+            $script:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($script:rtstatus) - Definitions : $($script:defstatus)`r`n"
+          } elseif (-not $script:blnWMI) {
+            $script:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
           } 
         }
       }
@@ -1467,55 +1467,55 @@ if (-not ($global:blnAVXML)) {
   }
 }
 #OUTPUT
-if (($global:o_AVname -match "No AV Product Found") -or ($global:o_AVname -match "Selected AV Product Not Found")) {
+if (($script:o_AVname -match "No AV Product Found") -or ($script:o_AVname -match "Selected AV Product Not Found")) {
   $ccode = "red"
 } else {
   $ccode = "green"
 }
 #DEVICE INFO
 write-host "`r`nDevice Info :" -foregroundcolor yellow
-write-host "Device : $($global:computername)" -foregroundcolor $ccode
-write-host "Operating System : $($global:OSCaption) ($($global:OSVersion))" -foregroundcolor $ccode
+write-host "Device : $($script:computername)" -foregroundcolor $ccode
+write-host "Operating System : $($script:OSCaption) ($($script:OSVersion))" -foregroundcolor $ccode
 #AV DETAILS
 write-host "`r`nAV Details :" -foregroundcolor yellow
-write-host "AV Display Name : $($global:o_AVname)" -foregroundcolor $ccode
-write-host "AV Path : $($global:o_AVpath)" -foregroundcolor $ccode
+write-host "AV Display Name : $($script:o_AVname)" -foregroundcolor $ccode
+write-host "AV Path : $($script:o_AVpath)" -foregroundcolor $ccode
 write-host "`r`nAV Status :" -foregroundcolor yellow
-write-host "$($global:o_AVStatus)" -foregroundcolor $ccode
+write-host "$($script:o_AVStatus)" -foregroundcolor $ccode
 write-host "`r`nComponent Versions :" -foregroundcolor yellow
 write-host "$($o_compver)" -foregroundcolor $ccode
-$global:o_AVStatus += "`r`n`r`n$($o_compver)`r`n"
+$script:o_AVStatus += "`r`n`r`n$($o_compver)`r`n"
 #REAL-TIME SCANNING & DEFINITIONS
 write-host "Definitions :" -foregroundcolor yellow
-write-host "Status : $($global:o_DefStatus)" -foregroundcolor $ccode
+write-host "Status : $($script:o_DefStatus)" -foregroundcolor $ccode
 #THREATS
 write-host "`r`nActive Detections :" -foregroundcolor yellow
-write-host "$($global:o_Infect)" -foregroundcolor $ccode
+write-host "$($script:o_Infect)" -foregroundcolor $ccode
 write-host "Detected Threats :" -foregroundcolor yellow
-write-host "$($global:o_Threats)" -foregroundcolor $ccode
+write-host "$($script:o_Threats)" -foregroundcolor $ccode
 #COMPETITOR AV
 write-host "Competitor AV :" -foregroundcolor yellow
-write-host "AV Conflict : $($global:o_AVcon)" -foregroundcolor $ccode
-write-host "$($global:o_CompAV)" -foregroundcolor $ccode
+write-host "AV Conflict : $($script:o_AVcon)" -foregroundcolor $ccode
+write-host "$($script:o_CompAV)" -foregroundcolor $ccode
 write-host "Competitor Path :" -foregroundcolor yellow
-write-host "$($global:o_CompPath)" -foregroundcolor $ccode
+write-host "$($script:o_CompPath)" -foregroundcolor $ccode
 write-host "Competitor State :" -foregroundcolor yellow
-write-host "$($global:o_CompState)" -foregroundcolor $ccode
+write-host "$($script:o_CompState)" -foregroundcolor $ccode
 #REFORMAT OUTPUT METRICS FOR LEGIBILITY IN NCENTRAL
 #AV DETAILS
-if (($global:o_AVname -ne "") -and ($global:o_AVname -ne $null)) {$global:o_AVname = $global:o_AVname.replace("`r`n", "<br>")}
-if (($global:o_AVpath -ne "") -and ($global:o_AVpath -ne $null)) {$global:o_AVpath = $global:o_AVpath.replace("`r`n", "<br>")}
-if (($global:o_AVVersion -ne "") -and ($global:o_AVVersion -ne $null)) {$global:o_AVVersion = $global:o_AVVersion.replace("`r`n", "<br>")}
-if (($global:o_AVStatus -ne "") -and ($global:o_AVStatus -ne $null)) {$global:o_AVStatus = $global:o_AVStatus.replace("`r`n", "<br>")}
+if (($script:o_AVname -ne "") -and ($script:o_AVname -ne $null)) {$script:o_AVname = $script:o_AVname.replace("`r`n", "<br>")}
+if (($script:o_AVpath -ne "") -and ($script:o_AVpath -ne $null)) {$script:o_AVpath = $script:o_AVpath.replace("`r`n", "<br>")}
+if (($script:o_AVVersion -ne "") -and ($script:o_AVVersion -ne $null)) {$script:o_AVVersion = $script:o_AVVersion.replace("`r`n", "<br>")}
+if (($script:o_AVStatus -ne "") -and ($script:o_AVStatus -ne $null)) {$script:o_AVStatus = $script:o_AVStatus.replace("`r`n", "<br>")}
 #REAL-TIME SCANNING & DEFINITIONS
-if (($global:o_RTstate -ne "") -and ($global:o_RTstate -ne $null)) {$global:o_RTstate = $global:o_RTstate.replace("`r`n", "<br>")}
-if (($global:o_DefStatus -ne "") -and ($global:o_DefStatus -ne $null)) {$global:o_DefStatus = $global:o_DefStatus.replace("`r`n", "<br>")}
+if (($script:o_RTstate -ne "") -and ($script:o_RTstate -ne $null)) {$script:o_RTstate = $script:o_RTstate.replace("`r`n", "<br>")}
+if (($script:o_DefStatus -ne "") -and ($script:o_DefStatus -ne $null)) {$script:o_DefStatus = $script:o_DefStatus.replace("`r`n", "<br>")}
 #THREATS
-if (($global:o_Infect -ne "") -and ($global:o_Infect -ne $null)) {$global:o_Infect = $global:o_Infect.replace("`r`n", "<br>")}
-if (($global:o_Threats -ne "") -and ($global:o_Threats -ne $null)) {$global:o_Threats = $global:o_Threats.replace("`r`n", "<br>")}
+if (($script:o_Infect -ne "") -and ($script:o_Infect -ne $null)) {$script:o_Infect = $script:o_Infect.replace("`r`n", "<br>")}
+if (($script:o_Threats -ne "") -and ($script:o_Threats -ne $null)) {$script:o_Threats = $script:o_Threats.replace("`r`n", "<br>")}
 #COMPETITOR AV
-if (($global:o_CompAV -ne "") -and ($global:o_CompAV -ne $null)) {$global:o_CompAV = $global:o_CompAV.replace("`r`n", "<br>")}
-if (($global:o_CompPath -ne "") -and ($global:o_CompPath -ne $null)) {$global:o_CompPath = $global:o_CompPath.replace("`r`n", "<br>")}
-if (($global:o_CompState -ne "") -and ($global:o_CompState -ne $null)) {$global:o_CompState = $global:o_CompState.replace("`r`n", "<br>")}
+if (($script:o_CompAV -ne "") -and ($script:o_CompAV -ne $null)) {$script:o_CompAV = $script:o_CompAV.replace("`r`n", "<br>")}
+if (($script:o_CompPath -ne "") -and ($script:o_CompPath -ne $null)) {$script:o_CompPath = $script:o_CompPath.replace("`r`n", "<br>")}
+if (($script:o_CompState -ne "") -and ($script:o_CompState -ne $null)) {$script:o_CompState = $script:o_CompState.replace("`r`n", "<br>")}
 #END SCRIPT
 #------------
