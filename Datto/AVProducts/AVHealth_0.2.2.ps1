@@ -1647,6 +1647,11 @@ write-host "Competitor State :" -foregroundcolor yellow
 write-host "$($script:o_CompState)" -foregroundcolor $ccode
 $script:diag += "`r`nThe following details failed checks :`r`n"
 write-host "The following details failed checks :" -foregroundcolor yellow
+#DATTO OUTPUT
+foreach ($warn in $script:avwarn.values) {
+  $script:diag += "$($warn)`r`n"
+  write-host "$($warn)" -foregroundcolor red
+}
 #Stop script execution time calculation
 $sw.Stop()
 $Days = $sw.Elapsed.Days
@@ -1661,11 +1666,6 @@ $mill = $mill.split(".")[1]
 $mill = $mill.SubString(0,[math]::min(3,$mill.length))
 $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
 write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-#DATTO OUTPUT
-foreach ($warn in $script:avwarn.values) {
-  $script:diag += "$($warn)`r`n"
-  write-host "$($warn)" -foregroundcolor red
-}
 write-host 'DATTO OUTPUT :'
 if ($script:blnWARN) {
   write-DRRMAlert "$($env:i_PAV) : Warning"
