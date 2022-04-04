@@ -391,6 +391,9 @@
             $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
             $script:diag += "$($xmldiag)"
+            #Stop script execution time calculation
+            StopClock
+            #DATTO OUTPUT
             write-DRRMAlert "Could not download AV Product XML"
             write-DRMMDiag "$($script:diag)"
             $script:blnAVXML = $false
@@ -448,6 +451,9 @@
       write-host $_.scriptstacktrace
       write-host $_
       $script:diag += "$($xmldiag)"
+      #Stop script execution time calculation
+      StopClock
+      #DATTO OUTPUT
       write-DRRMAlert "Error reading AV XML : $($srcAVP)"
       write-DRMMDiag "$($script:diag)"
       $xmldiag = $null
@@ -544,13 +550,30 @@
       9999 {return "No detections"}
     }
   } ## SEP-Map
+
+  function StopClock {
+    #Stop script execution time calculation
+    $script:sw.Stop()
+    $Days = $sw.Elapsed.Days
+    $Hours = $sw.Elapsed.Hours
+    $Minutes = $sw.Elapsed.Minutes
+    $Seconds = $sw.Elapsed.Seconds
+    $Milliseconds = $sw.Elapsed.Milliseconds
+    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
+    $mill = [string]($total / 1000)
+    $mill = $mill.split(".")[1]
+    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+  }
 #ENDREGION ----- FUNCTIONS ----
 
 #------------
 #BEGIN SCRIPT
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
-$sw = [Diagnostics.Stopwatch]::StartNew()
+$script:sw = [Diagnostics.Stopwatch]::StartNew()
 Get-OSArch
 Get-AVXML $env:i_PAV $script:pavkey
 if (-not ($script:blnAVXML)) {
@@ -570,6 +593,9 @@ if (-not ($script:blnAVXML)) {
   $script:o_CompPath = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   $script:o_CompState = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   $script:diag += "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  #Stop script execution time calculation
+  StopClock
+  #DATTO OUTPUT
   write-DRRMAlert "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   write-DRMMDiag "$($script:diag)"
   exit 1
@@ -940,6 +966,9 @@ if (-not ($script:blnAVXML)) {
     $script:o_RTstate = "Unknown"
     $script:o_DefStatus = "Unknown"
     $script:o_AVcon = 0
+    #Stop script execution time calculation
+    StopClock
+    # DATTO OUTPUT
     write-DRRMAlert "Could not find any AV Product registered`r`n"
     write-DRMMDiag "$($script:diag)"
     exit 1
@@ -1653,19 +1682,7 @@ foreach ($warn in $script:avwarn.values) {
   write-host "$($warn)" -foregroundcolor red
 }
 #Stop script execution time calculation
-$sw.Stop()
-$Days = $sw.Elapsed.Days
-$Hours = $sw.Elapsed.Hours
-$Minutes = $sw.Elapsed.Minutes
-$Seconds = $sw.Elapsed.Seconds
-$Milliseconds = $sw.Elapsed.Milliseconds
-$ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
-$total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
-$mill = [string]($total / 1000)
-$mill = $mill.split(".")[1]
-$mill = $mill.SubString(0,[math]::min(3,$mill.length))
-$script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+StopClock
 write-host 'DATTO OUTPUT :'
 if ($script:blnWARN) {
   write-DRRMAlert "$($env:i_PAV) : Warning"
