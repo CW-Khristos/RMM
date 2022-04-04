@@ -62,7 +62,7 @@
             $script:blnADD = $false
           }
           if ($script:blnADD) {
-            foreach ($itms in $prev) {
+            foreach ($itm in $prev) {
               $new.add("$($itm)`r`n")
             }
             $new.add("$($warn)`r`n")
