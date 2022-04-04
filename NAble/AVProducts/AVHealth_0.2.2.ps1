@@ -508,10 +508,30 @@
       9999 {return "No detections"}
     }
   } ## SEP-Map
+
+  function StopClock {
+    #Stop script execution time calculation
+    $script:sw.Stop()
+    $Days = $sw.Elapsed.Days
+    $Hours = $sw.Elapsed.Hours
+    $Minutes = $sw.Elapsed.Minutes
+    $Seconds = $sw.Elapsed.Seconds
+    $Milliseconds = $sw.Elapsed.Milliseconds
+    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
+    $mill = [string]($total / 1000)
+    $mill = $mill.split(".")[1]
+    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+  }
 #ENDREGION ----- FUNCTIONS ----
 
 #------------
 #BEGIN SCRIPT
+#Start script execution time calculation
+$ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+$script:sw = [Diagnostics.Stopwatch]::StartNew()
 Get-OSArch
 Get-AVXML $i_PAV $script:pavkey
 if (-not ($script:blnAVXML)) {
@@ -1501,6 +1521,8 @@ write-host "Competitor Path :" -foregroundcolor yellow
 write-host "$($script:o_CompPath)" -foregroundcolor $ccode
 write-host "Competitor State :" -foregroundcolor yellow
 write-host "$($script:o_CompState)" -foregroundcolor $ccode
+#Stop script execution time calculation
+StopClock
 #REFORMAT OUTPUT METRICS FOR LEGIBILITY IN NCENTRAL
 #AV DETAILS
 if (($script:o_AVname -ne "") -and ($script:o_AVname -ne $null)) {$script:o_AVname = $script:o_AVname.replace("`r`n", "<br>")}
