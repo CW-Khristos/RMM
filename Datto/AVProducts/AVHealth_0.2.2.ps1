@@ -548,6 +548,9 @@
 
 #------------
 #BEGIN SCRIPT
+#Start script execution time calculation
+$ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+$sw = [Diagnostics.Stopwatch]::StartNew()
 Get-OSArch
 Get-AVXML $env:i_PAV $script:pavkey
 if (-not ($script:blnAVXML)) {
@@ -1644,6 +1647,20 @@ write-host "Competitor State :" -foregroundcolor yellow
 write-host "$($script:o_CompState)" -foregroundcolor $ccode
 $script:diag += "`r`nThe following details failed checks :`r`n"
 write-host "The following details failed checks :" -foregroundcolor yellow
+#Stop script execution time calculation
+$sw.Stop()
+$Days = $sw.Elapsed.Days
+$Hours = $sw.Elapsed.Hours
+$Minutes = $sw.Elapsed.Minutes
+$Seconds = $sw.Elapsed.Seconds
+$Milliseconds = $sw.Elapsed.Milliseconds
+$ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+$total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
+$mill = [string]($total / 1000)
+$mill = $mill.split(".")[1]
+$mill = $mill.SubString(0,[math]::min(3,$mill.length))
+$script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
 #DATTO OUTPUT
 foreach ($warn in $script:avwarn.values) {
   $script:diag += "$($warn)`r`n"
