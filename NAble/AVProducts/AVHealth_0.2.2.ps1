@@ -236,8 +236,8 @@
       }
       #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
       if (-not $script:blnPSXML) {
-        $xmldiag += "`r`nFailed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
-        $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
+        $xmldiag += "`r`nFailed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
+        $xmldiag += "Loading : AV Product State XML`r`n"
         write-host "Failed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
         write-host "Loading : AV Product State XML" -foregroundcolor yellow
         $srcAVP = $script:ncxmlPRODUCTSTATE
@@ -316,7 +316,7 @@
     $xmldiag = $null
     $script:blnAVXML = $true
     #RETRIEVE AV VENDOR XML FROM GITHUB
-    $xmldiag+= "Loading : '$($src)' AV Product XML`r`n"
+    $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
     write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
     $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/dev/AVProducts/" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
     try {
@@ -630,10 +630,10 @@ if (-not ($script:blnAVXML)) {
                   $keyval3 = get-itemproperty -path "HKLM:$($regStat)" -name "$($regStatVal)" -erroraction stop
                   $keyval4 = get-itemproperty -path "HKLM:$($regRealTime)" -name "$($regRTVal)" -erroraction stop
                   #FORMAT AV DATA
-                  $strName = $keyval1.$regDisplayVal
+                  $strName = "$($keyval1.$regDisplayVal)"
                   if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($regDisplay -match "Sophos") -and ($strName -match "BETA")) {          #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($i_PAV -match "Sophos") -and ($strName -match "BETA")) {               #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
                   }
                   $strDisplay = "$($strDisplay)$($strName), "
@@ -690,7 +690,7 @@ if (-not ($script:blnAVXML)) {
                   $strName = "$($keyval1.$regDisplayVal)"
                   if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($regDisplay -match "Sophos") -and ($strName -match "BETA")) {          #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($i_PAV -match "Sophos") -and ($strName -match "BETA")) {               #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
                   }
                   $strDisplay = "$($strDisplay)$($strName), "
@@ -712,10 +712,10 @@ if (-not ($script:blnAVXML)) {
                   }
                   #FABRICATE 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
                   if ($blnSecMon) {
-                    write-host "Creating Registry Key HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\$strName for product : $($strName)" -foregroundcolor red
+                    write-host "Creating Registry Key HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\$($strName) for product : $($strName)" -foregroundcolor red
                     if ($script:bitarch = "bit64") {
                       try {
-                        new-item -path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Security Center\Monitoring\" -name "$($strName)" -value "$($strName)" -force
+                        new-item -path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Security Center\Monitoring\" -name "$strName" -value "$strName" -force
                       } catch {
                         write-host "Could not create Registry Key `HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\$($strName) for product : $($strName)" -foregroundcolor red
                         write-host $_.scriptstacktrace
@@ -763,7 +763,7 @@ if (-not ($script:blnAVXML)) {
       $tmppaths = $AntiVirusProduct.pathToSignedProductExe -split ", "
       $tmpstats = $AntiVirusProduct.productState -split ", "
     } elseif ($AntiVirusProduct -eq $null) {                                                        #FAILED TO RETURN WMI AV PRODUCT DATA
-      $strDisplay = ""
+      $strDisplay = $null
       #RETRIEVE EACH VENDOR XML AND CHECK FOR ALL SUPPORTED AV PRODUCTS
       write-host "`r`nPrimary AV Product not found / No AV Products found; will check each AV Product in all Vendor XMLs" -foregroundcolor yellow
       foreach ($vendor in $script:avVendors) {
@@ -793,7 +793,7 @@ if (-not ($script:blnAVXML)) {
                 $strName = "$($keyval1.$regDisplayVal)"
                 if ($strName -match "Windows Defender") {                                           #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                   $strName = "Windows Defender"
-                } elseif (($i_PAV -match "Sophos") -and ($strName -match "BETA")) {                 #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                } elseif (($strName -match "Sophos") -and ($strName -match "BETA")) {               #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                   $strName = "Sophos Intercept X Beta"
                 }
                 $strDisplay = "$($strDisplay)$($strName), "
@@ -884,7 +884,6 @@ if (-not ($script:blnAVXML)) {
   #OBTAIN FINAL AV PRODUCT DETAILS
   write-host "`r`nAV Product discovery completed`r`n" -foregroundcolor yellow
   if ($AntiVirusProduct -eq $null) {                                                                #NO AV PRODUCT FOUND
-    $AntiVirusProduct
     write-host "Could not find any AV Product registered" -foregroundcolor red
     $script:o_AVname = "No AV Product Found"
     $script:o_AVVersion = $null
@@ -977,13 +976,13 @@ if (-not ($script:blnAVXML)) {
           try {
             write-host "Reading : -path 'HKLM:$($i_verkey)' -name '$($i_verval)'" -foregroundcolor yellow
             $script:o_AVVersion = get-itemproperty -path "HKLM:$($i_verkey)" -name "$($i_verval)" -erroraction stop
-            $script:o_AVVersion = "$($script:o_AVVersion.$i_verval)"
           } catch {
             write-host "Could not validate Registry data : -path 'HKLM:$($i_verkey)' -name '$($i_verval)'" -foregroundcolor red
             $script:o_AVVersion = "."
             write-host $_.scriptstacktrace
             write-host $_
           }
+          $script:o_AVVersion = "$($script:o_AVVersion.$i_verval)"
           #GET PRIMARY AV PRODUCT COMPONENT VERSIONS
           $o_compver = "Core Version : $($script:o_AVVersion)`r`n"
           try {
@@ -1196,7 +1195,7 @@ if (-not ($script:blnAVXML)) {
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $script:o_AVStatus += "Tamper Protection : $($tamper)"
+          $script:o_AVStatus += "Tamper Protection : $($tamper)`r`n"
           #GET PRIMARY AV PRODUCT LAST SCAN DETAILS
           $lastage = 0
           if ($avs[$av].display -match "Windows Defender") {                                        #WINDOWS DEFENDER SCAN DATA
@@ -1259,7 +1258,7 @@ if (-not ($script:blnAVXML)) {
               try {
                 write-host "Reading : -path 'HKLM:$($i_scan)' -name '$($i_scanval)'" -foregroundcolor yellow
                 $scankey = get-itemproperty -path "HKLM:$($i_scan)" -name "$($i_scanval)" -erroraction stop
-                $scans += "Scan Type : N/A (REG Check)`r`nLast Scan Time : $(Get-Date($scankey.$i_scanval)) (REG Check)`r`n"
+                $scans += "Scan Type : N/A (REG Check)`r`nLast Scan Time : $(Get-Date($($scankey.$i_scanval))) (REG Check)`r`n"
                 $lastage = new-timespan -start ($scankey.$i_scanval) -end (Get-Date)
               } catch {
                 write-host "Could not validate Registry data : -path 'HKLM:$($i_scan)' -name '$($i_scanval)'" -foregroundcolor red
@@ -1277,7 +1276,7 @@ if (-not ($script:blnAVXML)) {
               $scans += "Recently Scanned : $($false) (REG Check)"
             }
           }
-          $script:o_AVStatus += "`r`n$($scans)"
+          $script:o_AVStatus += "$($scans)"
           #GET PRIMARY AV PRODUCT DEFINITIONS / SIGNATURES / PATTERN
           if ($script:blnWMI) {
             #will still return if it is unknown, etc. if it is unknown look at the code it returns, then look up the status and add it above
@@ -1332,8 +1331,8 @@ if (-not ($script:blnAVXML)) {
           $script:o_DefStatus = "Definition Status : $($script:o_DefStatus)"
           #GET PRIMARY AV PRODUCT DETECTED ALERTS VIA REGISTRY
           if ($script:zNoAlert -notcontains $i_PAV) {
-            if ($i_PAV -match "Sophos") {
-              try {
+            try {
+              if ($i_PAV -match "Sophos") {
                 write-host "Reading : -path 'HKLM:$($i_alert)'" -foregroundcolor yellow
                 $alertkey = get-ItemProperty -path "HKLM:$($i_alert)" -erroraction silentlycontinue
                 foreach ($alert in $alertkey.psobject.Properties) {
@@ -1345,34 +1344,34 @@ if (-not ($script:blnAVXML)) {
                     }
                   }
                 }
-              } catch {
-                write-host "Could not validate Registry data : 'HKLM:$($i_alert)'" -foregroundcolor red
-                $script:o_Infect = "N/A`r`n"
-                write-host $_.scriptstacktrace
-                write-host $_
               }
+              # NOT ACTUAL DETECTIONS - SAVE BELOW CODE FOR 'CONFIGURED ALERTS' METRIC
+              #elseif ($i_PAV -match "Trend Micro") {
+              #  if ($script:producttype -eq "Workstation") {
+              #    $i_alert += "Client"
+              #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
+              #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
+              #  } elseif (($script:producttype -eq "Server") -or ($script:producttype -eq "DC")) {
+              #    $i_alert += "Server"
+              #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
+              #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
+              #  }
+              #  foreach ($alert in $alertkey.psobject.Properties) {
+              #    if (($alert.name -notlike "PS*") -and ($alert.name -notlike "(default)")) {
+              #      if ($alert.value -eq 0) {
+              #        $script:o_Infect += "Type - $($alert.name) : $false`r`n"
+              #      } elseif ($alert.value -eq 1) {
+              #        $script:o_Infect += "Type - $($alert.name) : $true`r`n"
+              #      }
+              #    }
+              #  }
+              #}
+            } catch {
+              write-host "Could not validate Registry data : 'HKLM:$($i_alert)'" -foregroundcolor red
+              $script:o_Infect = "N/A`r`n"
+              write-host $_.scriptstacktrace
+              write-host $_
             }
-            # NOT ACTUAL DETECTIONS - SAVE BELOW CODE FOR 'CONFIGURED ALERTS' METRIC
-            #elseif ($i_PAV -match "Trend Micro") {
-            #  if ($script:producttype -eq "Workstation") {
-            #    $i_alert += "Client"
-            #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
-            #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
-            #  } elseif (($script:producttype -eq "Server") -or ($script:producttype -eq "DC")) {
-            #    $i_alert += "Server"
-            #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
-            #    $alertkey = get-ItemProperty -path "HKLM:$i_alert" -erroraction silentlycontinue
-            #  }
-            #  foreach ($alert in $alertkey.psobject.Properties) {
-            #    if (($alert.name -notlike "PS*") -and ($alert.name -notlike "(default)")) {
-            #      if ($alert.value -eq 0) {
-            #        $script:o_Infect += "Type - $($alert.name) : $false`r`n"
-            #      } elseif ($alert.value -eq 1) {
-            #        $script:o_Infect += "Type - $($alert.name) : $true`r`n"
-            #      }
-            #    }
-            #  }
-            #}
           }
           #GET PRIMARY AV PRODUCT DETECTED INFECTIONS VIA REGISTRY
           if ($script:zNoInfect -notcontains $i_PAV) {
@@ -1402,7 +1401,7 @@ if (-not ($script:blnAVXML)) {
                 if ($infectkey.$i_infectval -eq 0) {                                                #NO DETECTED INFECTIONS
                   $script:o_Infect += "Virus/Malware Present : $($false)`r`nVirus/Malware Count : $($infectkey.$i_infectval)`r`n"
                 } elseif ($infectkey.$i_infectval -gt 0) {                                          #DETECTED INFECTIONS
-                  $script:o_Infect += "Virus/Malware Present : $($true)`r`nVirus/Malware Count : $($infectkey.$i_infectval)`r`n"
+                  $script:o_Infect += "Virus/Malware Present : $($true)`r`nVirus/Malware Count - $($infectkey.$i_infectval)`r`n"
                 }
               } catch {
                 write-host "Could not validate Registry data : 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor red
