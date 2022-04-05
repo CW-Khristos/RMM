@@ -1004,7 +1004,6 @@ if (-not ($script:blnAVXML)) {
             } elseif ($i_PAV -match "Trend Micro") {                                                #CURSED TREND MICRO
               $compverkey = get-itemproperty -path "HKLM:$($i_compverkey)" -name "$($i_compverval)" -erroraction silentlycontinue
               $compverkey = $compverkey.$i_compverval.split("/")
-              $o_compver += "VC Version : $($compverkey[1])`r`n"
             }
           } catch {
             if ($i_PAV -match "Sophos") {
@@ -1080,6 +1079,7 @@ if (-not ($script:blnAVXML)) {
               }
               $script:o_AVStatus += "Core Version : $($script:o_AVVersion) - Expected : '$($compverkey[0])'`r`n"
               $script:o_AVStatus += "VC Version : $($vckey.$i_vcval) - Expected : '$($compverkey[1])'`r`n"
+              $o_compver += "VC Version : $($vckey.$i_vcval)`r`n"
             } catch {
               write-host "Could not validate Registry data : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor red
               $script:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
