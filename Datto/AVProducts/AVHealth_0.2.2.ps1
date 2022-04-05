@@ -11,7 +11,7 @@
     Script is intended to replace 'AV Status' VBS Monitoring Script
  
 .NOTES
-    Version        : 0.2.2 (15 March 2022)
+    Version        : 0.2.2 (05 April 2022)
     Creation Date  : 14 December 2021
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
     File Name      : AVHealth_0.2.2.ps1 
@@ -67,7 +67,12 @@
           Copied and modified code to retrieve Vendor AV Product XML into 'Get-AVState' function to replace the hard-coded 'swtich' to interpret WMI AV Product States
             This implements similar XML method to interpret WMI AV Product States as with retrieving Vendor AV Product details
             This should facilitate easier community contributions to WMI AV Product States and with this change plan to leave the WMI checks in place
-
+    0.2.2 Implementing unique hashtable for 'Trend Micro' in 'Get-AVXML' function to test producing more varied data structures to account for differences between the various AV Products
+            Planning to allow for creation of Vendor-specific hashtables being built; this also will allow for a greater flexibility in accounting for instances when 'LCD' type logic simply will not suffice
+            Hoping this will not lead down the same rabbit hole as the 'AV Status' VBS script faced with a multitude of differing 'branches' of code which could end up in a 'dead-end'
+          Switched to target '\SOFTWARE\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\UpgradeVersion' for dtermining if 'Trend Micro' AV Product is up-to-date
+            This is mostly due to 'Trend Micro' 'ClientUpgradeStatus' values being deemed unreliable for accurately determining if the AV Product itself is up-to-date and thus the need to use an completely different method from other AV Products
+          Added retrieval for 'Trend Micro' 'VCVersion' and proper comparison to determine if both Core AV and VC components are up-to-date with their respective expected versions                                                                                                                                                                       
 .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
     Need to obtain version and calculate date timestamps for AV Product updates, Definition updates, and Last Scan
@@ -245,7 +250,7 @@
       }
       #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
       if (-not $script:blnPSXML) {
-        $xmldiag += "Failed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
+        $xmldiag += "`r`nFailed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
         $xmldiag += "Loading : AV Product State XML`r`n"
         write-host "Failed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
         write-host "Loading : AV Product State XML" -foregroundcolor yellow
@@ -408,34 +413,69 @@
       if ($script:blnAVXML) {
         foreach ($itm in $avXML.NODE.ChildNodes) {
           if ($itm.name -notmatch "#comment") {                                                     #AVOID 'BUG' WITH A KEY AS '#comment'
-            $hash = @{
-              display = "$($itm.$script:bitarch.display)"
-              displayval = "$($itm.$script:bitarch.displayval)"
-              path = "$($itm.$script:bitarch.path)"
-              pathval = "$($itm.$script:bitarch.pathval)"
-              ver = "$($itm.$script:bitarch.ver)"
-              verval = "$($itm.$script:bitarch.verval)"
-              compver = "$($itm.$script:bitarch.compver)"
-              stat = "$($itm.$script:bitarch.stat)"
-              statval = "$($itm.$script:bitarch.statval)"
-              update = "$($itm.$script:bitarch.update)"
-              updateval = "$($itm.$script:bitarch.updateval)"
-              source = "$($itm.$script:bitarch.source)"
-              sourceval = "$($itm.$script:bitarch.sourceval)"
-              defupdate = "$($itm.$script:bitarch.defupdate)"
-              defupdateval = "$($itm.$script:bitarch.defupdateval)"
-              tamper = "$($itm.$script:bitarch.tamper)"
-              tamperval = "$($itm.$script:bitarch.tamperval)"
-              rt = "$($itm.$script:bitarch.rt)"
-              rtval = "$($itm.$script:bitarch.rtval)"
-              scan = "$($itm.$script:bitarch.scan)"
-              scantype = "$($itm.$script:bitarch.scantype)"
-              scanval = "$($itm.$script:bitarch.scanval)"
-              alert = "$($itm.$script:bitarch.alert)"
-              alertval = "$($itm.$script:bitarch.alertval)"
-              infect = "$($itm.$script:bitarch.infect)"
-              infectval = "$($itm.$script:bitarch.infectval)"
-              threat = "$($itm.$script:bitarch.threat)"
+            if ($env:i_PAV -notmatch "Trend Micro") {                                                   #BUILD HASHTABLE FOR ALL AV PRODUCTS EXCEPT TREND MICRO
+              $hash = @{
+                display = "$($itm.$script:bitarch.display)"
+                displayval = "$($itm.$script:bitarch.displayval)"
+                path = "$($itm.$script:bitarch.path)"
+                pathval = "$($itm.$script:bitarch.pathval)"
+                ver = "$($itm.$script:bitarch.ver)"
+                verval = "$($itm.$script:bitarch.verval)"
+                compver = "$($itm.$script:bitarch.compver)"
+                stat = "$($itm.$script:bitarch.stat)"
+                statval = "$($itm.$script:bitarch.statval)"
+                update = "$($itm.$script:bitarch.update)"
+                updateval = "$($itm.$script:bitarch.updateval)"
+                source = "$($itm.$script:bitarch.source)"
+                sourceval = "$($itm.$script:bitarch.sourceval)"
+                defupdate = "$($itm.$script:bitarch.defupdate)"
+                defupdateval = "$($itm.$script:bitarch.defupdateval)"
+                tamper = "$($itm.$script:bitarch.tamper)"
+                tamperval = "$($itm.$script:bitarch.tamperval)"
+                rt = "$($itm.$script:bitarch.rt)"
+                rtval = "$($itm.$script:bitarch.rtval)"
+                scan = "$($itm.$script:bitarch.scan)"
+                scantype = "$($itm.$script:bitarch.scantype)"
+                scanval = "$($itm.$script:bitarch.scanval)"
+                alert = "$($itm.$script:bitarch.alert)"
+                alertval = "$($itm.$script:bitarch.alertval)"
+                infect = "$($itm.$script:bitarch.infect)"
+                infectval = "$($itm.$script:bitarch.infectval)"
+                threat = "$($itm.$script:bitarch.threat)"
+              }
+            } elseif ($env:i_PAV -match "Trend Micro") {                                                #BUILD HASHTABLE FOR CURSED TREND MICRO
+              $hash = @{
+                display = "$($itm.$script:bitarch.display)"
+                displayval = "$($itm.$script:bitarch.displayval)"
+                path = "$($itm.$script:bitarch.path)"
+                pathval = "$($itm.$script:bitarch.pathval)"
+                corever = "$($itm.$script:bitarch.corever)"
+                coreverval = "$($itm.$script:bitarch.coreverval)"
+                vcver = "$($itm.$script:bitarch.vcver)"
+                vcverval = "$($itm.$script:bitarch.vcverval)"
+                compver = "$($itm.$script:bitarch.compver)"
+                compverval = "$($itm.$script:bitarch.compverval)"
+                stat = "$($itm.$script:bitarch.stat)"
+                statval = "$($itm.$script:bitarch.statval)"
+                update = "$($itm.$script:bitarch.update)"
+                updateval = "$($itm.$script:bitarch.updateval)"
+                source = "$($itm.$script:bitarch.source)"
+                sourceval = "$($itm.$script:bitarch.sourceval)"
+                defupdate = "$($itm.$script:bitarch.defupdate)"
+                defupdateval = "$($itm.$script:bitarch.defupdateval)"
+                tamper = "$($itm.$script:bitarch.tamper)"
+                tamperval = "$($itm.$script:bitarch.tamperval)"
+                rt = "$($itm.$script:bitarch.rt)"
+                rtval = "$($itm.$script:bitarch.rtval)"
+                scan = "$($itm.$script:bitarch.scan)"
+                scantype = "$($itm.$script:bitarch.scantype)"
+                scanval = "$($itm.$script:bitarch.scanval)"
+                alert = "$($itm.$script:bitarch.alert)"
+                alertval = "$($itm.$script:bitarch.alertval)"
+                infect = "$($itm.$script:bitarch.infect)"
+                infectval = "$($itm.$script:bitarch.infectval)"
+                threat = "$($itm.$script:bitarch.threat)"
+              }
             }
             if ($dest.containskey($itm.name)) {
               continue
@@ -842,14 +882,14 @@ if (-not ($script:blnAVXML)) {
           $script:diag += "Attempting to detect AV Product : '$($key)'`r`n"
           write-host "Attempting to detect AV Product : '$($key)'" -foregroundcolor yellow
           $strName = $null
-          $regDisplay = $script:vavkey[$key].display
-          $regDisplayVal = $script:vavkey[$key].displayval
-          $regPath = $script:vavkey[$key].path
-          $regPathVal = $script:vavkey[$key].pathval
-          $regStat = $script:vavkey[$key].stat
-          $regStatVal = $script:vavkey[$key].statval
-          $regRealTime = $script:vavkey[$key].rt
-          $regRTVal = $script:vavkey[$key].rtval
+          $regDisplay = "$($script:vavkey[$key].display)"
+          $regDisplayVal = "$($script:vavkey[$key].displayval)"
+          $regPath = "$($script:vavkey[$key].path)"
+          $regPathVal = "$($script:vavkey[$key].pathval)"
+          $regStat = "$($script:vavkey[$key].stat)"
+          $regStatVal = "$($script:vavkey[$key].statval)"
+          $regRealTime = "$($script:vavkey[$key].rt)"
+          $regRTVal = "$($script:vavkey[$key].rtval)"
           try {
             if (test-path "HKLM:$($regDisplay)") {                                                  #VALIDATE INSTALLED AV PRODUCT BY TESTING READING A KEY
               $script:diag += "Found 'HKLM:$($regDisplay)' for product : $($key)`r`n"
@@ -1009,10 +1049,20 @@ if (-not ($script:blnAVXML)) {
           $script:o_AVname = $avs[$av].display
           $script:o_AVpath = $avs[$av].path
           #AV PRODUCT VERSION
-          $i_verkey = $script:pavkey[$node].ver
-          $i_verval = $script:pavkey[$node].verval
+          if ($env:i_PAV -notmatch "Trend Micro") {
+            $i_verkey = $script:pavkey[$node].ver
+            $i_verval = $script:pavkey[$node].verval
+          } elseif ($env:i_PAV -match "Trend Micro") {
+            $i_verkey = $script:pavkey[$node].corever
+            $i_verval = $script:pavkey[$node].coreverval
+            $i_vckey = $script:pavkey[$node].vcver
+            $i_vcval = $script:pavkey[$node].vcverval
+          }
           #AV PRODUCT COMPONENTS VERSIONS
           $i_compverkey = $script:pavkey[$node].compver
+          if ($env:i_PAV -match "Trend Micro") {
+            $i_compverval = $script:pavkey[$node].compverval
+          }
           #AV PRODUCT STATE
           $i_statkey = $script:pavkey[$node].stat
           $i_statval = $script:pavkey[$node].statval
@@ -1061,7 +1111,7 @@ if (-not ($script:blnAVXML)) {
           try {
             $script:diag += "Reading : -path 'HKLM:$($i_compverkey)'`r`n"
             write-host "Reading : -path 'HKLM:$($i_compverkey)'" -foregroundcolor yellow
-            if ($env:i_PAV -match "Sophos") {
+            if ($env:i_PAV -match "Sophos") {                                                       #SOPHOS COMPONENT VERSIONS
               $compverkey = get-childitem -path "HKLM:$($i_compverkey)" -erroraction silentlycontinue
               foreach ($component in $compverkey) {
                 if (($component -ne $null) -and ($component -ne "")) {
@@ -1076,11 +1126,17 @@ if (-not ($script:blnAVXML)) {
               foreach ($component in $sort) {
                 $o_compver += "$($component.name) Version : $($component.value)`r`n"
               }
+            } elseif ($env:i_PAV -match "Trend Micro") {                                                #CURSED TREND MICRO
+              $compverkey = get-itemproperty -path "HKLM:$($i_compverkey)" -name "$($i_compverval)" -erroraction silentlycontinue
+              $compverkey = $compverkey.$i_compverval.split("/")
             }
           } catch {
-            $script:diag += "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($component.PSChildName)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-            write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($component.PSChildName)'" -foregroundcolor red
-            $o_compver = "Components : N/A"
+            if ($env:i_PAV -match "Sophos") {
+              write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($component.PSChildName)'" -foregroundcolor red
+            } elseif ($env:i_PAV -notmatch "Sophos") {
+              write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($avs[$av].display)'" -foregroundcolor red
+            }
+            $o_compver = "Components : N/A`r`n"
             write-host $_.scriptstacktrace
             write-host $_
           }
@@ -1099,38 +1155,74 @@ if (-not ($script:blnAVXML)) {
           }
           #GET PRIMARY AV PRODUCT STATUS VIA REGISTRY
           $updWARN = $false
-          try {
-            $script:diag += "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'`r`n"
-            write-host "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor yellow
-            $statkey = get-itemproperty -path "HKLM:$($i_statkey)" -name "$($i_statval)" -erroraction stop
-            #INTERPRET 'AVSTATUS' BASED ON ANY AV PRODUCT VALUE REPRESENTATION
-            if ($script:zUpgrade -contains $avs[$av].display) {                                     #AV PRODUCTS TREATING '0' AS 'UPTODATE'
-              $script:diag += "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '0')`r`n"
-              write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '0')" -foregroundcolor yellow
-              if ($statkey.$i_statval -eq "0") {
-                $script:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
-              } else {
-                $updWARN = $true
-                $script:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
+          #TREND MICRO'S 'ClientUpgradeStatus' VALUES FOUND UNDER THE FOLLOWING REG KEYS HAVE BEEN CONFIRMED TO BE ENTIRELY UNRELIABLE THROUGH MULTIPLE TESTS ACROSS MULTIPLE DEVICES
+          # 'HKLM\SOFTWARE\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\'
+          # 'HKLM\SOFTWARE\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\'
+          #AND UNSURPRISINGLY TREND MICRO SUPPORT WAS UNABLE / UNWILLING TO PROVIDE ADDITIONAL GUIDANCE ABOUT KEYS CURRENTLY IN USE AND THE POSSIBLE VALUES THAT COULD BE MONITORED
+          #FURTHER TESTING IS WARRANTED TO MONITOR KEY CHANGES WHEN THEY OCCUR; THE ADDITIONAL KEY VALUES FOUND AT THE FOLLOWING LOCATIONS COULD PROVIDE  MORE DETAILS
+          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\IsClientUpgradeFailed=dword:00000000
+          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\ClientUpgradeStatus=dword:00000000
+          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\ClientUpgradeStatus=dword:00000000
+          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\UpdateAgent=dword:00000000
+          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\UpdateOngoing=dword:00000000
+          # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\Updating=dword:00000000
+          if ($env:i_PAV -notmatch "Trend Micro") {                                                     #HANDLE ALL AV PRODUCTS EXCEPT TREND MICRO
+            try {
+              $script:diag += "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'`r`n"
+              write-host "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor yellow
+              $statkey = get-itemproperty -path "HKLM:$($i_statkey)" -name "$($i_statval)" -erroraction stop
+              #INTERPRET 'AVSTATUS' BASED ON ANY AV PRODUCT VALUE REPRESENTATION
+              if ($script:zUpgrade -contains $avs[$av].display) {                                     #AV PRODUCTS TREATING '0' AS 'UPTODATE'
+                $script:diag += "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '0')`r`n"
+                write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '0')" -foregroundcolor yellow
+                if ($statkey.$i_statval -eq "0") {
+                  $script:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
+                } else {
+                  $updWARN = $true
+                  $script:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
+                }
+              } elseif ($script:zUpgrade -notcontains $avs[$av].display) {                            #AV PRODUCTS TREATING '1' AS 'UPTODATE'
+                $script:diag += "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '1')`r`n"
+                write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '1')" -foregroundcolor yellow
+                if ($statkey.$i_statval -eq "1") {
+                  $script:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
+                } else {
+                  $updWARN = $true
+                  $script:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
+                }
               }
-            } elseif ($script:zUpgrade -notcontains $avs[$av].display) {                            #AV PRODUCTS TREATING '1' AS 'UPTODATE'
-              $script:diag += "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '1')`r`n"
-              write-host "$($avs[$av].display) reports '$($statkey.$i_statval)' for 'Up-To-Date' (Expected : '1')" -foregroundcolor yellow
-              if ($statkey.$i_statval -eq "1") {
-                $script:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
-              } else {
-                $updWARN = $true
-                $script:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
-              }
+            } catch {
+              $updWARN = $true
+              $script:diag += "Could not validate Registry data : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+              write-host "Could not validate Registry data : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor red
+              $script:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
+              Pop-Warnings $script:avwarn $($avs[$av].display) "$($script:o_AVStatus)`r`n"
+              write-host $_.scriptstacktrace
+              write-host $_
             }
-          } catch {
-            $updWARN = $true
-            $script:diag += "Could not validate Registry data : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-            write-host "Could not validate Registry data : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor red
-            $script:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
-            Pop-Warnings $script:avwarn $($avs[$av].display) "$($script:o_AVStatus)`r`n"
-            write-host $_.scriptstacktrace
-            write-host $_
+          } elseif ($env:i_PAV -match "Trend Micro") {                                                  #HANDLE TREND MICRO AV PRODUCT
+            try {
+              write-host "'Trend Micro' Detected : Reading : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor yellow
+              $vckey = get-itemproperty -path "HKLM:$($i_vckey)" -name "$($i_vcval)" -erroraction stop
+              write-host "$($avs[$av].display) reports '$($script:o_AVVersion)' for 'Up-To-Date' (Expected : '$($compverkey[0])')" -foregroundcolor yellow
+              write-host "$($avs[$av].display) reports '$($vckey.$i_vcval)' for 'Up-To-Date' (Expected : '$($compverkey[1])')" -foregroundcolor yellow
+              if (([version]$($script:o_AVVersion) -ge [version]$($compverkey[0])) -and 
+                ([version]$($vckey.$i_vcval) -ge [version]$($compverkey[1]))) {
+                  $script:o_AVStatus = "Up-to-Date : $($true) (REG Check)`r`n"
+              } elseif (([version]$($script:o_AVVersion) -lt [version]$($compverkey[0])) -or 
+                ([version]$($vckey.$i_vcval) -lt [version]$($compverkey[1]))) {
+                  $script:o_AVStatus = "Up-to-Date : $($false) (REG Check)`r`n"
+              }
+              $script:o_AVStatus += "Core Version : $($script:o_AVVersion) - Expected : '$($compverkey[0])'`r`n"
+              $script:o_AVStatus += "VC Version : $($vckey.$i_vcval) - Expected : '$($compverkey[1])'`r`n"
+              $o_compver += "VC Version : $($vckey.$i_vcval)`r`n"
+            } catch {
+              write-host "Could not validate Registry data : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor red
+              $script:o_AVStatus = "Up-to-Date : Unknown (REG Check)`r`n"
+                                            
+              write-host $_.scriptstacktrace
+              write-host $_
+            }
           }
           #GET PRIMARY AV PRODUCT LAST UPDATE TIMESTAMP VIA REGISTRY
           try {
@@ -1208,7 +1300,7 @@ if (-not ($script:blnAVXML)) {
             write-host $_.scriptstacktrace
             write-host $_
           }
-          $script:o_AVStatus += "Real-Time Status : $($script:o_RTstate)"
+          $script:o_AVStatus += "Real-Time Scanning : $($script:o_RTstate)"
           if ($rtWARN) {
             $rtWARN = $false
             $script:blnWARN = $true
@@ -1327,11 +1419,13 @@ if (-not ($script:blnAVXML)) {
                 $script:diag += "Reading : -path 'HKLM:$($i_scan)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_scan)'" -foregroundcolor yellow
                 if ($avs[$av].display -match "Sophos Intercept X") {
+                  write-host "Reading : -path 'HKLM:$($i_scan)'" -foregroundcolor yellow
                   $scankey = get-itemproperty -path "HKLM:$($i_scan)" -name "$($i_scanval)" -erroraction stop
                   $stime = [datetime]::ParseExact($scankey.$i_scanval,'yyyyMMddTHHmmssK',[Globalization.CultureInfo]::InvariantCulture)
                   $scans += "Scan Type : BackgroundScanV2 (REG Check)`r`nLast Scan Time : $($stime) (REG Check)`r`n"
                   $lastage = new-timespan -start $stime -end (Get-Date)
                 } elseif ($avs[$av].display -notmatch "Sophos Intercept X") {
+                  write-host "Reading : -path 'HKLM:$($i_scan)'" -foregroundcolor yellow
                   $scankey = get-itemproperty -path "HKLM:$($i_scan)" -erroraction stop
                   foreach ($scan in $scankey.psobject.Properties) {
                     if (($scan.name -notlike "PS*") -and ($scan.name -notlike "(default)")) {
@@ -1402,29 +1496,29 @@ if (-not ($script:blnAVXML)) {
               $update = Get-Date($time)
               $age = new-timespan -start $update -end (Get-Date)
               if ($age.compareto($time1) -le 0) {
-                $script:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                $script:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
               } elseif ($age.compareto($time1) -gt 0) {
                 $defWARN = $true
-                $script:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                $script:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
               }
               $script:o_DefStatus += "Last Definition Update : $($update)`r`n"
             } elseif ($avs[$av].display -notmatch "Windows Defender") {                             #ALL OTHER AV DEFINITION UPDATE TIMESTAMP
               if ($avs[$av].display -match "Symantec") {                                            #SYMANTEC DEFINITION UPDATE TIMESTAMP
                 $age = new-timespan -start ($defkey.$i_defupdateval) -end (Get-Date)
                 if ($age.compareto($time1) -le 0) {
-                  $script:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                  $script:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
                 } elseif ($age.compareto($time1) -gt 0) {
                   $defWARN = $true
-                  $script:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                  $script:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
                 }
                 $script:o_DefStatus += "Last Definition Update : $($defkey.$i_defupdateval)`r`n"
               } elseif ($avs[$av].display -notmatch "Symantec") {                                   #NON-SYMANTEC DEFINITION UPDATE TIMESTAMP
                 $age = new-timespan -start (Get-EpochDate($defkey.$i_defupdateval)("sec")) -end (Get-Date)
                 if ($age.compareto($time1) -le 0) {
-                  $script:o_DefStatus += "Status : Up to date (REG Check)`r`n"
+                  $script:o_DefStatus += "Definition Status : Up to date (REG Check)`r`n"
                 } elseif ($age.compareto($time1) -gt 0) {
                   $defWARN = $true
-                  $script:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+                  $script:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
                 }
                 $script:o_DefStatus += "Last Definition Update : $(Get-EpochDate($($defkey.$i_defupdateval))("sec"))`r`n"
               }
@@ -1434,7 +1528,7 @@ if (-not ($script:blnAVXML)) {
             $defWARN = $true
             $script:diag += "Could not validate Registry data : -path 'HKLM:$($i_defupdate)' -name '$($i_defupdateval)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
             write-host "Could not validate Registry data : -path 'HKLM:$($i_defupdate)' -name '$($i_defupdateval)'" -foregroundcolor red
-            $script:o_DefStatus += "Status : Out of date (REG Check)`r`n"
+            $script:o_DefStatus += "Definition Status : Out of date (REG Check)`r`n"
             $script:o_DefStatus += "Last Definition Update : N/A`r`n"
             $script:o_DefStatus += "Definition Age (DD:HH:MM) : N/A"
             write-host $_.scriptstacktrace
@@ -1610,6 +1704,8 @@ if (-not ($script:blnAVXML)) {
               $script:diag += "Could not validate Registry data : 'HKLM:$($i_threat)'`r`n"
               write-host "Could not validate Registry data : 'HKLM:$($i_threat)'" -foregroundcolor red
               $script:o_Threats = "N/A`r`n"
+              write-host $_.scriptstacktrace
+              write-host $_
             }
           }
           if ($threatWARN) {
@@ -1642,7 +1738,7 @@ if (($script:o_AVname -match "No AV Product Found") -or ($script:o_AVname -match
 $script:diag += "`r`nDevice Info :`r`nDevice : $($script:computername)`r`nOperating System : $($script:OSCaption) ($script:OSVersion)`r`n"
 write-host "`r`nDevice Info :" -foregroundcolor yellow
 write-host "Device : $($script:computername)" -foregroundcolor $ccode
-write-host "Operating System : $($script:OSCaption) ($script:OSVersion)" -foregroundcolor $ccode
+write-host "Operating System : $($script:OSCaption) ($($script:OSVersion))" -foregroundcolor $ccode
 #AV DETAILS
 $script:diag += "`r`nAV Details :`r`nAV Display Name : $($script:o_AVname)`r`nAV Path : $($script:o_AVpath)`r`n"
 $script:diag += "`r`nAV Status :`r`n$($script:o_AVStatus)`r`n`r`nComponent Versions :`r`n$($o_compver)`r`n"
