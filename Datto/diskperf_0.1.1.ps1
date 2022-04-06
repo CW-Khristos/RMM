@@ -161,8 +161,6 @@ try {
     $ldisks = Get-WMIObject 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where-object Name -match ":"
   } catch {
     $script:diag += "Unable to query Drive Statistics via CIM or WMI`r`n"
-    write-host $_.scriptstacktrace
-    write-host $_
     write-DRRMAlert "Warning : Monitoring Failure"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
