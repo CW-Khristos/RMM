@@ -56,15 +56,15 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  '<-Start Diagnostic->'
-    foreach ($Message in $Messages) { $Message }
-    write-host '<-End Diagnostic->'
+    write-host  "<-Start Diagnostic->"
+    foreach ($message in $messages) { $essage }
+    write-host "<-End Diagnostic->"
   }
 
   function write-DRRMAlert ($message) {
-    write-host '<-Start Result->'
-    write-host "Alert=$message"
-    write-host '<-End Result->'
+    write-host "<-Start Result->"
+    write-host "Alert=$($message)"
+    write-host "<-End Result->"
   }
   
   function Split-StringOnLiteralString {
