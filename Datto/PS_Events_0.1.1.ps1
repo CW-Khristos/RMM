@@ -179,9 +179,9 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
               }
               $script:dscripts = $script:dscripts + 1
               $script:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-              $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :`r`n"
+              $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block :`r`n"
               $script:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
-              write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :" -foregroundcolor red
+              write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block :" -foregroundcolor red
               write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
             }
           }
@@ -204,9 +204,9 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
             }
             $script:sscripts = $script:sscripts + 1
             $script:hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-            $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :`r`n"
+            $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :`r`n"
             $script:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
-            write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :" -foregroundcolor yellow
+            write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :" -foregroundcolor yellow
             write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor yellow
           }
         }
@@ -226,10 +226,10 @@ if ($script:dcmds -eq 0) {
   write-host "`r`nThe following Script Blocks contain dangerous commands :" -foregroundcolor yellow
   $script:diag += "`r`nThe following Script Blocks contain dangerous commands :"
   foreach ($cmd in $script:hashDCMD.keys) {
-    $script:diag += "`r`n  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($script:hashDCMD[$cmd].TriggeredCommand)`` found in script block :`r`n"
+    $script:diag += "`r`n  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($script:hashDCMD[$cmd].TriggeredCommand) found in script block :`r`n"
     $script:diag += "    - ScriptBlock ID : $($script:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($script:hashDCMD[$cmd].Path)`r`n"
     $script:diag += "$($script:hashDCMD[$cmd].EventMessage)`r`n"
-    write-host "  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($script:hashDCMD[$cmd].TriggeredCommand)`` found in script block :" -foregroundcolor red
+    write-host "  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($script:hashDCMD[$cmd].TriggeredCommand) found in script block :" -foregroundcolor red
     write-host "    - ScriptBlock ID : $($script:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($script:hashDCMD[$cmd].Path)" -foregroundcolor red
     write-host "$($script:hashDCMD[$cmd].EventMessage)`r`n" -foregroundcolor red
   }
