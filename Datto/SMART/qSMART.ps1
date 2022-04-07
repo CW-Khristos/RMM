@@ -15,15 +15,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  '<-Start Diagnostic->'
-    foreach ($Message in $Messages) {$Message}
-    write-host '<-End Diagnostic->'
+    write-host  "<-Start Diagnostic->"
+    foreach ($message in $messages) {$message}
+    write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host '<-Start Result->'
+    write-host "<-Start Result->"
     write-host "Alert=$($message)"
-    write-host '<-End Result->'
+    write-host "<-End Result->"
   } ## write-DRRMAlert
   
   function Get-ProcessOutput {
@@ -607,11 +607,12 @@ foreach ($objDRV in $arrDRV) {
     } elseif (-not $script:blnWARN) {
       if ($($script:arrDRV[$script:i].fail) -eq "N/A") {
         write-DRRMAlert "SMART Health : $($script:arrDRV[$script:i].drvID) : No Data Returned"
+        exit 1
       } elseif ($($script:arrDRV[$script:i].fail) -ne "N/A") {
         write-DRRMAlert "SMART Health : $($script:arrDRV[$script:i].drvID) : $($script:arrDRV[$script:i].fail)"
         write-DRMMDiag $allout
+        exit 0
       }
-      exit 0
     }
   }
 }
