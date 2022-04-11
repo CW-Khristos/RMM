@@ -308,13 +308,13 @@
     #HDD ATTRIBUTES
     if (($objDRV.id5 -ne "N/A") -and ([int]$objDRV.id5 -gt 100)) {$script:blnWARN = $true; $script:arrWARN.add("  - Reallocated Sectors (5) : $($script:arrDRV[$script:i].id5)`r`n")}
     if (($objDRV.id10 -ne "N/A") -and ([int]$objDRV.id10 -gt 20)) {$script:blnWARN = $true; $script:arrWARN.add("  - Spin Retry Count (10) : $($script:arrDRV[$script:i].id10)`r`n")}
-    if (($objDRV.id184 -ne "N/A") -and ([int]$objDRV.id184 -gt 0)) {$script:blnWARN = $true; $script:arrWARN.add("  - End to End Error (184) : $($script:arrDRV[$script:i].id184)`r`n")}
-    if (($objDRV.id187 -ne "N/A") -and ([int]$objDRV.id187 -gt 5)) {$script:blnWARN = $true; $script:arrWARN.add("  - Uncorrectable Errors (187) : $($script:arrDRV[$script:i].id187)`r`n")}
-    if (($objDRV.id188 -ne "N/A") -and ([int]$objDRV.id188 -gt 0)) {$script:blnWARN = $true; $script:arrWARN.add("  - Command Timeout (188) : $($script:arrDRV[$script:i].id188)`r`n")}
-    if (($objDRV.id194 -ne "N/A") -and ([int]$objDRV.id194 -gt 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Temperature [C] (194) : $($script:arrDRV[$script:i].id194)`r`n")}
+    if (($objDRV.id184 -ne "N/A") -and ([int]$objDRV.id184 -gt 5)) {$script:blnWARN = $true; $script:arrWARN.add("  - End to End Error (184) : $($script:arrDRV[$script:i].id184)`r`n")}
+    if (($objDRV.id187 -ne "N/A") -and ([int]$objDRV.id187 -gt 10)) {$script:blnWARN = $true; $script:arrWARN.add("  - Uncorrectable Errors (187) : $($script:arrDRV[$script:i].id187)`r`n")}
+    if (($objDRV.id188 -ne "N/A") -and ([int]$objDRV.id188 -gt 5)) {$script:blnWARN = $true; $script:arrWARN.add("  - Command Timeout (188) : $($script:arrDRV[$script:i].id188)`r`n")}
+    if (($objDRV.id194 -ne "N/A") -and ([int]$objDRV.id194 -gt 65)) {$script:blnWARN = $true; $script:arrWARN.add("  - Temperature [C] (194) : $($script:arrDRV[$script:i].id194)`r`n")}
     if (($objDRV.id196 -ne "N/A") -and ([int]$objDRV.id196 -gt 200)) {$script:blnWARN = $true; $script:arrWARN.add("  - Reallocation Events (196) : $($script:arrDRV[$script:i].id196)`r`n")}
     if (($objDRV.id197 -ne "N/A") -and ([int]$objDRV.id197 -gt 100)) {$script:blnWARN = $true; $script:arrWARN.add("  - Pending Sectors (197) : $($script:arrDRV[$script:i].id197)`r`n")}
-    if (($objDRV.id198 -ne "N/A") -and ([int]$objDRV.id198 -gt 0)) {$script:blnWARN = $true; $script:arrWARN.add("  - Offline Uncorrectable Sectors (198) : $($script:arrDRV[$script:i].id198)`r`n")}
+    if (($objDRV.id198 -ne "N/A") -and ([int]$objDRV.id198 -gt 10)) {$script:blnWARN = $true; $script:arrWARN.add("  - Offline Uncorrectable Sectors (198) : $($script:arrDRV[$script:i].id198)`r`n")}
     if (($objDRV.id201 -ne "N/A") -and ([int]$objDRV.id201 -gt 100)) {$script:blnWARN = $true; $script:arrWARN.add("  - Soft Read Error Rate (201) : $($script:arrDRV[$script:i].id201)`r`n")}
     #SSD ATTRIBUTES
     if (($objDRV.id170 -ne "N/A") -and ([int]$objDRV.id170 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Available Space (170) : $($script:arrDRV[$script:i].id170)`r`n")}
@@ -325,13 +325,13 @@
     if (($objDRV.id177 -ne "N/A") -and ([int]$objDRV.id177 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Wear Leveling (177) : $($script:arrDRV[$script:i].id177)`r`n")}
     if (($objDRV.id181 -ne "N/A") -and ([int]$objDRV.id181 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Program Fail (181) : $($script:arrDRV[$script:i].id181)`r`n")}
     if (($objDRV.id182 -ne "N/A") -and ([int]$objDRV.id182 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Erase Fail (182) : $($script:arrDRV[$script:i].id182)`r`n")}
-    if (($objDRV.id190 -ne "N/A") -and ([int]$objDRV.id190 -gt 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Airflow Temperature [C] (190) : $($script:arrDRV[$script:i].id190)`r`n")}
+    if (($objDRV.id190 -ne "N/A") -and ([int]$objDRV.id190 -gt 65)) {$script:blnWARN = $true; $script:arrWARN.add("  - Airflow Temperature [C] (190) : $($script:arrDRV[$script:i].id190)`r`n")}
     if (($objDRV.id230 -ne "N/A") -and ([int]$objDRV.id230 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Drive Life Protection (230) : $($script:arrDRV[$script:i].id230)`r`n")}
     if (($objDRV.id231 -ne "N/A") -and ([int]$objDRV.id231 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - SSD Life Left (231) : $($script:arrDRV[$script:i].id231)`r`n")}
     if (($objDRV.id232 -ne "N/A") -and ([int]$objDRV.id232 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Endurance Remaining (232) : $($script:arrDRV[$script:i].id232)`r`n")} 
     #NVME ATTRIBUTES
     if (($objDRV.nvmewarn -ne "N/A") -and ([int]$objDRV.nvmewarn -gt 0)) {$script:blnWARN = $true; $script:arrWARN.add("  - Critical Warning (NVMe) : $($script:arrDRV[$script:i].nvmewarn)`r`n")}
-    if (($objDRV.nvmetemp -ne "N/A") -and ([int]$objDRV.nvmetemp -gt 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Temperature [C] (NVMe) : $($script:arrDRV[$script:i].nvmetemp)`r`n")}
+    if (($objDRV.nvmetemp -ne "N/A") -and ([int]$objDRV.nvmetemp -gt 75)) {$script:blnWARN = $true; $script:arrWARN.add("  - Temperature [C] (NVMe) : $($script:arrDRV[$script:i].nvmetemp)`r`n")}
     if (($objDRV.nvmeavail -ne "N/A") -and ([int]$objDRV.nvmeavail -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Available Spare (NVMe) : $($script:arrDRV[$script:i].nvmeavail)`r`n")}
     if (($objDRV.nvmemdi -ne "N/A") -and ([int]$objDRV.nvmemdi -gt 0)) {$script:blnWARN = $true; $script:arrWARN.add("  - Media / Data Integrity Errors (NVMe) : $($script:arrDRV[$script:i].nvmemdi)`r`n")}
     #if (($objDRV.nvmeerr -ne "N/A") -and ([int]$objDRV.nvmeerr -gt 100)) {$script:blnWARN = $true; $script:arrWARN.add("  - Error Info Log Entries (NVMe) : $($script:arrDRV[$script:i].nvmeerr)`r`n")}
@@ -532,9 +532,9 @@ foreach ($objDRV in $arrDRV) {
     chkSMART $script:arrDRV[$script:i]
     write-host " - SMART REPORT :" -ForegroundColor yellow
     $allout = " - SMART REPORT DRIVE : $($script:arrDRV[$script:i].drvID)`r`n"
-    if ($script:arrWARN.length -eq 0) {
+    if ($script:arrWARN.count -eq 0) {
       $allout += "  - All SMART Attributes passed checks`r`n"
-    } elseif ($script:arrWARN.length -gt 0) {
+    } elseif ($script:arrWARN.count -gt 0) {
       $allout += "  - The following SMART Attributes did not pass :`r`n"
       foreach ($warn in $script:arrWARN) {
         $allout += "$($warn)"
@@ -593,7 +593,7 @@ foreach ($objDRV in $arrDRV) {
       # This logs an activity feed item on an Assets's Activity feed
       Log-Activity -Message "SMART Health : $($script:arrDRV[$script:i].drvID) : Warning" -EventName "SMART Health : $($script:arrDRV[$script:i].drvID)"
       # This creates an alert in Syncro and triggers the "New RMM Alert" in the Notification Center - automatically de-duping per asset.
-      Rmm-Alert -Category "SMART Health : $($script:arrDRV[$script:i].drvID) : Warning" -Body "$($allout)"
+      Rmm-Alert -Category "SMART Health : Warning" -Body "$($allout)"
     } elseif (-not $script:blnWARN) {
       if ($($script:arrDRV[$script:i].fail) -eq "N/A") {
         # This logs an activity feed item on an Assets's Activity feed
