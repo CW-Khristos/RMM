@@ -160,10 +160,10 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
         $details[0] = $details[0].trim()
         $details[1] = $details[1].trim()
         if (($null -ne $details[1]) -and ($details[1] -ne "")) {
-          $dcmds = $dcmds + 1
-          if ($hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+          $script:dcmds = $script:dcmds + 1
+          if ($script:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             continue
-          } elseif (-not $hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+          } elseif (-not $script:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             $hash = @{
               TimeCreated      = $Event.TimeCreated
               EventMessage     = $Event.message
@@ -171,8 +171,8 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
               ScriptBlockID    = $($details[0])
               Path             = $($details[1])
             }
-            $dscripts = $dscripts + 1
-            $hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
+            $script:dscripts = $script:dscripts + 1
+            $script:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
             $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block :`r`n"
             $script:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
             write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block :" -foregroundcolor red
@@ -186,9 +186,9 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
         $details[1] = $details[1].trim()
         if (($null -ne $details[1]) -and ($details[1] -ne "")) {
           $scmds = $scmds + 1
-          if ($hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+          if ($script:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             continue
-          } elseif (-not $hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+          } elseif (-not $script:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             $hash = @{
               TimeCreated      = $Event.TimeCreated
               EventMessage     = $Event.message
@@ -196,8 +196,8 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
               ScriptBlockID    = $($details[0])
               Path             = $($details[1])
             }
-            $sscripts = $sscripts + 1
-            $hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
+            $script:sscripts = $script:sscripts + 1
+            $script:hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
             $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :`r`n"
             $script:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
             write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :" -foregroundcolor yellow
@@ -212,24 +212,24 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
 StopClock
 #DATTO OUTPUT
 write-host "`r`nDATTO OUTPUT :" -foregroundcolor yellow
-if ($dcmds -eq 0) {
-  write-host "`r`n  - Powershell Events : Healthy - $($dcmds) Dangerous commands executed by $($dscripts) Scripts found in logs." -foregroundcolor green
-  write-DRRMAlert "Powershell Events : Healthy - $($dcmds) Dangerous commands executed by $($dscripts) Scripts found in logs."
+if ($script:dcmds -eq 0) {
+  write-host "`r`n  - Powershell Events : Healthy - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs." -foregroundcolor green
+  write-DRRMAlert "Powershell Events : Healthy - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs."
   write-DRMMDiag "$($script:diag)"
   exit 0
-} elseif ($dcmds -gt 0) {
-  write-host "`r`n  - Powershell Events : Warning - $($dcmds) Dangerous commands executed by $($dscripts) Scripts found in logs." -foregroundcolor red
+} elseif ($script:dcmds -gt 0) {
+  write-host "`r`n  - Powershell Events : Warning - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs." -foregroundcolor red
   write-host "`r`nThe following Script Blocks contain dangerous commands :" -foregroundcolor yellow
   $script:diag += "`r`nThe following Script Blocks contain dangerous commands :"
-  foreach ($cmd in $hashDCMD.keys) {
-    $script:diag += "`r`n  - $($hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($hashDCMD[$cmd].TriggeredCommand) found in script block :`r`n"
-    $script:diag += "    - ScriptBlock ID : $($hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($hashDCMD[$cmd].Path)`r`n"
-    $script:diag += "$($hashDCMD[$cmd].EventMessage)`r`n"
-    write-host "  - $($hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($hashDCMD[$cmd].TriggeredCommand) found in script block :" -foregroundcolor red
-    write-host "    - ScriptBlock ID : $($hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($hashDCMD[$cmd].Path)" -foregroundcolor red
-    write-host "$($hashDCMD[$cmd].EventMessage)`r`n" -foregroundcolor red
+  foreach ($cmd in $script:hashDCMD.keys) {
+    $script:diag += "`r`n  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($script:hashDCMD[$cmd].TriggeredCommand) found in script block :`r`n"
+    $script:diag += "    - ScriptBlock ID : $($script:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($script:hashDCMD[$cmd].Path)`r`n"
+    $script:diag += "$($script:hashDCMD[$cmd].EventMessage)`r`n"
+    write-host "  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($script:hashDCMD[$cmd].TriggeredCommand) found in script block :" -foregroundcolor red
+    write-host "    - ScriptBlock ID : $($script:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($script:hashDCMD[$cmd].Path)" -foregroundcolor red
+    write-host "$($script:hashDCMD[$cmd].EventMessage)`r`n" -foregroundcolor red
   }
-  write-DRRMAlert "Powershell Events : Warning - $($dcmds) Dangerous commands executed by $($dscripts) Scripts found in logs."
+  write-DRRMAlert "Powershell Events : Warning - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs."
   write-DRMMDiag "$($script:diag)"
   exit 1
 }
