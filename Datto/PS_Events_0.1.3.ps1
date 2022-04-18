@@ -185,7 +185,7 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
         $details[0] = $details[0].trim()
         $details[1] = $details[1].trim()
         if (($null -ne $details[1]) -and ($details[1] -ne "")) {
-          $scmds = $scmds + 1
+          $script:scmds = $script:scmds + 1
           if ($script:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             continue
           } elseif (-not $script:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
