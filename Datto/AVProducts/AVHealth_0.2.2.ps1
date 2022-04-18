@@ -176,15 +176,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  '<-Start Diagnostic->'
-    foreach ($Message in $Messages) {$Message}
-    write-host '<-End Diagnostic->'
+    write-host  "<-Start Diagnostic->"
+    foreach ($message in $messages) {$message}
+    write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host '<-Start Result->'
+    write-host "<-Start Result->"
     write-host "Alert=$($message)"
-    write-host '<-End Result->'
+    write-host "<-End Result->"
   } ## write-DRRMAlert
 
   function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
