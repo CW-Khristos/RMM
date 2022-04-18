@@ -259,7 +259,7 @@ Function CheckLSVsync {
   Elseif( ($LSVSync -match ".*(s|S)ynchronizing.*") -or ($LSVSync -match ".*%.*") ){
       $script:LSVSyncMessage = $script:LSVSync
       If($LSVSync.indexof(".") -ne -1) {
-        $stat = Split-StringOnLiteralString $LSVSync "."
+        $stat = $LSVSync -split "."
         $script:LSVSyncStatus = $stat[0]
       }
       Elseif($LSVSync.indexof(".") -eq -1) {
@@ -324,40 +324,6 @@ Function CheckLSVselfHealingStatus {
             $script:LSV_daysSinceSelfHealingTrigger = "not triggered"
         }
 }
-
-function Split-StringOnLiteralString {
-  trap {
-    Write-Error "An error occurred using the Split-StringOnLiteralString function. This was most likely caused by the arguments supplied not being strings"
-  }
-
-  if ($args.Length -ne 2) {
-    Write-Error "Split-StringOnLiteralString was called without supplying two arguments. The first argument should be the string to be split, and the second should be the string or character on which to split the string."
-  }
-  else {
-    if (($args[0]).GetType().Name -ne "String") {
-      Write-Warning "The first argument supplied to Split-StringOnLiteralString was not a string. It will be attempted to be converted to a string. To avoid this warning, cast arguments to a string before calling Split-StringOnLiteralString."
-      $strToSplit = [string]$args[0]
-    }
-    else {
-      $strToSplit = $args[0]
-    }
-
-    if ((($args[1]).GetType().Name -ne "String") -and (($args[1]).GetType().Name -ne "Char")) {
-      Write-Warning "The second argument supplied to Split-StringOnLiteralString was not a string. It will be attempted to be converted to a string. To avoid this warning, cast arguments to a string before calling Split-StringOnLiteralString."
-      $strSplitter = [string]$args[1]
-    }
-    elseif (($args[1]).GetType().Name -eq "Char") {
-      $strSplitter = [string]$args[1]
-    }
-    else {
-      $strSplitter = $args[1]
-    }
-
-    $strSplitterInRegEx = [regex]::Escape($strSplitter)
-    [regex]::Split($strToSplit, $strSplitterInRegEx)
-  }
-}
-
 #-----------------------------------------------------------[Execution]------------------------------------------------------------
 Try{
     #Paths of both RMM & NC/Standalone MSPB Status Report file
@@ -408,8 +374,8 @@ Try{
     #get LSV Location from ClientTool
     $test = & cmd.exe /c `"$CLI_path`" control.setting.list
     $test = [String]$test
-    $items = Split-StringOnLiteralString $test "LocalSpeedVaultLocation "
-    $items = Split-StringOnLiteralString $items[1] "LocalSpeedVaultPassword "
+    $items = $test -split "LocalSpeedVaultLocation "
+    $items = $items[1] -split "LocalSpeedVaultPassword "
     $script:LSVLocation = $items[0]
 
     if ($script:LSV_SelfHealingCountdownTrigger -eq $True){
