@@ -64,39 +64,6 @@ function CheckSync {
 	}
 }
 
-function Split-StringOnLiteralString {
-  trap {
-    Write-Error "An error occurred using the Split-StringOnLiteralString function. This was most likely caused by the arguments supplied not being strings"
-  }
-
-  if ($args.Length -ne 2) ` {
-    Write-Error "Split-StringOnLiteralString was called without supplying two arguments. The first argument should be the string to be split, and the second should be the string or character on which to split the string."
-  } `
-  else ` {
-    if (($args[0]).GetType().Name -ne "String") ` {
-      Write-Warning "The first argument supplied to Split-StringOnLiteralString was not a string. It will be attempted to be converted to a string. To avoid this warning, cast arguments to a string before calling Split-StringOnLiteralString."
-      $strToSplit = [string]$args[0]
-    } `
-    else ` {
-      $strToSplit = $args[0]
-    }
-
-    if ((($args[1]).GetType().Name -ne "String") -and (($args[1]).GetType().Name -ne "Char")) ` {
-      Write-Warning "The second argument supplied to Split-StringOnLiteralString was not a string. It will be attempted to be converted to a string. To avoid this warning, cast arguments to a string before calling Split-StringOnLiteralString."
-      $strSplitter = [string]$args[1]
-    } `
-    elseif (($args[1]).GetType().Name -eq "Char") ` {
-      $strSplitter = [string]$args[1]
-    } `
-    else ` {
-      $strSplitter = $args[1]
-    }
-
-    $strSplitterInRegEx = [regex]::Escape($strSplitter)
-    [regex]::Split($strToSplit, $strSplitterInRegEx)
-  }
-}
-
 #Paths of both RMM & Standalone
 $MOB_path = "$env:ALLUSERSPROFILE\Managed Online Backup\Backup Manager\StatusReport.xml"
 $SA_path = "$env:ALLUSERSPROFILE\MXB\Backup Manager\StatusReport.xml"
@@ -144,8 +111,8 @@ if ($true_path) {
     #$test = Get-ProcessOutput -FileName "cmd.exe" -Args "/c `"$CLI_path`" control.setting.list"
     $test = & cmd.exe /c `"$CLI_path`" control.setting.list
     $test = [String]$test
-    $items = Split-StringOnLiteralString $test "LocalSpeedVaultLocation "
-    $items = Split-StringOnLiteralString $items[1] "LocalSpeedVaultPassword "
+    $items = $test -split "LocalSpeedVaultLocation "
+    $items = $items[1] -split "LocalSpeedVaultPassword "
     $LSV_Location = $items[0]
 	}
 	
