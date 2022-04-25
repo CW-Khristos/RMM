@@ -95,7 +95,6 @@
     }
     $script:psaCalls += 1
     try {
-      #IPM-Khristos
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $script:blnWARN = $true
@@ -121,7 +120,6 @@
     }
     $script:psaCalls += 1
     try {
-      #IPM-Khristos
       $list = Invoke-RestMethod @params -UseBasicParsing -erroraction stop
       foreach ($item in $list.items) {
         if ($dest.containskey($item.id)) {
@@ -154,7 +152,6 @@
     $script:psaCalls += 1
     $script:CompanyDetails = @()
     try {
-      #IPM-Khristos
       $CompanyList = Invoke-RestMethod @params -UseBasicParsing -erroraction stop
       $sort = ($CompanyList.items | Sort-Object -Property companyName)
       foreach ($company in $sort) {
@@ -192,7 +189,6 @@
     $script:rmmCalls += 1
     # Request access token
     try {
-      #IPM-Khristos
       (Invoke-WebRequest @params -UseBasicParsing -erroraction stop | ConvertFrom-Json).access_token
     } catch {
       $script:blnFAIL = $true
@@ -225,7 +221,6 @@
     if ($apiRequestBody) {$params.Add('Body',$apiRequestBody)}
     # Make request
     try {
-      #IPM-Khristos
       (Invoke-WebRequest @params -UseBasicParsing).Content
     } catch {
       $script:blnWARN = $true
@@ -332,6 +327,7 @@
       apiRequestBody  = "{`"autotaskCompanyId`": `"$($id)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $onDemand,`"splashtopAutoInstall`": $installSplashtop}"
     }
     $script:rmmCalls += 1
+    $script:blnSITE = $false
     try {
       $script:newSite = (RMM-ApiRequest @params -UseBasicParsing) #| ConvertFrom-Json
       if ($script:newSite -match $name) {
@@ -341,6 +337,7 @@
       }
     } catch {
       $script:blnWARN = $true
+      $script:blnSITE = $false
       $script:diag += "`r`nAPI_WatchDog : Failed to create New DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
@@ -450,6 +447,7 @@ if (-not $script:blnFAIL) {
             write-host "CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
             $script:diag += "`r`nCREATE : $($company.CompanyName) : SUCCESS" #-foregroundcolor green
           } elseif (-not $postSite) {
+            $script:blnWARN = $true
             write-host "CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
             $script:diag += "`r`nCREATE : $($company.CompanyName) : FAILED" #-foregroundcolor red
           }
