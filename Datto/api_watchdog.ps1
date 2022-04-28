@@ -48,7 +48,8 @@
   #PSA API VARS
   $script:psaCalls          = 0
   $script:psaAPI            = $env:i_psaAPI
-  $script:psaFilter         = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
+  $script:psaGenFilter      = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
+  $script:psaActFilter      = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -82,11 +83,12 @@
     }
   }  ## Convert epoch time to date time
 
-  function PSA-GetThreshold {
+  function PSA-Query {
+    param ($method, $entity)
     $params = @{
-      Method      = "GET"
+      Method      = "$($method)"
       ContentType = 'application/json'
-      Uri         = "$($script:psaAPI)/ThresholdInformation"
+      Uri         = "$($script:psaAPI)/$($entity)"
       Headers     = @{
         'Username'            = $script:psaKey
         'Secret'              = $script:psaSecret
@@ -96,6 +98,44 @@
     $script:psaCalls += 1
     try {
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+    } catch {
+      $script:blnWARN = $true
+      $script:diag += "`r`nAPI_WatchDog : Failed to query PSA API via $($params.Uri)"
+      $script:diag += "`r`n$($_.Exception)"
+      $script:diag += "`r`n$($_.scriptstacktrace)"
+      $script:diag += "`r`n$($_)"
+      write-host "$($script:diag)`r`n"
+    }
+  }
+
+  function PSA-FilterQuery {
+    param ($method, $entity, $filter)
+    $params = @{
+      Method      = "$($method)"
+      ContentType = 'application/json'
+      Uri         = "$($script:psaAPI)/$($entity)/query?search=$($filter)"
+      Headers     = @{
+        'Username'            = $script:psaKey
+        'Secret'              = $script:psaSecret
+        'APIIntegrationcode'  = $script:psaIntegration
+      }
+    }
+    $script:psaCalls += 1
+    try {
+      Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+    } catch {
+      $script:blnWARN = $true
+      $script:diag += "`r`nAPI_WatchDog : Failed to query (filtered) PSA API via $($params.Uri)"
+      $script:diag += "`r`n$($_.Exception)"
+      $script:diag += "`r`n$($_.scriptstacktrace)"
+      $script:diag += "`r`n$($_)"
+      write-host "$($script:diag)`r`n"
+    }
+  }
+
+  function PSA-GetThreshold {
+    try {
+      PSA-Query "GET" "ThresholdInformation"
     } catch {
       $script:blnWARN = $true
       $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA API Utilization via $($params.Uri)"
@@ -108,19 +148,9 @@
 
   function PSA-GetMaps {
     param ($dest, $entity)
-    $params = @{
-      Method      = "GET"
-      ContentType = 'application/json'
-      Uri         = "$($script:psaAPI)/$($entity)/query?search=$($script:psaFilter)"
-      Headers     = @{
-        'Username'            = $script:psaKey
-        'Secret'              = $script:psaSecret
-        'APIIntegrationcode'  = $script:psaIntegration
-      }
-    }
-    $script:psaCalls += 1
+    $Uri = "$($script:psaAPI)/$($entity)/query?search=$($script:psaActFilter)"
     try {
-      $list = Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+      $list = PSA-FilterQuery "GET" "$($entity)" "$($script:psaActFilter)"
       foreach ($item in $list.items) {
         if ($dest.containskey($item.id)) {
           continue
@@ -130,7 +160,7 @@
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA $($entity) Maps via $($params.Uri)"
+      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA $($entity) Maps via $($Uri)"
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
@@ -139,20 +169,10 @@
   } ## PSA-GetMaps
 
   function PSA-GetCompanies {
-    $params = @{
-      Method      = "GET"
-      ContentType = 'application/json'
-      Uri         = "$($script:psaAPI)/Companies/query?search=$($script:psaFilter)"
-      Headers     = @{
-        'Username'            = $script:psaKey
-        'Secret'              = $script:psaSecret
-        'APIIntegrationcode'  = $script:psaIntegration
-      }
-    }
-    $script:psaCalls += 1
     $script:CompanyDetails = @()
+    $Uri = "$($script:psaAPI)/Companies/query?search=$($script:psaActFilter)"
     try {
-      $CompanyList = Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+      $CompanyList = PSA-FilterQuery "GET" "Companies" "$($script:psaActFilter)"
       $sort = ($CompanyList.items | Sort-Object -Property companyName)
       foreach ($company in $sort) {
         $script:CompanyDetails += New-Object -TypeName PSObject -Property @{
@@ -167,7 +187,7 @@
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA Companies via $($params.Uri)"
+      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA Companies via $($Uri)"
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
@@ -178,7 +198,7 @@
   function RMM-ApiAccessToken {
     # Convert password to secure string
     $securePassword = ConvertTo-SecureString -String 'public' -AsPlainText -Force
-    # Define parameters for Invoke-WebRequest cmdlet
+    # Define parameters
     $params = @{
       Method      = 'POST'
       ContentType = 'application/x-www-form-urlencoded'
@@ -207,7 +227,7 @@
       [string]$apiRequest,
       [string]$apiRequestBody
     )
-    # Define parameters for Invoke-WebRequest cmdlet
+    # Define parameters
     $params = @{
       Method        = $apiMethod
       ContentType   = 'application/json'
@@ -244,7 +264,6 @@
       apiRequest      = "/v2/device/$($deviceUID)/udf"
       apiRequestBody  = "{`"$($script:rmmUDF)`": `"$($companyType)`"}"
     }
-    $script:rmmCalls += 1
     try {
       $postUDF = (RMM-ApiRequest @params -UseBasicParsing)
     } catch {
@@ -268,7 +287,6 @@
       apiRequest      = "/v2/site/$($siteUID)/devices"
       apiRequestBody  = $null
     }
-    $script:rmmCalls += 1
     $script:DeviceDetails = @()
     try {
       $DeviceList = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
@@ -297,7 +315,6 @@
       apiRequest      = "/v2/account/sites"
       apiRequestBody  = $null
     }
-    $script:rmmCalls += 1
     try {
       $script:sitesList = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
     } catch {
@@ -326,7 +343,6 @@
       apiRequest      = "/v2/site"
       apiRequestBody  = "{`"autotaskCompanyId`": `"$($id)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $onDemand,`"splashtopAutoInstall`": $installSplashtop}"
     }
-    $script:rmmCalls += 1
     $script:blnSITE = $false
     try {
       $script:newSite = (RMM-ApiRequest @params -UseBasicParsing) #| ConvertFrom-Json
