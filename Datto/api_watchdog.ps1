@@ -420,7 +420,8 @@ if (-not $script:blnFAIL) {
     $script:diag += "$($script:strLineSeparator)`r`n"
     if (($($script:typeMap[[int]$($company.CompanyType)]) -ne "Dead") -and 
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Vendor") -and
-      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Partner")) {
+      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Partner") -and
+      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Lead")) {
         $rmmSite = $script:sitesList.sites | where-object {$_.name -eq "$($company.CompanyName)"}
         write-host "$($rmmSite)"
         write-host "$($script:strLineSeparator)"
