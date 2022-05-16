@@ -62,7 +62,7 @@
             $script:blnADD = $false
           }
           if ($script:blnADD) {
-            foreach ($itms in $prev) {
+            foreach ($itm in $prev) {
               $new.add("$($itm)`r`n")
             }
             $new.add("$($warn)`r`n")
@@ -153,12 +153,12 @@ if (($env:varDiskTransfersPersec -eq $null) -or ($env:varDiskTransfersPersec -eq
 if (($env:varAvgDiskBytesPerTransfer -eq $null) -or ($env:varAvgDiskBytesPerTransfer -eq "")) {$env:varAvgDiskBytesPerTransfer = 1073741824}
 
 try {
-  $ldisks = Get-CimInstance 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where Name -match ":"
+  $ldisks = Get-CimInstance 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where-object {$_.Name -match ":"}
 } catch {
   try {
     $script:blnWMI = $true
     $script:diag += "Unable to poll Drive Statistics via CIM`r`nAttempting to use WMI instead`r`n"
-    $ldisks = Get-WMIObject 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where Name -match ":"
+    $ldisks = Get-WMIObject 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where-object {$_.Name -match ":"}
   } catch {
     $script:diag += "Unable to query Drive Statistics via CIM or WMI`r`n"
     write-DRRMAlert "Warning : Monitoring Failure"

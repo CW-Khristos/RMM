@@ -7,10 +7,10 @@
     Assists you in finding machines that have ran dangerous commands such as invoke-expression, often used for attacks called 'Living off-the-Land'
  
 .NOTES
-    Version        : 0.1.2 (21 March 2022)
+    Version        : 0.1.3 (18 April 2022)
     Creation Date  : 14 May 2020
     Purpose/Change : Assists you in finding machines that have ran dangerous commands
-    File Name      : PS_Events_0.1.2.ps1
+    File Name      : PS_Events_0.1.3.ps1
     Author         : Kelvin Tegelaar - https://www.cyberdrain.com
     Modifications  : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Supported OS   : Server 2012R2 and higher
@@ -39,7 +39,7 @@ To Do:
 #>
 
 #First Clear any variables
-Remove-Variable * -ErrorAction SilentlyContinue
+#Remove-Variable * -ErrorAction SilentlyContinue
   
 #REGION ----- DECLARATIONS ----
   $script:dcmds = 0
@@ -56,47 +56,41 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  '<-Start Diagnostic->'
-    foreach ($Message in $Messages) { $Message }
-    write-host '<-End Diagnostic->'
+    write-host  "<-Start Diagnostic->"
+    foreach ($message in $messages) {$message}
+    write-host "<-End Diagnostic->"
   }
 
   function write-DRRMAlert ($message) {
-    write-host '<-Start Result->'
-    write-host "Alert=$message"
-    write-host '<-End Result->'
+    write-host "<-Start Result->"
+    write-host "Alert=$($message)"
+    write-host "<-End Result->"
   }
-  
-  function Split-StringOnLiteralString {
-    trap {
-      Write-Error "An error occurred using the Split-StringOnLiteralString function. This was most likely caused by the arguments supplied not being strings"
-    }
-    if ($args.Length -ne 2) {
-      Write-Error "Split-StringOnLiteralString was called without supplying two arguments. The first argument should be the string to be split, and the second should be the string or character on which to split the string."
-    } else {
-      if (($args[0]).GetType().Name -ne "String") {
-        Write-Warning "The first argument supplied to Split-StringOnLiteralString was not a string. It will be attempted to be converted to a string. To avoid this warning, cast arguments to a string before calling Split-StringOnLiteralString."
-        $strToSplit = [string]$args[0]
-      } else {
-        $strToSplit = $args[0]
-      }
-      if ((($args[1]).GetType().Name -ne "String") -and (($args[1]).GetType().Name -ne "Char")) {
-        Write-Warning "The second argument supplied to Split-StringOnLiteralString was not a string. It will be attempted to be converted to a string. To avoid this warning, cast arguments to a string before calling Split-StringOnLiteralString."
-        $strSplitter = [string]$args[1]
-      } elseif (($args[1]).GetType().Name -eq "Char") {
-        $strSplitter = [string]$args[1]
-      } else {
-        $strSplitter = $args[1]
-      }
-      $strSplitterInRegEx = [regex]::Escape($strSplitter)
-      [regex]::Split($strToSplit, $strSplitterInRegEx)
-    }
+
+  function StopClock {
+    #Stop script execution time calculation
+    $script:sw.Stop()
+    $Days = $sw.Elapsed.Days
+    $Hours = $sw.Elapsed.Hours
+    $Minutes = $sw.Elapsed.Minutes
+    $Seconds = $sw.Elapsed.Seconds
+    $Milliseconds = $sw.Elapsed.Milliseconds
+    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
+    $mill = [string]($total / 1000)
+    $mill = $mill.split(".")[1]
+    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
 #------------
 #BEGIN SCRIPT
 clear-host
+#Start script execution time calculation
+$ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+$script:sw = [Diagnostics.Stopwatch]::StartNew()
 $version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentVersion
 if ($Version -lt "6.2") {
   $script:diag += "Informational - Unsupported OS. Only Server 2012R2 and up are supported."
@@ -115,7 +109,7 @@ try {
       $script:diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
       write-host "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging" -foregroundcolor red
       Write-DRMMAlert "Error - Script Block Logging is not enabled"
-      Write-DRMMDiag $($script:diag)
+      Write-DRMMDiag "$($script:diag)"
       exit 1
     }
   } else {
@@ -135,7 +129,7 @@ try {
     $script:diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
     write-host "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging" -foregroundcolor red
     Write-DRMMAlert "Error - Script Block Logging is not enabled"
-    Write-DRMMDiag $($script:diag)
+    Write-DRMMDiag "$($script:diag)"
     exit 1
   }
 }
@@ -149,7 +143,7 @@ try{
   $script:diag += "You do not have permission to configure this log!`r`n"
   $script:diag += "Try running this script with administrator privileges.`r`n"
   $script:diag += "$($_.Exception.Message)`r`n"
-  Write-Error $script:diag
+  Write-Error "$($script:diag)"
 }
 $logInfo = @{ 
   ProviderName = "Microsoft-Windows-PowerShell"
@@ -160,37 +154,37 @@ $PowerShellEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction Silently
 $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
   foreach ($command in $DangerousCommands) {
     foreach ($syntax in $arrSyntax) {
-      if (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -notmatch ($script:slkey -join '|'))) { 
-          $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
-          $details = Split-StringOnLiteralString $($details[1]) "Path: "
-          $details[0] = $details[0].trim()
-          $details[1] = $details[1].trim()
-          if (($details[1] -ne $null) -and ($details[1] -ne "")) {
-            $script:dcmds = $script:dcmds + 1
-            if ($script:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
-              continue
-            } elseif (-not $script:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
-              $hash = @{
-                TimeCreated      = $Event.TimeCreated
-                EventMessage     = $Event.message
-                TriggeredCommand = "$($command)$($syntax)"
-                ScriptBlockID    = $($details[0])
-                Path             = $($details[1])
-              }
-              $script:dscripts = $script:dscripts + 1
-              $script:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-              $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :`r`n"
-              $script:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
-              write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block :" -foregroundcolor red
-              write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
-            }
-          }
-      } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -match ($script:slkey -join '|'))) { 
-        $details = Split-StringOnLiteralString $($Event.Message) "ScriptBlock ID: "
-        $details = Split-StringOnLiteralString $($details[1]) "Path: "
+      if (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -notmatch ($slkey -join "|"))) { 
+        $details = $($Event.Message) -split "ScriptBlock ID: "
+        $details = $($details[1]) -split "Path: "
         $details[0] = $details[0].trim()
         $details[1] = $details[1].trim()
-        if (($details[1] -ne $null) -and ($details[1] -ne "")) {
+        if (($null -ne $details[1]) -and ($details[1] -ne "")) {
+          $script:dcmds = $script:dcmds + 1
+          if ($script:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+            continue
+          } elseif (-not $script:hashDCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
+            $hash = @{
+              TimeCreated      = $Event.TimeCreated
+              EventMessage     = $Event.message
+              TriggeredCommand = "$($command)$($syntax)"
+              ScriptBlockID    = $($details[0])
+              Path             = $($details[1])
+            }
+            $script:dscripts = $script:dscripts + 1
+            $script:hashDCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
+            $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block :`r`n"
+            $script:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
+            write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block :" -foregroundcolor red
+            write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor red
+          }
+        }
+      } elseif (($Event.Message -like "*$($command)$($syntax)*") -and ($Event.Message -match ($slkey -join "|"))) { 
+        $details = $($Event.Message) -split "ScriptBlock ID: "
+        $details = $($details[1]) -split "Path: "
+        $details[0] = $details[0].trim()
+        $details[1] = $details[1].trim()
+        if (($null -ne $details[1]) -and ($details[1] -ne "")) {
           $script:scmds = $script:scmds + 1
           if ($script:hashSCMD.containskey("$($details[0]) - $($details[1]) : $($command)$($syntax)")) {
             continue
@@ -204,9 +198,9 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
             }
             $script:sscripts = $script:sscripts + 1
             $script:hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
-            $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :`r`n"
+            $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :`r`n"
             $script:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
-            write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : ``$($command)$($syntax)`` found in script block marked 'safe' :" -foregroundcolor yellow
+            write-host "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :" -foregroundcolor yellow
             write-host "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor yellow
           }
         }
@@ -214,27 +208,29 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
     }
   }
 }
+#Stop script execution time calculation
+StopClock
 #DATTO OUTPUT
 write-host "`r`nDATTO OUTPUT :" -foregroundcolor yellow
 if ($script:dcmds -eq 0) {
   write-host "`r`n  - Powershell Events : Healthy - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs." -foregroundcolor green
   write-DRRMAlert "Powershell Events : Healthy - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs."
-  write-DRMMDiag $($script:diag)
+  write-DRMMDiag "$($script:diag)"
   exit 0
 } elseif ($script:dcmds -gt 0) {
   write-host "`r`n  - Powershell Events : Warning - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs." -foregroundcolor red
   write-host "`r`nThe following Script Blocks contain dangerous commands :" -foregroundcolor yellow
   $script:diag += "`r`nThe following Script Blocks contain dangerous commands :"
   foreach ($cmd in $script:hashDCMD.keys) {
-    $script:diag += "`r`n  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($script:hashDCMD[$cmd].TriggeredCommand)`` found in script block :`r`n"
+    $script:diag += "`r`n  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($script:hashDCMD[$cmd].TriggeredCommand) found in script block :`r`n"
     $script:diag += "    - ScriptBlock ID : $($script:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($script:hashDCMD[$cmd].Path)`r`n"
     $script:diag += "$($script:hashDCMD[$cmd].EventMessage)`r`n"
-    write-host "  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : ``$($script:hashDCMD[$cmd].TriggeredCommand)`` found in script block :" -foregroundcolor red
+    write-host "  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($script:hashDCMD[$cmd].TriggeredCommand) found in script block :" -foregroundcolor red
     write-host "    - ScriptBlock ID : $($script:hashDCMD[$cmd].ScriptBlockID)`r`n    - Path : $($script:hashDCMD[$cmd].Path)" -foregroundcolor red
     write-host "$($script:hashDCMD[$cmd].EventMessage)`r`n" -foregroundcolor red
   }
   write-DRRMAlert "Powershell Events : Warning - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs."
-  write-DRMMDiag $($script:diag)
+  write-DRMMDiag "$($script:diag)"
   exit 1
 }
 #END SCRIPT

@@ -7,15 +7,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  '<-Start Diagnostic->'
+    write-host  "<-Start Diagnostic->"
     foreach ($Message in $Messages) { $Message }
-    write-host '<-End Diagnostic->'
+    write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
 
   function write-DRRMAlert ($message) {
-      write-host '<-Start Result->'
-      write-host "Alert=$message"
-      write-host '<-End Result->'
+      write-host "<-Start Result->"
+      write-host "Alert=$($message)"
+      write-host "<-End Result->"
   } ## write-DRRMAlert
 #ENDREGION ----- FUNCTIONS ----
 
@@ -76,7 +76,8 @@ $ListedDHCPServers.values
 
 $DHCPHealth = foreach ($ListedServer in $ListedDHCPServers.keys) {
   write-host "`r`nCHECK SERVER :" $ListedServer
-  if ($AllowedDHCPServer -notcontains $ListedServer) {"Rogue DHCP Server found. IP of rogue server is $ListedServer"}
+  write-host "`r`nALLOWED SERVER :"$AllowedDHCPServer
+  if ($AllowedDHCPServer -notmatch $ListedServer) {"Rogue DHCP Server found. IP of rogue server is $ListedServer"}
 }
 
 if (!$DHCPHealth) { 
@@ -85,7 +86,8 @@ if (!$DHCPHealth) {
 } elseif ($DHCPHealth) { 
   write-DRRMAlert $DHCPHealth
   foreach ($ListedServer in $ListedDHCPServers.keys) {
-    if ($AllowedDHCPServer -notcontains $ListedServer) {write-DRMMDiag $ListedDHCPServers.values}
+    if ($AllowedDHCPServer -notmatch $ListedServer) {write-DRMMDiag $ListedDHCPServers.values}
+  }
   exit 1
 }
 #END SCRIPT
