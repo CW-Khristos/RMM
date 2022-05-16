@@ -1304,7 +1304,7 @@ if (-not ($script:blnAVXML)) {
           if ($rtWARN) {
             $rtWARN = $false
             $script:blnWARN = $true
-            Pop-Warnings $script:avwarn $($avs[$av].display) "$($script:o_RTstate)`r`n"
+            Pop-Warnings $script:avwarn $($avs[$av].display) "Real-Time Scanning : $($script:o_RTstate)`r`n"
           }
           #GET PRIMARY AV PRODUCT TAMPER PROTECTION STATUS
           $tamperWARN = $false
@@ -1374,7 +1374,7 @@ if (-not ($script:blnAVXML)) {
           if ($tamperWARN) {
             $tamperWARN = $false
             $script:blnWARN = $true
-            Pop-Warnings $script:avwarn $($avs[$av].display) "$($tamper)`r`n"
+            Pop-Warnings $script:avwarn $($avs[$av].display) "Tamper Protection : $($tamper)`r`n"
           }
           #GET PRIMARY AV PRODUCT LAST SCAN DETAILS
           $lastage = 0
