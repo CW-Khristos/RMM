@@ -1,13 +1,13 @@
 ***
 # **AVHealth**
   * **[AVHealth Project](https://github.com/CW-Khristos/scripts/projects/26)**
-  * **Current Validation : [Validated - v0.2.1]**
+  * **Current Validation : [Validated - v0.2.2]**
   * **Current Branch : [master](https://github.com/CW-Khristos/RMM/tree/main/NAble/AVProducts) (Validated)**
 ***
 ## **Script Details :**
   * **NCentral AMP - [AVHealth.amp](https://github.com/CW-Khristos/RMM/blob/main/NAble/AVProducts/AV%20Health.amp)**
-  * **PS1 Script - [AVHealth_0.2.1.ps1](https://github.com/CW-Khristos/RMM/blob/main/NAble/AVProducts/AVHealth_0.2.1.ps1)**
-  * **Command :** `powershell -file .\AVHealth_0.2.1.ps1 -i_PAV "[AV Vendor]"`
+  * **PS1 Script - [AVHealth_0.2.2.ps1](https://github.com/CW-Khristos/RMM/blob/dev/NAble/AVProducts/AVHealth_0.2.2.ps1)**
+  * **Command :** `powershell -file .\AVHealth_0.2.2.ps1 -i_PAV "[AV Vendor]"`
   * **Arguments :** 1, Required 1
     * **[i_PAV] - REQUIRED** - String, String to set AV Vendor to monitor for AV Health
 ***
@@ -23,10 +23,10 @@
     Script is intended to replace 'AV Status' VBS Monitoring Script
 ***
 ## .NOTES
-    Version        : 0.2.1 (12 March 2022)
+    Version        : 0.2.2 (24 March 2022)
     Creation Date  : 14 December 2021
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
-    File Name      : AVHealth_0.2.1.ps1 
+    File Name      : AVHealth_0.2.2.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Thanks         : Chris Reid (NAble) for the original 'AV Status' Script and sanity checks
                      Prejay Shah (Doherty Associates) for sanity checks and a second pair of eyes
@@ -149,8 +149,15 @@ After creating the desired Custom Services; create Service Templates for your Wi
  - 0.2.1
     - Optimization and more bugfixes; namely putting an end to populating the key '#comment' into Vendor AV Product and Product State hashtables due to how PS parses XML natively
     - Copied and modified code to retrieve Vendor AV Product XML into 'Get-AVState' function to replace the hard-coded 'swtich' to interpret WMI AV Product States
-    - This implements similar XML method to interpret WMI AV Product States as with retrieving Vendor AV Product details
-    - This should facilitate easier community contributions to WMI AV Product States and with this change plan to leave the WMI checks in place
+      - This implements similar XML method to interpret WMI AV Product States as with retrieving Vendor AV Product details
+      - This should facilitate easier community contributions to WMI AV Product States and with this change plan to leave the WMI checks in place
+ - 0.2.2
+    - Implementing unique hashtable for 'Trend Micro' in 'Get-AVXML' function to test producing more varied data structures to account for differences between the various AV Products
+      - Planning to allow for creation of Vendor-specific hashtables being built; this also will allow for a greater flexibility in accounting for instances when 'LCD' type logic simply will not suffice
+      - Hoping this will not lead down the same rabbit hole as the 'AV Status' VBS script faced with a multitude of differing 'branches' of code which could end up in a 'dead-end'
+    - Switched to target '\SOFTWARE\TrendMicro\PC-cillinNTCorp\CurrentVersion\HostedAgent\RUpdate\UpgradeVersion' for dtermining if 'Trend Micro' AV Product is up-to-date
+      - This is mostly due to 'Trend Micro' 'ClientUpgradeStatus' values being deemed unreliable for accurately determining if the AV Product itself is up-to-date and thus the need to use an completely different method from other AV Products
+    - Added retrieval for 'Trend Micro' 'VCVersion' and proper comparison to determine if both Core AV and VC components are up-to-date with their respective expected versions
 ***
 # .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
