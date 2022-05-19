@@ -232,19 +232,28 @@
       } catch {
         $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
         write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
+        write-host $_.Exception
+        write-host $_.scriptstacktrace
+        write-host $_
         try {
           $web = new-object system.net.webclient
           [xml]$psXML = $web.DownloadString($srcAVP)
         } catch {
           $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
           write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
+          write-host $_.Exception
+          write-host $_.scriptstacktrace
+          write-host $_
           try {
             start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
             [xml]$psXML = "C:\IT\Scripts\productstate.xml"
           } catch {
+            $script:blnPSXML = $false
             $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-            $script:blnPSXML = $false
+            write-host $_.Exception
+            write-host $_.scriptstacktrace
+            write-host $_
           }
         }
       }
@@ -263,6 +272,9 @@
         } catch {
           $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
           write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
+          write-host $_.Exception
+          write-host $_.scriptstacktrace
+          write-host $_
           try {
             $web = new-object system.net.webclient
             [xml]$psXML = $web.DownloadString($srcAVP)
@@ -270,16 +282,21 @@
           } catch {
             $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
             write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
+            write-host $_.Exception
+            write-host $_.scriptstacktrace
+            write-host $_
             try {
               start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
               [xml]$psXML = "C:\IT\Scripts\productstate.xml"
               $script:blnPSXML = $true
             } catch {
+              $script:blnPSXML = $false
               $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
               write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
               $script:defstatus = "Definition Status : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
-              $script:rtstatus = "Real-Time Scanning : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
-              $script:blnPSXML = $false
+              write-host $_.Exception
+              write-host $_.scriptstacktrace
+              write-host $_
             }
           }
         }
@@ -306,6 +323,7 @@
         }
       } catch {
         $script:blnPSXML = $false
+        write-host $_.Exception
         write-host $_.scriptstacktrace
         write-host $_
       }
@@ -342,6 +360,9 @@
       $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
       write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
       $script:diag += "$($xmldiag)"
+      write-host $_.Exception
+      write-host $_.scriptstacktrace
+      write-host $_
       try {
         $web = new-object system.net.webclient
         [xml]$avXML = $web.DownloadString($srcAVP)
@@ -349,14 +370,20 @@
         $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
         write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
         $script:diag += "$($xmldiag)"
+        write-host $_.Exception
+        write-host $_.scriptstacktrace
+        write-host $_
         try {
           start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
           [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
         } catch {
+          $script:blnAVXML = $false
           $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
           write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
           $script:diag += "$($xmldiag)"
-          $script:blnAVXML = $false
+          write-host $_.Exception
+          write-host $_.scriptstacktrace
+          write-host $_
         }
       }
     }
@@ -380,6 +407,9 @@
         $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
         write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
         $script:diag += "$($xmldiag)"
+        write-host $_.Exception
+        write-host $_.scriptstacktrace
+        write-host $_
         try {
           $web = new-object system.net.webclient
           [xml]$avXML = $web.DownloadString($srcAVP)
@@ -388,6 +418,9 @@
           $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
           write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
           $script:diag += "$($xmldiag)"
+          write-host $_.Exception
+          write-host $_.scriptstacktrace
+          write-host $_
           try {
             start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
             [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
@@ -395,6 +428,9 @@
           } catch {
             $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
             write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
+            write-host $_.Exception
+            write-host $_.scriptstacktrace
+            write-host $_
             #Stop script execution time calculation
             StopClock
             #DATTO OUTPUT
@@ -488,6 +524,7 @@
     } catch {
       $xmldiag = "AV Health : Error reading AV XML : $($srcAVP)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       write-host "AV Health : Error reading AV XML : $($srcAVP)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+      write-host $_.Exception
       write-host $_.scriptstacktrace
       write-host $_
       #Stop script execution time calculation
@@ -518,10 +555,11 @@
     } catch {
       $compdiag = "AV Health : Error reading AV Components`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       write-host "AV Health : Error reading AV Components`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-host $_.scriptstacktrace
-      write-host $_
       $script:diag += "$($compdiag)"
       $compdiag = $null
+      write-host $_.Exception
+      write-host $_.scriptstacktrace
+      write-host $_
     }
   } ## Pop-Components
   
@@ -560,10 +598,11 @@
     } catch {
       $warndiag = "AV Health : Error populating warnings for $($av)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       write-host "AV Health : Error populating warnings for $($av)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-host $_.scriptstacktrace
-      write-host $_
       $script:diag += "$($warndiag)"
       $warndiag = $null
+      write-host $_.Exception
+      write-host $_.scriptstacktrace
+      write-host $_
     }
   } ## Pop-Warnings
 
