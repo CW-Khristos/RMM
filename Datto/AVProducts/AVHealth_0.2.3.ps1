@@ -1527,6 +1527,7 @@ if (-not ($script:blnAVXML)) {
           if ($lastage -ne 0) {
             $time1 = New-TimeSpan -days 5
             if ($lastage.compareto($time1) -le 0) {
+              $scanWARN = $false
               $scans += "Recently Scanned : $($true) (REG Check)"
             } elseif ($lastage.compareto($time1) -gt 0) {
               $scanWARN = $true
