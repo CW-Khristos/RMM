@@ -129,18 +129,18 @@
     }
     ## SET PARTNER NAME
     Write-Host "  Enter Exact, Case Sensitive Partner Name for N-able Backup.Management API i.e. 'Acme, Inc (bob@acme.net)'"
-    if ($env:i_PartnerName -eq $null) {
+    if ($null -eq $env:i_PartnerName) {
       DO{$Script:PartnerName = Read-Host "  Enter Login Partner Name"}
       WHILE ($PartnerName.length -eq 0)
-    } elseif ($env:i_PartnerName -ne $null) {
+    } elseif ($null -ne $env:i_PartnerName) {
       $PartnerName = $env:i_PartnerName
     }
     ## SET BACKUP CREDENTIALS
     $BackupCred = New-Object -TypeName PSObject
     $BackupCred | Add-Member -MemberType NoteProperty -Name PartnerName -Value "$($PartnerName)"
-    if (($env:i_BackupUser -eq $null) -or ($env:i_BackupPWD -eq $null)) {               ## NO CREDENTIALS PASSED
+    if (($null -eq $env:i_BackupUser) -or ($null -eq $env:i_BackupPWD)) {               ## NO CREDENTIALS PASSED
       $BackupCred = Get-Credential -UserName "" -Message 'Enter Login Email and Password for N-able Backup.Management API'
-    } elseif (($env:i_BackupUser -ne $null) -and ($env:i_BackupPWD -ne $null)) {        ## CREDENTIALS PASSED
+    } elseif (($null -ne $env:i_BackupUser) -and ($null -ne $env:i_BackupPWD)) {        ## CREDENTIALS PASSED
       $BackupCred | Add-Member -MemberType NoteProperty -Name UserName -Value "$($env:i_BackupUser)"
       $BackupCred | Add-Member -MemberType NoteProperty -Name Password -Value "$($env:i_BackupPWD)"
     }
@@ -563,11 +563,17 @@ $xmlPartnerID = $statusXML.Statistics.PartnerName
 
 Send-GetPartnerInfo $Script:cred0
 #Send-EnumeratePartners
-if ((-not $AllPartners) -and ($env:i_BackupName -ne $null)) {
+if ((-not $AllPartners) -and ($null -eq $env:i_BackupName)) {
+  Send-GetPartnerInfo $xmlPartnerID
+} elseif ((-not $AllPartners) -and ($null -ne $env:i_BackupName)) {
   Send-GetPartnerInfo $env:i_BackupName
 }
 $filter1 = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup.
-Send-GetDevices $xmlPartnerID
+if ($AllPartners) {
+  Send-GetDevices "External IPM"
+} elseif (-not $AllPartners) {
+  Send-GetDevices $xmlPartnerID
+}
 
 if ($AllDevices) {
   $script:SelectedDevices = $DeviceDetail | 
@@ -578,7 +584,7 @@ if ($AllDevices) {
   #$script:SelectedDevices = $DeviceDetail | 
   #  Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
   #  Out-GridView -title "Current Partner | $partnername" -OutputMode Multiple
-  if ($xmlBackupID -ne $null) {
+  if ($null -ne $xmlBackupID) {
     $script:SelectedDevices = $DeviceDetail | 
       Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
         Where-object {$_.DeviceName -eq $xmlBackupID}
