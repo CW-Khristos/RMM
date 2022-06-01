@@ -772,7 +772,7 @@ if (-not ($script:blnAVXML)) {
                     $strName = "Windows Defender"
                   } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
-                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d*\.\d*\.\d*")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X"
                   }
                   write-host "NORMALIZED DISPLAY VALUE : $($strName)"
@@ -848,7 +848,7 @@ if (-not ($script:blnAVXML)) {
                     $strName = "Windows Defender"
                   } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
-                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d*\.\d*\.\d*")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X"
                   }
                   write-host "NORMALIZED DISPLAY VALUE : $($strName)"
@@ -965,7 +965,7 @@ if (-not ($script:blnAVXML)) {
                   $strName = "Windows Defender"
                 } elseif (($strName -match "Sophos") -and ($strName -match "BETA")) {               #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                   $strName = "Sophos Intercept X Beta"
-                } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d*\.\d*\.\d*")) {    #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
+                } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {    #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
                   $strName = "Sophos Intercept X"
                 }
                 write-host "NORMALIZED DISPLAY VALUE : $($strName)"
@@ -1364,6 +1364,11 @@ if (-not ($script:blnAVXML)) {
             write-host $_
           }
           $script:o_AVStatus += "Real-Time Scanning : $($script:o_RTstate)"
+          if (($i_PAV -match "Sophos") -and ($script:o_AVVersion -match "\d{4}\.\d\.\d\.\d{2}")) {
+            $script:diag += "SOPHOS INTERCEPT X v$($script:o_AVVersion) : DISABLE REAL-TIME WARNINGS`r`n"
+            write-host "SOPHOS INTERCEPT X v$($script:o_AVVersion) : DISABLE REAL-TIME WARNINGS"
+            $rtWARN = $false
+          }
           if ($rtWARN) {
             $rtWARN = $false
             $script:blnWARN = $true
