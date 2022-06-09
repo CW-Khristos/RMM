@@ -1,12 +1,12 @@
 #REGION ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
-  Param (
-    [Parameter(Mandatory=$true)]$strHDR,
-    [Parameter(Mandatory=$true)]$strCHG,
-    [Parameter(Mandatory=$true)]$strVAL,
-    [Parameter(Mandatory=$false)]$blnFORCE
-  )
+  #Param (
+  #  [Parameter(Mandatory=$true)]$strHDR,
+  #  [Parameter(Mandatory=$true)]$strCHG,
+  #  [Parameter(Mandatory=$true)]$strVAL,
+  #  [Parameter(Mandatory=$false)]$blnFORCE
+  #)
   $blnFND = $false
   $blnHDR = $false
   $blnINJ = $false
@@ -97,15 +97,15 @@ if (test-path -path "$($cfgPath)") {                              #CONFIG.INI PR
   logERR 1
 }
 #INPUT VALIDATION
-if ((($null -eq $strHDR) -or ($strHDR -eq "")) -or
-  (($null -eq $strCHG) -or ($strCHG -eq "")) -or
-  (($null -eq $strVAL) -or ($strVAL -eq ""))) {                   #NOT ENOUGH ARGUMENTS, END SCRIPT
+if ((($null -eq $env:strHDR) -or ($env:strHDR -eq "")) -or
+  (($null -eq $env:strCHG) -or ($env:strCHG -eq "")) -or
+  (($null -eq $env:strVAL) -or ($env:strVAL -eq ""))) {           #NOT ENOUGH ARGUMENTS, END SCRIPT
     logERR 2
 }
-if (($null -eq $blnFORCE) -or ($blnFORCE -eq "")) {
-  $blnFORCE = $false
-} elseif (($blnFORCE.tolower() -eq "true") -or ($blnFORCE.tolower() -eq "$true")) {
-  $blnFORCE = $true
+if (($null -eq $env:blnFORCE) -or ($env:blnFORCE -eq "")) {
+  $env:blnFORCE = $false
+} elseif (($env:blnFORCE.tolower() -eq "true") -or ($env:blnFORCE.tolower() -eq "$true")) {
+  $env:blnFORCE = $true
 }
 #PARSE CONFIG.INI FILE
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - CURRENT CONFIG.INI`r`n"
@@ -113,31 +113,31 @@ write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - CURRENT CONFIG.INI
 foreach ($line in $objCFG) {                                      #CHECK CONFIG.INI LINE BY LINE
   $script:diag += "`t`t$($line)`r`n"
   write-host "`t`t$($line)"
-  if ($line -eq $strHDR) {                                        #FOUND SPECIFIED 'HEADER' IN CONFIG.INI
-    write-host "`t`tHEADER TARGET : $($strHDR)"
+  if ($line -eq $env:strHDR) {                                    #FOUND SPECIFIED 'HEADER' IN CONFIG.INI
+    write-host "`t`tHEADER TARGET : $($env:strHDR)"
     write-host "`t`tHEADER MATCH : $($line)"
     $blnFND = $true
     $blnHDR = $true
   }
-  if ($blnHDR -and ($line -match $strCHG)) {                      #STRING TO INJECT ALREADY IN CONFIG.INI
-    write-host "`t`tSTRING TARGET : $($strCHG)"
+  if ($blnHDR -and ($line -match $env:strCHG)) {                  #STRING TO INJECT ALREADY IN CONFIG.INI
+    write-host "`t`tSTRING TARGET : $($env:strCHG)"
     write-host "`t`tSTRING MATCH : $($line)"
     $blnINJ = $false
     $blnMOD = $false
-    if ($line.split("=")[1] -eq $strVAL) {                        #PASSED VALUE 'STRVAL' MATCHES INTERNAL STRING VALUE
+    if ($line.split("=")[1] -eq $env:strVAL) {                    #PASSED VALUE 'STRVAL' MATCHES INTERNAL STRING VALUE
       $blnINJ = $false
       $blnMOD = $false
-    } elseif ($line.split("=")[1] -ne $strVAL) {                  #PASSED VALUE 'STRVAL' DOES NOT MATCH INTERNAL STRING VALUE
-      write-host "`t`tVALUE TARGET : $($strCHG)=$($strVAL)"
+    } elseif ($line.split("=")[1] -ne $env:strVAL) {              #PASSED VALUE 'STRVAL' DOES NOT MATCH INTERNAL STRING VALUE
+      write-host "`t`tVALUE TARGET : $($env:strCHG)=$($env:strVAL)"
       write-host "`t`tVALUE MIS-MATCH : $($line)"
       $blnINJ = $true
-      if (-not $blnFORCE) {
+      if (-not $env:blnFORCE) {
         $blnHDR = $false
         $blnMOD = $false
-      } elseif ($blnFORCE) {
+      } elseif ($env:blnFORCE) {
         $blnHDR = $false
         $blnMOD = $true
-        $line = "$($strCHG)=$($strVAL)"
+        $line = "$($env:strCHG)=$($env:strVAL)"
       }
     }
   }
@@ -146,7 +146,7 @@ foreach ($line in $objCFG) {                                      #CHECK CONFIG.
       $blnHDR = $false
       $blnINJ = $true
       $blnMOD = $true
-      $line = "$($strCHG)=$($strVAL)`r`n`r`n"
+      $line = "$($env:strCHG)=$($env:strVAL)`r`n`r`n"
   }
   $arrCFG.add($line)
 }
@@ -156,12 +156,12 @@ $script:diag += "`r`nblnINJ : $($blnINJ)`r`n"
 $script:diag += "blnHDR : $($blnHDR)`r`n"
 $script:diag += "blnMOD : $($blnMOD)`r`n"
 $script:diag += "blnFND : $($blnFND)`r`n"
-$script:diag += "blnFORCE : $($blnFORCE)`r`n`r`n"
+$script:diag += "blnFORCE : $($env:blnFORCE)`r`n`r`n"
 write-host "`r`nblnINJ : $($blnINJ)"
 write-host "blnHDR : $($blnHDR)"
 write-host "blnMOD : $($blnMOD)"
 write-host "blnFND : $($blnFND)"
-write-host "blnFORCE : $($blnFORCE)`r`n"
+write-host "blnFORCE : $($env:blnFORCE)`r`n"
 if ($blnINJ) {
   if (-not $blnMOD) {                                             #SPECIFIED 'VALUE' MIS-MATCH, NOT FORCING INJECT 'STRING', AND 'STRVAL'
     logERR 3
@@ -187,9 +187,9 @@ if ((-not $blnFND) -and ( -not $blnFORCE)) {                      #SPECIFIED 'HE
     write-host "`t`t$($line)"
     "$($line)" | add-content $cfgPath -force
   }
-  $script:diag += "`r`n`t`t$($strHDR)`r`n`t`t$($strCHG)=$($strVAL)`r`n"
-  write-host "`r`n`t`t$($strHDR)`r`n`t`t$($strCHG)=$($strVAL)"
-  "`r`n$($strHDR)`r`n$($strCHG)=$($strVAL)`r`n" | add-content $cfgPath -force
+  $script:diag += "`r`n`t`t$($env:strHDR)`r`n`t`t$($env:strCHG)=$($env:strVAL)`r`n"
+  write-host "`r`n`t`t$($env:strHDR)`r`n`t`t$($env:strCHG)=$($env:strVAL)"
+  "`r`n$($env:strHDR)`r`n$($env:strCHG)=$($env:strVAL)`r`n" | add-content $cfgPath -force
 }
 #DATTO OUTPUT
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - MSP_CONFIG COMPLETE`r`n"
