@@ -274,13 +274,13 @@
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $sw = [Diagnostics.Stopwatch]::StartNew()
 try {
-  Get-CimInstance Win32_DiskDrive | ForEach-Object {
+  Get-CimInstance Win32_DiskDrive -erroraction stop | ForEach-Object {
     $ddisk = $_
     $partitions = "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='$($ddisk.DeviceID)'} WHERE AssocClass = Win32_DiskDriveToDiskPartition"
-    Get-CimInstance -Query $partitions | ForEach-Object {
+    Get-CimInstance -Query $partitions -erroraction stop | ForEach-Object {
       $dpartition = $_
       $drives = "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='$($dpartition.DeviceID)'} WHERE AssocClass = Win32_LogicalDiskToPartition"
-      Get-CimInstance -Query $drives | ForEach-Object {
+      Get-CimInstance -Query $drives -erroraction stop | ForEach-Object {
         $pdrive = $_
         write-host "--------------------------------------`r`n"
         write-host "POLLING DISK : $($ddisk.name)`r`n" -foregroundcolor yellow
@@ -291,7 +291,7 @@ try {
         $script:diag += "POLLING DISK : $($ddisk.name)`r`n`r`n"
         $script:diag += "--------------------------------------`r`n"
         $script:diag += "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)`r`n"
-        $pdisk = Get-PhysicalDisk | Select-Object | where-object {$_.SerialNumber -match "$($ddisk.serialnumber)"}
+        $pdisk = Get-PhysicalDisk -erroraction stop | Select-Object | where-object {$_.SerialNumber -match "$($ddisk.serialnumber)"}
         $ldisk = Get-CimInstance 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where-object {$_.Name -match "$($pdrive.DeviceID)"}
         write-PERF $ldisk $pdisk
         $idisks += 1
@@ -302,15 +302,15 @@ try {
   try {
     $script:blnWMI = $true
     $script:diag += "Unable to poll Drive Statistics via CIM`r`nAttempting to use WMI instead`r`n"
-    Get-WmiObject Win32_DiskDrive | ForEach-Object {
+    Get-WmiObject Win32_DiskDrive -erroraction stop | ForEach-Object {
       $ddisk = $_
       $partitions = "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='$($ddisk.DeviceID)'} WHERE AssocClass = Win32_DiskDriveToDiskPartition"
-      Get-WmiObject -Query $partitions | ForEach-Object {
+      Get-WmiObject -Query $partitions -erroraction stop | ForEach-Object {
         $dpartition = $_
         $drives = "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='$($dpartition.DeviceID)'} WHERE AssocClass = Win32_LogicalDiskToPartition"
-        Get-WmiObject -Query $drives | ForEach-Object {
+        Get-WmiObject -Query $drives -erroraction stop | ForEach-Object {
           $pdrive = $_
-          write-host "--------------------------------------`r`n"
+          write-host "--------------------------------------"
           write-host "POLLING DISK : $($ddisk.name)`r`n" -foregroundcolor yellow
           write-host "--------------------------------------"
           write-host "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)"
@@ -319,7 +319,7 @@ try {
           $script:diag += "POLLING DISK : $($ddisk.name)`r`n`r`n"
           $script:diag += "--------------------------------------`r`n"
           $script:diag += "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)`r`n"
-          $pdisk = Get-PhysicalDisk | Select-Object | where-object {$_.SerialNumber -match "$($ddisk.serialnumber)"}
+          $pdisk = Get-PhysicalDisk -erroraction stop | Select-Object | where-object {$_.SerialNumber -match "$($ddisk.serialnumber)"}
           $ldisk = Get-WmiObject 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where-object {$_.Name -match "$($pdrive.DeviceID)"}
           write-PERF $ldisk $pdisk
           $idisks += 1
