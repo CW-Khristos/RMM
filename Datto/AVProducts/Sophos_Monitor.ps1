@@ -151,7 +151,7 @@ switch ($env:i_Action.toupper()) {
     try {
       #$scan = Get-ProcessOutput -FileName "$($script:engDIR)\SophosSAVICLI.exe" -Args "-vdldir=`"$($script:dataDIR)`" -dn -archive -all c:\it --stop-scan -P=C:\IT\Log\SophosScan.txt"
       #$scan = [string]$scan.standardoutput
-      $scan = { & "$($script:engDIR)\SophosSAVICLI.exe" "-vdldir=`"$($script:dataDIR)`" -dn -archive -all c:\it --stop-scan -P=C:\IT\Log\SophosScan.txt" }
+      $scan = { & "$($script:engDIR)\SophosSAVICLI.exe" "-vdldir=`"$($script:dataDIR)`" -dn -archive -all c:\ --stop-scan -P=C:\IT\Log\SophosScan.txt" }
       Start-Job -name "Sophos Scan" -ScriptBlock $scan
       $script:diag += "$($scan)`r`n`r`nScanning Started : See Log : 'C:\IT\Log\SophosScan.txt'`r`n"
       write-host "`r`nScanning Started : See Log : 'C:\IT\Log\SophosScan.txt'"
