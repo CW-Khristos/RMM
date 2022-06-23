@@ -348,7 +348,9 @@ if ($script:blnFAIL) {
           $age = new-timespan -start ($script:fscan) -end (Get-Date)
           $status = "Last $($act) : $($script:fscan)`r`nTime Since Last $($act) : $($age.tostring("dd\:hh\:mm"))"
           if ($age.days -ge $env:i_fsInterval) {$script:blnWARN = $true}
-          $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-startFullScan"
+          $scan = { & "$($script:epsEXE) -startFullScan" }
+          Start-Job -name "BitDefenderFullScan" -ScriptBlock $scan
+          #$output = Get-ProcessOutput -FileName $script:epsEXE -Args "-startFullScan"
         }
         "RUNQUICKSCAN" {
           $output = $output.standardoutput.split("|")[1]
@@ -356,18 +358,20 @@ if ($script:blnFAIL) {
           $age = new-timespan -start ($script:qscan) -end (Get-Date)
           $status = "Last $($act) : $($script:qscan)`r`nTime Since Last $($act) : $($age.tostring("dd\:hh\:mm"))"
           if ($age.days -ge $env:i_qsInterval) {$script:blnWARN = $true}
-          $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-startQuickScan"
+          $scan = { & "$($script:epsEXE) -startQuickScan" }
+          Start-Job -name "BitDefenderQuickScan" -ScriptBlock $scan
+          #$output = Get-ProcessOutput -FileName $script:epsEXE -Args "-startQuickScan"
         }
       }
-      $output = [string]$output.standardoutput
-      switch ($output) {
-        "0" {$status = " - $($act) OPERATION PERFORMED SUCCESSFULLY`r`n`r`n$($status)"}
-        "622" {$status = " - FILESCAN FEATURE IS EXPIRED`r`n`r`n$($status)"}
-        "1168" {$status = " - STORED SCAN TASK NOT FOUND`r`n`r`n$($status)"}
-        "5006" {$status = " - ANTIMALWARE SCANNER NOT AVAILABLE`r`n`r`n$($status)"}
-        "5023" {$status = " - STORED SCAN TASK ALREADY RUNNING`r`n`r`n$($status)"}
-        default {$status = " - $($sct) CANNOT BE PERFORMED. ERROR CODE : $($output)`r`n`r`n$($status)"}
-      }
+      #$output = [string]$output.standardoutput
+      #switch ($output) {
+      #  "0" {$status = " - $($act) OPERATION PERFORMED SUCCESSFULLY`r`n`r`n$($status)"}
+      #  "622" {$status = " - FILESCAN FEATURE IS EXPIRED`r`n`r`n$($status)"}
+      #  "1168" {$status = " - STORED SCAN TASK NOT FOUND`r`n`r`n$($status)"}
+      #  "5006" {$status = " - ANTIMALWARE SCANNER NOT AVAILABLE`r`n`r`n$($status)"}
+      #  "5023" {$status = " - STORED SCAN TASK ALREADY RUNNING`r`n`r`n$($status)"}
+      #  default {$status = " - $($sct) CANNOT BE PERFORMED. ERROR CODE : $($output)`r`n`r`n$($status)"}
+      #}
     }
   }
 }
