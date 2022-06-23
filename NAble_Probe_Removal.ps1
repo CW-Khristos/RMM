@@ -23,15 +23,20 @@
   } ## Get-ProcessOutput
   
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Windows Software Probe"}
-write-host "NABLE PROBE:`r`n"
+write-host "NABLE PROBE:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
-  $script:installed.UninstallString
-  $output = Get-ProcessOutput -FileName "msiexec.exe" -Args "$($script:installed.UninstallString) /quiet /qn /norestart"
-  #PARSE SMARTCTL OUTPUT LINE BY LINE
+  write-host "UNINSTALLING NABLE PROBE:"
+  if ($script:installed.UninstallString -like "*msiexec*") {
+    $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
+    $script:installed.UninstallString
+    $output = Get-ProcessOutput -FileName "msiexec.exe" -Args "$($script:installed.UninstallString) /quiet /qn /norestart"
+  } elseif ($script:installed.UninstallString -notlike "*msiexec*") {
+    $output = Get-ProcessOutput -FileName "$($script:installed.UninstallString)" -Args "/SILENT"
+  }
+  #PARSE OUTPUT LINE BY LINE
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
 } else {
-  write-host "NAble Probe Not Installed"
+  write-host "NAble Probe Not Installed`r`n"
 }
