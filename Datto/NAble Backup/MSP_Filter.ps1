@@ -1,19 +1,15 @@
 #REGION ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
-  #Param (
-  #  [Parameter(Mandatory=$true)]$strHDR,
-  #  [Parameter(Mandatory=$true)]$strCHG,
-  #  [Parameter(Mandatory=$true)]$strVAL,
-  #  [Parameter(Mandatory=$false)]$blnFORCE
-  #)
+  Param (
+    [Parameter(Mandatory=$true)]$strOPT
+  #  [Parameter(Mandatory=$true)]$strUSR,
+  #  [Parameter(Mandatory=$true)]$strICL,
+  #  [Parameter(Mandatory=$false)]$strFILTER
+  )
   $script:diag = $null
+  $logPath = "C:\IT\Log\MSP_Filter"
   $cliPath = "C:\Program Files\Backup Manager\clienttool.exe"
-  #VARIABLES ACCEPTING PARAMETERS
-  #$strOPT = $null
-  #$strUSR = $null
-  #$strINCL = $null
-  #$strFILTER = $null
   #USER AND USER FOLDER ARRAYS
   $objFOL = $null
   $arrFOL = [System.Collections.ArrayList]@()
@@ -32,7 +28,7 @@
     "Default.migrated"
   )
   #PROTECTED EXT / FILES / DIRECTORIES
-  $arrPFOL(2) = [System.Collections.ArrayList]@(
+  $arrPFOL = [System.Collections.ArrayList]@(
     ".PST",
     "Outlook\Roamcache"
   )
@@ -95,7 +91,7 @@
     "\AppData\Local\Microsoft\Edge\CrashReports",
     "\AppData\Local\Microsoft\Edge\User Data\Default\Service Worker\CacheStorage",
     "\AppData\Local\Microsoft\Edge\User Data\Default\Service Worker\ScriptCache",
-    "\AppData\Local\Packages",
+    "\AppData\Local\Packages"
   )
   #GOOGLE CHROME / MICROSOFT EDGE 'PROFILE' EXCLUSIONS
   #\AppData\Local\~\~\User Data\Profile #\"
@@ -170,6 +166,7 @@
       0 {                                                         #'ERRRET'=0 - CLIENTTOOL CHECK PASSED
         $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - MSP_FILTER - CLIENTTOOL CHECK PASSED`r`n"
         write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - MSP_FILTER - CLIENTTOOL CHECK PASSED"
+      }
       1 {                                                         #'ERRRET'=1 - CONFIG.INI NOT PRESENT, END SCRIPT
         $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - MSP_FILTER - CONFIG.INI NOT PRESENT, END SCRIPT`r`n`r`n"
         write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - MSP_FILTER - CONFIG.INI NOT PRESENT, END SCRIPT`r`n"
@@ -184,7 +181,7 @@
   function chkSFOL ($strSFOL) {
     #CHECK EACH 'C:\USERS\<USERNAME>' SUB-FOLDER
     $blnFND = false
-    if (($null -ne $strSFOL) -and ($strSFOL -ne "") {
+    if (($null -ne $strSFOL) -and ($strSFOL -ne "")) {
       #ENUMERATE THROUGH AND MAKE SURE THIS ISN'T ONE OF THE 'PROTECTED' EXT / FILES / DIRECTORIES
       foreach ($pFOL in $arrPFOL) {
         $blnFND = $false
@@ -196,9 +193,9 @@
             #PROCEED WITH INCLUDING ENTIRE USER DIRECTORY
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strSFOL)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strSFOL)`""
-            $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strSFOL)`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strSFOL)`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
             start-sleep -milliseconds 100
             #MARK 'PROTECTED'
             $blnFND = true
@@ -218,7 +215,7 @@
         #end if
       }
       #NO MATCH TO 'PROTECTED' EXT / FILES / DIRECTORIES
-      if (-not blnFND) {
+      if (-not $blnFND) {
         #OUTLOOK OST / TMP  AND ICONCACHE / THUMBCACHE EXCLUSIONS
         if ($strSFOL -like '`*') {
           $strTMP = $null
@@ -236,9 +233,9 @@
                 #EXCLUDE FOLDER / FILE
                 $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subFIL.fullname)`"`r`n"
                 write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subFIL.fullname)`""
-                $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subFIL.fullname)`""
-                $script:diag += "$($output)`r`n"
-                write-host $output
+                $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subFIL.fullname)`""
+                $script:diag += "`t`t`t - $($output)`r`n"
+                write-host "`t`t`t - $($output)"
                 start-sleep -milliseconds 100
               }
             }
@@ -257,9 +254,9 @@
                 #EXCLUDE FOLDER / FILE
                 $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subSFOL.fullname)\$($item)`"`r`n"
                 write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subSFOL.fullname)\$($item)`""
-                $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subSFOL.fullname)\$($item)`""
-                $script:diag += "$($output)`r`n"
-                write-host $output
+                $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subSFOL.fullname)\$($item)`""
+                $script:diag += "`t`t`t - $($output)`r`n"
+                write-host "`t`t`t - $($output)"
                 start-sleep -milliseconds 100
               }
             }
@@ -269,9 +266,9 @@
           #EXCLUDE FOLDER / FILE
           $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strSFOL)`"`r`n"
           write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strSFOL)`""
-          $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strSFOL)`""
-          $script:diag += "$($output)`r`n"
-          write-host $output
+          $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strSFOL)`""
+          $script:diag += "`t`t`t - $($output)`r`n"
+          write-host "`t`t`t - $($output)"
           start-sleep -milliseconds 100
         }
       }
@@ -294,6 +291,10 @@ $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - EXECUTING MSP_FILTER`r`n"
 write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - EXECUTING MSP_FILTER"
+#REMOVE PREVIOUS LOGFILE
+if (test-path -path "$($logPath)") {
+  remove-item -path "$($logPath)" -force
+}
 #CHECK 'PERSISTENT' FOLDERS
 if (-not (test-path -path "C:\temp")) {
   new-item -path "C:\temp" -itemtype directory
@@ -324,43 +325,34 @@ switch ($strOPT.tolower()) {
     #call HOOK("$($cliPath) control.selection.modify -datasource FileSystem -include C:\")
     #start-sleep -milliseconds 5000
     #REMOVE PREVIOUS 'FILTERS.TXT' FILE
-    if (test-path -path "C:\IT\Scripts\filters.txt" -leaf) {
+    if (test-path -path "C:\IT\Scripts\filters.txt" -pathtype leaf) {
       remove-item "C:\IT\Scripts\filters.txt" -force
     }
     $script:diag += "`t - Loading : NAble Backup Filters`r`n"
     write-host "`t - Loading : NAble Backup Filters" -foregroundcolor yellow
     $srcTXT = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/MSP%20Backups/filters.txt"
     try {
-      $psTXT = get-content $srcTXT
+      $web = new-object system.net.webclient
+      $web.DownloadFile($srcTXT, "C:\IT\Scripts\filters.txt")
+      $psTXT = get-content "C:\IT\Scripts\filters.txt"
       $script:blnPSTXT = $true
     } catch {
-      $script:diag += "`t - Load() - Could not open $($srcTXT)`r`n"
-      write-host "`t - Load() - Could not open $($srcTXT)" -foregroundcolor red
+      $script:diag += "`t - Web.DownloadFile() - Could not download $($srcTXT)`r`n"
+      write-host "`t - Web.DownloadFile() - Could not download $($srcTXT)" -foregroundcolor red
       write-host $_.Exception
       write-host $_.scriptstacktrace
       write-host $_
       try {
-        $web = new-object system.net.webclient
-        $psTXT = $web.DownloadString($srcTXT)
+        start-bitstransfer -erroraction stop -source $srcTXT -destination "C:\IT\Scripts\filters.txt"
+        $psTXT = get-content "C:\IT\Scripts\filters.txt"
         $script:blnPSTXT = $true
       } catch {
-        $script:diag += "`t - Web.DownloadString() - Could not download $($srcTXT)`r`n"
-        write-host "`t - Web.DownloadString() - Could not download $($srcTXT)" -foregroundcolor red
+        $script:blnPSTXT = $false
+        $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
+        write-host "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
         write-host $_.Exception
         write-host $_.scriptstacktrace
         write-host $_
-        try {
-          start-bitstransfer -erroraction stop -source $srcTXT -destination "C:\IT\Scripts\filters.txt"
-          $psTXT = get-content "C:\IT\Scripts\filters.txt"
-          $script:blnPSTXT = $true
-        } catch {
-          $script:blnPSTXT = $false
-          $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
-          write-host "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
-          write-host $_.Exception
-          write-host $_.scriptstacktrace
-          write-host $_
-        }
       }
     }
     
@@ -370,57 +362,59 @@ switch ($strOPT.tolower()) {
           $strPATH = $line
           #EXPAND ENVIRONMENT STRINGS
           if ($line -match "%") {
-            if ($line -notmatch "\") {$line = "$($line)\"}
+            if ($line -notmatch "\\") {$line = "$($line)\"}
             $arrPATH = $line.split("\")
             $strPATH = [System.Environment]::ExpandEnvironmentVariables($($arrPATH[0]))
-            for ($intPATH = 1; $intPATH -le $arrPATH.length; $intPATH++) {
+            for ($intPATH = 1; $intPATH -le ($arrPATH.length - 1); $intPATH++) {
               $strPATH = "$($strPATH)\$($arrPATH[$intPATH])"
             }
           }
+          if ($strPATH -match "|") {$strPATH = $strPATH.replace("|", "")}
           if ($line -match "\*") {                                #APPLY BACKUP FILTERS
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`""
-            $output = get-process -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
-          } elseif ($line -match "\*") {                          #APPLY BACKUP EXCLUSIONS
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
+          } elseif ($line -notmatch "\*") {                          #APPLY BACKUP EXCLUSIONS
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
-            $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
           }
         }
         start-sleep -milliseconds 200
       }
       #CUSTOM 'FILTER' PASSED
       if (($null -ne $strFILTER) -and ($strFILTER -ne "")) {
-        if ($strFILTER -notmatch "|") {$strFILTER = "$($strFILTER|"}
+        if ($strFILTER -notmatch "|") {$strFILTER = "$($strFILTER)|"}
         $arrFILTER = $strFILTER.split("|")
         for ($intTMP = 0; $intTMP -le $arrFILTER.length; $intTMP++) {
           if (($null -ne $arrFILTER[$intTMP]) -and ($arrFILTER[$intTMP] -ne "")) {
             $strPATH = $arrFILTER[$intTMP]
             #EXPAND ENVIRONMENT STRINGS
             if ($arrFILTER[$intTMP] -match "%") {
-              if ($arrFILTER[$intTMP] -notmatch "\") {$arrFILTER[$intTMP] = "$($arrFILTER[intTMP])\"}
+              if ($arrFILTER[$intTMP] -notmatch "\\") {$arrFILTER[$intTMP] = "$($arrFILTER[$intTMP])\"}
               $arrPATH = $arrFILTER[$intTMP].split("\")
               $strPATH = [System.Environment]::ExpandEnvironmentVariables($($arrPATH[0]))
-              for ($intPATH = 1; $intPATH -le $arrPATH.length; $intPATH++) {
+              for ($intPATH = 1; $intPATH -le ($arrPATH.length - 1); $intPATH++) {
                 $strPATH = "$($strPATH)\$($arrPATH[$intPATH])"
               }
             }
-            if ($arrFILTER[$intTMP -match "\*") {                 #APPLY BACKUP FILTERS
+            if ($strPATH -match "|") {$strPATH = $strPATH.replace("|", "")}
+            if ($arrFILTER[$intTMP] -match "\*") {                 #APPLY BACKUP FILTERS
               $script:diag += "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`"`r`n"
               write-host "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`""
-              $output = get-process -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
-              $script:diag += "$($output)`r`n"
-              write-host $output
-            } elseif (instr(1, arrTMP(intTMP), "*") = 0) {        #APPLY BACKUP EXCLUSIONS
+              $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
+              $script:diag += "`t`t`t - $($output)`r`n"
+              write-host "`t`t`t - $($output)"
+            } elseif ($arrFILTER[$intTMP] -notmatch "\*") {        #APPLY BACKUP EXCLUSIONS
               $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`"`r`n"
               write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
-              $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
-              $script:diag += "$($output)`r`n"
-              write-host $output
+              $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
+              $script:diag += "`t`t`t - $($output)`r`n"
+              write-host "`t`t`t - $($output)"
             }
             start-sleep -milliseconds 200
           }
@@ -432,43 +426,34 @@ switch ($strOPT.tolower()) {
     #objOUT.write vbnewline & now & vbtab & vbtab & " - DOWNLOADING 'INCLUDES.TXT' BACKUP INCLUDES DEFINITION"
     #objLOG.write vbnewline & now & vbtab & vbtab & " - DOWNLOADING 'INCLUDES.TXT' BACKUP INCLUDES DEFINITION"
     #REMOVE PREVIOUS 'INCLUDES.TXT' FILE
-    if (test-path -path "C:\IT\Scripts\includes.txt" -leaf) {
+    if (test-path -path "C:\IT\Scripts\includes.txt" -pathtype leaf) {
       remove-item "C:\IT\Scripts\includes.txt" -force
     }
     $script:diag += "`r`n`r`n`t - Loading : NAble Backup includes`r`n"
     write-host "`r`n`t - Loading : NAble Backup includes" -foregroundcolor yellow
     $srcTXT = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/MSP%20Backups/includes.txt"
     try {
-      $psTXT = get-content $srcTXT
+      $web = new-object system.net.webclient
+      $web.DownloadFile($srcTXT, "C:\IT\Scripts\includes.txt")
+      $psTXT = get-content "C:\IT\Scripts\includes.txt"
       $script:blnPSTXT = $true
     } catch {
-      $script:diag += "`t - Load() - Could not open $($srcTXT)`r`n"
-      write-host "`t - Load() - Could not open $($srcTXT)" -foregroundcolor red
+      $script:diag += "`t - Web.DownloadFile() - Could not download $($srcTXT)`r`n"
+      write-host "`t - Web.DownloadFile() - Could not download $($srcTXT)" -foregroundcolor red
       write-host $_.Exception
       write-host $_.scriptstacktrace
       write-host $_
       try {
-        $web = new-object system.net.webclient
-        $psTXT = $web.DownloadString($srcTXT)
+        start-bitstransfer -erroraction stop -source $srcTXT -destination "C:\IT\Scripts\includes.txt"
+        $psTXT = get-content "C:\IT\Scripts\includes.txt"
         $script:blnPSTXT = $true
       } catch {
-        $script:diag += "`t - Web.DownloadString() - Could not download $($srcTXT)`r`n"
-        write-host "`t - Web.DownloadString() - Could not download $($srcTXT)" -foregroundcolor red
+        $script:blnPSTXT = $false
+        $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
+        write-host "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
         write-host $_.Exception
         write-host $_.scriptstacktrace
         write-host $_
-        try {
-          start-bitstransfer -erroraction stop -source $srcTXT -destination "C:\IT\Scripts\includes.txt"
-          $psTXT = get-content "C:\IT\Scripts\includes.txt"
-          $script:blnPSTXT = $true
-        } catch {
-          $script:blnPSTXT = $false
-          $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
-          write-host "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
-          write-host $_.Exception
-          write-host $_.scriptstacktrace
-          write-host $_
-        }
       }
     }
     
@@ -478,44 +463,46 @@ switch ($strOPT.tolower()) {
           $strPATH = $line
           #EXPAND ENVIRONMENT STRINGS
           if ($line -match "%") {
-            if ($line -notmatch "\") {$line = "$($line)\"}
+            if ($line -notmatch "\\") {$line = "$($line)\"}
             $arrPATH = $line.split("\")
             $strPATH = [System.Environment]::ExpandEnvironmentVariables($($arrPATH[0]))
-            for ($intPATH = 1; $intPATH -le $arrPATH.length; $intPATH++) {
+            for ($intPATH = 1; $intPATH -le ($arrPATH.length - 1); $intPATH++) {
               $strPATH = "$($strPATH)\$($arrPATH[$intPATH])"
             }
           }
           #APPLY INCLUDES
+          if ($strPATH -match "|") {$strPATH = $strPATH.replace("|", "")}
           $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`"`r`n"
           write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
-          $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
-          $script:diag += "$($output)`r`n"
-          write-host $output
+          $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
+          $script:diag += "`t`t`t - $($output)`r`n"
+          write-host "`t`t`t - $($output)"
         }
         start-sleep -milliseconds 200
       }
       #CUSTOM 'INCLUDE' PASSED
       if (($null -ne $strINCL) -and ($strINCL -ne "")) {
-        if ($strINCL -notmatch "|") {$strINCL = "$($strINCL|"}
+        if ($strINCL -notmatch "|") {$strINCL = "$($strINCL)|"}
         $arrINCL = $strINCL.split("|")
         for ($intTMP = 0; $intTMP -le $arrINCL.length; $intTMP++) {
           if (($null -ne $arrINCL[$intTMP]) -and ($arrINCL[$intTMP] -ne "")) {
             $strPATH = $arrINCL[$intTMP]
             #EXPAND ENVIRONMENT STRINGS
             if ($arrINCL[$intTMP] -match "%") {
-              if ($arrINCL[$intTMP] -notmatch "\") {$arrINCL[$intTMP] = "$($arrINCL[intTMP])\"}
+              if ($arrINCL[$intTMP] -notmatch "\\") {$arrINCL[$intTMP] = "$($arrINCL[$intTMP])\"}
               $arrPATH = $arrINCL[$intTMP].split("\")
               $strPATH = [System.Environment]::ExpandEnvironmentVariables($($arrPATH[0]))
-              for ($intPATH = 1; $intPATH -le $arrPATH.length; $intPATH++) {
+              for ($intPATH = 1; $intPATH -le ($arrPATH.length - 1); $intPATH++) {
                 $strPATH = "$($strPATH)\$($arrPATH[$intPATH])"
               }
             }
             #APPLY INCLUDES
+            if ($strPATH -match "|") {$strPATH = $strPATH.replace("|", "")}
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
-            $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
             start-sleep -milliseconds 200
           }
         }
@@ -528,48 +515,39 @@ switch ($strOPT.tolower()) {
     #RESET CURRENT BACKUP INCLUDES , REF #2
     $script:diag += "`t - RESETTING CURRENT MSP BACKUP INCLUDES`r`n"
     write-host "`t - RESETTING CURRENT MSP BACKUP INCLUDES"
-    $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"C:\`""
-    $script:diag += "$($output)`r`n"
-    write-host $output
+    $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"C:\`""
+    $script:diag += "`t`t`t - $($output)`r`n"
+    write-host "`t`t`t - $($output)"
     start-sleep -milliseconds 60000
     #REMOVE PREVIOUS 'FILTERS.TXT' FILE
-    if (test-path -path "C:\IT\Scripts\cloud_filters.txt" -leaf) {
+    if (test-path -path "C:\IT\Scripts\cloud_filters.txt" -pathtype leaf) {
       remove-item "C:\IT\Scripts\cloud_filters.txt" -force
     }
     $script:diag += "`r`n`r`n`t - Loading : NAble Backup Filters`r`n"
     write-host "`r`n`t - Loading : NAble Backup Filters" -foregroundcolor yellow
     $srcTXT = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/MSP%20Backups/cloud_filters.txt"
     try {
-      $psTXT = get-content $srcTXT
+      $web = new-object system.net.webclient
+      $web.DownloadFile($srcTXT, "C:\IT\Scripts\cloud_filters.txt")
+      $psTXT = get-content "C:\IT\Scripts\cloud_filters.txt"
       $script:blnPSTXT = $true
     } catch {
-      $script:diag += "`t - Load() - Could not open $($srcTXT)`r`n"
-      write-host "`t - Load() - Could not open $($srcTXT)" -foregroundcolor red
+      $script:diag += "`t - Web.DownloadFile() - Could not download $($srcTXT)`r`n"
+      write-host "`t - Web.DownloadFile() - Could not download $($srcTXT)" -foregroundcolor red
       write-host $_.Exception
       write-host $_.scriptstacktrace
       write-host $_
       try {
-        $web = new-object system.net.webclient
-        $psTXT = $web.DownloadString($srcTXT)
+        start-bitstransfer -erroraction stop -source $srcTXT -destination "C:\IT\Scripts\cloud_filters.txt"
+        $psTXT = get-content "C:\IT\Scripts\cloud_filters.txt"
         $script:blnPSTXT = $true
       } catch {
-        $script:diag += "`t - Web.DownloadString() - Could not download $($srcTXT)`r`n"
-        write-host "`t - Web.DownloadString() - Could not download $($srcTXT)" -foregroundcolor red
+        $script:blnPSTXT = $false
+        $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
+        write-host "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
         write-host $_.Exception
         write-host $_.scriptstacktrace
         write-host $_
-        try {
-          start-bitstransfer -erroraction stop -source $srcTXT -destination "C:\IT\Scripts\cloud_filters.txt"
-          $psTXT = get-content "C:\IT\Scripts\cloud_filters.txt"
-          $script:blnPSTXT = $true
-        } catch {
-          $script:blnPSTXT = $false
-          $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
-          write-host "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
-          write-host $_.Exception
-          write-host $_.scriptstacktrace
-          write-host $_
-        }
       }
     }
     
@@ -579,57 +557,59 @@ switch ($strOPT.tolower()) {
           $strPATH = $line
           #EXPAND ENVIRONMENT STRINGS
           if ($line -match "%") {
-            if ($line -notmatch "\") {$line = "$($line)\"}
+            if ($line -notmatch "\\") {$line = "$($line)\"}
             $arrPATH = $line.split("\")
             $strPATH = [System.Environment]::ExpandEnvironmentVariables($($arrPATH[0]))
-            for ($intPATH = 1; $intPATH -le $arrPATH.length; $intPATH++) {
+            for ($intPATH = 1; $intPATH -le ($arrPATH.length - 1); $intPATH++) {
               $strPATH = "$($strPATH)\$($arrPATH[$intPATH])"
             }
           }
+          if ($strPATH -match "|") {$strPATH = $strPATH.replace("|", "")}
           if ($line -match "\*") {                                #APPLY BACKUP FILTERS
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`""
-            $output = get-process -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
           } elseif ($line -match "\*") {                          #APPLY BACKUP EXCLUSIONS
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
-            $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
           }
         }
         start-sleep -milliseconds 200
       }
       #CUSTOM 'FILTER' PASSED
       if (($null -ne $strFILTER) -and ($strFILTER -ne "")) {
-        if ($strFILTER -notmatch "|") {$strFILTER = "$($strFILTER|"}
+        if ($strFILTER -notmatch "|") {$strFILTER = "$($strFILTER)|"}
         $arrFILTER = $strFILTER.split("|")
         for ($intTMP = 0; $intTMP -le $arrFILTER.length; $intTMP++) {
           if (($null -ne $arrFILTER[$intTMP]) -and ($arrFILTER[$intTMP] -ne "")) {
             $strPATH = $arrFILTER[$intTMP]
             #EXPAND ENVIRONMENT STRINGS
             if ($arrFILTER[$intTMP] -match "%") {
-              if ($arrFILTER[$intTMP] -notmatch "\") {$arrFILTER[$intTMP] = "$($arrFILTER[intTMP])\"}
+              if ($arrFILTER[$intTMP] -notmatch "\\") {$arrFILTER[$intTMP] = "$($arrFILTER[$intTMP])\"}
               $arrPATH = $arrFILTER[$intTMP].split("\")
               $strPATH = [System.Environment]::ExpandEnvironmentVariables($($arrPATH[0]))
-              for ($intPATH = 1; $intPATH -le $arrPATH.length; $intPATH++) {
+              for ($intPATH = 1; $intPATH -le ($arrPATH.length - 1); $intPATH++) {
                 $strPATH = "$($strPATH)\$($arrPATH[$intPATH])"
               }
             }
-            if ($arrFILTER[$intTMP -match "\*") {                 #APPLY BACKUP FILTERS
+            if ($strPATH -match "|") {$strPATH = $strPATH.replace("|", "")}
+            if ($arrFILTER[$intTMP] -match "\*") {                 #APPLY BACKUP FILTERS
               $script:diag += "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`"`r`n"
               write-host "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`""
-              $output = get-process -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
-              $script:diag += "$($output)`r`n"
-              write-host $output
-            } elseif (instr(1, arrTMP(intTMP), "*") = 0) {        #APPLY BACKUP EXCLUSIONS
+              $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
+              $script:diag += "`t`t`t - $($output)`r`n"
+              write-host "`t`t`t - $($output)"
+            } elseif ($arrFILTER[$intTMP] -notmatch "\*") {        #APPLY BACKUP EXCLUSIONS
               $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`"`r`n"
               write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
-              $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
+              $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
               $script:diag += "$($output)"
-              write-host $output
+              write-host "`t`t`t - $($output)"
             }
             start-sleep -milliseconds 200
           }
@@ -641,43 +621,34 @@ switch ($strOPT.tolower()) {
     #objOUT.write vbnewline & now & vbtab & vbtab & " - DOWNLOADING 'INCLUDES.TXT' BACKUP INCLUDES DEFINITION"
     #objLOG.write vbnewline & now & vbtab & vbtab & " - DOWNLOADING 'INCLUDES.TXT' BACKUP INCLUDES DEFINITION"
     #REMOVE PREVIOUS 'INCLUDES.TXT' FILE
-    if (test-path -path "C:\IT\Scripts\cloud_includes.txt" -leaf) {
+    if (test-path -path "C:\IT\Scripts\cloud_includes.txt" -pathtype leaf) {
       remove-item "C:\IT\Scripts\cloud_includes.txt" -force
     }
     $script:diag += "`r`n`r`n`t - Loading : NAble Backup Includes`r`n"
     write-host "`r`n`t - Loading : NAble Backup Includes" -foregroundcolor yellow
     $srcTXT = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/MSP%20Backups/cloud_includes.txt"
     try {
-      $psTXT = get-content $srcTXT
+      $web = new-object system.net.webclient
+      $web.DownloadFile($srcTXT, "C:\IT\Scripts\cloud_includes.txt")
+      $psTXT = get-content "C:\IT\Scripts\cloud_includes.txt"
       $script:blnPSTXT = $true
     } catch {
-      $script:diag += "`t - Load() - Could not open $($srcTXT)`r`n"
-      write-host "`t - Load() - Could not open $($srcTXT)" -foregroundcolor red
+      $script:diag += "`t - Web.DownloadFile() - Could not download $($srcTXT)`r`n"
+      write-host "`t - Web.DownloadFile() - Could not download $($srcTXT)" -foregroundcolor red
       write-host $_.Exception
       write-host $_.scriptstacktrace
       write-host $_
       try {
-        $web = new-object system.net.webclient
-        $psTXT = $web.DownloadString($srcTXT)
+        start-bitstransfer -erroraction stop -source $srcTXT -destination "C:\IT\Scripts\cloud_includes.txt"
+        $psTXT = get-content "C:\IT\Scripts\cloud_includes.txt"
         $script:blnPSTXT = $true
       } catch {
-        $script:diag += "`t - Web.DownloadString() - Could not download $($srcTXT)`r`n"
-        write-host "`t - Web.DownloadString() - Could not download $($srcTXT)" -foregroundcolor red
+        $script:blnPSTXT = $false
+        $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
+        write-host "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
         write-host $_.Exception
         write-host $_.scriptstacktrace
         write-host $_
-        try {
-          start-bitstransfer -erroraction stop -source $srcTXT -destination "C:\IT\Scripts\cloud_includes.txt"
-          $psTXT = get-content "C:\IT\Scripts\cloud_includes.txt"
-          $script:blnPSTXT = $true
-        } catch {
-          $script:blnPSTXT = $false
-          $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
-          write-host "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
-          write-host $_.Exception
-          write-host $_.scriptstacktrace
-          write-host $_
-        }
       }
     }
     
@@ -687,44 +658,46 @@ switch ($strOPT.tolower()) {
           $strPATH = $line
           #EXPAND ENVIRONMENT STRINGS
           if ($line -match "%") {
-            if ($line -notmatch "\") {$line = "$($line)\"}
+            if ($line -notmatch "\\") {$line = "$($line)\"}
             $arrPATH = $line.split("\")
             $strPATH = [System.Environment]::ExpandEnvironmentVariables($($arrPATH[0]))
-            for ($intPATH = 1; $intPATH -le $arrPATH.length; $intPATH++) {
+            for ($intPATH = 1; $intPATH -le ($arrPATH.length - 1); $intPATH++) {
               $strPATH = "$($strPATH)\$($arrPATH[$intPATH])"
             }
           }
           #APPLY INCLUDES
+          if ($strPATH -match "|") {$strPATH = $strPATH.replace("|", "")}
           $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`"`r`n"
           write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
-          $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
-          $script:diag += "$($output)`r`n"
-          write-host $output
+          $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
+          $script:diag += "`t`t`t - $($output)`r`n"
+          write-host "`t`t`t - $($output)"
         }
         start-sleep -milliseconds 200
       }
       #CUSTOM 'INCLUDE' PASSED
       if (($null -ne $strINCL) -and ($strINCL -ne "")) {
-        if ($strINCL -notmatch "|") {$strINCL = "$($strINCL|"}
+        if ($strINCL -notmatch "|") {$strINCL = "$($strINCL)|"}
         $arrINCL = $strINCL.split("|")
         for ($intTMP = 0; $intTMP -le $arrINCL.length; $intTMP++) {
           if (($null -ne $arrINCL[$intTMP]) -and ($arrINCL[$intTMP] -ne "")) {
             $strPATH = $arrINCL[$intTMP]
             #EXPAND ENVIRONMENT STRINGS
             if ($arrINCL[$intTMP] -match "%") {
-              if ($arrINCL[$intTMP] -notmatch "\") {$arrINCL[$intTMP] = "$($arrINCL[intTMP])\"}
+              if ($arrINCL[$intTMP] -notmatch "\\") {$arrINCL[$intTMP] = "$($arrINCL[$intTMP])\"}
               $arrPATH = $arrINCL[$intTMP].split("\")
               $strPATH = [System.Environment]::ExpandEnvironmentVariables($($arrPATH[0]))
-              for ($intPATH = 1; $intPATH -le $arrPATH.length; $intPATH++) {
+              for ($intPATH = 1; $intPATH -le ($arrPATH.length - 1); $intPATH++) {
                 $strPATH = "$($strPATH)\$($arrPATH[$intPATH])"
               }
             }
             #APPLY INCLUDES
+            if ($strPATH -match "|") {$strPATH = $strPATH.replace("|", "")}
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
-            $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
             start-sleep -milliseconds 200
           }
         }
@@ -740,87 +713,86 @@ for ($intEXCL = 65; $intEXCL -le 90; $intEXCL++) {
   #PROCEED WITH EXCLUDING DEFAULTS
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Temp`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Temp`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Temp`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Temp`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Recovery`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Recovery`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Recovery`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Recovery`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\RECYCLED`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\RECYCLED`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\RECYCLED`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\RECYCLED`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\AV_ASW`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\AV_ASW`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\AV_ASW`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\AV_ASW`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\GetCurrent`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\GetCurrent`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\GetCurrent`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\GetCurrent`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Recycle.Bin`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Recycle.Bin`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Recycle.Bin`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Recycle.Bin`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~BT`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~BT`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~BT`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~BT`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~WS`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~WS`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~WS`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~WS`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Windows10Upgrade`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Windows10Upgrade`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Windows10Upgrade`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Windows10Upgrade`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\hiberfil.sys`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\hiberfil.sys`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\hiberfil.sys`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\hiberfil.sys`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\pagefile.sys`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\pagefile.sys`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\pagefile.sys`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\pagefile.sys`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\swapfile.sys`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\swapfile.sys`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\swapfile.sys`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\swapfile.sys`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\System Volume Information`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\System Volume Information`""
-  $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\System Volume Information`""
-  $script:diag += "$($output)`r`n"
-  write-host $output
+  $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\System Volume Information`""
+  $script:diag += "`t`t`t - $($output)`r`n"
+  write-host "`t`t`t - $($output)"
   start-sleep -milliseconds 200
 }
 #ENUMERATE 'C:\USERS' SUB-FOLDERS
 $script:diag += "`r`n`r`n`t - CHECKING USER FOLDERS`r`n"
 write-host "`r`n`t - CHECKING USER FOLDERS"
-set objFOL = objFSO.getfolder("C:\Users")
 $objFOL = get-childitem -path "C:\Users\" -directory -recurse -erroraction stop
 foreach ($subFOL in $objFOL) {
   $script:diag += "$($subFOL.fullname)`r`n"
@@ -856,15 +828,15 @@ foreach ($subFOL in $arrFOL) {
             #PROCEED WITH EXCLUDING USER DIRECTORY SUB-FOLDERS
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subUFOL.fullname)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subUFOL.fullname)`""
-            $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subUFOL.fullname)`""
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subUFOL.fullname)`""
             $script:diag +="$($output)`r`n"
-            write-host $output
+            write-host "`t`t`t - $($output)"
             #INCLUDE 'SUB-FOLDER\DESKTOP.INI' FOR EACH SUB-FOLDER TO RETAIN ORIGINAL FOLDER STRUCTURE
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($subUFOL.fullname)\desktop.ini`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($subUFOL.fullname)\desktop.ini`""
-            $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($subUFOL.fullname)\desktop.ini`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($subUFOL.fullname)\desktop.ini`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
             start-sleep -milliseconds 200
           }
           break
@@ -903,9 +875,9 @@ foreach ($subFOL in $arrFOL) {
             #PROCEED WITH INCLUDING ENTIRE USER DIRECTORY
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($subUFOL)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($subUFOL)`""
-            $output = get-process -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($subUFOL)`""
-            $script:diag += "$($output)`r`n"
-            write-host $output
+            $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($subUFOL)`""
+            $script:diag += "`t`t`t - $($output)`r`n"
+            write-host "`t`t`t - $($output)"
             start-sleep -milliseconds 200
             #MARK 'PROTECTED'
             $blnFND = $true
@@ -938,11 +910,13 @@ foreach ($subFOL in $arrFOL) {
     }
   }
 }
-#DATTO OUTPUT
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - MSP_FILTER COMPLETE`r`n"
 write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - MSP_FILTER COMPLETE"
 #Stop script execution time calculation
 StopClock
+#WRITE LOGFILE
+$script:diag | out-file $logPath
+#DATTO OUTPUT
 if ($script:blnWARN) {
   write-DRRMAlert "MSP_FILTER : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
