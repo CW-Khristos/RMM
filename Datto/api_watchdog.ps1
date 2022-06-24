@@ -30,7 +30,15 @@
     7 = "Vendor"
     8 = "Partner"
   }
-  $script:classMap          = @{}
+  $script:classMap          = @{
+    7 = "Target"
+    9 = "Canceled"
+    10 = "Delinquent"
+    14 = "Jeopardy Company"
+    18 = "Managed Services"
+    200 = "Vendor"
+    201 = "Self-Managed Client"
+  }
   $script:categoryMap       = @{}
   #RMM API CREDS
   $script:rmmKey            = $env:i_rmmKey
@@ -484,13 +492,13 @@ if (-not $script:blnFAIL) {
               $script:diag += "DEVICE UDF : $($device.UDF)`r`n"
               if (($null -eq $device.UDF) -or 
                 ($device.UDF -eq "") -or 
-                ($device.UDF -ne $script:typeMap[[int]$($company.CompanyType)])) {
+                ($device.UDF -ne $($script:categoryMap[$($company.CompanyCategory)]))) {
                   $script:diag += "Device : $($device.hostname)`r`n"
                   $script:diag += "Device $($script:rmmUDF) : $($device.UDF)`r`n"
-                  $script:diag += "Customer Type : $($script:typeMap[[int]$($company.CompanyType)])`r`n"
+                  $script:diag += "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])`r`n"
                   $script:diag += "UPDATING $($script:rmmUDF) ON DEVICE : $($device.hostname)`r`n"
                   write-host "UPDATING $($script:rmmUDF) ON DEVICE : $($device.hostname)"
-                  RMM-PostUDF $device.DeviceUID $script:typeMap[[int]$($company.CompanyType)]
+                  RMM-PostUDF $device.DeviceUID $($script:categoryMap[$($company.CompanyCategory)])
               }
               write-host "$($script:strLineSeparator)"
               $script:diag += "$($script:strLineSeparator)`r`n"
