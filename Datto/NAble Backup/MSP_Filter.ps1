@@ -808,7 +808,7 @@ foreach ($subFOL in $arrFOL) {
       $blnFND = $false
       if (($null -ne $arrEXCL[$intCOL]) -and ($arrEXCL[$intCOL] -ne "")) {
         # 'UNNEEDED / TO EXCLUDE' USER ACCOUNT 'ARREXCL' FOUND IN FOLDER PATH
-        if ($arrEXCL[$intCOL].tolower() -match $subFOL.tolower()) {
+        if ($subFOL.tolower() -match $arrEXCL[$intCOL].tolower()) {
           $script:diag += "`t`t - UNNEEDED / TO EXCLUDE USER : $($arrEXCL[$intCOL])`r`n"
           write-host "`t`t - UNNEEDED / TO EXCLUDE USER : $($arrEXCL[$intCOL])"
           #MARK 'UNNEEDED / TO EXCLUDE'
@@ -869,7 +869,7 @@ foreach ($subFOL in $arrFOL) {
         if (($null -ne $arrPUSR[$intPCOL]) -and ($arrPUSR[$intPCOL] -ne "")) {
           #objOUT.write vbnewline & arrPUSR(intPCOL)
           # 'PRTOTECTED' USER ACCOUNTS DIRECTORIES 'ARRPUSR' FOUND IN FOLDER PATH
-          if ($arrPUSR[$intPCOL] -match $subFOL) {
+          if ($subFOL -match $arrPUSR[$intPCOL]) {
             $script:diag += "`t`t - PROTECTED : $($arrPUSR[$intPCOL])`r`n"
             write-host "`t`t - PROTECTED : $($arrPUSR[$intPCOL])"
             #PROCEED WITH INCLUDING ENTIRE USER DIRECTORY
