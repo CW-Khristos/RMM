@@ -4,7 +4,7 @@
   Param (
     [Parameter(Mandatory=$true)]$strOPT
   #  [Parameter(Mandatory=$true)]$strUSR,
-  #  [Parameter(Mandatory=$true)]$strICL,
+  #  [Parameter(Mandatory=$true)]$strINCL,
   #  [Parameter(Mandatory=$false)]$strFILTER
   )
   $script:diag = $null
