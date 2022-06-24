@@ -195,7 +195,7 @@
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strSFOL)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strSFOL)`""
             $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             start-sleep -milliseconds 100
             #MARK 'PROTECTED'
             $blnFND = true
@@ -223,7 +223,7 @@
           foreach ($chunk in $arrTMP) {
             $strTMP += "$($chunk)\"
           }
-          $colSFIL = Get-ChildItem -Path "$($strTMP)" -attributes !Directory -Force -ErrorAction SilentlyContinue
+          $colSFIL = Get-ChildItem -Path "$($strTMP)" -attributes !Directory -Force -erroraction continue
           foreach ($subFIL in $colSFIL) {
             if ($subFIL.fullname.tolower() -match $strSFOL.split("*")[0].tolower()) {
               if ($subFIL.fullname.tolower() -match $strSFOL.split("*")[1].tolower()) {
@@ -235,7 +235,7 @@
                 write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subFIL.fullname)`""
                 $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subFIL.fullname)`""
                 $script:diag += "`t`t`t - $($output)`r`n"
-                write-host "`t`t`t - $($output)"
+                write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
                 start-sleep -milliseconds 100
               }
             }
@@ -247,7 +247,7 @@
         } elseif ($strSFOL -like "~") {
           #GOOGLE CHROME / MICROSOFT EDGE 'PROFILE' EXCLUSIONS
           #USE TO CHECK FURTHER SUB-FOLDERS / FILES
-          $colSFOL = get-childitem -path $strSFOL.substring(0, $strSFOL.length - 1) -attributes Directory -Force -ErrorAction SilentlyContinue
+          $colSFOL = get-childitem -path $strSFOL.substring(0, $strSFOL.length - 1) -attributes Directory -Force -erroraction continue
           foreach ($subSFOL in $colSFOL) {
             if ($subSFOL.fullname -match "Profile ") {
               foreach ($item in $arrPROF) {
@@ -256,7 +256,7 @@
                 write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subSFOL.fullname)\$($item)`""
                 $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subSFOL.fullname)\$($item)`""
                 $script:diag += "`t`t`t - $($output)`r`n"
-                write-host "`t`t`t - $($output)"
+                write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
                 start-sleep -milliseconds 100
               }
             }
@@ -268,7 +268,7 @@
           write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strSFOL)`""
           $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strSFOL)`""
           $script:diag += "`t`t`t - $($output)`r`n"
-          write-host "`t`t`t - $($output)"
+          write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
           start-sleep -milliseconds 100
         }
       }
@@ -375,13 +375,13 @@ switch ($strOPT.tolower()) {
             write-host "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
             $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
           } elseif ($line -notmatch "\*") {                          #APPLY BACKUP EXCLUSIONS
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
             $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
           }
         }
         start-sleep -milliseconds 200
@@ -408,13 +408,13 @@ switch ($strOPT.tolower()) {
               write-host "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`""
               $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
               $script:diag += "`t`t`t - $($output)`r`n"
-              write-host "`t`t`t - $($output)"
+              write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             } elseif ($arrFILTER[$intTMP] -notmatch "\*") {        #APPLY BACKUP EXCLUSIONS
               $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`"`r`n"
               write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
               $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
               $script:diag += "`t`t`t - $($output)`r`n"
-              write-host "`t`t`t - $($output)"
+              write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             }
             start-sleep -milliseconds 200
           }
@@ -476,7 +476,7 @@ switch ($strOPT.tolower()) {
           write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
           $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
           $script:diag += "`t`t`t - $($output)`r`n"
-          write-host "`t`t`t - $($output)"
+          write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
         }
         start-sleep -milliseconds 200
       }
@@ -502,7 +502,7 @@ switch ($strOPT.tolower()) {
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
             $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             start-sleep -milliseconds 200
           }
         }
@@ -517,7 +517,7 @@ switch ($strOPT.tolower()) {
     write-host "`t - RESETTING CURRENT MSP BACKUP INCLUDES"
     $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"C:\`""
     $script:diag += "`t`t`t - $($output)`r`n"
-    write-host "`t`t`t - $($output)"
+    write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
     start-sleep -milliseconds 60000
     #REMOVE PREVIOUS 'FILTERS.TXT' FILE
     if (test-path -path "C:\IT\Scripts\cloud_filters.txt" -pathtype leaf) {
@@ -570,13 +570,13 @@ switch ($strOPT.tolower()) {
             write-host "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
             $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
           } elseif ($line -match "\*") {                          #APPLY BACKUP EXCLUSIONS
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
             $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
           }
         }
         start-sleep -milliseconds 200
@@ -603,13 +603,13 @@ switch ($strOPT.tolower()) {
               write-host "`t`t - EXECUTING : $($cliPath) control.filter.modify -add `"$($strPATH)`""
               $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.filter.modify -add `"$($strPATH)`""
               $script:diag += "`t`t`t - $($output)`r`n"
-              write-host "`t`t`t - $($output)"
+              write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             } elseif ($arrFILTER[$intTMP] -notmatch "\*") {        #APPLY BACKUP EXCLUSIONS
               $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`"`r`n"
               write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
               $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($strPATH)`""
               $script:diag += "$($output)"
-              write-host "`t`t`t - $($output)"
+              write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             }
             start-sleep -milliseconds 200
           }
@@ -671,7 +671,7 @@ switch ($strOPT.tolower()) {
           write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
           $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
           $script:diag += "`t`t`t - $($output)`r`n"
-          write-host "`t`t`t - $($output)"
+          write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
         }
         start-sleep -milliseconds 200
       }
@@ -697,7 +697,7 @@ switch ($strOPT.tolower()) {
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($strPATH)`""
             $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             start-sleep -milliseconds 200
           }
         }
@@ -715,88 +715,88 @@ for ($intEXCL = 65; $intEXCL -le 90; $intEXCL++) {
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Temp`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Temp`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Recovery`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Recovery`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Recovery`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\RECYCLED`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\RECYCLED`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\RECYCLED`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\AV_ASW`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\AV_ASW`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\AV_ASW`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\GetCurrent`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\GetCurrent`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\GetCurrent`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Recycle.Bin`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Recycle.Bin`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Recycle.Bin`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~BT`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~BT`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~BT`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~WS`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~WS`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\$Windows.~WS`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Windows10Upgrade`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Windows10Upgrade`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\Windows10Upgrade`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\hiberfil.sys`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\hiberfil.sys`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\hiberfil.sys`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\pagefile.sys`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\pagefile.sys`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\pagefile.sys`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\swapfile.sys`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\swapfile.sys`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\swapfile.sys`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 20
   $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\System Volume Information`"`r`n"
   write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\System Volume Information`""
   $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$([char]$($intEXCL)):\System Volume Information`""
   $script:diag += "`t`t`t - $($output)`r`n"
-  write-host "`t`t`t - $($output)"
+  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   start-sleep -milliseconds 200
 }
 #ENUMERATE 'C:\USERS' SUB-FOLDERS
 $script:diag += "`r`n`r`n`t - CHECKING USER FOLDERS`r`n"
 write-host "`r`n`t - CHECKING USER FOLDERS"
-$objFOL = get-childitem -path "C:\Users\" -directory -recurse -erroraction stop
+$objFOL = get-childitem -path "C:\Users\" -directory -force -recurse -erroraction continue
 foreach ($subFOL in $objFOL) {
-  $script:diag += "$($subFOL.fullname)`r`n"
-  write-host $subFOL.fullname
+  #$script:diag += "$($subFOL.fullname)`r`n"
+  #write-host $subFOL.fullname
   $arrFOL.add($($subFOL.fullname))
 }
 #CHECK EACH 'C:\USERS\<USERNAME>' FOLDER
@@ -823,20 +823,20 @@ foreach ($subFOL in $arrFOL) {
           #start-sleep -milliseconds 200
           #EXCLUDE USER FOLDER SUB-FOLDERS
           #ENUMERATE 'C:\USERS\<USERNAME>' SUB-FOLDERS
-          $objUFOL = get-childitem -path "$($subFOL)" -directory -recurse -erroraction stop
+          $objUFOL = get-childitem -path "$($subFOL)" -directory -force -recurse -erroraction continue
           foreach ($subUFOL in $objUFOL) {
             #PROCEED WITH EXCLUDING USER DIRECTORY SUB-FOLDERS
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subUFOL.fullname)`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -exclude `"$($subUFOL.fullname)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -exclude `"$($subUFOL.fullname)`""
-            $script:diag +="$($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            $script:diag += "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)`r`n"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             #INCLUDE 'SUB-FOLDER\DESKTOP.INI' FOR EACH SUB-FOLDER TO RETAIN ORIGINAL FOLDER STRUCTURE
             $script:diag += "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($subUFOL.fullname)\desktop.ini`"`r`n"
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($subUFOL.fullname)\desktop.ini`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($subUFOL.fullname)\desktop.ini`""
-            $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            $script:diag += "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)`r`n"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             start-sleep -milliseconds 200
           }
           break
@@ -877,7 +877,7 @@ foreach ($subFOL in $arrFOL) {
             write-host "`t`t - EXECUTING : $($cliPath) control.selection.modify -datasource FileSystem -include `"$($subUFOL)`""
             $output = Get-ProcessOutput -filename "$($cliPath)" -args "control.selection.modify -datasource FileSystem -include `"$($subUFOL)`""
             $script:diag += "`t`t`t - $($output)`r`n"
-            write-host "`t`t`t - $($output)"
+            write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
             start-sleep -milliseconds 200
             #MARK 'PROTECTED'
             $blnFND = $true
