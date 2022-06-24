@@ -294,7 +294,7 @@ if (errRET = 0) then                                          ''ARGUMENTS PASSED
                 objLOG.write vbnewline & now & vbtab & vbtab & _
                   "EXECUTING : C:\Program Files\Backup Manager\clienttool.exe control.filter.modify -add " & chr(34) & strPATH & chr(34)
                 call HOOK("C:\Program Files\Backup Manager\clienttool.exe control.filter.modify -add " & chr(34) & strPATH & chr(34))
-              elseif (instr(1, arrTMP(intTMP), "*") = 0) then       ''APPLY BACKUP EXCLUSIONS
+              elseif (instr(1, arrFILTER(intTMP), "*") = 0) then       ''APPLY BACKUP EXCLUSIONS
                 objOUT.write vbnewline & now & vbtab & vbtab & _
                   "EXECUTING : C:\Program Files\Backup Manager\clienttool.exe control.selection.modify -datasource FileSystem -exclude " & chr(34) & strPATH & chr(34)
                 objLOG.write vbnewline & now & vbtab & vbtab & _
