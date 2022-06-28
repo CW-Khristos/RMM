@@ -104,7 +104,7 @@
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
 
-  # GENERATE RANDOMIZED PASSWORD UP TO LEN($i_GUILength)
+  # GENERATE RANDOMIZED PASSWORD UP TO LEN($env:i_GUILength)
   if (($env:i_GUILength -eq 0) -or ($env:i_GUILength -lt 8)) {
     $env:i_GUILength = 8
   }
@@ -168,7 +168,7 @@
     $BackupCred.UserName | Out-file -append $APIcredfile
     $BackupCred.Password | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-file -append $APIcredfile
     Start-Sleep -milliseconds 300
-    Send-APICredentialsCookie  ## Attempt API Authentication
+    #Send-APICredentialsCookie  ## Attempt API Authentication
   }  ## Set API credentials if not present
 
   Function Get-APICredentials {
@@ -513,6 +513,7 @@
 
 #------------
 #BEGIN SCRIPT
+Set-APICredentials
 Send-APICredentialsCookie
 Write-Host $Script:strLineSeparator
 Write-Host ""
@@ -520,7 +521,7 @@ Write-Host ""
 [xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
 $xmlBackupID = $statusXML.Statistics.Account
 $xmlPartnerID = $statusXML.Statistics.PartnerName
-Send-GetPartnerInfo $Script:cred0
+#Send-GetPartnerInfo $Script:cred0
 #Send-EnumeratePartners
 if ((-not $AllPartners) -and (($null -eq $env:i_BackupName) -or ($env:i_BackupName -eq ""))) {
   write-host "  XML Partner: $($xmlPartnerID)"
