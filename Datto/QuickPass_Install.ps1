@@ -6,7 +6,7 @@
 
   #Edit These Values for your Install Token and Agent ID Inside quotation Marks
   $psQPInstallTokenID = "$($env:QPInstallToken)"
-  $osQPAgentID = "$($env:QPAgentID)"
+  $psQPAgentID = "$($env:QPAgentID)"
 
   #Edit RegionID for EU Tenant ONLY
   $RegionID = "NA"
@@ -116,18 +116,18 @@ clear-host
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #INPUT VALIDATION
-if ((($null -eq $QPInstallTokenID) -or ($QPInstallTokenID -eq "") -or ($QPInstallTokenID -eq "CHANGEME")) -or 
-  (($null -eq $QPAgentID) -or ($QPAgentID -eq "") -or ($QPAgentID -eq "CHANGEME"))) {
+if ((($null -eq $psQPInstallTokenID) -or ($psQPInstallTokenID -eq "") -or ($psQPInstallTokenID -eq "CHANGEME")) -or 
+  (($null -eq $psQPAgentID) -or ($psQPAgentID -eq "") -or ($psQPAgentID -eq "CHANGEME"))) {
     $script:diag += "Invalid Input Values`r`n"
     write-host "Invalid Input Values"
     $script:diag += "Variables in use for QuickPass Agent installation`r`n"
     write-host "Variables in use for QuickPass Agent installation"
     $script:diag += "`t - Software Path: $($Setup)`r`n"
     write-host "`t - Software Path: $($Setup)"
-    $script:diag += "`t - Installation Token: $($QPInstallTokenID)`r`n"
-    write-host "`t - Installation Token: $($QPInstallTokenID)"
-    $script:diag += "`t - Customer ID $($QPAgentID)`r`n"
-    write-host "`t - Customer ID $($QPAgentID)"
+    $script:diag += "`t - Installation Token: $($psQPInstallTokenID)`r`n"
+    write-host "`t - Installation Token: $($psQPInstallTokenID)"
+    $script:diag += "`t - Customer ID $($psQPAgentID)`r`n"
+    write-host "`t - Customer ID $($psQPAgentID)"
     $script:diag += "`t - Restart option Selected $($RestartOption)`r`n"
     write-host "`t - Restart option Selected $($RestartOption)"
     $script:diag += "`t - MSA Creation Selected $($MSAOption)`r`n"
@@ -136,8 +136,8 @@ if ((($null -eq $QPInstallTokenID) -or ($QPInstallTokenID -eq "") -or ($QPInstal
     write-host "Not Proceeding with QuickPass Install"
     StopClock
     exit 1
-} elseif ((($null -ne $QPInstallTokenID) -and ($QPInstallTokenID -ne "") -and ($QPInstallTokenID -ne "CHANGEME")) -and 
-  (($null -ne $QPAgentID) -and ($QPAgentID -ne "") -and ($QPAgentID -ne "CHANGEME"))) {
+} elseif ((($null -ne $psQPInstallTokenID) -and ($psQPInstallTokenID -ne "") -and ($psQPInstallTokenID -ne "CHANGEME")) -and 
+  (($null -ne $psQPAgentID) -and ($psQPAgentID -ne "") -and ($psQPAgentID -ne "CHANGEME"))) {
     $script:diag += "Validated Input Values`r`nProceeding with QuickPass Install`r`n"
     write-host "Validated Input Values`r`nProceeding with QuickPass Install"
     #Test if download destination folder exists, create folder if required
@@ -153,8 +153,10 @@ if ((($null -eq $QPInstallTokenID) -or ($QPInstallTokenID -eq "") -or ($QPInstal
     $script:diag += "Beginning download of the QuickPass agent`r`n"
     write-host "Beginning download of the QuickPass agent" -foregroundcolor yellow
     try {
+      $script:diag += "`t - Web.DownloadFile() - Downloading: $($DownloadURL)`r`n"
+      write-host "`t - Web.DownloadFile() - Downloading: $($DownloadURL)" -foregroundcolor yellow
       $web = new-object system.net.webclient
-      $web.DownloadFile($srcTXT, $Setup)
+      $web.DownloadFile($DownloadURL, $Setup)
     } catch {
       $script:diag += "`t - Web.DownloadFile() - Could not download $($DownloadURL)`r`n"
       write-host "`t - Web.DownloadFile() - Could not download $($DownloadURL)" -foregroundcolor red
@@ -162,6 +164,8 @@ if ((($null -eq $QPInstallTokenID) -or ($QPInstallTokenID -eq "") -or ($QPInstal
       write-host $_.scriptstacktrace
       write-host $_
       try {
+        $script:diag += "`t - BITS.Transfer() - Downloading: $($DownloadURL)`r`n"
+        write-host "`t - BITS.Transfer() - Downloading: $($DownloadURL)" -foregroundcolor yellow
         start-bitstransfer -source $DownloadURL -destination $Setup -erroraction stop
       } catch {
         $script:diag += "`t - BITS.Transfer() - Could not download $($DownloadURL)`r`n"
@@ -175,10 +179,10 @@ if ((($null -eq $QPInstallTokenID) -or ($QPInstallTokenID -eq "") -or ($QPInstal
     write-host "Variables in use for QuickPass Agent installation"
     $script:diag += "`t - Software Path: $($Setup)`r`n"
     write-host "`t - Software Path: $($Setup)"
-    $script:diag += "`t - Installation Token: $($QPInstallTokenID)`r`n"
-    write-host "`t - Installation Token: $($QPInstallTokenID)"
-    $script:diag += "`t - Customer ID $($QPAgentID)`r`n"
-    write-host "`t - Customer ID $($QPAgentID)"
+    $script:diag += "`t - Installation Token: $($psQPInstallTokenID)`r`n"
+    write-host "`t - Installation Token: $($psQPInstallTokenID)"
+    $script:diag += "`t - Customer ID $($psQPAgentID)`r`n"
+    write-host "`t - Customer ID $($psQPAgentID)"
     $script:diag += "`t - Restart option Selected $($RestartOption)`r`n"
     write-host "`t - Restart option Selected $($RestartOption)"
     $script:diag += "`t - MSA Creation Selected $($MSAOption)`r`n"
@@ -187,8 +191,8 @@ if ((($null -eq $QPInstallTokenID) -or ($QPInstallTokenID -eq "") -or ($QPInstal
     write-host "Beginning installation of QuickPass"
 
     try {
-      #Start-Process "$Setup" -ArgumentList "/quiet $RestartOption INSTALLTOKEN=$QPInstallTokenID CUSTOMERID=$QPAgentIDDBlQt REGION=$Region $MSAOption" -ErrorAction Stop
-      $output = Get-ProcessOutput -filename "$($Setup)" -args "/quiet $($RestartOption) INSTALLTOKEN=$($QPInstallTokenID) CUSTOMERID=$($QPAgentIDDBlQt) REGION=$($Region) $($MSAOption)" -erroraction stop
+      #Start-Process "$Setup" -ArgumentList "/quiet $RestartOption INSTALLTOKEN=$QPInstallTokenIDBLQt CUSTOMERID=$QPAgentIDDBlQt REGION=$Region $MSAOption" -ErrorAction Stop
+      $output = Get-ProcessOutput -filename "$($Setup)" -args "/quiet $($RestartOption) INSTALLTOKEN=$($QPInstallTokenIDBLQt) CUSTOMERID=$($QPAgentIDDBlQt) REGION=$($Region) $($MSAOption)" -erroraction stop
       $script:diag += "StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)`r`n"
       write-host "StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
       StopClock
