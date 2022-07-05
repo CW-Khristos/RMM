@@ -335,6 +335,42 @@
     }
   }
 
+  function RMM-UpdateSite {
+    param (
+      [string]$rmmID,
+      [string]$psaID,
+      [string]$name,
+      [string]$description,
+      [string]$notes,
+      [string]$onDemand,
+      [string]$installSplashtop
+    )
+    $params = @{
+      apiMethod       = "POST"
+      apiUrl          = $script:rmmAPI
+      ApiAccessToken  = $script:rmmToken
+      apiRequest      = "/v2/site/$($rmmID)"
+      apiRequestBody  = "{`"autotaskCompanyId`": `"$($psaID)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $onDemand,`"splashtopAutoInstall`": $installSplashtop}"
+    }
+    $script:blnSITE = $false
+    try {
+      $script:updateSite = (RMM-ApiRequest @params -UseBasicParsing) #| ConvertFrom-Json
+      if ($script:updateSite -match $name) {
+        return $true
+      } elseif ($script:updateSite -notmatch $name) {
+        return $false
+      }
+    } catch {
+      $script:blnWARN = $true
+      $script:blnSITE = $false
+      $script:diag += "`r`nAPI_WatchDog : Failed to update DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
+      $script:diag += "`r`n$($_.Exception)"
+      $script:diag += "`r`n$($_.scriptstacktrace)"
+      $script:diag += "`r`n$($_)"
+      write-host "$($script:diag)`r`n"
+    }
+  }
+
   function RMM-NewSite {
     param (
       [string]$id,
@@ -478,6 +514,23 @@ if (-not $script:blnFAIL) {
           }
         } elseif (($null -ne $rmmSite) -and ($rmmsite -ne "")) {
           try {
+            if ($rmmSite.description -notmatch "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])`r`n") {
+              $script:diag += "UPDATE SITE : $($company.CompanyName)`r`n"
+              $params = @{
+                rmmID               = $rmmSite.uid
+                psaID               = $company.CompanyID
+                name                = $company.CompanyName
+                description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)\nCreated by API Watchdog"
+                notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)\nCreated by API Watchdog"
+                onDemand            = "false"
+                installSplashtop    = "true"
+              }
+              $updateSite = (RMM-UpdateSite @params -UseBasicParsing)
+              write-host "$($updateSite)"
+              write-host "$($script:strLineSeparator)"
+              $script:diag += "$($postSite)`r`n"
+              $script:diag += "$($script:strLineSeparator)`r`n"
+            }
             RMM-GetDevices $rmmSite.uid
             write-host "$($script:strLineSeparator)"
             write-host "DEVICES :"
