@@ -64,8 +64,10 @@
   #  [Parameter(Mandatory=$true)] $i_BackupPWD,
   #  [Parameter(Mandatory=$true)] $i_UDFNumber
   #)
-
   $Script:strLineSeparator = "  ---------"
+  $Script:True_path = "C:\ProgramData\MXB\"
+  $Script:APIcredfile = join-path -Path $True_Path -ChildPath "$env:computername API_Credentials.Secure.txt"
+  $Script:APIcredpath = Split-path -path $APIcredfile
   $urlJSON = 'https://api.backup.management/jsonapi'
   $mxbPath = ${env:ProgramData} + "\MXB\Backup Manager"
   $CurrentDate = Get-Date -format "yyy-MM-dd_hh-mm-ss"
@@ -172,10 +174,6 @@
   }  ## Set API credentials if not present
 
   Function Get-APICredentials {
-    $Script:True_path = "C:\ProgramData\MXB\"
-    $Script:APIcredfile = join-path -Path $True_Path -ChildPath "$env:computername API_Credentials.Secure.txt"
-    $Script:APIcredpath = Split-path -path $APIcredfile
-
     if (($ClearCredentials) -and (Test-Path $APIcredfile)) {                    ## CLEAR API CREDENTIALS
       Remove-Item -Path $Script:APIcredfile
       $ClearCredentials = $Null
