@@ -22,7 +22,7 @@
     $output | Add-Member -type NoteProperty -name StandardError -Value $StandardError
     return $output
   } ## Get-ProcessOutput
-  
+
 #PASSPORTAL AGENT REMOVAL
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Passportal Agent"}
 write-host "PASSPORTAL AGENT:"
@@ -39,6 +39,29 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
   #PARSE SMARTCTL OUTPUT LINE BY LINE
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
+  $script:reg = remove-item "HKLM:\Software\Passportal" -recurse -force -ea SilentlyContinue
+  $script:reg
+  $script:reg = remove-item "HKLM:\Software\WOW6432Node\Passportal" -recurse -force -ea SilentlyContinue
+  $script:reg
 } else {
-  write-host "Passportal Agent Not Installed`r`n"
+    $script:installed = (Get-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Passportal Agent"}
+    $script:installed
+    if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
+      write-host "UNINSTALLING PASSPORTAL AGENT:"
+      if ($script:installed.UninstallString -like "*msiexec*") {
+        $script:installed.UninstallString = "{$($script:installed.UninstallString.split("{")[1])"
+        $output = Get-ProcessOutput -FileName "msiexec.exe" -Args "/X $($script:installed.UninstallString) /quiet /qn /norestart"
+      } elseif ($script:installed.UninstallString -notlike "*msiexec*") {
+        $output = Get-ProcessOutput -FileName "$($script:installed.UninstallString)" -Args "/SILENT"
+      }
+      #PARSE SMARTCTL OUTPUT LINE BY LINE
+      $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+      $lines
+      $script:reg = remove-item "HKLM:\Software\Passportal" -recurse -force -ea SilentlyContinue
+      $script:reg
+      $script:reg = remove-item "HKLM:\Software\WOW6432Node\Passportal" -recurse -force -ea SilentlyContinue
+      $script:reg
+    } else {
+      write-host "Passportal Agent Not Installed`r`n"
+    }
 }
