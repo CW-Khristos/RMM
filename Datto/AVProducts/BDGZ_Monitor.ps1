@@ -375,12 +375,14 @@ if ($script:blnFAIL) {
     }
   }
 }
+#DATTO OUTPUT
 $script:diag += "$($status)`r`n"
 if ($script:blnWARN) {
   write-host "$($status)" -foregroundcolor red
 } elseif (-not $script:blnWARN) {
   write-host "$($status)" -foregroundcolor green
 }
+#Stop script execution time calculation
 StopClock
 if ($script:blnWARN) {
   write-DRRMAlert "$($status)"
@@ -391,3 +393,5 @@ if ($script:blnWARN) {
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
+#END SCRIPT
+#------------
