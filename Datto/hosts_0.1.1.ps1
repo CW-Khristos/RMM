@@ -36,7 +36,7 @@
     write-host '<-End Diagnostic->'
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host '<-Start Result->'
     write-host "Alert=$($message)"
     write-host '<-End Result->'
@@ -64,7 +64,7 @@ if ((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name L
 } else {
   #WRITE HOSTS BACKUP
   Copy-Item "$env:SystemRoot\System32\drivers\etc\hosts" -Destination "C:\IT\hosts"
-  write-DRRMAlert "HOSTS not modified since $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)"
+  write-DRMMAlert "HOSTS not modified since $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)"
   Exit 0
 }
 #END SCRIPT
