@@ -83,8 +83,8 @@ if (-not (test-path -path "C:\IT\Scripts")) {
 try {
   get-childitem -path "C:\IT"  | where-object {$_.name -match "BEST_uninstallTool"} | % {
     if ($_.creationtime -gt (get-date).adddays(-7)) {
-      $script:diag += " - NOT REMOVING EPS FILE`r`n`r`n"
-      write-host " - NOT REMOVING EPS FILE`r`n"
+      $script:diag += " - NOT REMOVING BEST_uninstallTool FILE`r`n`r`n"
+      write-host " - NOT REMOVING BEST_uninstallTool FILE`r`n"
       $script:blnDL = $false
     } elseif ($_.creationtime -le (get-date).adddays(-7)) {
       $script:diag += " - DELETE : $($_.name)`r`n`r`n"
@@ -135,10 +135,11 @@ if ($script:blnFAIL) {
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnFAIL) {
-  #UTILIZE EPS.RMM.EXE TO DETECT BD INSTALL
+  #UTILIZE BD CLI REMOVAL TOOL TO UNINSTALL BITDEFENDER
+  #
   $script:diag += " - RUNNING BDGZ UNINSTALL TOOL`r`n"
   write-host " - RUNNING BDGZ UNINSTALL TOOL" -foregroundcolor yellow
-  $output = Get-ProcessOutput -FileName $script:bdEXE -Args "/bdparams /bruteforce /log"
+  $output = Get-ProcessOutput -FileName $script:bdEXE -Args "/bdparams /bruteForce /log"
   $results = [string]$output.standardoutput
   $errors = [string]$output.standarderror
   $status = "RESULTS :`r`nSTDOUT :`r`n$($results)`r`nSTDERR :`r`n$($errors)`r`n`r`n"
