@@ -531,6 +531,7 @@ if (-not $script:blnFAIL) {
               $script:diag += "$($postSite)`r`n"
               $script:diag += "$($script:strLineSeparator)`r`n"
             }
+            <#--  DISABLED TO SWITCH TO INSERTING CUSTOMER TYPE INTO SITE DESCRIPTION TO OPTIMIZE RMM API CALLS
             RMM-GetDevices $rmmSite.uid
             write-host "$($script:strLineSeparator)"
             write-host "DEVICES :"
@@ -556,6 +557,7 @@ if (-not $script:blnFAIL) {
               write-host "$($script:strLineSeparator)"
               $script:diag += "$($script:strLineSeparator)`r`n"
             }
+            --#>
           } catch {
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
