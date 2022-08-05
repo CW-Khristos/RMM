@@ -100,25 +100,47 @@ $version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion
 if ($Version -lt "6.2") {
   $script:diag += "Informational - Unsupported OS. Only Server 2012R2 and up are supported.`r`n`r`n"
 }
-
-$logInfo = @{
-  LogName      = "$($env:i_EventLog)"
-  ProviderName = "$($env:i_EventSource)"
-  ID           = "$($env:i_EventID)"
-  Level        = MapLevel "$($env:i_EventType)"
+#HANDLE MULTIPLE EVENT TYPES
+if ($env:i_EventID -match ",") {
+  $arrID = $i_EventID.split(",")
+} elseif ($env:i_EventID -notmatch ",") {
+  $arrID = [int]$i_EventID
 }
-$LogEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction SilentlyContinue
-$script:intTotal = $LogEvents.count
-
+#HANDLE MULTIPLE EVENT TYPES
+if ($env:i_EventType -match ",") {
+  $types = $env:i_EventType.split(",")
+  foreach ($type in $types) {
+    if (($null -ne $type) -and ($type -ne "")) {
+      $strType = MapLevel "$($type)"
+      $strTypes = "$($strTypes)$($strType),"
+    }
+  }
+  $strTypes = $strTypes.substring(0,$strTypes.length - 1)
+  $arrTypes = $strTypes.split(",")
+} elseif ($i_EventType -notmatch ",") {
+  [int]$i_EventType = MapLevel "$($env:i_EventType)"
+}
+write-host "ID : $($arrID)"
+write-host "LEVEL : $($arrTypes)"
+#CAPTURE TOTAL EVENTS MATCHING FILTERS
 $logInfo = @{
   LogName      = "$($env:i_EventLog)"
   ProviderName = "$($env:i_EventSource)"
-  ID           = "$($env:i_EventID)"
-  Level        = MapLevel "$($env:i_EventType)"
-  StartTime    = (get-date).AddHours(-$($env:i_LogRange))
+  ID           = $arrID
+  Level        = $arrTypes
+}
+$LogEvents = Get-WinEvent -FilterHashtable $logInfo
+$script:intTotal = $LogEvents.count
+#CAPTURE EVENTS MATCHING FILTERS WITHIN SPECIFIED TIME RANGE
+$logInfo = @{
+  LogName      = "$($env:i_EventLog)"
+  ProviderName = "$($env:i_EventSource)"
+  ID           = $arrID
+  Level        = $arrTypes
+  StartTime    = (get-date).AddHours(-$($i_LogRange))
   EndTime      = (get-date).AddMinutes(-2)
 }
-$FilteredEvents = Get-WinEvent -FilterHashtable $logInfo -ErrorAction SilentlyContinue
+$FilteredEvents = Get-WinEvent -FilterHashtable $logInfo
 $script:diag += "----------------------------------`r`n"
 $script:diag += "COLLECTING EVENTS MATCHING THE FOLLOWING :`r`n"
 $script:diag += "`tLogName : $($env:i_EventLog)`tSource : $($env:i_EventSource)`tEvent ID : $($env:i_EventID)`tEvent Type : $($env:i_EventType)`tTime Range (Hours) : $($env:i_LogRange)`r`n"
