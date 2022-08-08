@@ -102,9 +102,9 @@ if ($Version -lt "6.2") {
 }
 #HANDLE MULTIPLE EVENT TYPES
 if ($env:i_EventID -match ",") {
-  $arrID = $i_EventID.split(",")
+  $arrID = $env:i_EventID.split(",")
 } elseif ($env:i_EventID -notmatch ",") {
-  $arrID = [int]$i_EventID
+  $arrID = [int]$env:i_EventID
 }
 #HANDLE MULTIPLE EVENT TYPES
 if ($env:i_EventType -match ",") {
