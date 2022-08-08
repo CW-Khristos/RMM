@@ -137,7 +137,7 @@ $logInfo = @{
   ProviderName = "$($env:i_EventSource)"
   ID           = $arrID
   Level        = $arrTypes
-  StartTime    = (get-date).AddHours(-$($i_LogRange))
+  StartTime    = (get-date).AddHours(-$($env:i_LogRange))
   EndTime      = (get-date).AddMinutes(-2)
 }
 $FilteredEvents = Get-WinEvent -FilterHashtable $logInfo
