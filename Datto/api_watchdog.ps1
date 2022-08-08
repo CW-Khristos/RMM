@@ -30,15 +30,7 @@
     7 = "Vendor"
     8 = "Partner"
   }
-  $script:classMap          = @{
-    7 = "Target"
-    9 = "Canceled"
-    10 = "Delinquent"
-    14 = "Jeopardy Company"
-    18 = "Managed Services"
-    200 = "Vendor"
-    201 = "Self-Managed Client"
-  }
+  $script:classMap          = @{}
   $script:categoryMap       = @{}
   #RMM API CREDS
   $script:rmmKey            = $env:i_rmmKey
@@ -520,8 +512,8 @@ if (-not $script:blnFAIL) {
                 rmmID               = $rmmSite.uid
                 psaID               = $company.CompanyID
                 name                = $company.CompanyName
-                description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)\nCreated by API Watchdog"
-                #notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)\nCreated by API Watchdog"
+                description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)"
+                #notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)"
                 onDemand            = "false"
                 installSplashtop    = "true"
               }
