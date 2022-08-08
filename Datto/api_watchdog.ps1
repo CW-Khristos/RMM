@@ -494,8 +494,8 @@ if (-not $script:blnFAIL) {
           $params = @{
             id                  = $company.CompanyID
             name                = $company.CompanyName
-            description         = "Created by API Watchdog"
-            notes               = "Created by API Watchdog"
+            description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog"
+            notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog"
             onDemand            = "false"
             installSplashtop    = "true"
           }
@@ -521,7 +521,7 @@ if (-not $script:blnFAIL) {
                 psaID               = $company.CompanyID
                 name                = $company.CompanyName
                 description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)\nCreated by API Watchdog"
-                notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)\nCreated by API Watchdog"
+                #notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)\nCreated by API Watchdog"
                 onDemand            = "false"
                 installSplashtop    = "true"
               }
