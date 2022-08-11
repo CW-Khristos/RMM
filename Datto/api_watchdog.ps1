@@ -444,14 +444,23 @@
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #QUERY PSA API
+write-host "------------------------------"
+write-host "`tCLASS MAP :"
 PSA-GetMaps $script:classMap "ClassificationIcons"
+$script:classMap
+write-host "------------------------------"
+write-host "------------------------------"
+write-host "`tCATEGORY MAP :"
 PSA-GetMaps $script:categoryMap "CompanyCategories"
+$script:categoryMap
+write-host "------------------------------"
 PSA-GetCompanies
 #QUERY RMM API
 $script:rmmToken = RMM-ApiAccessToken
 RMM-GetSites
 #OUTPUT
 if (-not $script:blnFAIL) {
+  $date = get-date
   write-host "`r`n$($script:strLineSeparator)"
   write-host "COMPANIES :"
   write-host "$($script:strLineSeparator)"
@@ -479,77 +488,67 @@ if (-not $script:blnFAIL) {
         write-host "$($script:strLineSeparator)"
         $script:diag += "$($rmmSite)`r`n"
         $script:diag += "$($script:strLineSeparator)`r`n"
-        if (($null -eq $rmmSite) -or ($rmmsite -eq "")) {
-          $script:rmmSites += 1
-          $script:blnSITE = $true
-          $script:diag += "CREATE SITE : $($company.CompanyName)`r`n"
-          $params = @{
-            id                  = $company.CompanyID
-            name                = $company.CompanyName
-            description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog"
-            notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog"
-            onDemand            = "false"
-            installSplashtop    = "true"
-          }
-          $postSite = (RMM-NewSite @params -UseBasicParsing)
-          write-host "$($postSite)"
-          write-host "$($script:strLineSeparator)"
-          $script:diag += "$($postSite)`r`n"
-          $script:diag += "$($script:strLineSeparator)`r`n"
-          if ($postSite) {
-            write-host "CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
-            $script:diag += "`r`nCREATE : $($company.CompanyName) : SUCCESS" #-foregroundcolor green
-          } elseif (-not $postSite) {
-            $script:blnWARN = $true
-            write-host "CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-            $script:diag += "`r`nCREATE : $($company.CompanyName) : FAILED" #-foregroundcolor red
-          }
-        } elseif (($null -ne $rmmSite) -and ($rmmsite -ne "")) {
+        if (($null -eq $rmmSite) -or ($rmmSite -eq "") -and ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
           try {
-            if ($rmmSite.description -notmatch "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])`r`n") {
+            $script:rmmSites += 1
+            $script:blnSITE = $true
+            $script:diag += "CREATE SITE : $($company.CompanyName)`r`n"
+            $params = @{
+              id                  = $company.CompanyID
+              name                = $company.CompanyName
+              description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
+              notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
+              onDemand            = "false"
+              installSplashtop    = "true"
+            }
+            $postSite = (RMM-NewSite @params -UseBasicParsing)
+            write-host "$($postSite)"
+            write-host "$($script:strLineSeparator)"
+            $script:diag += "$($postSite)`r`n"
+            $script:diag += "$($script:strLineSeparator)`r`n"
+            if ($postSite) {
+              write-host "CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
+              $script:diag += "`r`nCREATE : $($company.CompanyName) : SUCCESS"
+            } elseif (-not $postSite) {
+              $script:blnWARN = $true
+              write-host "CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+              $script:diag += "`r`nCREATE : $($company.CompanyName) : FAILED"
+            }
+          } catch {
+            $script:diag += "`r`n$($_.Exception)"
+            $script:diag += "`r`n$($_.scriptstacktrace)"
+            $script:diag += "`r`n$($_)"
+          }
+        } elseif (($null -ne $rmmSite) -and ($rmmSite -ne "")) {
+          try {
+            write-host "---------Notes :`r`n$($rmmSite.notes)`r`n---------"
+            write-host "---------Description :`r`n$($rmmSite.description)`r`n---------"
+            if ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[$($company.CompanyCategory)])*") {
+              write-host "UPDATE SITE : $($company.CompanyName)"
               $script:diag += "UPDATE SITE : $($company.CompanyName)`r`n"
               $params = @{
                 rmmID               = $rmmSite.uid
                 psaID               = $company.CompanyID
                 name                = $company.CompanyName
-                description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)"
-                #notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\n$($rmmSite.description)"
+                description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nUpdated by API Watchdog\n$($date)"
+                notes               = "$($rmmSite.notes)"
                 onDemand            = "false"
                 installSplashtop    = "true"
               }
               $updateSite = (RMM-UpdateSite @params -UseBasicParsing)
               write-host "$($updateSite)"
               write-host "$($script:strLineSeparator)"
-              $script:diag += "$($postSite)`r`n"
+              $script:diag += "$($updateSite)`r`n"
               $script:diag += "$($script:strLineSeparator)`r`n"
-            }
-            <#--  DISABLED TO SWITCH TO INSERTING CUSTOMER TYPE INTO SITE DESCRIPTION TO OPTIMIZE RMM API CALLS
-            RMM-GetDevices $rmmSite.uid
-            write-host "$($script:strLineSeparator)"
-            write-host "DEVICES :"
-            write-host "$($script:strLineSeparator)"
-            $script:diag += "$($script:strLineSeparator)`r`n"
-            $script:diag += "DEVICES :`r`n"
-            $script:diag += "$($script:strLineSeparator)`r`n"
-            foreach ($device in $script:DeviceDetails) {
-              write-host "DEVICE : $($device.hostname)"
-              write-host "DEVICE UDF : $($device.UDF)"
-              $script:diag += "DEVICE : $($device.hostname)`r`n"
-              $script:diag += "DEVICE UDF : $($device.UDF)`r`n"
-              if (($null -eq $device.UDF) -or 
-                ($device.UDF -eq "") -or 
-                ($device.UDF -ne $($script:categoryMap[$($company.CompanyCategory)]))) {
-                  $script:diag += "Device : $($device.hostname)`r`n"
-                  $script:diag += "Device $($script:rmmUDF) : $($device.UDF)`r`n"
-                  $script:diag += "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])`r`n"
-                  $script:diag += "UPDATING $($script:rmmUDF) ON DEVICE : $($device.hostname)`r`n"
-                  write-host "UPDATING $($script:rmmUDF) ON DEVICE : $($device.hostname)"
-                  RMM-PostUDF $device.DeviceUID $($script:categoryMap[$($company.CompanyCategory)])
+              if ($updateSite) {
+                write-host "UPDATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
+                $script:diag += "`r`nUPDATE : $($company.CompanyName) : SUCCESS"
+              } elseif (-not $updateSite) {
+                $script:blnWARN = $true
+                write-host "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+                $script:diag += "`r`nUPDATE : $($company.CompanyName) : FAILED"
               }
-              write-host "$($script:strLineSeparator)"
-              $script:diag += "$($script:strLineSeparator)`r`n"
             }
-            --#>
           } catch {
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
@@ -567,7 +566,7 @@ if (-not $script:blnFAIL) {
     exit 1
   }
   if (-not $script:blnWARN) {
-    write-DRRMAlert "API_WatchDog : Execution Successful"
+    write-DRRMAlert "API_WatchDog : Execution Successful : No Sites Created"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 0
