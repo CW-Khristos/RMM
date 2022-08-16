@@ -524,7 +524,7 @@ $xmlPartnerID = $statusXML.Statistics.PartnerName
 if ((-not $AllPartners) -and (($null -eq $env:i_BackupName) -or ($env:i_BackupName -eq ""))) {
   write-host "  XML Partner: $($xmlPartnerID)"
   Send-GetPartnerInfo $xmlPartnerID
-} elseif ((-not $AllPartners) -and (($null -ne $env:i_BackupName) -or ($env:i_BackupName -ne ""))) {
+} elseif ((-not $AllPartners) -and (($null -ne $env:i_BackupName) -and ($env:i_BackupName -ne ""))) {
   write-host "  Passed Partner: $($env:i_BackupName)"
   Send-GetPartnerInfo $env:i_BackupName
 }
