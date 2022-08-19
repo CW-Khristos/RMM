@@ -17,6 +17,7 @@
   $script:blnWARN           = $false
   $script:blnSITE           = $false
   $script:strLineSeparator  = "---------"
+  $script:logPath = "C:\IT\Log\HuduDoc_Watchdog"
   # Specify security protocols
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
@@ -443,6 +444,20 @@
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
+#Get the Hudu API Module if not installed
+if (Get-Module -ListAvailable -Name HuduAPI) {
+  Import-Module HuduAPI 
+} else {
+  Install-Module HuduAPI -Force
+  Import-Module HuduAPI
+}
+
+if (Get-Module -ListAvailable -Name AutotaskAPI) {
+  Import-Module AutotaskAPI 
+} else {
+  Install-Module AutotaskAPI -Force
+  Import-Module AutotaskAPI
+}
 #QUERY PSA API
 write-host "------------------------------"
 write-host "`tCLASS MAP :"
@@ -483,11 +498,13 @@ if (-not $script:blnFAIL) {
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Vendor") -and
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Partner") -and
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Lead")) {
+        #CHECK FOR COMPANY IN DRMM SITES
         $rmmSite = $script:sitesList.sites | where-object {$_.name -eq "$($company.CompanyName)"}
         write-host "$($rmmSite)"
         write-host "$($script:strLineSeparator)"
         $script:diag += "$($rmmSite)`r`n"
         $script:diag += "$($script:strLineSeparator)`r`n"
+        #CREATE SITE IN DRMM
         if (($null -eq $rmmSite) -or ($rmmSite -eq "") -and ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
           try {
             $script:rmmSites += 1
@@ -507,18 +524,22 @@ if (-not $script:blnFAIL) {
             $script:diag += "$($postSite)`r`n"
             $script:diag += "$($script:strLineSeparator)`r`n"
             if ($postSite) {
-              write-host "CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
-              $script:diag += "`r`nCREATE : $($company.CompanyName) : SUCCESS"
+              write-host "RMM CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
+              $script:diag += "`r`nRMM CREATE : $($company.CompanyName) : SUCCESS"
             } elseif (-not $postSite) {
               $script:blnWARN = $true
-              write-host "CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-              $script:diag += "`r`nCREATE : $($company.CompanyName) : FAILED"
+              write-host "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+              $script:diag += "`r`nRMM CREATE : $($company.CompanyName) : FAILED"
             }
           } catch {
+            $script:blnWARN = $true
+            write-host "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+            $script:diag += "`r`nRMM CREATE : $($company.CompanyName) : FAILED"
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
             $script:diag += "`r`n$($_)"
           }
+        #UPDATE SITE IN DRMM
         } elseif (($null -ne $rmmSite) -and ($rmmSite -ne "")) {
           try {
             write-host "---------Notes :`r`n$($rmmSite.notes)`r`n---------"
@@ -550,27 +571,92 @@ if (-not $script:blnFAIL) {
               }
             }
           } catch {
+            $script:blnWARN = $true
+            write-host "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+            $script:diag += "`r`nUPDATE : $($company.CompanyName) : FAILED"
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
             $script:diag += "`r`n$($_)"
           }
         }
+        #CHECK FOR COMPANY IN HUDU
+        $huduSite = Get-HuduCompanies -Name "$($company.CompanyName)"
+        #CREATE COMPANY IN HUDU
+        if (($null -eq $huduSite) -or ($huduSite -eq "") -and ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
+          write-host "NEED TO CREATE COMPANY IN HUDU"
+          try {
+            
+    Param (
+        [Parameter(Mandatory = $true)]
+        [String]$Name,
+        [String]$Nickname = '',
+        [Alias("address_line_1")]
+        [String]$AddressLine1 = '',
+        [Alias("address_line_2")]
+        [String]$AddressLine2 = '',
+        [String]$City = '',
+        [String]$State = '',
+        [Alias("PostalCode", "PostCode")]
+        [String]$Zip = '',
+        [Alias("country_name")]
+        [String]$CountryName = '',
+        [Alias("phone_number")]
+        [String]$PhoneNumber = '',
+        [Alias("fax_number")]
+        [String]$FaxNumber = '',
+        [String]$Website = '',
+        [Alias("id_number")]
+        [String]$IdNumber = '',
+        [String]$Notes = ''
+    )
+            
+            $script:diag += "CREATE HUDU : $($company.CompanyName)`r`n"
+            $params = @{
+              name                = $company.CompanyName
+              description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
+              notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
+              onDemand            = "false"
+              installSplashtop    = "true"
+            }
+            $postHUDU = (New-HuduCompany @params -UseBasicParsing)
+          } catch {
+            $script:blnWARN = $true
+            write-host "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+            $script:diag += "`r`nHUDU CREATE : $($company.CompanyName) : FAILED"
+            $script:diag += "`r`n$($_.Exception)"
+            $script:diag += "`r`n$($_.scriptstacktrace)"
+            $script:diag += "`r`n$($_)"
+          }
+        } elseif (($null -ne $huduSite) -and ($huduSite -ne "")) {
+          write-host "DO NOT NEED TO CREATE COMPANY IN HUDU"
+        }
     }
   }
   #Stop script execution time calculation
   StopClock
+  #CLEAR LOGFILE
+  $null | set-content $script:logPath -force
   if ($script:blnSITE) {
+    #WRITE TO LOGFILE
+    $script:diag += "`r`n`r`nAPI_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
+    "$($script:diag)" | add-content $script:logPath -force
     write-DRRMAlert "API_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
   }
   if (-not $script:blnWARN) {
+    #WRITE TO LOGFILE
+    $script:diag += "`r`n`r`nAPI_WatchDog : Execution Successful : No Sites Created"
+    "$($script:diag)" | add-content $script:logPath -force
     write-DRRMAlert "API_WatchDog : Execution Successful : No Sites Created"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 0
   } elseif ($script:blnWARN) {
+    #WRITE TO LOGFILE
+    $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Warnings : See Diagnostics"
+    "$($script:diag)" | add-content $script:logPath -force
     write-DRRMAlert "API_WatchDog : Execution Completed with Warnings : See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
@@ -579,6 +665,11 @@ if (-not $script:blnFAIL) {
 } elseif ($script:blnFAIL) {
   #Stop script execution time calculation
   StopClock
+  #CLEAR LOGFILE
+  $null | set-content $script:logPath -force
+  #WRITE TO LOGFILE
+  $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Warnings : See Diagnostics"
+  "$($script:diag)" | add-content $script:logPath -force
   write-DRRMAlert "API_WatchDog : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
