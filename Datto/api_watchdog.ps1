@@ -17,7 +17,7 @@
   $script:blnWARN           = $false
   $script:blnSITE           = $false
   $script:strLineSeparator  = "---------"
-  $script:logPath = "C:\IT\Log\HuduDoc_Watchdog"
+  $script:logPath = "C:\IT\Log\API_Watchdog"
   # Specify security protocols
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
