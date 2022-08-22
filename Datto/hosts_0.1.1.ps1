@@ -55,6 +55,7 @@ if ((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name L
       #FLAG CHANGE
       write-host "DETECTED CHANGE : $($_)"
       $script:diag += "DETECTED CHANGE : $($_)`r`n"
+      $script:arrCHG.add($_)
     }
     $script:intLN += 1
   }
