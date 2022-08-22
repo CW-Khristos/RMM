@@ -158,7 +158,7 @@ $Scriptpath = $($MyInvocation.MyCommand.Path)
 $Dir = "C:\IT";
 
 #Report
-$runntime= (get-date -format dd_MM_yyyy-HH_mm_ss)-as [string]
+$runntime= $((Get-Date).ToString('dd-MM-yyyy'))
 $HealthReport = $Dir + "\Reports\ADsecurity" + "$runntime" + ".htm"
 
 #Logfile 
