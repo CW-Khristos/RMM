@@ -444,14 +444,7 @@
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
-#Get the Hudu API Module if not installed
-if (Get-Module -ListAvailable -Name HuduAPI) {
-  Import-Module HuduAPI 
-} else {
-  Install-Module HuduAPI -Force
-  Import-Module HuduAPI
-}
-
+#Get the Autotask API Module if not installed
 if (Get-Module -ListAvailable -Name AutotaskAPI) {
   Import-Module AutotaskAPI 
 } else {
