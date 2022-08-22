@@ -59,6 +59,7 @@ if ((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name L
     }
     $script:intLN += 1
   }
+  write-host $script:arrCHG
   write-DRMMAlert "HOSTS modified within the last 24 hours. Last modification @ $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)"
   write-DRMMDiag "$($script:diag)"
   Exit 1
