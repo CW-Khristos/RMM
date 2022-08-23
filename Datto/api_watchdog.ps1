@@ -490,7 +490,8 @@ if (-not $script:blnFAIL) {
     if (($($script:typeMap[[int]$($company.CompanyType)]) -ne "Dead") -and 
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Vendor") -and
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Partner") -and
-      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Lead")) {
+      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Lead") -and 
+      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
         #CHECK FOR COMPANY IN DRMM SITES
         $rmmSite = $script:sitesList.sites | where-object {$_.name -eq "$($company.CompanyName)"}
         write-host "$($rmmSite)"
