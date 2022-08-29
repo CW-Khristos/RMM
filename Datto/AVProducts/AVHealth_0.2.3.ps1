@@ -294,6 +294,7 @@
               $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
               write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
               $script:defstatus = "Definition Status : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
+              $script:rtstatus = "Real-Time Scanning : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
               write-host $_.Exception
               write-host $_.scriptstacktrace
               write-host $_
@@ -1364,7 +1365,7 @@ if (-not ($script:blnAVXML)) {
             write-host $_
           }
           $script:o_AVStatus += "Real-Time Scanning : $($script:o_RTstate)"
-          if (($i_PAV -match "Sophos") -and ($script:o_AVVersion -match "\d{4}\.\d\.\d\.\d{2}")) {
+          if (($env:i_PAV -match "Sophos") -and ($script:o_AVVersion -match "\d{4}\.\d\.\d\.\d+")) {
             $script:diag += "SOPHOS INTERCEPT X v$($script:o_AVVersion) : DISABLE REAL-TIME WARNINGS`r`n"
             write-host "SOPHOS INTERCEPT X v$($script:o_AVVersion) : DISABLE REAL-TIME WARNINGS"
             $rtWARN = $false
@@ -1487,13 +1488,12 @@ if (-not ($script:blnAVXML)) {
                 $script:diag += "Reading : -path 'HKLM:$($i_scan)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_scan)'" -foregroundcolor yellow
                 if ($avs[$av].display -match "Sophos Intercept X") {
-                  write-host "Reading : -path 'HKLM:$($i_scan)'" -foregroundcolor yellow
                   $scankey = get-itemproperty -path "HKLM:$($i_scan)" -name "$($i_scanval)" -erroraction stop
-                  $stime = [datetime]::ParseExact($scankey.$i_scanval,'yyyyMMddTHHmmssK',[Globalization.CultureInfo]::InvariantCulture)
-                  $scans += "Scan Type : BackgroundScanV2 (REG Check)`r`nLast Scan Time : $($stime) (REG Check)`r`n"
+                  $stime = [DateTime]::FromFileTime($scankey.LastSystemScanTime)
+                  #$stime = [datetime]::ParseExact($scankey.$i_scanval,'yyyyMMddTHHmmssK',[Globalization.CultureInfo]::InvariantCulture)
+                  $scans += "Scan Type : On-Demand System Scan (REG Check)`r`nLast Scan Time : $($stime) (REG Check)`r`n"
                   $lastage = new-timespan -start $stime -end (Get-Date)
                 } elseif ($avs[$av].display -notmatch "Sophos Intercept X") {
-                  write-host "Reading : -path 'HKLM:$($i_scan)'" -foregroundcolor yellow
                   $scankey = get-itemproperty -path "HKLM:$($i_scan)" -erroraction stop
                   foreach ($scan in $scankey.psobject.Properties) {
                     if (($scan.name -notlike "PS*") -and ($scan.name -notlike "(default)")) {
@@ -1530,7 +1530,7 @@ if (-not ($script:blnAVXML)) {
             }
           }
           if ($lastage -ne 0) {
-            $time1 = New-TimeSpan -days 5
+            $time1 = New-TimeSpan -days 7
             if ($lastage.compareto($time1) -le 0) {
               $scanWARN = $false
               $scans += "Recently Scanned : $($true) (REG Check)"
@@ -1850,12 +1850,12 @@ foreach ($warn in $script:avwarn.values) {
 StopClock
 write-host 'DATTO OUTPUT :'
 if ($script:blnWARN) {
-  write-DRRMAlert "$($env:i_PAV) : Warning"
+  write-DRRMAlert "AV Health : $($env:i_PAV) : Warning"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "$($env:i_PAV) : Healthy"
+  write-DRRMAlert "AV Health : $($env:i_PAV) : Healthy"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 0
