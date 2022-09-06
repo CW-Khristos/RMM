@@ -579,7 +579,7 @@ To Do:
   function Set-BackupDash ($i_Company, $i_CompanyID, $i_AllPartners, $i_AllDevices, $i_Note, $i_URL, $i_BackupID) {
     ######################### Backups Section ###########################
     Send-APICredentialsCookie
-    $bmdiag = "Validating Backups :`r`nAUTH STATE : $($script:blnBM)"
+    $bmdiag = "Validating Backups : AUTH STATE : $($script:blnBM)"
     logERR 4 "Set-BackupDash" "$($bmdiag)"
     if ($script:blnBM) {
       #Fix Mis-Matched Target Partner Names
@@ -789,6 +789,7 @@ To Do:
 #------------
 #BEGIN SCRIPT
 clear-host
+Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 #Start script execution time calculation
 $ScrptStartTime = (get-date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
@@ -801,7 +802,7 @@ if (Get-Module -ListAvailable -Name HuduAPI) {
   }
 } else {
   try {
-    Install-Module HuduAPI -Force
+    Install-Module HuduAPI -Force -Confirm:$false
     Import-Module HuduAPI
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
@@ -816,12 +817,13 @@ if (Get-Module -ListAvailable -Name AutotaskAPI) {
   }
 } else {
   try {
-    Install-Module AutotaskAPI -Force
+    Install-Module AutotaskAPI -Force -Confirm:$false
     Import-Module AutotaskAPI
   } catch {
     logERR 2 "AutotaskAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
 }
+Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
 #CHECK 'PERSISTENT' FOLDERS
 if (-not (test-path -path "C:\temp")) {
   new-item -path "C:\temp" -itemtype directory
