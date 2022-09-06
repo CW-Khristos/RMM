@@ -10,17 +10,29 @@
   #  [Parameter(Mandatory=$true)]$i_psaKey,
   #  [Parameter(Mandatory=$true)]$i_psaSecret,
   #  [Parameter(Mandatory=$true)]$i_psaIntegration,
-  #  [Parameter(Mandatory=$true)]$i_psaAPI
+  #  [Parameter(Mandatory=$true)]$i_psaAPI,
+  #  [Parameter(Mandatory=$true)]$i_HuduKey,
+  #  [Parameter(Mandatory=$true)]$i_HuduDomain
   #)
   $script:diag              = $null
   $script:blnFAIL           = $false
   $script:blnWARN           = $false
   $script:blnSITE           = $false
   $script:strLineSeparator  = "---------"
-  $script:logPath = "C:\IT\Log\API_Watchdog"
-  # Specify security protocols
+  $script:logPath = "C:\IT\Log\API_WatchDog"
+  ######################### TLS Settings ###########################
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
+  ######################### RMM Settings ###########################
+  #RMM API CREDS
+  $script:rmmKey            = $env:i_rmmKey
+  $script:rmmSecret         = $env:i_rmmSecret
+  #RMM API VARS
+  $script:rmmSites          = 0
+  $script:rmmCalls          = 0
+  $script:rmmUDF            = $env:i_rmmUDF
+  $script:rmmAPI            = $env:i_rmmAPI
+  ######################### Autotask Settings ###########################
   #PSA API DATASETS
   $script:typeMap           = @{
     1 = "Customer"
@@ -33,24 +45,27 @@
   }
   $script:classMap          = @{}
   $script:categoryMap       = @{}
-  #RMM API CREDS
-  $script:rmmKey            = $env:i_rmmKey
-  $script:rmmSecret         = $env:i_rmmSecret
-  #RMM API VARS
-  $script:rmmSites          = 0
-  $script:rmmCalls          = 0
-  $script:rmmUDF            = $env:i_rmmUDF
-  $script:rmmAPI            = $env:i_rmmAPI
   #PSA API CREDS
   $script:psaUser           = $env:i_psaUser
   $script:psaKey            = $env:i_psaKey
   $script:psaSecret         = $env:i_psaSecret
   $script:psaIntegration    = $env:i_psaIntegration
+  $script:psaHeaders        = @{
+    'UserName'              = "$($script:psaKey)"
+    'Secret'                = "$($script:psaSecret)"
+    'ApiIntegrationCode'    = "$($script:psaIntegration)"
+  }
   #PSA API VARS
   $script:psaCalls          = 0
   $script:psaAPI            = $env:i_psaAPI
   $script:psaGenFilter      = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
   $script:psaActFilter      = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
+  ######################### Hudu Settings ###########################
+  $script:huduCalls         = 0
+  # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
+  $script:HuduAPIKey        = $env:i_HuduKey
+  # Set the base domain of your Hudu instance without a trailing /
+  $script:HuduBaseDomain    = $env:i_HuduDomain
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -84,17 +99,14 @@
     }
   }  ## Convert epoch time to date time
 
+#region ----- PSA FUNCTIONS ----
   function PSA-Query {
-    param ($method, $entity)
+    param ($header, $method, $entity)
     $params = @{
       Method      = "$($method)"
       ContentType = 'application/json'
       Uri         = "$($script:psaAPI)/$($entity)"
-      Headers     = @{
-        'Username'            = $script:psaKey
-        'Secret'              = $script:psaSecret
-        'APIIntegrationcode'  = $script:psaIntegration
-      }
+      Headers     = $header
     }
     $script:psaCalls += 1
     try {
@@ -110,16 +122,12 @@
   }
 
   function PSA-FilterQuery {
-    param ($method, $entity, $filter)
+    param ($header, $method, $entity, $filter)
     $params = @{
       Method      = "$($method)"
       ContentType = 'application/json'
       Uri         = "$($script:psaAPI)/$($entity)/query?search=$($filter)"
-      Headers     = @{
-        'Username'            = $script:psaKey
-        'Secret'              = $script:psaSecret
-        'APIIntegrationcode'  = $script:psaIntegration
-      }
+      Headers     = $header
     }
     $script:psaCalls += 1
     try {
@@ -135,8 +143,9 @@
   }
 
   function PSA-GetThreshold {
+    param ($header)
     try {
-      PSA-Query "GET" "ThresholdInformation"
+      PSA-Query $header "GET" "ThresholdInformation" -erroraction stop
     } catch {
       $script:blnWARN = $true
       $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA API Utilization via $($params.Uri)"
@@ -148,10 +157,10 @@
   }
 
   function PSA-GetMaps {
-    param ($dest, $entity)
+    param ($header, $dest, $entity)
     $Uri = "$($script:psaAPI)/$($entity)/query?search=$($script:psaActFilter)"
     try {
-      $list = PSA-FilterQuery "GET" "$($entity)" "$($script:psaActFilter)"
+      $list = PSA-FilterQuery $header "GET" "$($entity)" "$($psaActFilter)"
       foreach ($item in $list.items) {
         if ($dest.containskey($item.id)) {
           continue
@@ -170,18 +179,28 @@
   } ## PSA-GetMaps
 
   function PSA-GetCompanies {
+    param ($header)
     $script:CompanyDetails = @()
     $Uri = "$($script:psaAPI)/Companies/query?search=$($script:psaActFilter)"
     try {
-      $CompanyList = PSA-FilterQuery "GET" "Companies" "$($script:psaActFilter)"
+      $CompanyList = PSA-FilterQuery $header "GET" "Companies" "$($psaActFilter)"
       $sort = ($CompanyList.items | Sort-Object -Property companyName)
       foreach ($company in $sort) {
         $script:CompanyDetails += New-Object -TypeName PSObject -Property @{
-          CompanyID       = $company.id
-          CompanyName     = $company.companyName
-          CompanyType     = $company.companyType
-          CompanyClass    = $company.classification
-          CompanyCategory = $company.companyCategoryID
+          CompanyID       = "$($company.id)"
+          CompanyName     = "$($company.companyName)"
+          CompanyType     = "$($company.companyType)"
+          CompanyClass    = "$($company.classification)"
+          CompanyCategory = "$($company.companyCategoryID)"
+          address1        = "$($company.address1)"
+          address2        = "$($company.address2)"
+          city            = "$($company.city)"
+          state           = "$($company.state)"
+          postalCode      = "$($company.postalCode)"
+          country         = "$($country.displayName)"
+          phone           = "$($company.phone)"
+          fax             = "$($company.fax)"
+          webAddress      = "$($company.webAddress)"
         }
         #write-host "$($company.companyName) : $($company.companyType)"
         #write-host "Type Map : $(script:typeMap[[int]$company.companyType])"
@@ -195,7 +214,9 @@
       write-host "$($script:diag)`r`n"
     }
   } ## PSA-GetCompanies API Call
+#endregion ----- PSA FUNCTIONS ----
 
+#region ----- RMM FUNCTIONS ----
   function RMM-ApiAccessToken {
     # Convert password to secure string
     $securePassword = ConvertTo-SecureString -String 'public' -AsPlainText -Force
@@ -398,6 +419,28 @@
       write-host "$($script:diag)`r`n"
     }
   }
+#endregion ----- RMM FUNCTIONS ----
+
+  function logERR ($intSTG, $strModule, $strErr) {
+    $script:blnWARN = $true
+    #CUSTOM ERROR CODES
+    switch ($intSTG) {
+      1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+        $script:blnBREAK = $true
+        $script:diag += "`r`n$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
+        write-host "$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+      }
+      2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+        $script:blnBREAK = $true
+        $script:diag += "`r`n$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
+        write-host "$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
+      }
+      default {                                                   #'ERRRET'=3+
+        $script:diag += "`r`n$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
+        write-host "$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
+      }
+    }
+  }
 
   function StopClock {
     #Stop script execution time calculation
@@ -419,7 +462,7 @@
     $asecs = $asecs.split(".")[0]
     $amill = $amill.SubString(0,[math]::min(3,$mill.length))
     #DISPLAY API THRESHOLDS
-    $psa = PSA-GetThreshold
+    $psa = PSA-GetThreshold $script:psaHeaders
     write-host "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls)"
     write-host "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600"
     write-host "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
@@ -441,28 +484,71 @@
 
 #------------
 #BEGIN SCRIPT
+clear-host
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
+#Get the Hudu API Module if not installed
+Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+if (Get-Module -ListAvailable -Name HuduAPI) {
+  try {
+    Import-Module HuduAPI
+  } catch {
+    logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
+  }
+} else {
+  try {
+    Install-Module HuduAPI -Force -Confirm:$false
+    Import-Module HuduAPI
+  } catch {
+    logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
+  }
+}
 #Get the Autotask API Module if not installed
 if (Get-Module -ListAvailable -Name AutotaskAPI) {
-  Import-Module AutotaskAPI 
+  try {
+    Import-Module AutotaskAPI
+  } catch {
+    logERR 2 "AutotaskAPI" "INSTALL / IMPORT MODULE FAILURE"
+  }
 } else {
-  Install-Module AutotaskAPI -Force
-  Import-Module AutotaskAPI
+  try {
+    Install-Module AutotaskAPI -Force -Confirm:$false
+    Import-Module AutotaskAPI
+  } catch {
+    logERR 2 "AutotaskAPI" "INSTALL / IMPORT MODULE FAILURE"
+  }
 }
+Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
+#CHECK 'PERSISTENT' FOLDERS
+if (-not (test-path -path "C:\temp")) {
+  new-item -path "C:\temp" -itemtype directory
+}
+if (-not (test-path -path "C:\IT")) {
+  new-item -path "C:\IT" -itemtype directory
+}
+if (-not (test-path -path "C:\IT\Log")) {
+  new-item -path "C:\IT\Log" -itemtype directory
+}
+if (-not (test-path -path "C:\IT\Scripts")) {
+  new-item -path "C:\IT\Scripts" -itemtype directory
+}
+#Set Hudu logon information
+New-HuduAPIKey $script:HuduAPIKey
+New-HuduBaseUrl $script:HuduBaseDomain
 #QUERY PSA API
+$countries = PSA-FilterQuery $script:psaHeaders "GET" "Countries" $psaGenFilter
 write-host "------------------------------"
 write-host "`tCLASS MAP :"
-PSA-GetMaps $script:classMap "ClassificationIcons"
+PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
 $script:classMap
 write-host "------------------------------"
 write-host "------------------------------"
 write-host "`tCATEGORY MAP :"
-PSA-GetMaps $script:categoryMap "CompanyCategories"
+PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
 $script:categoryMap
 write-host "------------------------------"
-PSA-GetCompanies
+PSA-GetCompanies $script:psaHeaders
 #QUERY RMM API
 $script:rmmToken = RMM-ApiAccessToken
 RMM-GetSites
@@ -478,14 +564,17 @@ if (-not $script:blnFAIL) {
   foreach ($company in $script:CompanyDetails) {
     write-host "`r`n$($script:strLineSeparator)"
     write-host "COMPANY : $($company.CompanyName)"
-    write-host "COMPANY TYPE : $($script:typeMap[[int]$($company.CompanyType)])"
+    write-host "ID : $($company.CompanyID)"
+    write-host "TYPE : $($script:typeMap[[int]$($company.CompanyType)])"
+    write-host "CATEGORY : $($script:categoryMap[[int]$($company.CompanyCategory)])"
+    write-host "CLASSIFICATION : $($script:classMap[[int]$($company.CompanyClass)])"
     write-host "$($script:strLineSeparator)"
     $script:diag += "`r`n$($script:strLineSeparator)`r`n"
     $script:diag += "ID : $($company.CompanyID)`r`n"
     $script:diag += "TYPE : $($script:typeMap[[int]$($company.CompanyType)])`r`n"
     $script:diag += "COMPANY : $($company.CompanyName)`r`n"
-    $script:diag += "CATEGORY : $($script:categoryMap[$($company.CompanyCategory)])`r`n"
-    $script:diag += "CLASSIFICATION : $($script:classMap[$($company.CompanyClass)])`r`n"
+    $script:diag += "CATEGORY : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`n"
+    $script:diag += "CLASSIFICATION : $($script:classMap[[int]$($company.CompanyClass)])`r`n"
     $script:diag += "$($script:strLineSeparator)`r`n"
     if (($($script:typeMap[[int]$($company.CompanyType)]) -ne "Dead") -and 
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Vendor") -and
@@ -499,7 +588,7 @@ if (-not $script:blnFAIL) {
         $script:diag += "$($rmmSite)`r`n"
         $script:diag += "$($script:strLineSeparator)`r`n"
         #CREATE SITE IN DRMM
-        if (($null -eq $rmmSite) -or ($rmmSite -eq "") -and ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
+        if (($null -eq $rmmSite) -or ($rmmSite -eq "")) {
           try {
             $script:rmmSites += 1
             $script:blnSITE = $true
@@ -507,8 +596,8 @@ if (-not $script:blnFAIL) {
             $params = @{
               id                  = $company.CompanyID
               name                = $company.CompanyName
-              description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
-              notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
+              description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
+              notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
               onDemand            = "false"
               installSplashtop    = "true"
             }
@@ -516,14 +605,14 @@ if (-not $script:blnFAIL) {
             write-host "$($postSite)"
             write-host "$($script:strLineSeparator)"
             $script:diag += "$($postSite)`r`n"
-            $script:diag += "$($script:strLineSeparator)`r`n"
+            $script:diag += "$($script:strLineSeparator)"
             if ($postSite) {
               write-host "RMM CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
-              $script:diag += "`r`nRMM CREATE : $($company.CompanyName) : SUCCESS"
+              $script:diag += "RMM CREATE : $($company.CompanyName) : SUCCESS`r`n"
             } elseif (-not $postSite) {
               $script:blnWARN = $true
               write-host "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-              $script:diag += "`r`nRMM CREATE : $($company.CompanyName) : FAILED"
+              $script:diag += "RMM CREATE : $($company.CompanyName) : FAILED`r`n"
             }
           } catch {
             $script:blnWARN = $true
@@ -538,14 +627,14 @@ if (-not $script:blnFAIL) {
           try {
             write-host "---------Notes :`r`n$($rmmSite.notes)`r`n---------"
             write-host "---------Description :`r`n$($rmmSite.description)`r`n---------"
-            if ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[$($company.CompanyCategory)])*") {
+            if ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
               write-host "UPDATE SITE : $($company.CompanyName)"
               $script:diag += "UPDATE SITE : $($company.CompanyName)`r`n"
               $params = @{
                 rmmID               = $rmmSite.uid
                 psaID               = $company.CompanyID
                 name                = $company.CompanyName
-                description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nUpdated by API Watchdog\n$($date)"
+                description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nUpdated by API Watchdog\n$($date)"
                 notes               = "$($rmmSite.notes)"
                 onDemand            = "false"
                 installSplashtop    = "true"
@@ -557,12 +646,15 @@ if (-not $script:blnFAIL) {
               $script:diag += "$($script:strLineSeparator)`r`n"
               if ($updateSite) {
                 write-host "UPDATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
-                $script:diag += "`r`nUPDATE : $($company.CompanyName) : SUCCESS"
+                $script:diag += "UPDATE : $($company.CompanyName) : SUCCESS`r`n"
               } elseif (-not $updateSite) {
                 $script:blnWARN = $true
                 write-host "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-                $script:diag += "`r`nUPDATE : $($company.CompanyName) : FAILED"
+                $script:diag += "UPDATE : $($company.CompanyName) : FAILED`r`n"
               }
+            } elseif ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
+              write-host "DO NOT NEED TO CREATE / UPDATE SITE IN RMM"
+              $script:diag += "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n"
             }
           } catch {
             $script:blnWARN = $true
@@ -576,43 +668,41 @@ if (-not $script:blnFAIL) {
         #CHECK FOR COMPANY IN HUDU
         $huduSite = Get-HuduCompanies -Name "$($company.CompanyName)"
         #CREATE COMPANY IN HUDU
-        if (($null -eq $huduSite) -or ($huduSite -eq "") -and ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
+        if (($null -eq $huduSite) -or ($huduSite -eq "")) {
+          $script:blnSITE = $true
           write-host "NEED TO CREATE COMPANY IN HUDU"
+          $script:diag += "NEED TO CREATE COMPANY IN HUDU`r`n"
           try {
-            
-    Param (
-        [Parameter(Mandatory = $true)]
-        [String]$Name,
-        [String]$Nickname = '',
-        [Alias("address_line_1")]
-        [String]$AddressLine1 = '',
-        [Alias("address_line_2")]
-        [String]$AddressLine2 = '',
-        [String]$City = '',
-        [String]$State = '',
-        [Alias("PostalCode", "PostCode")]
-        [String]$Zip = '',
-        [Alias("country_name")]
-        [String]$CountryName = '',
-        [Alias("phone_number")]
-        [String]$PhoneNumber = '',
-        [Alias("fax_number")]
-        [String]$FaxNumber = '',
-        [String]$Website = '',
-        [Alias("id_number")]
-        [String]$IdNumber = '',
-        [String]$Notes = ''
-    )
-            
-            $script:diag += "CREATE HUDU : $($company.CompanyName)`r`n"
+            $country = $countries.items | where {($_.id -eq $company.countryID)} | select displayName
+            $script:diag += "CREATE HUDU : $($company.CompanyName)`t - $($company.address1), $($company.address2), $($company.city), $($company.state), $($company.postalCode) $($company.country)`r`n"
             $params = @{
-              name                = $company.CompanyName
-              description         = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
-              notes               = "Customer Type : $($script:categoryMap[$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
-              onDemand            = "false"
-              installSplashtop    = "true"
+              name                = "$($company.CompanyName)"
+              nickname            = ""
+              address_line_1      = "$($company.address1)"
+              address_line_2      = "$($company.address2)"
+              city                = "$($company.city)"
+              state               = "$($company.state)"
+              zip                 = "$($company.postalCode)"
+              country_name        = "$($company.country)"
+              phone_number        = "$($company.phone)"
+              fax_number          = "$($company.fax)"
+              website             = "$($company.webAddress)"
+              id_number           = ""
+              notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
             }
-            $postHUDU = (New-HuduCompany @params -UseBasicParsing)
+            $postHUDU = (New-HuduCompany @params -erroraction stop)
+            write-host "$($postHUDU)"
+            write-host "$($script:strLineSeparator)"
+            $script:diag += "$($postHUDU)`r`n"
+            $script:diag += "$($script:strLineSeparator)`r`n"
+            if ($postHUDU) {
+              write-host "HUDU CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
+              $script:diag += "HUDU CREATE : $($company.CompanyName) : SUCCESS`r`n"
+            } elseif (-not $postHUDU) {
+              $script:blnWARN = $true
+              write-host "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+              $script:diag += "HUDU CREATE : $($company.CompanyName) : FAILED`r`n"
+            }
           } catch {
             $script:blnWARN = $true
             write-host "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
