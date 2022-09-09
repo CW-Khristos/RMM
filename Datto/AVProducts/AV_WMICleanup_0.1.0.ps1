@@ -4,7 +4,7 @@
 
 .DESCRIPTION 
     PS conversion of AV_WMICleanup VBS Script
-    Removes All / Specified AV from WMI AVProduct and FWProduct
+    Removes All / Specified AV from WMI AVProduct and FWProduct Namespaces
  
 .NOTES
     Version        : 0.1.0 (09 September 2022)
