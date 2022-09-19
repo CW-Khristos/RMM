@@ -40,6 +40,9 @@
     # https://documentation.n-able.com/backup/userguide/documentation/Content/service-management/console/remote-commands.htm
 # -----------------------------------------------------------#>  ## Behavior
 
+#REGION ----- DECLARATIONS ----
+  #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
+  #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
 #[CmdletBinding(DefaultParameterSetName="SetGUIPW")]
 #    Param (
 #        [Parameter(ParameterSetName="WipeGUIPW",Mandatory=$False)] [Switch]$WipeGUIPassword,  ## Clear GUI Password   
@@ -52,10 +55,11 @@
 #        [Parameter(Mandatory=$False)] [switch] $ClearCredentials,                             ## Remove Stored API Credentials at start of script
 #        
 #    )
-
-#region ----- Environment, Variables, Names and Paths ----
   Import-Module $env:SyncroModule
   $Script:strLineSeparator = "  ---------"
+  $Script:True_path = "C:\ProgramData\MXB\"
+  $Script:APIcredfile = join-path -Path $True_Path -ChildPath "$env:computername API_Credentials.Secure.txt"
+  $Script:APIcredpath = Split-path -path $APIcredfile
   $urlJSON = 'https://api.backup.management/jsonapi'
   $mxbPath = ${env:ProgramData} + "\MXB\Backup Manager"
   $CurrentDate = Get-Date -format "yyy-MM-dd_hh-mm-ss"
@@ -87,7 +91,8 @@
     $i_GUIlength = 8
   }
   if (($i_GUIpassword -eq $null) -or ($i_GUIpassword -eq "NULL")) {
-    $password = -join ((33..33) + (35..38) + (42..42) + (50..57) + (63..72) + (74..75) + (77..78) + (80..90) + (97..104) + (106..107) + (109..110) + (112..122) | Get-Random -Count $i_GUIlength | ForEach-Object {[char]$_})
+    $password = -join ((33..33) + (35..38) + (42..42) + (50..57) + (63..72) + (74..75) + (77..78) + (80..90) + (97..104) + (106..107) + (109..110) + (112..122) | 
+      Get-Random -Count $i_GUIlength | ForEach-Object {[char]$_})
   } else {
     $password = $i_GUIpassword
   }
@@ -96,11 +101,10 @@
   if ($i_BackupCMD -eq "-WipeGUIPassword") {
     $WipeGUIPassword = $True
   }
-#endregion ----- Environment, Variables, Names and Paths ----
+#ENDREGION ----- DECLARATIONS ----
 
 #region ----- Functions ----
-#region ----- Data Conversion ----
-  Function Convert-UnixTimeToDateTime($inputUnixTime){
+  Function Convert-UnixTimeToDateTime ($inputUnixTime) {
     if ($inputUnixTime -gt 0 ) {
       $epoch = Get-Date -Date "1970-01-01 00:00:00Z"
       $epoch = $epoch.ToUniversalTime()
@@ -109,8 +113,7 @@
     } else {
       return ""
     }
-  }  ## Convert epoch time to date time 
-#endregion ----- Data Conversion ----
+  }  ## Convert epoch time to date time
 
 #region ----- Authentication ----
   Function Set-APICredentials {
@@ -124,35 +127,33 @@
       New-Item -ItemType Directory -Path $APIcredpath
     }
     ## SET PARTNER NAME
-    Write-Host "  Enter Exact, Case Sensitive Partner Name for N-able Backup.Management API i.e. 'Acme, Inc (bob@acme.net)'"
-    if ($i_PartnerName -eq $null) {
+    if (($null -eq $i_PartnerName) -or ($i_PartnerName -eq "")) {
+      Write-Host "  Enter Exact, Case Sensitive Partner Name for N-able Backup.Management API i.e. 'Acme, Inc (bob@acme.net)'"
       DO{$Script:PartnerName = Read-Host "  Enter Login Partner Name"}
       WHILE ($PartnerName.length -eq 0)
-    } elseif ($i_PartnerName -ne $null) {
+    } elseif (($null -ne $i_PartnerName) -and ($i_PartnerName -ne "")) {
       $PartnerName = $i_PartnerName
     }
     ## SET BACKUP CREDENTIALS
     $BackupCred = New-Object -TypeName PSObject
     $BackupCred | Add-Member -MemberType NoteProperty -Name PartnerName -Value "$PartnerName"
-    if (($i_BackupUser -eq $null) -or ($i_BackupPWD -eq $null)) {               ## NO CREDENTIALS PASSED
-      $BackupCred = Get-Credential -UserName "" -Message 'Enter Login Email and Password for N-able Backup.Management API'
-    } elseif (($i_BackupUser -ne $null) -and ($i_BackupPWD -ne $null)) {        ## CREDENTIALS PASSED
-      $BackupCred | Add-Member -MemberType NoteProperty -Name UserName -Value "$i_BackupUser"
-      $BackupCred | Add-Member -MemberType NoteProperty -Name Password -Value "$i_BackupPWD"
+    if ((($null -eq $i_BackupUser) -or ($i_BackupUser -eq "")) -or 
+      (($null -eq $i_BackupPWD) -or ($i_BackupPWD -eq ""))) {                   ## NO CREDENTIALS PASSED
+        $BackupCred = Get-Credential -UserName "" -Message 'Enter Login Email and Password for N-able Backup.Management API'
+    } elseif ((($null -ne $i_BackupUser) -and ($i_BackupUser -ne "")) -and 
+      (($null -ne $i_BackupPWD) -and ($i_BackupPWD -ne ""))) {                  ## CREDENTIALS PASSED
+        $BackupCred | Add-Member -MemberType NoteProperty -Name UserName -Value "$i_BackupUser"
+        $BackupCred | Add-Member -MemberType NoteProperty -Name Password -Value "$i_BackupPWD"
     }
     ## WRITE API FILE
     $PartnerName | out-file $APIcredfile
     $BackupCred.UserName | Out-file -append $APIcredfile
     $BackupCred.Password | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-file -append $APIcredfile
     Start-Sleep -milliseconds 300
-    Send-APICredentialsCookie  ## Attempt API Authentication
+    #Send-APICredentialsCookie  ## Attempt API Authentication
   }  ## Set API credentials if not present
 
   Function Get-APICredentials {
-    $Script:True_path = "C:\ProgramData\MXB\"
-    $Script:APIcredfile = join-path -Path $True_Path -ChildPath "$env:computername API_Credentials.Secure.txt"
-    $Script:APIcredpath = Split-path -path $APIcredfile
-
     if (($ClearCredentials) -and (Test-Path $APIcredfile)) {                    ## CLEAR API CREDENTIALS
       Remove-Item -Path $Script:APIcredfile
       $ClearCredentials = $Null
@@ -221,7 +222,7 @@
 #endregion ----- Authentication ----
 
 #region ----- Backup.Management JSON Calls ----
-  Function CallJSON($url,$object) {
+  Function CallJSON ($url,$object) {
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($object)
     $web = [System.Net.WebRequest]::Create($url)
     $web.Method = "POST"
@@ -349,7 +350,7 @@
         $script:Selection = $Script:SelectedPartners |  
           Select-object id,Name,Level,CreationTime,State,TrialRegistrationTime,TrialExpirationTime,Uid | sort-object Level,name | 
             out-gridview -Title "Current Partner | $partnername" -OutputMode Single
-        if($null -eq $Selection) {
+        if (($null -eq $Selection) -or ($Selection -eq "")) {
           # Cancel was pressed
           # Run cancel script
           Write-Host    $Script:strLineSeparator
@@ -458,7 +459,7 @@
       Headers     = @{ 'Authorization' = "Bearer $Script:visa" }
       Body        = ([System.Text.Encoding]::UTF8.GetBytes($jsondata))
       ContentType = 'application/json; charset=utf-8'
-    }  
+    }
 
     $Script:sendResult = Invoke-RestMethod @params
     #$Script:sendResult.result.result | Select-Object Id,@{Name="Status"; Expression={$_.Result.code}},@{Name="Message"; Expression={$_.Result.Message}} | Format-Table
@@ -486,69 +487,12 @@
     Write-Host $Script:strLineSeparator
     Write-Host "  UpdateA : $($Script:updateCC)"
   } ## UpdateCustomColumnA API Call
-
-  Function UpdateCustomColumnB($DeviceId,$ColumnId,$Message) {
-    $url = $urlJSON
-    $method = 'POST'
-    $data = @{}
-    $data.jsonrpc = '2.0'
-    $data.visa = $Script:visa
-    $data.method = 'UpdateAccountCustomColumnValues'
-    $data.params = @{}
-    $data.params.accountId = [System.Int32[]]$DeviceId
-    $data.params.values = @($ColumnID,$Message)
-    $jsondata = (ConvertTo-Json $data -depth 2)
-
-    $params = @{
-      Uri         = $url
-      Method      = $method
-      Headers     = @{"Authorization" = "Bearer $Script:visa"}
-      Body        = ([System.Text.Encoding]::UTF8.GetBytes($jsondata))
-      ContentType = 'application/json; charset=utf-8'
-    }
-    
-    $Script:updateCC = Invoke-RestMethod @params
-    Write-Host $Script:strLineSeparator
-    Write-Host "  UpdateB : $($Script:updateCC)"
-  } ## UpdateCustomColumnB API Call
-
-  Function UpdateCustomColumnC($DeviceId,$ColumnId,$Message) {
-    $objModifyAccount = (New-Object PSObject | 
-    Add-Member -PassThru NoteProperty jsonrpc ‘2.0’ | 
-    Add-Member -PassThru NoteProperty visa $Script:visa |
-    Add-Member -PassThru NoteProperty method ‘UpdateAccountCustomColumnValues’ |
-    Add-Member -PassThru NoteProperty params @{
-      accountId = [System.Int32]$DeviceId
-      values = @($ColumnId,$Message)
-    }) | ConvertTo-Json -Depth 2
-    # (Call the JSON Web Request Function to get the ModifyAccount Object)
-    $ModifyAccountSession = CallJSON $urlJSON $objModifyAccount
-    # (Added Delay in case command takes a bit to respond)
-    Start-Sleep -Milliseconds 100
-    # (Get Result Status of ModifyAccountSession)
-    $ModifyAccountSessionErrorCode = $ModifyAccountSession.error.code
-    $ModifyAccountSessionErrorMsg = $ModifyAccountSession.error.message
-    # (Check for Errors with ModifyAccountSession - Check if ErrorCode has a value)
-    if ($ModifyAccountSessionErrorCode) {
-      Write-Host $Script:strLineSeparator
-      Write-Host "  ModifyAccountSession Error Code:  $ModifyAccountSessionErrorCode"
-      Write-Host "  ModifyAccountSession Message:  $ModifyAccountSessionErrorMsg"
-      Write-Host $Script:strLineSeparator
-      Write-Host "  DEVICE | $($DeviceId) | $($selecteddevice.DeviceName) | ASSIGN GUI PW ERROR | $ModifyAccountSessionErrorMsg"
-      # (Exit Script if there is a problem)
-      #Break Script
-    } elseif (-not $ModifyAccountSessionErrorCode) {
-      # (No error)
-      Write-Host $Script:strLineSeparator
-      Write-Host "  SUCCESS UPDATING GUI PW COLUMN"
-    }
-    Write-Host $Script:strLineSeparator
-    Write-Host "  UpdateC : $ModifyAccountSessionErrorMsg"
-  } ## UpdateCustomColumnC API Call
 #endregion ----- Backup.Management JSON Calls ----
 #endregion ----- Functions ----
 
-$switch = $i_BackupCMD
+#------------
+#BEGIN SCRIPT
+Set-APICredentials
 Send-APICredentialsCookie
 Write-Host $Script:strLineSeparator
 Write-Host ""
@@ -557,13 +501,21 @@ Write-Host ""
 $xmlBackupID = $statusXML.Statistics.Account
 $xmlPartnerID = $statusXML.Statistics.PartnerName
 
-Send-GetPartnerInfo $Script:cred0
+#Send-GetPartnerInfo $Script:cred0
 #Send-EnumeratePartners
-if ((-not $AllPartners) -and ($i_BackupName -ne $null)) {
+if ((-not $AllPartners) -and (($null -eq $i_BackupName) -or ($i_BackupName -eq ""))) {
+  write-host "  XML Partner: $($xmlPartnerID)"
+  Send-GetPartnerInfo $xmlPartnerID
+} elseif ((-not $AllPartners) -and (($null -ne $i_BackupName) -and ($i_BackupName -ne ""))) {
+  write-host "  Passed Partner: $($i_BackupName)"
   Send-GetPartnerInfo $i_BackupName
 }
 $filter1 = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup.
-Send-GetDevices $xmlPartnerID
+if ($AllPartners) {
+  Send-GetDevices "External IPM"
+} elseif (-not $AllPartners) {
+  Send-GetDevices $xmlPartnerID
+}
 
 if ($AllDevices) {
   $script:SelectedDevices = $DeviceDetail | 
@@ -574,7 +526,7 @@ if ($AllDevices) {
   #$script:SelectedDevices = $DeviceDetail | 
   #  Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
   #  Out-GridView -title "Current Partner | $partnername" -OutputMode Multiple
-  if ($xmlBackupID -ne $null) {
+  if (($null -ne $xmlBackupID) -and ($xmlBackupID -ne "")) {
     $script:SelectedDevices = $DeviceDetail | 
       Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
         Where-object {$_.DeviceName -eq $xmlBackupID}
@@ -618,4 +570,6 @@ if($null -eq $SelectedDevices) {
   $o_sPassword = $password
   Set-Asset-Field -Name "Backup GUI Password" -Value $o_sPassword
   Set-Asset-Field -Subdomain '[subdomain]' -Name "Backup GUI Password" -Value $o_sPassword
+  Set-Asset-Field -Name "Backup Device Name" -Value $xmlBackupID
+  Set-Asset-Field -Subdomain '[subdomain]' -Name "Backup Device Name" -Value $xmlBackupID
 }
