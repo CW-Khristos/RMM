@@ -186,6 +186,7 @@
       $CompanyList = PSA-FilterQuery $header "GET" "Companies" "$($psaActFilter)"
       $sort = ($CompanyList.items | Sort-Object -Property companyName)
       foreach ($company in $sort) {
+        $country = $countries.items | where {($_.id -eq $company.countryID)} | select displayName
         $script:CompanyDetails += New-Object -TypeName PSObject -Property @{
           CompanyID       = "$($company.id)"
           CompanyName     = "$($company.companyName)"
