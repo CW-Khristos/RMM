@@ -48,19 +48,25 @@
 #BEGIN SCRIPT
 clear-host
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+#INSTALL NUGET PROVIDER
+if (-not (Get-PackageProvider -name NuGet)) {
+  Install-PackageProvider -Name NuGet -Force -Confirm:$false
+}
+#INSTALL POWERSHELLGET MODULE
 if (Get-Module -ListAvailable -Name PowershellGet) {
   Import-Module PowershellGet 
 } else {
   Install-Module PowershellGet -Force -Confirm:$false
   Import-Module PowershellGet
 }
-#Get the Hudu API Module if not installed
+#INSTALL HUDUAPI MODULE
 if (Get-Module -ListAvailable -Name HuduAPI) {
   Import-Module HuduAPI 
 } else {
   Install-Module HuduAPI -Force -Confirm:$false
   Import-Module HuduAPI
 }
+#INSTALL NTFSSECURITY MODULE
 if(Get-Module -ListAvailable -Name "NTFSSecurity") {
   Import-module "NTFSSecurity"
 } else {
