@@ -653,7 +653,7 @@ if (-not $script:blnFAIL) {
                 write-host "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
                 $script:diag += "UPDATE : $($company.CompanyName) : FAILED`r`n"
               }
-            } elseif ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
+            } elseif ($rmmSite.description -like "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
               write-host "DO NOT NEED TO CREATE / UPDATE SITE IN RMM"
               $script:diag += "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n"
             }
