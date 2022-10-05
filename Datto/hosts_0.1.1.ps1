@@ -51,7 +51,7 @@ if ((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name L
     $script:arrHOST.add($_)
   }
   Get-Content "$env:SystemRoot\System32\drivers\etc\hosts" | ForEach-Object {
-    if ($_ -ne $script:arrHOST[$script:intLN]) {
+    if ((($null -ne $_) -and ($_ -ne "")) -and ($_ -ne $script:arrHOST[$script:intLN])) {
       #FLAG CHANGE
       write-host "DETECTED CHANGE : $($_)"
       $script:diag += "DETECTED CHANGE : $($_)`r`n"
@@ -60,13 +60,15 @@ if ((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name L
     $script:intLN += 1
   }
   write-host $script:arrCHG
-  write-DRMMAlert "HOSTS modified within the last 24 hours. Last modification @ $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)"
+  $strMod = $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)
+  write-DRMMAlert "HOSTS modified within the last 24 hours. Last modification @ $($strMod)"
   write-DRMMDiag "$($script:diag)"
   Exit 1
 } else {
   #WRITE HOSTS BACKUP
+  $strMod = $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)
   Copy-Item "$env:SystemRoot\System32\drivers\etc\hosts" -Destination "C:\IT\hosts"
-  write-DRMMAlert "HOSTS not modified since $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)"
+  write-DRMMAlert "HOSTS not modified since $($strMod)"
   Exit 0
 }
 #END SCRIPT
