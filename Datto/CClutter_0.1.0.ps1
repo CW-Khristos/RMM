@@ -28,10 +28,10 @@
 #region ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
-  Param (
-    [Parameter(Mandatory=$false)]$blnLOG,
-    [Parameter(Mandatory=$false)]$clrFOL
-  )
+  #Param (
+  #  [Parameter(Mandatory=$false)]$blnLOG,
+  #  [Parameter(Mandatory=$false)]$clrFOL
+  #)
   #FILESIZE COUNTER
   $script:lngSIZ    = 0
   $script:diag      = $null
@@ -339,15 +339,15 @@ foreach ($tgtFOL in $arrSW) {
   }
 }
 #ENUMERATE THROUGH PASSED FOLDER PATH
-if (($null -ne $clrFOL) -and ($clrFOL -ne "")) {
-  if (test-path -path "$($clrFOL)" ) {                                            #ENSURE FOLDER EXISTS BEFORE CLEARING
-    $script:diag += "`t - CLEARING : $($clrFOL)`r`n"
-    write-host "`t - CLEARING : $($clrFOL)"
+if (($null -ne $env:clrFOL) -and ($env:clrFOL -ne "")) {
+  if (test-path -path "$($env:clrFOL)" ) {                                            #ENSURE FOLDER EXISTS BEFORE CLEARING
+    $script:diag += "`t - CLEARING : $($env:clrFOL)`r`n"
+    write-host "`t - CLEARING : $($env:clrFOL)"
     #CLEAR CONTENTS OF FOLDER
-    cFolder "$($clrFOL)"
+    cFolder "$($env:clrFOL)"
   } else {                                                                        #NON-EXISTENT FOLDER
-    $script:diag += "`t - NON-EXISTENT : $($clrFOL)`r`n"
-    write-host "`t - NON-EXISTENT : $($clrFOL)"
+    $script:diag += "`t - NON-EXISTENT : $($env:clrFOL)`r`n"
+    write-host "`t - NON-EXISTENT : $($env:clrFOL)"
   }
 }
 $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)`r`n"
@@ -355,7 +355,7 @@ write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE
-if ($blnLOG) {
+if ($env:blnLOG) {
   $script:diag | out-file $logPath
 }
 #DATTO OUTPUT
