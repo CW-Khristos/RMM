@@ -107,7 +107,7 @@ To Do:
   $AutotaskDev        = "/Autotask/AutotaskExtend/AutotaskCommand.aspx?&Code=OpenInstalledProduct&InstalledProductID="
   $psaGenFilter       = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
   $psaActFilter       = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
-  $TicketFilter       = "{`"filter`":[{`"op`":`"notin`",`"field`":`"queueID`",`"value`":$ExcludeQueue},{`"op`":`"notin`",`"field`":`"status`",`"value`":$ExcludeStatus},{`"op`":`"notin`",`"field`":`"ticketType`",`"value`":$ExcludeType}]}"
+  $TicketFilter       = "{`"filter`":[{`"op`":`"notin`",`"field`":`"queueID`",`"value`":$($ExcludeQueue)},{`"op`":`"notin`",`"field`":`"status`",`"value`":$($ExcludeStatus)},{`"op`":`"notin`",`"field`":`"ticketType`",`"value`":$($ExcludeType)}]}"
   ########################### Autotask Auth ##############################
   $script:AutotaskAPIUser       = $env:ATAPIUser
   $script:AutotaskAPISecret     = $env:ATAPISecret
