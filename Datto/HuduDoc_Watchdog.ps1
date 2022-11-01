@@ -527,7 +527,7 @@ To Do:
     $data.params.query = @{}
     $data.params.query.PartnerId = [int]$PartnerId
     $data.params.query.Filter = $Filter1
-    $data.params.query.Columns = @("AU","AR","AN","MN","AL","LN","OP","OI","OS","PD","AP","PF","PN","CD","TS","TL","T3","US","AA843","AA77","AA2048","I78")
+    $data.params.query.Columns = @("AU","AR","AN","MN","AL","LN","OP","OI","OS","PD","AP","PF","PN","CD","TS","TL","T3","US","AA843","AA77","AA2048","AA2531","I78")
     $data.params.query.OrderBy = "CD DESC"
     $data.params.query.StartRecordNumber = 0
     $data.params.query.RecordsCount = 2000
@@ -563,7 +563,8 @@ To Do:
         Account           = $BackupsResult.Settings.AU -join '' ;
         Location          = $BackupsResult.Settings.LN -join '' ;
         Notes             = $BackupsResult.Settings.AA843 -join '' ;
-        GUIPassword       = $BackupsResult.Settings.AA2048 -join '' ;                                                                    
+        GUIPassword       = $BackupsResult.Settings.AA2048 -join '' ;
+        IPMGUIPwd         = $BackupsResult.Settings.AA2531 -join '' ;
         TempInfo          = $BackupsResult.Settings.AA77 -join '' ;
         Product           = $BackupsResult.Settings.PN -join '' ;
         ProductID         = $BackupsResult.Settings.PD -join '' ;
@@ -602,14 +603,14 @@ To Do:
 
       if ($i_AllDevices) {
         $script:SelectedDevices = $script:BackupsDetails | 
-          Select-Object PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,GUIPassword,
+          Select-Object PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
             TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes
         $bmdiag = "`r`n$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
         logERR 4 "Set-BackupDash" "$($bmdiag)"
       } elseif (-not $i_AllDevices) {
         if (($null -ne $i_BackupID) -and ($i_BackupID -ne "")) {
           $script:SelectedDevices = $script:BackupsDetails | 
-            Select-Object PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,GUIPassword,
+            Select-Object PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
               TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
                 Where-object {$_.DeviceName -eq $i_BackupID}
           $bmdiag = "`r`n$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
@@ -621,7 +622,7 @@ To Do:
         # OK was pressed, $Selection contains what was chosen
         # Run OK script
         $script:SelectedDevices | 
-          Select-Object PartnerId,PartnerName,@{Name="AccountID"; Expression={[int]$_.AccountId}},ComputerName,DeviceName,OS,GUIPassword,
+          Select-Object PartnerId,PartnerName,@{Name="AccountID"; Expression={[int]$_.AccountId}},ComputerName,DeviceName,OS,IPMGUIPwd,
             TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
               Sort-object AccountId | Format-Table
 
@@ -632,19 +633,19 @@ To Do:
         $MagicMessage = "$(@($script:SelectedDevices).count) Protected Devices"
         $overdue = @($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
-              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,GUIPassword,
+              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
                 TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes).count
         if ($overdue -ge 1) {
           $shade = "warning"
           $MagicMessage = "$($overdue) / $(@($script:SelectedDevices).count) Backups Overdue"
           $badHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
-              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,GUIPassword,
+              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
                 TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
                   convertto-html -fragment | out-string) -replace $TableStylingBad)
           $goodHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -ge $reportDate.AddDays(-1)} | 
-              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,GUIPassword,
+              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
                 TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
           $badbody = "<h2>Overdue Backups:</h2><figure class=`"table`">$($badHTML)</figure>"
@@ -652,7 +653,7 @@ To Do:
         } else {
           $goodHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -ge $reportDate.AddDays(-1)} | 
-              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,GUIPassword,
+              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
                 TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
           $goodbody = "<h2>$($i_Company) Backups:</h2><figure class=`"table`">$($goodHTML)</figure>"
@@ -693,12 +694,12 @@ To Do:
                   $goodHTML = $null
                   if ((get-date -date "$($device.TimeStamp)") -lt $reportDate.AddDays(-1)) {
                     $badHTML = [System.Net.WebUtility]::HtmlDecode(($device | 
-                      select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,GUIPassword,
+                      select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
                         TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
                           convertto-html -fragment | out-string) -replace $TableStylingBad)
                   } elseif ((get-date -date "$($device.TimeStamp)") -ge $reportDate.AddDays(-1)) {
                     $goodHTML = [System.Net.WebUtility]::HtmlDecode(($device | 
-                      select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,GUIPassword,
+                      select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
                         TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
                           convertto-html -fragment | out-string) -replace $TableStylingGood)
                   }
