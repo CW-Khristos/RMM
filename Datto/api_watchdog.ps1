@@ -603,10 +603,8 @@ if (-not $script:blnFAIL) {
               installSplashtop    = "true"
             }
             $postSite = (RMM-NewSite @params -UseBasicParsing)
-            write-host "$($postSite)"
-            write-host "$($script:strLineSeparator)"
-            $script:diag += "$($postSite)`r`n"
-            $script:diag += "$($script:strLineSeparator)"
+            write-host "$($postSite)`r`n$($script:strLineSeparator)"
+            $script:diag += "$($postSite)`r`n$($script:strLineSeparator)`r`n"
             if ($postSite) {
               write-host "RMM CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
               $script:diag += "RMM CREATE : $($company.CompanyName) : SUCCESS`r`n"
@@ -654,8 +652,8 @@ if (-not $script:blnFAIL) {
                 $script:diag += "UPDATE : $($company.CompanyName) : FAILED`r`n"
               }
             } elseif ($rmmSite.description -like "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
-              write-host "DO NOT NEED TO CREATE / UPDATE SITE IN RMM"
-              $script:diag += "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n"
+              write-host "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)"
+              $script:diag += "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)`r`n"
             }
           } catch {
             $script:blnWARN = $true
@@ -692,10 +690,8 @@ if (-not $script:blnFAIL) {
               notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
             }
             $postHUDU = (New-HuduCompany @params -erroraction stop)
-            write-host "$($postHUDU)"
-            write-host "$($script:strLineSeparator)"
-            $script:diag += "$($postHUDU)`r`n"
-            $script:diag += "$($script:strLineSeparator)`r`n"
+            write-host "$($postHUDU)`r`n$($script:strLineSeparator)"
+            $script:diag += "$($postHUDU)`r`n$($script:strLineSeparator)`r`n"
             if ($postHUDU) {
               write-host "HUDU CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
               $script:diag += "HUDU CREATE : $($company.CompanyName) : SUCCESS`r`n"
@@ -713,7 +709,8 @@ if (-not $script:blnFAIL) {
             $script:diag += "`r`n$($_)"
           }
         } elseif (($null -ne $huduSite) -and ($huduSite -ne "")) {
-          write-host "DO NOT NEED TO CREATE COMPANY IN HUDU"
+          write-host "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)"
+          $script:diag += "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)`r`n"
         }
     }
   }
