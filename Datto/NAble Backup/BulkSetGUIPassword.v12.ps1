@@ -427,9 +427,9 @@
         Creation       = Convert-UnixTimeToDateTime ($DeviceResult.Settings.CD -join '') ;
         TimeStamp      = Convert-UnixTimeToDateTime ($DeviceResult.Settings.TS -join '') ;
         LastSuccess    = Convert-UnixTimeToDateTime ($DeviceResult.Settings.TL -join '') ;
-        SelectedGB     = (($DeviceResult.Settings.T3 -join '') /1GB) ;  
-        UsedGB         = (($DeviceResult.Settings.US -join '') /1GB) ;  
-        DataSources    = $DeviceResult.Settings.AP -join '' ;                                                                
+        SelectedGB     = (($DeviceResult.Settings.T3 -join '') /1GB) ;
+        UsedGB         = (($DeviceResult.Settings.US -join '') /1GB) ;
+        DataSources    = $DeviceResult.Settings.AP -join '' ;
         Account        = $DeviceResult.Settings.AU -join '' ;
         Location       = $DeviceResult.Settings.LN -join '' ;
         Notes          = $DeviceResult.Settings.AA843 -join '' ;
@@ -439,7 +439,7 @@
         Product        = $DeviceResult.Settings.PN -join '' ;
         ProductID      = $DeviceResult.Settings.PD -join '' ;
         Profile        = $DeviceResult.Settings.OP -join '' ;
-        OS             = $DeviceResult.Settings.OS -join '' ;                                                                
+        OS             = $DeviceResult.Settings.OS -join '' ;
         ProfileID      = $DeviceResult.Settings.OI -join ''
       }
     }
