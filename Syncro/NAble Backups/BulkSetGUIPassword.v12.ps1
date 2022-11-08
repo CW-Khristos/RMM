@@ -79,6 +79,14 @@
   Write-Host "  -SetGUIPassword  = $SetGUIPassword"
   Write-Host "  -RestoreOnly     = $RestoreOnly"
   Write-Host "  -WipeGUIPassword = $WipeGUIPassword"
+  Write-Host "  -i_BackupCMD = $($env:i_BackupCMD)"
+  Write-Host "  -i_GUILength = $($env:i_GUILength)"
+  Write-Host "  -i_GUIpassword = $($env:i_GUIpassword)"
+  Write-Host "  -i_PartnerName = $($env:i_PartnerName)"
+  Write-Host "  -i_BackupName = $($env:i_BackupName)"
+  Write-Host "  -i_BackupUser = $($env:i_BackupUser)"
+  Write-Host "  -i_BackupPWD = {ENCRYPTED}"
+  Write-Host "  -i_UDFNumber = $($env:i_UDFNumber)"
   
   #$scriptpath = $MyInvocation.MyCommand.Path
   #$dir = Split-Path $scriptpath
@@ -175,8 +183,8 @@
         $Script:cred2 = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($Script:cred2))
 
         Write-Host $Script:strLineSeparator 
-        Write-Host "  Stored Backup API Partner  = $Script:cred0"
-        Write-Host "  Stored Backup API User     = $Script:cred1"
+        Write-Host "  Stored Backup API Partner  = $($Script:cred0)"
+        Write-Host "  Stored Backup API User     = $($Script:cred1)"
         Write-Host "  Stored Backup API Password = Encrypted"
       } else {                                                                  ## API FILE DOES NOT EXIST
         Write-Host $Script:strLineSeparator 
@@ -268,7 +276,7 @@
       [String]$script:Level = $Partner.result.result.Level
       [String]$Script:PartnerName = $Partner.result.result.Name
       Write-Host $Script:strLineSeparator
-      Write-Host "  $PartnerName - $partnerId - $Uid"
+      Write-Host "  $($PartnerName) - $($partnerId) - $($Uid)"
       Write-Host $Script:strLineSeparator
     } else {
       Write-Host $Script:strLineSeparator
@@ -301,10 +309,10 @@
     
     # (Call the JSON Web Request Function to get the EnumeratePartners Object)
     [array]$Script:EnumeratePartnersSession = CallJSON $urlJSON $objEnumeratePartners
-    #$Script:visa = $EnumeratePartnersSession.visa
-    #Write-Host    $Script:strLineSeparator
-    #Write-Host    "  Using Visa:" $Script:visa
-    #Write-Host    $Script:strLineSeparator
+    $Script:visa = $EnumeratePartnersSession.visa
+    Write-Host    $Script:strLineSeparator
+    Write-Host    "  Using Visa: $($Script:visa)"
+    Write-Host    $Script:strLineSeparator
     # (Added Delay in case command takes a bit to respond)
     Start-Sleep -Milliseconds 100
     # (Get Result Status of EnumerateAccountProfiles)
@@ -314,8 +322,8 @@
     # (Check for Errors with EnumeratePartners - Check if ErrorCode has a value)
     if ($EnumeratePartnersSessionErrorCode) {
       Write-Host    $Script:strLineSeparator
-      Write-Host    "  EnumeratePartnersSession Error Code:  $EnumeratePartnersSessionErrorCode"
-      Write-Host    "  EnumeratePartnersSession Message:  $EnumeratePartnersSessionErrorMsg"
+      Write-Host    "  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)"
+      Write-Host    "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)"
       Write-Host    $Script:strLineSeparator
       Write-Host    "  Exiting Script"
       # (Exit Script if there is a problem)
@@ -349,7 +357,7 @@
       } else {
         $script:Selection = $Script:SelectedPartners |  
           Select-object id,Name,Level,CreationTime,State,TrialRegistrationTime,TrialExpirationTime,Uid | sort-object Level,name | 
-            out-gridview -Title "Current Partner | $partnername" -OutputMode Single
+            out-gridview -Title "Current Partner | $($partnername)" -OutputMode Single
         if (($null -eq $Selection) -or ($Selection -eq "")) {
           # Cancel was pressed
           # Run cancel script
@@ -378,7 +386,7 @@
     $data.params.query = @{}
     $data.params.query.PartnerId = [int]$PartnerId
     $data.params.query.Filter = $Filter1
-    $data.params.query.Columns = @("AU","AR","AN","MN","AL","LN","OP","OI","OS","PD","AP","PF","PN","CD","TS","TL","T3","US","AA843","AA77","AA2048")
+    $data.params.query.Columns = @("AU","AR","AN","MN","AL","LN","OP","OI","OS","PD","AP","PF","PN","CD","TS","TL","T3","US","AA843","AA77","AA2048","AA2531")
     $data.params.query.OrderBy = "CD DESC"
     $data.params.query.StartRecordNumber = 0
     $data.params.query.RecordsCount = 2000
@@ -388,14 +396,13 @@
     $params = @{
       Uri         = $url
       Method      = $method
-      Headers     = @{ 'Authorization' = "Bearer $Script:visa" }
+      Headers     = @{ 'Authorization' = "Bearer $($Script:visa)" }
       Body        = ([System.Text.Encoding]::UTF8.GetBytes($jsondata))
       ContentType = 'application/json; charset=utf-8'
     }
 
-    $Script:DeviceResponse = Invoke-RestMethod @params
-
     $Script:DeviceDetail = @()
+    $Script:DeviceResponse = Invoke-RestMethod @params
     ForEach ( $DeviceResult in $DeviceResponse.result.result ) {
       $Script:DeviceDetail += New-Object -TypeName PSObject -Property @{
         AccountID      = [Int]$DeviceResult.AccountId;
@@ -406,20 +413,21 @@
         PartnerName    = $DeviceResult.Settings.AR -join '' ;
         Reference      = $DeviceResult.Settings.PF -join '' ;
         Creation       = Convert-UnixTimeToDateTime ($DeviceResult.Settings.CD -join '') ;
-        TimeStamp      = Convert-UnixTimeToDateTime ($DeviceResult.Settings.TS -join '') ;  
-        LastSuccess    = Convert-UnixTimeToDateTime ($DeviceResult.Settings.TL -join '') ;                                                                                                                                                                                                               
-        SelectedGB     = (($DeviceResult.Settings.T3 -join '') /1GB) ;  
-        UsedGB         = (($DeviceResult.Settings.US -join '') /1GB) ;  
-        DataSources    = $DeviceResult.Settings.AP -join '' ;                                                                
+        TimeStamp      = Convert-UnixTimeToDateTime ($DeviceResult.Settings.TS -join '') ;
+        LastSuccess    = Convert-UnixTimeToDateTime ($DeviceResult.Settings.TL -join '') ;
+        SelectedGB     = (($DeviceResult.Settings.T3 -join '') /1GB) ;
+        UsedGB         = (($DeviceResult.Settings.US -join '') /1GB) ;
+        DataSources    = $DeviceResult.Settings.AP -join '' ;
         Account        = $DeviceResult.Settings.AU -join '' ;
         Location       = $DeviceResult.Settings.LN -join '' ;
         Notes          = $DeviceResult.Settings.AA843 -join '' ;
-        GUIPassword    = $DeviceResult.Settings.AA2048 -join '' ;                                                                    
+        GUIPassword    = $DeviceResult.Settings.AA2048 -join '' ;
+        IPMGUIPwd      = $DeviceResult.Settings.AA2531 -join '' ;
         TempInfo       = $DeviceResult.Settings.AA77 -join '' ;
         Product        = $DeviceResult.Settings.PN -join '' ;
         ProductID      = $DeviceResult.Settings.PD -join '' ;
         Profile        = $DeviceResult.Settings.OP -join '' ;
-        OS             = $DeviceResult.Settings.OS -join '' ;                                                                
+        OS             = $DeviceResult.Settings.OS -join '' ;
         ProfileID      = $DeviceResult.Settings.OI -join ''
       }
     }
@@ -447,16 +455,16 @@
     $data.method = 'SendRemoteCommands'
     $data.params = @{}
     $data.params.command = "set gui password"
-    $data.params.parameters = "$PasswordParam"
+    $data.params.parameters = "$($PasswordParam)"
     $data.params.ids = @([System.Int32[]]$selecteddevice.accountid)
     $jsondata = (ConvertTo-Json $data -depth 6)
     #$jsondata  ## Debug
-    Write-Host "`n##Sending Remote Command##`n$($data.params.command)`n$CommandParameters" ## Output sent Remote Command
+    Write-Host "`n##Sending Remote Command##`n$($data.params.command)`n$($CommandParameters)" ## Output sent Remote Command
 
     $params = @{
       Uri         = $url
       Method      = $method
-      Headers     = @{ 'Authorization' = "Bearer $Script:visa" }
+      Headers     = @{ 'Authorization' = "Bearer $($Script:visa)" }
       Body        = ([System.Text.Encoding]::UTF8.GetBytes($jsondata))
       ContentType = 'application/json; charset=utf-8'
     }
@@ -466,27 +474,27 @@
     Write-Host " $($Script:sendResult.result.result.id) $($Script:sendResult.result.result.result.code)"
   } ## Send-RemoteCommand API Call
 
-  Function UpdateCustomColumnA($DeviceId,$ColumnId,$Message) {
+  Function UpdateCustomColumn ($DeviceId,$ColumnId,$Message) {
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $headers.Add("Authorization","Bearer $Script:visa")
+    $headers.Add("Authorization","Bearer $($Script:visa)")
     $headers.Add("Content-Type","application/json")
   
     $body = "{
       `n    `"jsonrpc`":`"2.0`",
       `n    `"id`":`"jsonrpc`",
-      `n    `"visa`":`"$Script:visa`",
+      `n    `"visa`":`"$($Script:visa)`",
       `n    `"method`":`"UpdateAccountCustomColumnValues`",
       `n    `"params`":{
-      `n      `"accountId`": $DeviceId,
-      `n      `"values`": [[$ColumnId,`"$Message`"]]
+      `n      `"accountId`": $($DeviceId),
+      `n      `"values`": [[$($ColumnId),`"$($Message)`"]]
       `n      }
       `n    }
       `n"
 
     $Script:updateCC = Invoke-RestMethod $urlJSON -Method 'POST' -Headers $headers -Body $body
     Write-Host $Script:strLineSeparator
-    Write-Host "  UpdateA : $($Script:updateCC)"
-  } ## UpdateCustomColumnA API Call
+    Write-Host "  UpdateCC : $($Script:updateCC)"
+  } ## UpdateCustomColumn API Call
 #endregion ----- Backup.Management JSON Calls ----
 #endregion ----- Functions ----
 
@@ -500,7 +508,6 @@ Write-Host ""
 [xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
 $xmlBackupID = $statusXML.Statistics.Account
 $xmlPartnerID = $statusXML.Statistics.PartnerName
-
 #Send-GetPartnerInfo $Script:cred0
 #Send-EnumeratePartners
 if ((-not $AllPartners) -and (($null -eq $i_BackupName) -or ($i_BackupName -eq ""))) {
@@ -519,7 +526,7 @@ if ($AllPartners) {
 
 if ($AllDevices) {
   $script:SelectedDevices = $DeviceDetail | 
-    Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
+    Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
   Write-Host    $Script:strLineSeparator
   Write-Host    "  $($SelectedDevices.AccountId.count) Devices Selected"
 } elseif (-not $allDevices) {
@@ -528,7 +535,7 @@ if ($AllDevices) {
   #  Out-GridView -title "Current Partner | $partnername" -OutputMode Multiple
   if (($null -ne $xmlBackupID) -and ($xmlBackupID -ne "")) {
     $script:SelectedDevices = $DeviceDetail | 
-      Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
+      Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
         Where-object {$_.DeviceName -eq $xmlBackupID}
     Write-Host $Script:strLineSeparator
     Write-Host "  $($SelectedDevices.AccountId.count) Devices Selected"
@@ -545,8 +552,8 @@ if($null -eq $SelectedDevices) {
   # OK was pressed, $Selection contains what was chosen
   # Run OK script
   $script:SelectedDevices | 
-    Select-Object PartnerId,PartnerName,Reference,@{Name="AccountID"; Expression={[int]$_.AccountId}},DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp | 
-        Sort-object AccountId | Format-Table
+    Select-Object PartnerId,PartnerName,Reference,@{Name="AccountID"; Expression={[int]$_.AccountId}},DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp | 
+      Sort-object AccountId | Format-Table
 
   if ($i_BackupCMD -eq "-SetGUIPassword") {
     #$SecurePassword = Read-Host "  Enter Backup Manager GUI Password to be applied to $($SelectedDevices.AccountId.count) Devices" -AsSecureString
@@ -558,8 +565,8 @@ if($null -eq $SelectedDevices) {
     $device = $selecteddevice.DeviceName
     # UPDATE CUSOTM COLUMN 'GUI PW'
     Write-Host $Script:strLineSeparator
-    Write-Host "  Updating GUI PW Column for $device - " $selecteddevice.AccountID 2048 $password
-    UpdateCustomColumnA $selecteddevice.AccountID 2048 $password
+    Write-Host "  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)"
+    UpdateCustomColumn $selecteddevice.AccountID 2531 $password
     Start-Sleep -Milliseconds 500
     # SEND REMOTE COMMAND
     Write-Host $Script:strLineSeparator
@@ -573,3 +580,5 @@ if($null -eq $SelectedDevices) {
   Set-Asset-Field -Name "Backup Device Name" -Value $xmlBackupID
   Set-Asset-Field -Subdomain '[subdomain]' -Name "Backup Device Name" -Value $xmlBackupID
 }
+#END SCRIPT
+#------------
