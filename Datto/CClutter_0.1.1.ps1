@@ -296,7 +296,7 @@
               }
               #REMOVE PREVIOUS COPIES OF SCRIPT
               if (test-path -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1") {
-                remove-item -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1" -force
+                remove-item -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1" -force -erroraction stop
               }
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
@@ -347,7 +347,7 @@ chkAU $strVER $strREPO $strBRCH $strDIR $strSCR
 if (-not $script:blnBREAK) {
   #REMOVE PREVIOUS LOGFILE
   if (test-path -path "$($logPath)") {
-    remove-item -path "$($logPath)" -force
+    remove-item -path "$($logPath)" -force -erroraction stop
   }
   #CHECK 'PERSISTENT' FOLDERS
   if (-not (test-path -path "C:\temp")) {
@@ -442,7 +442,7 @@ if (-not $script:blnBREAK) {
         try {
           $script:diag += "`t - REMOVING : $($tgtFOL)`r`n"
           write-host "`t - REMOVING : $($tgtFOL)"
-          remove-item -path "$($tgtFOL)\" -recurse -force
+          remove-item -path "$($tgtFOL)\" -recurse -force -erroraction stop
         } catch {
           logERR 1 "ERROR DELETING : $($strFOL)`r`n$($strLineSeparator)`r`n`t - $($_.Exception)`r`n`t - $($_.scriptstacktrace)`r`n`t - $($_)"
         }
