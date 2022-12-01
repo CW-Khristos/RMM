@@ -148,10 +148,10 @@
     )
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo.WindowStyle = "Hidden"
-    $process.StartInfo.CreateNoWindow = $false
+    $process.StartInfo.CreateNoWindow = $true
     $process.StartInfo.UseShellExecute = $false
-    $process.StartInfo.RedirectStandardOutput = $false
-    $process.StartInfo.RedirectStandardError = $false
+    $process.StartInfo.RedirectStandardOutput = $true
+    $process.StartInfo.RedirectStandardError = $true
     $process.StartInfo.FileName = $FileName
     if($Args) {$process.StartInfo.Arguments = $Args}
     $out = $process.Start()
@@ -189,7 +189,10 @@
         $strFIL = $objFil.fullname
         $filSIZ = [math]::round(((get-item $objFIL.fullname -erroraction stop).length / 1MB), 2)
         $script:lngSIZ = $script:lngSIZ + $filSIZ
-        remove-item -path "$($strFIL)" -force -erroraction continue
+        #remove-item -path "$($strFIL)" -force -erroraction continue
+        $output = Get-ProcessOutput -filename "C:\Windows\System32\cmd.exe" -args "/C del $($strFIL)"
+        $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
+        write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
         #SUCCESSFULLY DELETED FILE
         $script:diag += "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)`r`n"
         write-host "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)"
@@ -207,7 +210,10 @@
         $script:diag += "`t`t - CLIEARING FOLDER : $($strFOL)`r`n"
         write-host "`t`t - CLEARING FOLDER : $($strFOL)"
         cFolder "$($strFOL)"
-        remove-item -path "$($strFOL)\" -recurse -force -erroraction continue
+        #remove-item -path "$($strFOL)\" -recurse -force -erroraction continue
+        $output = Get-ProcessOutput -filename "C:\Windows\System32\cmd.exe" -args "/C rmdir $($strFOL) /S /Q"
+        $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
+        write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
         #SUCCESSFULLY DELETED FOLDER
         $script:diag += "`t`t - REMOVED FOLDER : $($strFOL)`r`n"
         write-host "`t`t - REMOVED FOLDER : $($strFOL)"
