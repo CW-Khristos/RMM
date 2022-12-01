@@ -67,7 +67,7 @@
   #THESE FOLDERS REQUIRE RETRIEVAL FROM ENVIRONMENTAL VARIABLES
   $arrFOL           = [System.Collections.ArrayList]@(
     #PROGRAMDATA
-    "$($strUTFOL)",
+    #"$($strUTFOL)",
     "$($strSTFOL)",
     "$($strWFOL)\Logs\CBS",
     "$($strWFOL)\SoftwareDistribution",
