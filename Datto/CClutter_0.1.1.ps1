@@ -35,7 +35,7 @@
   #)
   #VERSION FOR SCRIPT UPDATE
   $strSCR           = "CClutter"
-  $strVER           = [version]"0.1.0"
+  $strVER           = [version]"0.1.1"
   $strREPO          = "RMM"
   $strBRCH          = "dev"
   $strDIR           = "Datto"
