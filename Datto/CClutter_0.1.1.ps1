@@ -296,7 +296,7 @@
               }
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
-              $output = Get-ProcessOutput -filename "powershell.exe" -args "-executionpolicy bypass -file C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1 -blnLOG $($blnLOG)"
+              $output = Get-ProcessOutput -filename "powershell.exe" -args "-executionpolicy bypass -file C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1 -blnLOG `$$($blnLOG)"
               $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
               write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
               $script:blnBREAK = $true
