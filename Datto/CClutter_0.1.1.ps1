@@ -43,6 +43,7 @@
   $script:lngSIZ    = 0
   $script:diag      = $null
   $script:blnWARN   = $false
+  $script:blnBREAK  = $false
   $strLineSeparator = "---------"
   $logPath          = "C:\IT\Log\CCLUTTER"
   #ENVIRONMENT VARIABLES
@@ -298,6 +299,7 @@
               $output = Get-ProcessOutput -filename "powershell.exe" -args "-executionpolicy bypass -file C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1 -blnLOG $($blnLOG) -clrFOL $($clrFOL)"
               $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
               write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
+              $script:blnBREAK = $true
             }
             break
           }
@@ -306,6 +308,7 @@
       $script:diag += "$($xmldiag)"
       $xmldiag = $null
     } catch {
+      $script:blnBREAK = $false
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "AV Health : Error reading AV XML : $($srcVER)`r`n$($err)`r`n"
       write-host "AV Health : Error reading AV XML : $($srcVER)`r`n$($err)`r`n"
@@ -332,125 +335,127 @@ $script:diag += "$($strLineSeparator)`r`n$($ScrptStartTime) - EXECUTING CCLUTTER
 write-host "$($strLineSeparator)`r`n$($ScrptStartTime) - EXECUTING CCLUTTER`r`n$($strLineSeparator)"
 #CHECK FOR UPDATE
 chkAU $strVER $strREPO $strBRCH $strDIR $strSCR
-#REMOVE PREVIOUS LOGFILE
-if (test-path -path "$($logPath)") {
-  remove-item -path "$($logPath)" -force
-}
-#CHECK 'PERSISTENT' FOLDERS
-if (-not (test-path -path "C:\temp")) {
-  new-item -path "C:\temp" -itemtype directory
-}
-if (-not (test-path -path "C:\IT")) {
-  new-item -path "C:\IT" -itemtype directory
-}
-if (-not (test-path -path "C:\IT\Log")) {
-  new-item -path "C:\IT\Log" -itemtype directory
-}
-if (-not (test-path -path "C:\IT\Scripts")) {
-  new-item -path "C:\IT\Scripts" -itemtype directory
-}
-#USE ICACLS TO 'RESET' PERMISSIONS ON C:\WINDOWS\TEMP
-$script:diag += "`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\WINDOWS\TEMP'`r`n"
-write-host "`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\WINDOWS\TEMP'"
-$output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C icacls C:\Windows\Temp /grant administrators:f"
-$script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
-write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
-#USE ICACLS TO 'RESET' PERMISSIONS ON C:\PROGRAMDATA\SENTINEL\LOGS
-$script:diag += "`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\PROGRAMDATA\SENTINEL\LOGS'`r`n"
-write-host "`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\PROGRAMDATA\SENTINEL\LOGS'"
-$output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C icacls C:\ProgramData\Sentinel\logs /grant administrators:f"
-$script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
-write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
-#ENUMERATE THROUGH FOLDER COLLECTION
-foreach ($tgtFOL in $arrFOL) {
-  if (($null -ne $tgtFOL) -and ($tgtFOL -ne "")) {                                #ENSURE $TGTFOL IS NOT EMPTY
-    if (test-path -path "$($tgtFOL)") {                                           #ENSURE FOLDER EXISTS BEFORE CLEARING
-      #CLEAR NORMAL FOLDERS
-      if ($tgtFOL -ne "$($strWFOL)\SoftwareDistribution") {
-        $script:diag += "`t - CLEARING : $($tgtFOL)`r`n"
-        write-host "`t - CLEARING : $($tgtFOL)"
-        #CLEAR CONTENTS OF FOLDER
-        cFolder "$($tgtFOL)"
-      #CLEARING WINDOWS UPDATES
-      } elseif ($tgtFOL -eq "$($strWFOL)\SoftwareDistribution") {
-        #CHECK FOR 'PENDING.XML IF CLEARING SOFTWAREDISTRIBUTION
-        if (test-path -path "$($strWFOL)\WinSxS\pending.xml") {
-          $script:diag += "`t - 'PENDING.XML' FOUND : SKIPPING : $($tgtFOL)`r`n"
-          write-host "`t - 'PENDING.XML' FOUND : SKIPPING : $($tgtFOL)"
-        } elseif (-not (test-path -path "$($strWFOL)\WinSxS\pending.xml")) {
-          $script:diag += "`t - 'PENDING.XML' NOT FOUND : CLEARING : $($tgtFOL)`r`n"
-          write-host "`t - 'PENDING.XML' NOT FOUND : CLEARING : $($tgtFOL)"
-          #STOP WINDOWS UPDATE SERVICE TO CLEAR WINDOWS UPDATE FOLDER
-          $script:diag += "`t - STOPPING 'WUAUSERV' SERVICE TO CLEAR 'SOFTWAREDISTRIBUTION'`r`n"
-          write-host "`t - STOPPING 'WUAUSERV' SERVICE TO CLEAR 'SOFTWAREDISTRIBUTION'"
-          $output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C net stop wuauserv /y"
-          $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n"
-          write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)"
+if (-not $script:blnBREAK) {
+  #REMOVE PREVIOUS LOGFILE
+  if (test-path -path "$($logPath)") {
+    remove-item -path "$($logPath)" -force
+  }
+  #CHECK 'PERSISTENT' FOLDERS
+  if (-not (test-path -path "C:\temp")) {
+    new-item -path "C:\temp" -itemtype directory
+  }
+  if (-not (test-path -path "C:\IT")) {
+    new-item -path "C:\IT" -itemtype directory
+  }
+  if (-not (test-path -path "C:\IT\Log")) {
+    new-item -path "C:\IT\Log" -itemtype directory
+  }
+  if (-not (test-path -path "C:\IT\Scripts")) {
+    new-item -path "C:\IT\Scripts" -itemtype directory
+  }
+  #USE ICACLS TO 'RESET' PERMISSIONS ON C:\WINDOWS\TEMP
+  $script:diag += "`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\WINDOWS\TEMP'`r`n"
+  write-host "`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\WINDOWS\TEMP'"
+  $output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C icacls C:\Windows\Temp /grant administrators:f"
+  $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
+  write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
+  #USE ICACLS TO 'RESET' PERMISSIONS ON C:\PROGRAMDATA\SENTINEL\LOGS
+  $script:diag += "`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\PROGRAMDATA\SENTINEL\LOGS'`r`n"
+  write-host "`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\PROGRAMDATA\SENTINEL\LOGS'"
+  $output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C icacls C:\ProgramData\Sentinel\logs /grant administrators:f"
+  $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
+  write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
+  #ENUMERATE THROUGH FOLDER COLLECTION
+  foreach ($tgtFOL in $arrFOL) {
+    if (($null -ne $tgtFOL) -and ($tgtFOL -ne "")) {                                #ENSURE $TGTFOL IS NOT EMPTY
+      if (test-path -path "$($tgtFOL)") {                                           #ENSURE FOLDER EXISTS BEFORE CLEARING
+        #CLEAR NORMAL FOLDERS
+        if ($tgtFOL -ne "$($strWFOL)\SoftwareDistribution") {
+          $script:diag += "`t - CLEARING : $($tgtFOL)`r`n"
+          write-host "`t - CLEARING : $($tgtFOL)"
           #CLEAR CONTENTS OF FOLDER
           cFolder "$($tgtFOL)"
-          #RESTART WINDOWS UPDATE SERVICE
-          $script:diag += "`t - RESTARTING 'WUAUSERV' SERVICE`r`n"
-          write-host "`t - RESTARTING 'WUAUSERV' SERVICE"
-          $output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C net start wuauserv"
-          $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n"
-          write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)"
+        #CLEARING WINDOWS UPDATES
+        } elseif ($tgtFOL -eq "$($strWFOL)\SoftwareDistribution") {
+          #CHECK FOR 'PENDING.XML IF CLEARING SOFTWAREDISTRIBUTION
+          if (test-path -path "$($strWFOL)\WinSxS\pending.xml") {
+            $script:diag += "`t - 'PENDING.XML' FOUND : SKIPPING : $($tgtFOL)`r`n"
+            write-host "`t - 'PENDING.XML' FOUND : SKIPPING : $($tgtFOL)"
+          } elseif (-not (test-path -path "$($strWFOL)\WinSxS\pending.xml")) {
+            $script:diag += "`t - 'PENDING.XML' NOT FOUND : CLEARING : $($tgtFOL)`r`n"
+            write-host "`t - 'PENDING.XML' NOT FOUND : CLEARING : $($tgtFOL)"
+            #STOP WINDOWS UPDATE SERVICE TO CLEAR WINDOWS UPDATE FOLDER
+            $script:diag += "`t - STOPPING 'WUAUSERV' SERVICE TO CLEAR 'SOFTWAREDISTRIBUTION'`r`n"
+            write-host "`t - STOPPING 'WUAUSERV' SERVICE TO CLEAR 'SOFTWAREDISTRIBUTION'"
+            $output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C net stop wuauserv /y"
+            $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n"
+            write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)"
+            #CLEAR CONTENTS OF FOLDER
+            cFolder "$($tgtFOL)"
+            #RESTART WINDOWS UPDATE SERVICE
+            $script:diag += "`t - RESTARTING 'WUAUSERV' SERVICE`r`n"
+            write-host "`t - RESTARTING 'WUAUSERV' SERVICE"
+            $output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C net start wuauserv"
+            $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n"
+            write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)"
+          }
         }
+      } else {                                                                      #NON-EXISTENT FOLDER
+        $script:diag += "`t - NON-EXISTENT : $($tgtFOL)`r`n"
+        write-host "`t - NON-EXISTENT : $($tgtFOL)"
       }
-    } else {                                                                      #NON-EXISTENT FOLDER
-      $script:diag += "`t - NON-EXISTENT : $($tgtFOL)`r`n"
-      write-host "`t - NON-EXISTENT : $($tgtFOL)"
     }
   }
-}
-#FINAL CLEANUP OF NCENTRAL PROGRAM LOGS
-$script:diag += "`t - FINAL CLEANUP : `r`n"
-write-host "`t - FINAL CLEANUP : "
-$script:diag += "`t - LOOKING FOR '*.BDINSTALL.BIN' FILES`r`n"
-write-host "`t - LOOKING FOR '*.BDINSTALL.BIN' FILES"
-$output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C DIR `"C:\ProgramData\*.bdinstall.bin`""
-$script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n"
-write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)"
-$script:diag += "`t - REMOVING '*.BDINSTALL.BIN' FILES`r`n"
-write-host "`t - REMOVING '*.BDINSTALL.BIN' FILES"
-$output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C DEL /S /Q `"C:\ProgramData\*.bdinstall.bin`""
-$script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n"
-write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)"
-#REMOVE NCENTRAL REMNANTS
-foreach ($tgtFOL in $arrSW) {
-  if (test-path -path "$($tgtFOL)") {
-      try {
-        $script:diag += "`t - CLEARING : $($tgtFOL)`r`n"
-        write-host "`t - CLEARING : $($tgtFOL)"
-        #CLEAR CONTENTS OF FOLDER
-        cFolder "$($tgtFOL)"
-      } catch {
-        logERR 1 "ERROR DELETING : $($strFOL)`r`n$($strLineSeparator)`r`n`t - $($_.Exception)`r`n`t - $($_.scriptstacktrace)`r`n`t - $($_)"
-      }
-      try {
-        $script:diag += "`t - REMOVING : $($tgtFOL)`r`n"
-        write-host "`t - REMOVING : $($tgtFOL)"
-        remove-item -path "$($tgtFOL)\" -recurse -force
-      } catch {
-        logERR 1 "ERROR DELETING : $($strFOL)`r`n$($strLineSeparator)`r`n`t - $($_.Exception)`r`n`t - $($_.scriptstacktrace)`r`n`t - $($_)"
-      }
+  #FINAL CLEANUP OF NCENTRAL PROGRAM LOGS
+  $script:diag += "`t - FINAL CLEANUP : `r`n"
+  write-host "`t - FINAL CLEANUP : "
+  $script:diag += "`t - LOOKING FOR '*.BDINSTALL.BIN' FILES`r`n"
+  write-host "`t - LOOKING FOR '*.BDINSTALL.BIN' FILES"
+  $output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C DIR `"C:\ProgramData\*.bdinstall.bin`""
+  $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n"
+  write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)"
+  $script:diag += "`t - REMOVING '*.BDINSTALL.BIN' FILES`r`n"
+  write-host "`t - REMOVING '*.BDINSTALL.BIN' FILES"
+  $output = get-processoutput -filename "C:\Windows\System32\cmd.exe" -args "/C DEL /S /Q `"C:\ProgramData\*.bdinstall.bin`""
+  $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n"
+  write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)"
+  #REMOVE NCENTRAL REMNANTS
+  foreach ($tgtFOL in $arrSW) {
+    if (test-path -path "$($tgtFOL)") {
+        try {
+          $script:diag += "`t - CLEARING : $($tgtFOL)`r`n"
+          write-host "`t - CLEARING : $($tgtFOL)"
+          #CLEAR CONTENTS OF FOLDER
+          cFolder "$($tgtFOL)"
+        } catch {
+          logERR 1 "ERROR DELETING : $($strFOL)`r`n$($strLineSeparator)`r`n`t - $($_.Exception)`r`n`t - $($_.scriptstacktrace)`r`n`t - $($_)"
+        }
+        try {
+          $script:diag += "`t - REMOVING : $($tgtFOL)`r`n"
+          write-host "`t - REMOVING : $($tgtFOL)"
+          remove-item -path "$($tgtFOL)\" -recurse -force
+        } catch {
+          logERR 1 "ERROR DELETING : $($strFOL)`r`n$($strLineSeparator)`r`n`t - $($_.Exception)`r`n`t - $($_.scriptstacktrace)`r`n`t - $($_)"
+        }
+    }
   }
-}
-#ENUMERATE THROUGH PASSED FOLDER PATH
-if (($null -ne $clrFOL) -and ($clrFOL -ne "")) {
-  if (test-path -path "$($clrFOL)" ) {                                            #ENSURE FOLDER EXISTS BEFORE CLEARING
-    $script:diag += "`t - CLEARING : $($clrFOL)`r`n"
-    write-host "`t - CLEARING : $($clrFOL)"
-    #CLEAR CONTENTS OF FOLDER
-    cFolder "$($clrFOL)"
-  } else {                                                                        #NON-EXISTENT FOLDER
-    $script:diag += "`t - NON-EXISTENT : $($clrFOL)`r`n"
-    write-host "`t - NON-EXISTENT : $($clrFOL)"
+  #ENUMERATE THROUGH PASSED FOLDER PATH
+  if (($null -ne $clrFOL) -and ($clrFOL -ne "")) {
+    if (test-path -path "$($clrFOL)" ) {                                            #ENSURE FOLDER EXISTS BEFORE CLEARING
+      $script:diag += "`t - CLEARING : $($clrFOL)`r`n"
+      write-host "`t - CLEARING : $($clrFOL)"
+      #CLEAR CONTENTS OF FOLDER
+      cFolder "$($clrFOL)"
+    } else {                                                                        #NON-EXISTENT FOLDER
+      $script:diag += "`t - NON-EXISTENT : $($clrFOL)`r`n"
+      write-host "`t - NON-EXISTENT : $($clrFOL)"
+    }
   }
+  $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)"
+  #Stop script execution time calculation
+  StopClock
 }
-$script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)`r`n"
-write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)"
-#Stop script execution time calculation
-StopClock
 #WRITE LOGFILE
 if ($blnLOG) {
   $script:diag | out-file $logPath
