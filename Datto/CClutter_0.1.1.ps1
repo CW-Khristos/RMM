@@ -189,7 +189,7 @@
         $strFIL = $objFil.fullname
         $filSIZ = [math]::round(((get-item $objFIL.fullname -erroraction stop).length / 1MB), 2)
         $script:lngSIZ = $script:lngSIZ + $filSIZ
-        remove-item -path "$($strFIL)" -force -erroraction stop
+        remove-item -path "$($strFIL)" -force -erroraction continue
         #SUCCESSFULLY DELETED FILE
         $script:diag += "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)`r`n"
         write-host "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)"
@@ -207,7 +207,7 @@
         $script:diag += "`t`t - CLIEARING FOLDER : $($strFOL)`r`n"
         write-host "`t`t - CLEARING FOLDER : $($strFOL)"
         cFolder "$($strFOL)"
-        remove-item -path "$($strFOL)\" -recurse -force -erroraction stop
+        remove-item -path "$($strFOL)\" -recurse -force -erroraction continue
         #SUCCESSFULLY DELETED FOLDER
         $script:diag += "`t`t - REMOVED FOLDER : $($strFOL)`r`n"
         write-host "`t`t - REMOVED FOLDER : $($strFOL)"
