@@ -147,11 +147,11 @@
       $Args
     )
     $process = New-Object System.Diagnostics.Process
-    $process.StartInfo.WindowStyle = "Normal"
-    $process.StartInfo.CreateNoWindow = $true
+    $process.StartInfo.WindowStyle = "Hidden"
+    $process.StartInfo.CreateNoWindow = $false
     $process.StartInfo.UseShellExecute = $false
-    $process.StartInfo.RedirectStandardOutput = $true
-    $process.StartInfo.RedirectStandardError = $true
+    $process.StartInfo.RedirectStandardOutput = $false
+    $process.StartInfo.RedirectStandardError = $false
     $process.StartInfo.FileName = $FileName
     if($Args) {$process.StartInfo.Arguments = $Args}
     $out = $process.Start()
@@ -302,7 +302,7 @@
               #RE-EXECUTE LATEST VERSION OF SCRIPT
               $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               write-host "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
-              $output = Get-ProcessOutput -filename "C:\Windows\System32\cmd.exe" -args "/C powershell.exe -executionpolicy bypass -file C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1 -blnLOG `$$($blnLOG)"
+              $output = Get-ProcessOutput -filename "C:\Windows\System32\cmd.exe" -args "/C powershell -executionpolicy bypass -file C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1 -blnLOG `$$($blnLOG)"
               $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
               write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
               $script:blnBREAK = $true
