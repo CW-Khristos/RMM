@@ -294,6 +294,10 @@
               } elseif (($null -ne $strDIR) -and ($strDIR -ne "")) {
                 $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/$($strSCR)_$($objSCR.innertext).ps1"
               }
+              #REMOVE PREVIOUS COPIES OF SCRIPT
+              if (test-path -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1") {
+                remove-item -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1" -force
+              }
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
               $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
@@ -302,6 +306,9 @@
               $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
               write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
               $script:blnBREAK = $true
+            } elseif ([version]$objSCR.innertext -le $strVER) {
+              $xmldiag += "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              write-host "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n"
             }
             break
           }
