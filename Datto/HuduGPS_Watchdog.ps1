@@ -141,6 +141,17 @@ if (-not (test-path -path "C:\IT\Scripts")) {
   new-item -path "C:\IT\Scripts" -itemtype directory
 }
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+#INSTALL NUGET PROVIDER
+if (-not (Get-PackageProvider -name NuGet)) {
+  Install-PackageProvider -Name NuGet -Force -Confirm:$false
+}
+#INSTALL POWERSHELLGET MODULE
+if (Get-Module -ListAvailable -Name PowershellGet) {
+  Import-Module PowershellGet 
+} else {
+  Install-Module PowershellGet -Force -Confirm:$false
+  Import-Module PowershellGet
+}
 #Get the Hudu API Module if not installed
 if (Get-Module -ListAvailable -Name HuduAPI) {
   try {
