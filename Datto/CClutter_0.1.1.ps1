@@ -29,10 +29,10 @@
 #region ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
-  #Param (
-  #  [Parameter(Mandatory=$false)]$blnLOG,
-  #  [Parameter(Mandatory=$false)]$clrFOL
-  #)
+  Param (
+    [Parameter(Mandatory=$false)]$blnLOG,
+    [Parameter(Mandatory=$false)]$clrFOL
+  )
   #VERSION FOR SCRIPT UPDATE
   $strSCR           = "CClutter"
   $strVER           = [version]"0.1.1"
@@ -284,18 +284,18 @@
             #CHECK LATEST VERSION
             $xmldiag += "`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)`r`n"
             write-host "`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)`r`n"
-            if ([version]$objSCR.text -gt $strVER) {
+            if ([version]$objSCR.innertext -gt $strVER) {
               $xmldiag += "`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               write-host "`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               #DOWNLOAD LATEST VERSION OF ORIGINAL SCRIPT
               if (($null -eq $strDIR) -or ($strDIR -eq "")) {
-                $strURL = "https://raw.githubusercontent.com/CW-Khristos/scripts/$($strREPO)/$($strBRCH)/$($strSCR)_$($objSCR.innertext).ps1"
+                $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strSCR)_$($objSCR.innertext).ps1"
               } elseif (($null -ne $strDIR) -and ($strDIR -ne "")) {
-                $strURL = "https://raw.githubusercontent.com/CW-Khristos/scripts/$($strREPO)/$($strBRCH)/$($strDIR)/$($strSCR)_$($objSCR.innertext).ps1"
+                $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/$($strSCR)_$($objSCR.innertext).ps1"
               }
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
-              $output = Get-ProcessOutput -filename "powershell.exe" -args "-executionpolicy bypass -file C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
+              $output = Get-ProcessOutput -filename "powershell.exe" -args "-executionpolicy bypass -file C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1 -blnLOG $($blnLOG) -clrFOL $($clrFOL)"
               $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
               write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
             }
@@ -318,6 +318,13 @@
 #------------
 #BEGIN SCRIPT
 clear-host
+#DATTO VARIABLES
+if (($null -ne $env:blnLOG) -and ($env:blnLOG -ne "")) {
+  $blnLOG = $env:blnLOG
+}
+if (($null -ne $env:clrFOL) -and ($env:clrFOL -ne "")) {
+  $clrFOL = $env:clrFOL
+}
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
@@ -429,15 +436,15 @@ foreach ($tgtFOL in $arrSW) {
   }
 }
 #ENUMERATE THROUGH PASSED FOLDER PATH
-if (($null -ne $env:clrFOL) -and ($env:clrFOL -ne "")) {
-  if (test-path -path "$($env:clrFOL)" ) {                                            #ENSURE FOLDER EXISTS BEFORE CLEARING
-    $script:diag += "`t - CLEARING : $($env:clrFOL)`r`n"
-    write-host "`t - CLEARING : $($env:clrFOL)"
+if (($null -ne $clrFOL) -and ($clrFOL -ne "")) {
+  if (test-path -path "$($clrFOL)" ) {                                            #ENSURE FOLDER EXISTS BEFORE CLEARING
+    $script:diag += "`t - CLEARING : $($clrFOL)`r`n"
+    write-host "`t - CLEARING : $($clrFOL)"
     #CLEAR CONTENTS OF FOLDER
-    cFolder "$($env:clrFOL)"
+    cFolder "$($clrFOL)"
   } else {                                                                        #NON-EXISTENT FOLDER
-    $script:diag += "`t - NON-EXISTENT : $($env:clrFOL)`r`n"
-    write-host "`t - NON-EXISTENT : $($env:clrFOL)"
+    $script:diag += "`t - NON-EXISTENT : $($clrFOL)`r`n"
+    write-host "`t - NON-EXISTENT : $($clrFOL)"
   }
 }
 $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)`r`n"
@@ -445,7 +452,7 @@ write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE
-if ($env:blnLOG) {
+if ($blnLOG) {
   $script:diag | out-file $logPath
 }
 #DATTO OUTPUT
