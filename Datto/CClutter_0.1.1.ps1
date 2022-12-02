@@ -270,23 +270,26 @@
             if ([version]$objSCR.innertext -gt $strVER) {
               $xmldiag += "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               write-host "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              #REMOVE PREVIOUS COPIES OF SCRIPT
+              if (test-path -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1") {
+                remove-item -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1" -force -erroraction stop
+              }
               #DOWNLOAD LATEST VERSION OF ORIGINAL SCRIPT
               if (($null -eq $strDIR) -or ($strDIR -eq "")) {
                 $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strSCR)_$($objSCR.innertext).ps1"
               } elseif (($null -ne $strDIR) -and ($strDIR -ne "")) {
                 $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/$($strSCR)_$($objSCR.innertext).ps1"
               }
-              #REMOVE PREVIOUS COPIES OF SCRIPT
-              if (test-path -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1") {
-                remove-item -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1" -force -erroraction stop
-              }
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
-              $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n`r`n"
               write-host "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               $output = C:\Windows\System32\cmd.exe "/C powershell -executionpolicy bypass -file `"C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1`" -blnLOG `$$($blnLOG)"
-              $script:diag += "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)`r`n"
-              write-host "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)"
+              foreach ($line in $output) {$stdout += "$($line)`r`n"}
+              $xmldiag += "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)`r`n"
+              write-host "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)"
+              $xmldiag += "`t`t - COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
+              write-host "`t`t - COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
               $script:blnBREAK = $true
             } elseif ([version]$objSCR.innertext -le $strVER) {
               $xmldiag += "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
