@@ -149,7 +149,7 @@
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo.WindowStyle = "Hidden"
     $process.StartInfo.CreateNoWindow = $true
-    $process.StartInfo.UseShellExecute = $true
+    $process.StartInfo.UseShellExecute = $false
     $process.StartInfo.RedirectStandardOutput = $true
     $process.StartInfo.RedirectStandardError = $true
     $process.StartInfo.FileName = $FileName
