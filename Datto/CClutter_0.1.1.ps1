@@ -190,9 +190,8 @@
         $filSIZ = [math]::round(((get-item $objFIL.fullname -erroraction stop).length / 1MB), 2)
         $script:lngSIZ = $script:lngSIZ + $filSIZ
         #remove-item -path "$($strFIL)" -force -erroraction continue
-        $output = Get-ProcessOutput -filename "C:\Windows\System32\cmd.exe" -args "/C del $($strFIL)"
-        $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
-        write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
+        $output = C:\Windows\System32\cmd.exe /C del "`"$($strFIL)`""
+        $output
         #SUCCESSFULLY DELETED FILE
         $script:diag += "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)`r`n"
         write-host "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)"
@@ -211,9 +210,8 @@
         write-host "`t`t - CLEARING FOLDER : $($strFOL)"
         cFolder "$($strFOL)"
         #remove-item -path "$($strFOL)\" -recurse -force -erroraction continue
-        $output = Get-ProcessOutput -filename "C:\Windows\System32\cmd.exe" -args "/C rmdir $($strFOL) /S /Q"
-        $script:diag += "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)`r`n"
-        write-host "`t`t - StdOut : $($output.standardoutput)`r`n`t`t - StdErr : $($output.standarderror)`r`n$($strLineSeparator)"
+        $output = C:\Windows\System32\cmd.exe /C rmdir "`"$($strFOL)`" /S /Q"
+        $output
         #SUCCESSFULLY DELETED FOLDER
         $script:diag += "`t`t - REMOVED FOLDER : $($strFOL)`r`n"
         write-host "`t`t - REMOVED FOLDER : $($strFOL)"
