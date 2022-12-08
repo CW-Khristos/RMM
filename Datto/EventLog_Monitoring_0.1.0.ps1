@@ -117,7 +117,7 @@ if ($env:i_EventType -match ",") {
   }
   $strTypes = $strTypes.substring(0,$strTypes.length - 1)
   $arrTypes = $strTypes.split(",")
-} elseif ($i_EventType -notmatch ",") {
+} elseif ($env:i_EventType -notmatch ",") {
   [int]$i_EventType = MapLevel "$($env:i_EventType)"
 }
 write-host "ID : $($arrID)"
