@@ -340,6 +340,14 @@
     }
     try {
       $script:sitesList = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
+      if (($null -eq $script:sitesList) -or ($script:sitesList -eq "")) {
+        $script:blnFAIL = $true
+        $script:diag += "`r`nAPI_WatchDog : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)"
+        $script:diag += "`r`n$($_.Exception)"
+        $script:diag += "`r`n$($_.scriptstacktrace)"
+        $script:diag += "`r`n$($_)"
+        write-host "$($script:diag)`r`n"
+      }
     } catch {
       $script:blnFAIL = $true
       $script:diag += "`r`nAPI_WatchDog : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)"
@@ -639,10 +647,8 @@ if (-not $script:blnFAIL) {
                 installSplashtop    = "true"
               }
               $updateSite = (RMM-UpdateSite @params -UseBasicParsing)
-              write-host "$($updateSite)"
-              write-host "$($script:strLineSeparator)"
-              $script:diag += "$($updateSite)`r`n"
-              $script:diag += "$($script:strLineSeparator)`r`n"
+              write-host "$($updateSite)`r`n$($script:strLineSeparator)"
+              $script:diag += "$($updateSite)`r`n$($script:strLineSeparator)`r`n"
               if ($updateSite) {
                 write-host "UPDATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
                 $script:diag += "UPDATE : $($company.CompanyName) : SUCCESS`r`n"
