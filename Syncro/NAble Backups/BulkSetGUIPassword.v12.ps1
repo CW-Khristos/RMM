@@ -575,9 +575,7 @@ if($null -eq $SelectedDevices) {
     Start-Sleep -Milliseconds 500
   }
   $o_sPassword = $password
-  Set-Asset-Field -Name "Backup GUI Password" -Value $o_sPassword
   Set-Asset-Field -Subdomain '[subdomain]' -Name "Backup GUI Password" -Value $o_sPassword
-  Set-Asset-Field -Name "Backup Device Name" -Value $xmlBackupID
   Set-Asset-Field -Subdomain '[subdomain]' -Name "Backup Device Name" -Value $xmlBackupID
 }
 #END SCRIPT
