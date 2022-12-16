@@ -70,7 +70,7 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-host "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
@@ -688,7 +688,7 @@ if (-not $script:blnFAIL) {
               city                = "$($company.city)"
               state               = "$($company.state)"
               zip                 = "$($company.postalCode)"
-              country_name        = "$($company.country)"
+              country_name        = "$($country.displayName)"
               phone_number        = "$($company.phone)"
               fax_number          = "$($company.fax)"
               website             = "$($company.webAddress)"
