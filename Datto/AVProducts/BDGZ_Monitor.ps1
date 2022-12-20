@@ -1,12 +1,4 @@
-#REGION ----- DECLARATIONS ----
-  #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
-  #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
-  #Param (
-  #  [Parameter(Mandatory=$true)]$i_Action,
-  #  [Parameter(Mandatory=$true)]$i_epsInterval,
-  #  [Parameter(Mandatory=$true)]$i_qsInterval,
-  #  [Parameter(Mandatory=$true)]$i_fsInterval
-  #)                
+#REGION ----- DECLARATIONS ----               
   $script:diag = $null
   $script:blnDL = $true
   $script:blnFAIL = $false
@@ -29,7 +21,7 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-host "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
@@ -151,12 +143,10 @@ get-childitem -path "C:\IT"  | where-object {$_.name -match "eps.rmm.exe"} | % {
 #DOWNLOAD EPS.RMM.EXE
 if ($script:blnDL) {
     try {
-      #IPM-Khristos
       $script:diag += "Invoke-WebRequest() - Determining latest version of eps.rmm.exe`r`n"
       write-host "Invoke-WebRequest() - Determining latest version of eps.rmm.exe" -foregroundcolor yellow
       $script:epsVER = [System.Text.Encoding]::ASCII.GetString((invoke-webrequest -URI "http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat" -UseBasicParsing -erroraction stop).content)
     } catch {
-      #IPM-Khristos
       $script:diag += "Unable to determine latest version of eps.rmm.exe`r`n"
       $script:diag += "Invoke-WebRequest() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat`r`n"
       write-host "Unable to determine latest version of eps.rmm.exe"
@@ -165,14 +155,12 @@ if ($script:blnDL) {
       $script:diag += "$($_.scriptstacktrace)`r`n"
       $script:diag += "$($_)`r`n`r`n"
       try {
-        #IPM-Khristos
         $script:diag += "Web.DownloadFile() - Determining latest version of eps.rmm.exe`r`n"
         write-host "Web.DownloadFile() - Determining latest version of eps.rmm.exe" -foregroundcolor yellow
         $web = new-object system.net.webclient
         $web.downloadfile("http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat", "C:\IT\latest.dat")
         $script:epsVER = get-content -path "C:\IT\latest.dat"
       } catch {
-        #IPM-Khristos
         $script:diag += "Unable to determine latest version of eps.rmm.exe`r`n"
         $script:diag += "Web.DownloadFile() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat`r`n"
         write-host "Unable to determine latest version of eps.rmm.exe"
@@ -187,24 +175,20 @@ if ($script:blnDL) {
       $script:epsSRC = "http://download.bitdefender.com/SMB/RMM/Tools/Win/$($script:epsVER)/$($script:bitarch)/eps.rmm.exe"
       if (-not (test-path -path $script:epsEXE -pathtype leaf)) {
         try {
-          #IPM-Khristos
           $script:diag += "BITS.Transfer() - Downloading latest version of eps.rmm.exe ($($script:epsVER))`r`n"
           write-host "BITS.Transfer() - Downloading latest version of eps.rmm.exe ($($script:epsVER))" -foregroundcolor yellow
           start-bitstransfer -erroraction stop -source $script:epsSRC -destination $script:epsEXE
           (get-childitem -path $script:epsEXE).creationtime = (get-date)
         } catch {
-          #IPM-Khristos
           $script:diag += "BITS.Transfer() - Could not download $($script:epsSRC)`r`n"
           write-host "BITS.Transfer() - Could not download $($script:epsSRC)" -foregroundcolor red
           try {
-            #IPM-Khristos
             $script:diag += "Web.DownloadFile() - Downloading latest version of eps.rmm.exe ($($script:epsVER))`r`n"
             write-host "Web.DownloadFile() - Downloading latest version of eps.rmm.exe ($($script:epsVER))" -foregroundcolor yellow
             $web = new-object system.net.webclient
             $web.downloadfile($script:epsSRC, $script:epsEXE)
             (get-childitem -path $script:epsEXE).creationtime = (get-date)
           } catch {
-            #IPM-Khristos
             $script:diag += "Web.DownloadFile() - Could not download $($script:epsSRC)`r`n"
             write-host "Web.DownloadFile() - Could not download $($script:epsSRC)" -foregroundcolor red
             $script:diag += "$($_.Exception)`r`n"
@@ -249,8 +233,12 @@ if ($script:blnFAIL) {
       write-host "BDGZ installed; AV running`r`n" -foregroundcolor green
     }
     2 {
+      $script:running = $false
       $script:diag += "BDGZ installed; AV not running`r`n`r`n"
       write-host "BDGZ installed; AV not running`r`n" -foregroundcolor red
+      remove-item "$($script:avjson)" -force -erroraction silentlycontinue
+      $json = "{`"product`":`"Bitdefender Endpoint Security Tools`",`"running`":$($script:running.tostring().tolower()),`"upToDate`":$($script:isupdated.tostring().tolower())}"
+      set-content "$($script:avjson)" -value "$($json)"
       StopClock
       write-DRRMAlert "BDGZ installed; AV not running"
       write-DRMMDiag "$($script:diag)"
@@ -271,22 +259,26 @@ if ($script:blnFAIL) {
       $bdissue = [string]$output.standardoutput
       if (($null -eq $bdissue) -or ($bdissue -eq "")) {
         $status = "Version : $($bdver) - Issues : None - UpToDate : $($script:isupdated.tostring()) - Last Update : $($bdupdate)"
+        write-host "$($status)"
       } elseif (($null -ne $bdissue) -or ($bdissue -ne "")) {
         $script:blnWARN = $true
         $status = "Version : $($bdver) - Issues : Critical Issues Detected - UpToDate : $($script:isupdated.tostring()) - Last Update : $($bdupdate)"
+        write-host "$($status)"
       }
+      $script:diag += "$($status)`r`n`r`n"
       if ($script:isupdated.tostring().tolower() -eq "false") {
-        $script:blnWARN = $true
+        #$script:blnWARN = $true
         $bdupdate = Get-ProcessOutput -FileName $script:epsEXE -Args "-startUpdate"
         $bdupdate = [string]$bdupdate.standardoutput
         switch ($bdupdate) {
-          "0" {$status = " - UPDATE PROCESS STARTED -`r`n`r`n$($status)`r`n`r`n"}
-          "1552" {$status = " - UPDATE PROCESS ALREADY RUNNING -`r`n`r`n$($status)`r`n`r`n"}
-          default {$status = " - COULDN'T START UPDATE PROCESS -`r`n`r`n$($status)`r`n`r`n"}
+          "0" {$status = " - UPDATE PROCESS STARTED -`r`n`r`n$($status)`r`n`r`n";write-host "$($status)"}
+          "1552" {$status = " - UPDATE PROCESS ALREADY RUNNING -`r`n`r`n$($status)`r`n`r`n";write-host "$($status)"}
+          default {$status = " - COULDN'T START UPDATE PROCESS -`r`n`r`n$($status)`r`n`r`n";write-host "$($status)"}
         }
       }
-      #$script:diag += "$($status)`r`n`r`n - WRITING ANTIVIRUS.JSON FILE`r`n`r`n"
-      #write-host "$($status)`r`n`r`n - WRITING ANTIVIRUS.JSON FILE`r`n" -foregroundcolor yellow
+      $script:diag += "$($status)`r`n`r`n"
+      #$script:diag += "$($status)`r`n - WRITING ANTIVIRUS.JSON FILE`r`n`r`n"
+      #write-host "$($status)`r`n - WRITING ANTIVIRUS.JSON FILE`r`n" -foregroundcolor yellow
       remove-item "$($script:avjson)" -force -erroraction silentlycontinue
       $json = "{`"product`":`"Bitdefender Endpoint Security Tools`",`"running`":$($script:running.tostring().tolower()),`"upToDate`":$($script:isupdated.tostring().tolower())}"
       set-content "$($script:avjson)" -value "$($json)"
@@ -301,15 +293,18 @@ if ($script:blnFAIL) {
       $script:fscan = Get-EpochDate([int]$script:fscan.split("=")[1])("sec")
       $age = new-timespan -start ($script:fscan) -end (Get-Date)
       if ($age.days -ge $env:i_fsInterval) {$script:blnWARN = $true}
-      $status = "Last Full Scan : $($script:fscan)`r`nTime Since Last Full Scan : $($age.tostring("dd\:hh\:mm"))"
-      $script:diag += "$($status)`r`n`r`n"
-      write-host "$($status)`r`n"
+      $fsstatus = "Last Full Scan : $($script:fscan)`r`nTime Since Last Full Scan : $($age.tostring("dd\:hh\:mm")) (Current Threshold : $($env:i_fsInterval) days)"
+      $script:diag += "$($fsstatus)`r`n`r`n"
+      write-host "$($fsstatus)`r`n"
       #QUICK SCANS
       $script:qscan = $output.standardoutput.split("|")[1]
       $script:qscan = Get-EpochDate([int]$script:qscan.split("=")[1])("sec")
       $age = new-timespan -start ($script:qscan) -end (Get-Date)
       if ($age.days -ge $env:i_qsInterval) {$script:blnWARN = $true}
-      $status = "Last Quick Scan : $($script:qscan)`r`nTime Since Last Quick Scan : $($age.tostring("dd\:hh\:mm"))"
+      $qsstatus = "Last Quick Scan : $($script:qscan)`r`nTime Since Last Quick Scan : $($age.tostring("dd\:hh\:mm")) (Current Threshold : $($env:i_qsInterval) days)"
+      $script:diag += "$($qsstatus)`r`n`r`n"
+      write-host "$($qsstatus)`r`n"
+      $status = "$($fsstatus)`r`n$($qsstatus)`r`n`r`n"
     }
     {($_ -eq "RUNUPDATE")} {
       $act = $env:i_Action.replace("Run", "")
@@ -323,18 +318,22 @@ if ($script:blnFAIL) {
       $bdissue = [string]$output.standardoutput
       if (($null -eq $bdissue) -or ($bdissue -eq "")) {
         $status = "Version : $($bdver) - Issues : None - UpToDate : $($script:isupdated.tostring()) - Last Update : $($bdupdate)"
+        write-host "$($status)"
       } elseif (($null -ne $bdissue) -or ($bdissue -ne "")) {
         $script:blnWARN = $true
         $status = "Version : $($bdver) - Issues : Critical Issues Detected - UpToDate : $($script:isupdated.tostring()) - Last Update : $($bdupdate)"
+        write-host "$($status)"
       }
+      $script:diag += "$($status)`r`n`r`n"
       $bdissue = [string]$output.standardoutput
       $bdupdate = Get-ProcessOutput -FileName $script:epsEXE -Args "-startUpdate"
       $bdupdate = [string]$bdupdate.standardoutput
       switch ($bdupdate) {
-        "0" {$status = " - UPDATE PROCESS STARTED`r`n`r`n$($status)"}
-        "1552" {$status = " - UPDATE PROCESS ALREADY RUNNING`r`n`r`n$($status)"}
-        default {$status = " - COULDN'T START UPDATE PROCESS`r`n`r`n$($status)"}
+        "0" {$status = " - UPDATE PROCESS STARTED`r`n`r`n$($status)`r`n`r`n";write-host "$($status)"}
+        "1552" {$status = " - UPDATE PROCESS ALREADY RUNNING`r`n`r`n$($status)`r`n`r`n";write-host "$($status)"}
+        default {$status = " - COULDN'T START UPDATE PROCESS`r`n`r`n$($status)`r`n`r`n";write-host "$($status)"}
       }
+      $script:diag += "$($status)`r`n`r`n"
     }
     {($_ -eq "RUNFULLSCAN") -or ($_ -eq "RUNQUICKSCAN")} {
       $act = $env:i_Action.replace("Run", "")
@@ -346,49 +345,43 @@ if ($script:blnFAIL) {
           $output = $output.standardoutput.split("|")[0]
           $script:fscan = Get-EpochDate([int]$output.split("=")[1])("sec")
           $age = new-timespan -start ($script:fscan) -end (Get-Date)
-          $status = "Last $($act) : $($script:fscan)`r`nTime Since Last $($act) : $($age.tostring("dd\:hh\:mm"))"
+          $status = "Last $($act) : $($script:fscan)`r`nTime Since Last $($act) : $($age.tostring("dd\:hh\:mm")) (Current Threshold : $($env:i_fsInterval) days)"
           if ($age.days -ge $env:i_fsInterval) {$script:blnWARN = $true}
-          $scan = { & "$($script:epsEXE) -startFullScan" }
-          Start-Job -name "BitDefenderFullScan" -ScriptBlock $scan
-          #$output = Get-ProcessOutput -FileName $script:epsEXE -Args "-startFullScan"
+          $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-startFullScan"
         }
         "RUNQUICKSCAN" {
           $output = $output.standardoutput.split("|")[1]
           $script:qscan = Get-EpochDate([int]$output.split("=")[1])("sec")
           $age = new-timespan -start ($script:qscan) -end (Get-Date)
-          $status = "Last $($act) : $($script:qscan)`r`nTime Since Last $($act) : $($age.tostring("dd\:hh\:mm"))"
+          $status = "Last $($act) : $($script:qscan)`r`nTime Since Last $($act) : $($age.tostring("dd\:hh\:mm")) (Current Threshold : $($env:i_qsInterval) days)"
           if ($age.days -ge $env:i_qsInterval) {$script:blnWARN = $true}
-          $scan = { & "$($script:epsEXE) -startQuickScan" }
-          Start-Job -name "BitDefenderQuickScan" -ScriptBlock $scan
-          #$output = Get-ProcessOutput -FileName $script:epsEXE -Args "-startQuickScan"
+          $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-startQuickScan"
         }
       }
-      #$output = [string]$output.standardoutput
-      #switch ($output) {
-      #  "0" {$status = " - $($act) OPERATION PERFORMED SUCCESSFULLY`r`n`r`n$($status)"}
-      #  "622" {$status = " - FILESCAN FEATURE IS EXPIRED`r`n`r`n$($status)"}
-      #  "1168" {$status = " - STORED SCAN TASK NOT FOUND`r`n`r`n$($status)"}
-      #  "5006" {$status = " - ANTIMALWARE SCANNER NOT AVAILABLE`r`n`r`n$($status)"}
-      #  "5023" {$status = " - STORED SCAN TASK ALREADY RUNNING`r`n`r`n$($status)"}
-      #  default {$status = " - $($sct) CANNOT BE PERFORMED. ERROR CODE : $($output)`r`n`r`n$($status)"}
-      #}
+      $script:diag += "$($status)`r`n`r`n"
+      $output = [string]$output.standardoutput
+      switch ($output) {
+        "0" {$status = " - $($act) OPERATION PERFORMED SUCCESSFULLY`r`n`r`n$($status)"}
+        "622" {$status = " - FILESCAN FEATURE IS EXPIRED`r`n`r`n$($status)"}
+        "1168" {$status = " - STORED SCAN TASK NOT FOUND`r`n`r`n$($status)"}
+        "5006" {$status = " - ANTIMALWARE SCANNER NOT AVAILABLE`r`n`r`n$($status)"}
+        "5023" {$status = " - STORED SCAN TASK ALREADY RUNNING`r`n`r`n$($status)"}
+        default {$status = " - $($act) CANNOT BE PERFORMED. ERROR CODE : $($output)`r`n`r`n$($status)"}
+      }
+      $script:diag += "$($status)`r`n`r`n"
     }
   }
 }
 #DATTO OUTPUT
-$script:diag += "$($status)`r`n"
 if ($script:blnWARN) {
   write-host "$($status)" -foregroundcolor red
-} elseif (-not $script:blnWARN) {
-  write-host "$($status)" -foregroundcolor green
-}
-#Stop script execution time calculation
-StopClock
-if ($script:blnWARN) {
+  StopClock
   write-DRRMAlert "$($status)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
+  write-host "$($status)" -foregroundcolor green
+  StopClock
   write-DRRMAlert "$($status)"
   write-DRMMDiag "$($script:diag)"
   exit 0
