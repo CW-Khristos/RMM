@@ -130,7 +130,7 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-host "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
