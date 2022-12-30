@@ -132,11 +132,11 @@ To Do:
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
 #region ----- MISC FUNCTIONS ----
   function logERR ($intSTG, $strModule, $strErr) {
@@ -1366,7 +1366,7 @@ if (-not $script:blnBREAK) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nHuduDoc_WatchDog : Execution Successful"
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "HuduDoc_WatchDog : Execution Successful"
+    write-DRMMAlert "HuduDoc_WatchDog : Execution Successful"
     #write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 0
@@ -1374,7 +1374,7 @@ if (-not $script:blnBREAK) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nHuduDoc_WatchDog : Execution Completed with Warnings : See Diagnostics"
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "HuduDoc_WatchDog : Execution Completed with Warnings : See Diagnostics"
+    write-DRMMAlert "HuduDoc_WatchDog : Execution Completed with Warnings : See Diagnostics"
     #write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
@@ -1387,7 +1387,7 @@ if (-not $script:blnBREAK) {
   #WRITE TO LOGFILE
   $script:diag += "`r`n`r`nHuduDoc_WatchDog : Execution Failure : See Diagnostics"
   "$($script:diag)" | add-content $logPath -force
-  write-DRRMAlert "HuduDoc_WatchDog : Execution Failure : See Diagnostics"
+  write-DRMMAlert "HuduDoc_WatchDog : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
