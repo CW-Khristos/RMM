@@ -40,11 +40,11 @@
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-ProcessOutput {
     Param (
@@ -349,11 +349,11 @@ StopClock
 $script:diag | out-file $logPath
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-DRRMAlert "All_AV_Removal : Execution Failure : See Diagnostics"
+  write-DRMMAlert "All_AV_Removal : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "All_AV_Removal : Completed Execution"
+  write-DRMMAlert "All_AV_Removal : Completed Execution"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
