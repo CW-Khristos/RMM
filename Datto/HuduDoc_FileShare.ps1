@@ -12,7 +12,7 @@
   # Set the base domain of your Hudu instance without a trailing /
   $HuduBaseDomain = $env:HuduDomain
   #Company Name as it appears in Hudu
-  $CompanyName = $env:CustomerName
+  $CompanyName = $env:CS_PROFILE_NAME
   $HuduAssetLayoutName = "File Shares - AutoDoc"
   $timestamp = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
   #####################################################################
