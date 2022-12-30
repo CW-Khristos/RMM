@@ -70,11 +70,11 @@
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function logERR ($intSTG, $strModule, $strErr) {
     $script:blnWARN = $true
@@ -550,7 +550,7 @@ if (-not $script:blnFAIL) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nUnifi_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRRMAlert "Unifi_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
+    write-DRMMAlert "Unifi_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
@@ -559,7 +559,7 @@ if (-not $script:blnFAIL) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nUnifi_WatchDog : Execution Successful : No Sites Created"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRRMAlert "Unifi_WatchDog : Execution Successful : No Sites Created"
+    write-DRMMAlert "Unifi_WatchDog : Execution Successful : No Sites Created"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 0
@@ -567,7 +567,7 @@ if (-not $script:blnFAIL) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nUnifi_WatchDog : Execution Completed with Warnings : See Diagnostics"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRRMAlert "Unifi_WatchDog : Execution Completed with Warnings : See Diagnostics"
+    write-DRMMAlert "Unifi_WatchDog : Execution Completed with Warnings : See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
@@ -580,7 +580,7 @@ if (-not $script:blnFAIL) {
   #WRITE TO LOGFILE
   $script:diag += "`r`n`r`nUnifi_WatchDog : Execution Failed : See Diagnostics"
   "$($script:diag)" | add-content $script:logPath -force
-  write-DRRMAlert "Unifi_WatchDog : Execution Failure : See Diagnostics"
+  write-DRMMAlert "Unifi_WatchDog : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
