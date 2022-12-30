@@ -127,11 +127,11 @@
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-ProcessOutput {
     Param (
@@ -360,11 +360,11 @@ if ($env:blnLOG) {
 }
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-DRRMAlert "CCLUTTER : Execution Completed with Warnings : See Diagnostics"
+  write-DRMMAlert "CCLUTTER : Execution Completed with Warnings : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "CCLUTTER : Completed Execution"
+  write-DRMMAlert "CCLUTTER : Completed Execution"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
