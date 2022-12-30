@@ -183,11 +183,11 @@
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
@@ -438,7 +438,7 @@
             StopClock
             #DATTO OUTPUT
             $script:diag += "$($xmldiag)"
-            write-DRRMAlert "Could not download AV Product XML"
+            write-DRMMAlert "Could not download AV Product XML"
             write-DRMMDiag "$($script:diag)"
             $script:blnAVXML = $false
             $xmldiag = $null
@@ -534,7 +534,7 @@
       StopClock
       #DATTO OUTPUT
       $script:diag += "$($xmldiag)"
-      write-DRRMAlert "Error reading AV XML : $($srcAVP)"
+      write-DRMMAlert "Error reading AV XML : $($srcAVP)"
       write-DRMMDiag "$($script:diag)"
       $xmldiag = $null
       exit 1
@@ -684,7 +684,7 @@ if (-not ($script:blnAVXML)) {
   #Stop script execution time calculation
   StopClock
   #DATTO OUTPUT
-  write-DRRMAlert "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
+  write-DRMMAlert "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif ($script:blnAVXML) {
@@ -1156,7 +1156,7 @@ if (-not ($script:blnAVXML)) {
     #Stop script execution time calculation
     StopClock
     #DATTO OUTPUT
-    write-DRRMAlert "Could not find any AV Product registered`r`n"
+    write-DRMMAlert "Could not find any AV Product registered`r`n"
     write-DRMMDiag "$($script:diag)"
     exit 1
   } elseif ($AntiVirusProduct -ne $null) {                                                          #FOUND AV PRODUCTS
@@ -1962,12 +1962,12 @@ $null | set-content $logPath -force
 "$($script:diag)" | add-content $logPath -force
 write-host 'DATTO OUTPUT :'
 if ($script:blnWARN) {
-  write-DRRMAlert "AV Health : $($env:i_PAV) : Warning"
+  write-DRMMAlert "AV Health : $($env:i_PAV) : Warning"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "AV Health : $($env:i_PAV) : Healthy"
+  write-DRMMAlert "AV Health : $($env:i_PAV) : Healthy"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 0
