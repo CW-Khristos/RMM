@@ -75,11 +75,11 @@
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
@@ -728,7 +728,7 @@ if (-not $script:blnFAIL) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nAPI_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRRMAlert "API_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
+    write-DRMMAlert "API_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
@@ -737,7 +737,7 @@ if (-not $script:blnFAIL) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nAPI_WatchDog : Execution Successful : No Sites Created"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRRMAlert "API_WatchDog : Execution Successful : No Sites Created"
+    write-DRMMAlert "API_WatchDog : Execution Successful : No Sites Created"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 0
@@ -745,7 +745,7 @@ if (-not $script:blnFAIL) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Warnings : See Diagnostics"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRRMAlert "API_WatchDog : Execution Completed with Warnings : See Diagnostics"
+    write-DRMMAlert "API_WatchDog : Execution Completed with Warnings : See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
@@ -758,7 +758,7 @@ if (-not $script:blnFAIL) {
   #WRITE TO LOGFILE
   $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Warnings : See Diagnostics"
   "$($script:diag)" | add-content $script:logPath -force
-  write-DRRMAlert "API_WatchDog : Execution Failure : See Diagnostics"
+  write-DRMMAlert "API_WatchDog : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
