@@ -23,11 +23,11 @@
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function logERR($intSTG) {
     $script:blnWARN = $true
@@ -197,11 +197,11 @@ write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - MSP_CONFIG COMPLETE"
 #Stop script execution time calculation
 StopClock
 if ($script:blnWARN) {
-  write-DRRMAlert "MSP_Config : Execution Failure : See Diagnostics"
+  write-DRMMAlert "MSP_Config : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "MSP_Config : Completed Execution"
+  write-DRMMAlert "MSP_Config : Completed Execution"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
