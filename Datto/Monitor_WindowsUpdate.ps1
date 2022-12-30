@@ -19,7 +19,6 @@
   $script:blnBREAK  = $false
   $strLineSeparator = "---------"
   $logPath          = "C:\IT\Log\Monitor_WindowsUpdate"
-
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
@@ -29,11 +28,11 @@
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function logERR($intSTG, $strErr) {
     $script:blnWARN = $true
@@ -70,7 +69,6 @@
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
-
 #endregion ----- FUNCTIONS ----
 
 #------------
@@ -186,18 +184,16 @@ write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE
-if ($blnLOG) {
-  $script:diag | out-file $logPath
-}
+if ($blnLOG) {$script:diag | out-file $logPath}
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-DRRMAlert "Monitor_WindowsUpdate : Execution Completed with Warnings : See Diagnostics"
+  write-DRMMAlert "Monitor_WindowsUpdate : Execution Completed with Warnings : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
-  #exit 1
+  exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "Monitor_WindowsUpdate : Healthy : Completed Execution"
+  write-DRMMAlert "Monitor_WindowsUpdate : Healthy : Completed Execution"
   write-DRMMDiag "$($script:diag)"
-  #exit 0
+  exit 0
 }
 #END SCRIPT
 #------------
