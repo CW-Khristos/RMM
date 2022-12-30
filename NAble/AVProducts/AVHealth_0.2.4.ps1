@@ -177,18 +177,6 @@
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
-  function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
-    foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
-  } ## write-DRMMDiag
-  
-  function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
-  } ## write-DRRMAlert
-
   function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
       "sec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($epochDate))}
@@ -434,15 +422,9 @@
             write-host $_.Exception
             write-host $_.scriptstacktrace
             write-host $_
-            #Stop script execution time calculation
-            StopClock
-            #DATTO OUTPUT
             $script:diag += "$($xmldiag)"
-            write-DRRMAlert "Could not download AV Product XML"
-            write-DRMMDiag "$($script:diag)"
             $script:blnAVXML = $false
             $xmldiag = $null
-            exit 1
           }
         }
       }
@@ -530,14 +512,8 @@
       write-host $_.Exception
       write-host $_.scriptstacktrace
       write-host $_
-      #Stop script execution time calculation
-      StopClock
-      #DATTO OUTPUT
       $script:diag += "$($xmldiag)"
-      write-DRRMAlert "Error reading AV XML : $($srcAVP)"
-      write-DRMMDiag "$($script:diag)"
       $xmldiag = $null
-      exit 1
     }
   } ## Get-AVXML
   
@@ -681,12 +657,6 @@ if (-not ($script:blnAVXML)) {
   $script:o_CompPath = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   $script:o_CompState = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
   $script:diag += "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  #Stop script execution time calculation
-  StopClock
-  #DATTO OUTPUT
-  write-DRRMAlert "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
-  write-DRMMDiag "$($script:diag)"
-  exit 1
 } elseif ($script:blnAVXML) {
   #QUERY WMI SECURITYCENTER NAMESPACE FOR AV PRODUCT DETAILS
   if ([system.version]$script:OSVersion -ge [system.version]'6.0.0.0') {
@@ -1153,12 +1123,6 @@ if (-not ($script:blnAVXML)) {
     $script:o_RTstate = "Unknown"
     $script:o_DefStatus = "Unknown"
     $script:o_AVcon = 0
-    #Stop script execution time calculation
-    StopClock
-    #DATTO OUTPUT
-    write-DRRMAlert "Could not find any AV Product registered`r`n"
-    write-DRMMDiag "$($script:diag)"
-    exit 1
   } elseif ($AntiVirusProduct -ne $null) {                                                          #FOUND AV PRODUCTS
     foreach ($av in $avs.keys) {                                                                    #ITERATE THROUGH EACH FOUND AV PRODUCT
       if (($avs[$av].display -ne $null) -and ($avs[$av].display -ne "")) {
