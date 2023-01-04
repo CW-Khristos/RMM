@@ -65,7 +65,7 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-host "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
@@ -202,9 +202,9 @@ if (-not $script:blnFAIL) {
         position = 7
       }
     )
-    Write-Host "Creating New Asset Layout $($HuduSiteLayoutName)"
-    $script:diag += "Creating New Asset Layout $($HuduSiteLayoutName)`r`n"
-    $NewLayout = New-HuduAssetLayout -name $HuduSiteLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $false -include_photos $false -include_comments $false -include_files $false -fields $AssetLayoutFields
+    Write-Host "Creating New Site Layout $($HuduSiteLayoutName)"
+    $script:diag += "Creating New Site Layout $($HuduSiteLayoutName)`r`n"
+    $NewLayout = New-HuduAssetLayout -name $HuduSiteLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $true -include_photos $true -include_comments $true -include_files $true -fields $AssetLayoutFields
     $SiteLayout = Get-HuduAssetLayouts -name $HuduSiteLayoutName
   }
   $DeviceLayout = Get-HuduAssetLayouts -name $HuduAssetLayoutName
@@ -274,7 +274,7 @@ if (-not $script:blnFAIL) {
     )
     Write-Host "Creating New Asset Layout $($HuduAssetLayoutName)"
     $script:diag += "Creating New Asset Layout $($HuduAssetLayoutName)`r`n"
-    $NewLayout = New-HuduAssetLayout -name $HuduAssetLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $false -include_photos $false -include_comments $false -include_files $false -fields $AssetLayoutFields
+    $NewLayout = New-HuduAssetLayout -name $HuduAssetLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $true -include_photos $true -include_comments $true -include_files $true -fields $AssetLayoutFields
     $DeviceLayout = Get-HuduAssetLayouts -name $HuduAssetLayoutName
   }
 
@@ -320,14 +320,14 @@ if (-not $script:blnFAIL) {
       $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
       $script:diag += "Attempting to map $($site.desc)`r`n"
       $script:diag += "$($strLineSeparator)`r`n"
-      $SiteAsset = Get-HuduAssets -name $($site.desc) -assetlayoutid $SiteLayout.id
+      $SiteAsset = Get-HuduAssets -name "$($site.desc) - Unifi" -assetlayoutid $SiteLayout.id
       if (!$SiteAsset) {
         #Check on company name
-        $Company = Get-HuduCompanies -name $($site.desc)
+        $Company = Get-HuduCompanies -name "$($site.desc)"
         if (!$company) {
-          $script:diag += "A company in Hudu could not be matched to the site. Please create a blank $($HuduSiteLayoutName) asset, with a name of `"$($site.desc)`" under the company in Hudu you wish to map this site to.`r`n"
+          $script:diag += "A company in Hudu could not be matched to the site : $($site.desc). Please create a blank $($HuduSiteLayoutName) asset, with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to.`r`n"
           $script:diag += "$($strLineSeparator)`r`n`r`n"
-          Write-Host "A company in Hudu could not be matched to the site. Please create a blank $($HuduSiteLayoutName) asset, with a name of `"$($site.desc)`" under the company in Hudu you wish to map this site to." -ForegroundColor Red
+          Write-Host "A company in Hudu could not be matched to the site : $($site.desc). Please create a blank $($HuduSiteLayoutName) asset, with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to." -ForegroundColor Red
           write-host "$($strLineSeparator)`r`n"
           continue
         }
@@ -428,7 +428,7 @@ if (-not $script:blnFAIL) {
       $Wifi = ($wifi | convertto-html -frag | out-string) -replace $tablestyling
       $PortForwards = ($Portforward | convertto-html -frag | out-string) -replace $tablestyling
 
-      $AssetName = $($site.desc)
+      $AssetName = "$($site.desc) - Unifi"
       $AssetFields = @{
         'site_name'     = $site.name
         'wan'           = $WANs
@@ -442,31 +442,35 @@ if (-not $script:blnFAIL) {
       if (!$SiteAsset) {
         $script:blnSITE = $true
         $companyid = $company.id
-        Write-Host "Creating new Asset - $($AssetName)"
+        Write-Host "Creating new Site Unifi - AutoDoc : $($AssetName)"
         write-host "$($strLineSeparator)"
-        $script:diag += "Creating new Asset - $($AssetName)`r`n"
+        $script:diag += "Creating new Site Unifi - AutoDoc : $($AssetName)`r`n"
         $script:diag += "$($strLineSeparator)`r`n"
         try {
           $SiteAsset = New-HuduAsset -name $AssetName -company_id $companyid -asset_layout_id $SiteLayout.id -fields $AssetFields	
         } catch {
-          Write-Host "Error Creating new Asset - $($AssetName)" -foregroundColor red
+          Write-Host "Error Creating new Site Unifi - AutoDoc : $($AssetName)" -foregroundColor red
           write-host "$($strLineSeparator)`r`n"
-          $script:diag += "Error Creating new Asset - $($AssetName)`r`n"
+          $script:diag += "Error Creating new Site Unifi - AutoDoc : $($AssetName)`r`n"
           $script:diag += "$($strLineSeparator)`r`n`r`n"
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+          logERR 3 "Create Site Unifi - AutoDoc" $err
         }
       } else {
         $companyid = $SiteAsset.company_id
-        Write-Host "Updating Asset - $($AssetName)"
+        Write-Host "Updating Site Unifi - AutoDoc : $($AssetName)"
         write-host "$($strLineSeparator)"
-        $script:diag += "Updating Asset - $($AssetName)`r`n"
+        $script:diag += "Updating Site Unifi - AutoDoc : $($AssetName)`r`n"
         $script:diag += "$($strLineSeparator)`r`n"
         try {
           $SiteAsset = Set-HuduAsset -asset_id $SiteAsset.id -name $AssetName -company_id $companyid -asset_layout_id $SiteLayout.id -fields $AssetFields	
         } catch {
-          Write-Host "Error Updating Asset - $($AssetName)" -foregroundColor red
+          Write-Host "Error Updating Site Unifi - AutoDoc : $($AssetName)" -foregroundColor red
           write-host "$($strLineSeparator)`r`n"
-          $script:diag += "Error Updating new Asset - $($AssetName)`r`n"
+          $script:diag += "Error Updating Site Unifi - AutoDoc : $($AssetName)`r`n"
           $script:diag += "$($strLineSeparator)`r`n`r`n"
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+          logERR 3 "Create Site Unifi - AutoDoc" $err
         }
       }
       ######################### Unifi Device Documentation ###########################
@@ -483,11 +487,11 @@ if (-not $script:blnFAIL) {
         write-host "$($strLineSeparator)`r`n"
         exit
       }
-      $SiteAsset = Get-HuduAssets -name $($site.desc) -assetlayoutid $SiteLayout.id
+      $SiteAsset = Get-HuduAssets -name "$($site.desc) - Unifi" -assetlayoutid $SiteLayout.id
       if (!$SiteAsset) {
-        $script:diag += "A Site in Hudu could not be matched to the site. Please create a blank Unifi site asset (created with the other Unifi Sync script), with a name of `"$($site.desc)`" under the company in Hudu you wish to map this site to.`r`n"
+        $script:diag += "A Site in Hudu could not be matched to the site : $($site.desc). Please create a blank Unifi site asset (created with the other Unifi Sync script), with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to.`r`n"
         $script:diag += "$($strLineSeparator)`r`n`r`n"
-        Write-Host "A Site in Hudu could not be matched to the site. Please create a blank Unifi site asset (created with the other Unifi Sync script), with a name of `"$($site.desc)`" under the company in Hudu you wish to map this site to."  -ForegroundColor Red
+        Write-Host "A Site in Hudu could not be matched to the site : $($site.desc). Please create a blank Unifi site asset (created with the other Unifi Sync script), with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to."  -ForegroundColor Red
         write-host "$($strLineSeparator)`r`n"
         continue
       }
