@@ -66,21 +66,31 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 try {
   $schedule = .\clienttool.exe control.schedule.list
   $schedule = $schedule | where {$_ -like "* yes *"}
+  write-host "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)`r`n`t$($schedule)`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)`r`n`t$($schedule)`r`n$($strLineSeparator)"
   $array = $schedule.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+  write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
+  foreach ($item in $array) {
+    write-host "`t$($item)"
+    $script:diag += "`t$($item)`r`n"
+  }
   if ($array.count -lt 11) {
     $scheduleset = "$($array[2]) - $($array[4]) : $($array[7]) - $($array[5]) - $($array[6])"
   } elseif ($array.count -ge 11) {
-    while ($i -le ($array.count / 10)) {
+    while ($i -lt (($array.count / 10) - 1)) {
       $i += 1
       if ($i -eq 0) {
-        $scheduleset = "$($array[2]) - $($array[4]) : $($array[7]) - $($array[5]) - $($array[6])"
+        $scheduleset = "$($array[2]) - $($array[4]) : $($array[7]) - $($array[5]) - $($array[6]) | "
       } elseif ($i -gt 0) {
-        $scheduleset += "`r`n$($array[(($i * 10) + 2)]) - $($array[(($i * 10) + 4)]) : $($array[(($i * 10) + 7)]) - $($array[(($i * 10) + 5)]) - $($array[(($i * 10) + 6)])"
+        $scheduleset += "`r`n`t$($array[(($i * 10) + 2)]) - $($array[(($i * 10) + 4)]) : $($array[(($i * 10) + 7)]) - $($array[(($i * 10) + 5)]) - $($array[(($i * 10) + 6)]) | "
       }
     }
   }
-  $scheduleset = $scheduleset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS")
+  $scheduleset = $scheduleset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH")
   $scheduleset = $scheduleset.replace("Monday","Mon").replace("Tuesday","Tue").replace("Wednesday","Wed").replace("Thursday","Thu").replace("Friday","Fri").replace("Saturday","Sat").replace("Sunday","Sun")
+  write-host "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($scheduleset)`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($scheduleset)`r`n$($strLineSeparator)`r`n"
 } catch {
   $script:blnWARN = $true
   write-host "ERROR ENCOUNTERED"
@@ -90,10 +100,20 @@ try {
 try {
   $archive = .\clienttool.exe control.archiving.list
   $archive = $archive | where {$_ -like "* yes *"}
+  write-host "$($strLineSeparator)`r`nARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archive)`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archive)`r`n$($strLineSeparator)`r`n"
   $array = $archive.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-  $archiveset = "$($array[2]) - $($array[3]) - Datasrouces : $($array[4]) - Archive Time : $($array[5]) - Archive Months : $($array[6]) - Archive Days : $($array[7])"
-  $archiveset = $archiveset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS")
+  write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
+  foreach ($item in $array) {
+    write-host "`t$($item)"
+    $script:diag += "`t$($item)`r`n"
+  }
+  $archiveset = "$($array[2]) - $($array[4]) - Datasources : $($array[5]) - Archive Time : $($array[6]) - Archive Months : $($array[7]) - Archive Days : $($array[8])"
+  $archiveset = $archiveset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH")
   $archiveset = $archiveset.replace("Monday","Mon").replace("Tuesday","Tue").replace("Wednesday","Wed").replace("Thursday","Thu").replace("Friday","Fri").replace("Saturday","Sat").replace("Sunday","Sun")
+  write-host "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archiveset)`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archiveset)`r`n$($strLineSeparator)`r`n"
 } catch {
   $script:blnWARN = $true
   write-host "ERROR ENCOUNTERED"
