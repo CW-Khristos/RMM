@@ -87,19 +87,19 @@ try {
     $script:diag += "`t$($item)`r`n"
   }
   if ($array.count -lt 11) {
-    $scheduleset = "$($array[2]) - $($array[4]) : $($array[7]) - $($array[5]) - $($array[6])"
+    $scheduleset = "$($array[2])-$($array[4]) : $($array[7])-$($array[5]) - $($array[6])"
   } elseif ($array.count -ge 11) {
     while ($i -lt (($array.count / 10) - 1)) {
       $i += 1
       if ($i -eq 0) {
-        $scheduleset = "$($array[2]) - $($array[4]) : $($array[7]) - $($array[5]) - $($array[6]) | "
+        $scheduleset = "$($array[2])-$($array[4]) : $($array[7])-$($array[5]) - $($array[6]) | "
       } elseif ($i -gt 0) {
-        $scheduleset += "`r`n`t$($array[(($i * 10) + 2)]) - $($array[(($i * 10) + 4)]) : $($array[(($i * 10) + 7)]) - $($array[(($i * 10) + 5)]) - $($array[(($i * 10) + 6)]) | "
+        $scheduleset += "`r`n$($array[(($i * 10) + 2)])-$($array[(($i * 10) + 4)]) : $($array[(($i * 10) + 7)])-$($array[(($i * 10) + 5)]) - $($array[(($i * 10) + 6)]) | "
       }
     }
   }
-  $scheduleset = $scheduleset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH")
-  $scheduleset = $scheduleset.replace("Monday","Mon").replace("Tuesday","Tue").replace("Wednesday","Wed").replace("Thursday","Thu").replace("Friday","Fri").replace("Saturday","Sat").replace("Sunday","Sun")
+  $scheduleset = $scheduleset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
+  $scheduleset = $scheduleset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
   write-host "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($scheduleset)`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($scheduleset)`r`n$($strLineSeparator)`r`n"
   new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom14" -value "$($scheduleset)" -force
@@ -122,8 +122,8 @@ try {
     $script:diag += "`t$($item)`r`n"
   }
   $archiveset = "$($array[2]) - $($array[4]) - Datasources : $($array[5]) - Archive Time : $($array[6]) - Archive Months : $($array[7]) - Archive Days : $($array[8])"
-  $archiveset = $archiveset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH")
-  $archiveset = $archiveset.replace("Monday","Mon").replace("Tuesday","Tue").replace("Wednesday","Wed").replace("Thursday","Thu").replace("Friday","Fri").replace("Saturday","Sat").replace("Sunday","Sun")
+  $archiveset = $archiveset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
+  $archiveset = $archiveset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
   write-host "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archiveset)`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archiveset)`r`n$($strLineSeparator)`r`n"
   new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom15" -value "$($archiveset)" -force
