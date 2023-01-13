@@ -155,14 +155,18 @@ $sw = [Diagnostics.Stopwatch]::StartNew()
 
 #Get Script Directory
 $Scriptpath = $($MyInvocation.MyCommand.Path)
-$Dir = "C:\IT";
+$Dir = "C:\IT"
 
 #Report
 $runntime= $((Get-Date).ToString('dd-MM-yyyy'))
 $HealthReport = $Dir + "\Reports\ADsecurity" + "$runntime" + ".htm"
+#Cleanup old Reports
+Get-ChildItem -path "$($Dir)\Reports" -file | where {$_.name -like "ADsecurity*.htm"} | Sort-Object LastWriteTime -Descending | Select-Object -Skip 2 | Remove-Item
 
 #Logfile 
 $Logfile = $Dir + "\Log\ADsecurity" + "$runntime" + ".log"
+#Cleanup old Logs
+Get-ChildItem -path "$($Dir)\Log" -file | where {$_.name -like "ADsecurity*.log"} | Sort-Object LastWriteTime -Descending | Select-Object -Skip 2 | Remove-Item
 
 #Import AD Module
 try {
