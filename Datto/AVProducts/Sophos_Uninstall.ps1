@@ -1,4 +1,37 @@
+<#
+.SYNOPSIS 
+    Provide modern Powershell conversion of Sophos Uninstall BAT Script : https://support.sophos.com/support/s/article/KB-000035419?language=en_US
+
+.DESCRIPTION
+    Script will attempt to stop all known Sophos services via an easy to update array; $colServices, located at the top of the script
+    Script will attempt currently known uninstaller EXE utilities with "--quiet" switch (uninstallcli.exe, uninstallgui.exe, and SophosUninstall.exe)
+    Script will automatically export found Sophos Component Uninstall Strings from both 32bit and 64bit Registry Hives and then execute each
+    Script will attempt to detect, log, and handle errors throughout each step in the uninstall process
+    Script will output logfile to C:\IT\Log\Sophos_Uninstall
+ 
+.NOTES
+    Version        : 0.1.0 (25 January 2023)
+    Creation Date  : 25 January 2023
+    Purpose/Change : Provide modern Powershell conversion of Sophos Uninstall BAT Script : https://support.sophos.com/support/s/article/KB-000035419?language=en_US
+    File Name      : Sophos_Uninstall_0.1.0.ps1 
+    Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com - Khristos#8436
+    Requires       : PowerShell Version 2.0+ installed
+    Thanks         : Brian Ellis - Third Party Verification and Addition / Change Suggestions
+
+.CHANGELOG
+    0.1.0 Initial Release
+
+.TODO
+
+#>
+
 #region ----- DECLARATIONS ----
+  #VERSION FOR SCRIPT UPDATE
+  $strSCR           = "Sophos_Uninstall"
+  $strVER           = [version]"0.1.0"
+  $strREPO          = "RMM"
+  $strBRCH          = "dev"
+  $strDIR           = "Datto/AVProducts"
   $script:diag      = $null
   $script:blnWARN   = $false
   $script:blnBREAK  = $false
@@ -240,6 +273,9 @@ try {
 }
 write-host "$($strLineSeparator)`r`nCOMPLETED FINAL EXE UNINSTALLS`r`n$($strLineSeparator)"
 $script:diag += "$($strLineSeparator)`r`nCOMPLETED FINAL EXE UNINSTALLS`r`n$($strLineSeparator)`r`n"
+#CLEANUP WMI INSTANCES
+(Get-WmiObject -Namespace "root/SecurityCenter2" -Class FirewallProduct | ?{$_.displayname -like 'sophos*'}).delete()
+(Get-WmiObject -Namespace "root/SecurityCenter2" -Class AntiVirusProduct | ?{$_.displayname -like 'sophos*'}).delete()
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE
