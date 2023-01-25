@@ -144,7 +144,7 @@
 #BEGIN SCRIPT
 clear-host
 #REMOVE PREVIOUS LOGFILE
-remove-item -path "$($logPath)" -force -erroraction stop
+remove-item -path "$($logPath)" -force -erroraction silentlycontinue
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
