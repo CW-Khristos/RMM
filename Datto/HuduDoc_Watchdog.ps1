@@ -1338,8 +1338,9 @@ if (-not $script:blnBREAK) {
   #Create Global Overdue Ticket Report
   if ($CreateAllOverdueTicketsReport -eq $true) {
     $articleHTML = [System.Net.WebUtility]::HtmlDecode($($GlobalOverdue | 
-      select 'Ticket-Number', 'Company', 'Title', 'Due', 'Resource', 'Last-Update', 'Priority', 'Status' | 
-        Sort-object Company | convertto-html -fragment | out-string))
+      where {$_.companyID -eq $company.CompanyID} | 
+        select 'Ticket-Number', 'Company', 'Title', 'Due', 'Resource', 'Last-Update', 'Priority', 'Status' | 
+          Sort-object Company | convertto-html -fragment | out-string))
     $reportDate = get-date
     $body = "<h4>Report last updated: $($reportDate)</h4><figure class=`"table`">$($articleHTML)</figure>"
     #Check if an article already exists
