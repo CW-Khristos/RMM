@@ -3,6 +3,7 @@
   $script:blnWARN   = $false
   $script:blnBREAK  = $false
   $strLineSeparator = "---------"
+  $logPath          = "C:\IT\Log\Sophos_Uninstall"
   $colServices      = @(
     "SAVService",
     "Sophos AutoUpdate Service",
@@ -142,6 +143,8 @@
 #------------
 #BEGIN SCRIPT
 clear-host
+#REMOVE PREVIOUS LOGFILE
+remove-item -path "$($logPath)" -force -erroraction stop
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
@@ -239,6 +242,8 @@ write-host "$($strLineSeparator)`r`nCOMPLETED FINAL EXE UNINSTALLS`r`n$($strLine
 $script:diag += "$($strLineSeparator)`r`nCOMPLETED FINAL EXE UNINSTALLS`r`n$($strLineSeparator)`r`n"
 #Stop script execution time calculation
 StopClock
+#WRITE LOGFILE
+$script:diag | out-file $logPath
 #DATTO OUTPUT
 if ($script:blnBREAK) {
   write-DRMMAlert "Uninstall_Sophos : Execution Failed : See Diagnostics"
