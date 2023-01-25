@@ -676,7 +676,7 @@ if (-not ($script:blnAVXML)) {
   }
   if (-not $script:blnWMI) {                                                                        #FAILED TO RETURN WMI SECURITYCENTER NAMESPACE
     try {
-      $script:diag += "`r`nFailed to query WMI SecurityCenter Namespace"
+      $script:diag += "`r`nFailed to query WMI SecurityCenter Namespace`r`n"
       $script:diag += "Possibly Server, attempting to fallback to using 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' registry key`r`n"
       write-host "`r`nFailed to query WMI SecurityCenter Namespace" -foregroundcolor red
       write-host "Possibly Server, attempting to fallback to using 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' registry key" -foregroundcolor red
