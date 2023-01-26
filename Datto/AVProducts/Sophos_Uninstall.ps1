@@ -228,8 +228,10 @@ $script:diag += "$($strLineSeparator)`r`nCOMPLETED SOPHOS EXE UNINSTALLS`r`n$($s
 write-host "$($strLineSeparator)`r`nPROCESSING SOPHOS REG UNINSTALLS`r`n$($strLineSeparator)"
 $script:diag += "$($strLineSeparator)`r`nPROCESSING SOPHOS REG UNINSTALLS`r`n$($strLineSeparator)`r`n"
 #RETRIEVE UNINSTALL STRINGS FROM REGISTRY
-$key32 = get-itemproperty -path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" -erroraction stop | where {$_.DisplayName -like "*Sophos*"}
-$key64 = get-itemproperty -path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -erroraction stop | where {$_.DisplayName -like "*Sophos*"}
+$key32 = get-itemproperty -path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" -erroraction stop | where {(($_.DisplayName -like "*Sophos*") -and 
+  (($_.DisplayName -notmatch "Sophos Connect") -and ($_.DisplayName -notmatch "Sophos SSL VPN Client")))}
+$key64 = get-itemproperty -path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -erroraction stop | where {(($_.DisplayName -like "*Sophos*") -and 
+  (($_.DisplayName -notmatch "Sophos Connect") -and ($_.DisplayName -notmatch "Sophos SSL VPN Client")))}
 #LOOP THROUGH EACH UNINSTALL STRING
 try {
   foreach ($string32 in $key32) {
