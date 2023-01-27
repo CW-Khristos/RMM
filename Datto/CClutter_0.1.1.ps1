@@ -222,7 +222,7 @@
     )
     $blnXML = $true
     $xmldiag = $null
-    #RETRIEVE AV VENDOR XML FROM GITHUB
+    #RETRIEVE VERSION XML FROM GITHUB
     if (($null -eq $strDIR) -or ($strDIR -eq "")) {
       $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
       write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
@@ -257,7 +257,7 @@
         }
       }
     }
-    #READ PRIMARY AV PRODUCT VENDOR XML DATA INTO NESTED HASHTABLE FOR LATER USE
+    #READ VERSION XML DATA INTO NESTED HASHTABLE FOR LATER USE
     try {
       if (-not $blnXML) {
         write-host $blnXML
@@ -271,8 +271,8 @@
               $xmldiag += "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               write-host "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               #REMOVE PREVIOUS COPIES OF SCRIPT
-              if (test-path -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1") {
-                remove-item -path "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1" -force -erroraction stop
+              if (test-path -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1") {
+                remove-item -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1" -force -erroraction stop
               }
               #DOWNLOAD LATEST VERSION OF ORIGINAL SCRIPT
               if (($null -eq $strDIR) -or ($strDIR -eq "")) {
