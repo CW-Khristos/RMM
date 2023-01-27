@@ -11,10 +11,10 @@
     Script will output logfile to C:\IT\Log\Sophos_Uninstall
  
 .NOTES
-    Version        : 0.1.0 (25 January 2023)
+    Version        : 0.1.1 (27 January 2023)
     Creation Date  : 25 January 2023
     Purpose/Change : Provide modern Powershell conversion of Sophos Uninstall BAT Script : https://support.sophos.com/support/s/article/KB-000035419?language=en_US
-    File Name      : Sophos_Uninstall_0.1.0.ps1 
+    File Name      : Sophos_Uninstall_0.1.1.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com - Khristos#8436
     Requires       : PowerShell Version 2.0+ installed
     Thanks         : Brian Ellis - Third Party Verification and Addition / Change Suggestions
