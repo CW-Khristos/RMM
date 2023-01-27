@@ -460,6 +460,7 @@
                 ver = "$($itm.$script:bitarch.ver)"
                 verval = "$($itm.$script:bitarch.verval)"
                 compver = "$($itm.$script:bitarch.compver)"
+                compverval = "$($itm.$script:bitarch.compverval)"
                 stat = "$($itm.$script:bitarch.stat)"
                 statval = "$($itm.$script:bitarch.statval)"
                 update = "$($itm.$script:bitarch.update)"
