@@ -144,15 +144,9 @@
     $blnXML = $true
     $xmldiag = $null
     #RETRIEVE VERSION XML FROM GITHUB
-    if (($null -eq $strDIR) -or ($strDIR -eq "")) {
-      $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
-      write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
-      $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/version.xml"
-    } elseif (($null -ne $strDIR) -and ($strDIR -ne "")) {
-      $xmldiag += "Loading : '$($strREPO)/$($strBRCH)/$($strDIR)' Version XML`r`n"
-      write-host "Loading : '$($strREPO)/$($strBRCH)/$($strDIR)' Version XML" -foregroundcolor yellow
-      $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/version.xml"
-    }
+    $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
+    write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
+    $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/Datto/version.xml"
     try {
       $verXML = New-Object System.Xml.XmlDocument
       $verXML.Load($srcVER)
