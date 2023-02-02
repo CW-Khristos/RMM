@@ -497,6 +497,19 @@ clear-host
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
+#CHECK 'PERSISTENT' FOLDERS
+if (-not (test-path -path "C:\temp")) {
+  new-item -path "C:\temp" -itemtype directory
+}
+if (-not (test-path -path "C:\IT")) {
+  new-item -path "C:\IT" -itemtype directory
+}
+if (-not (test-path -path "C:\IT\Log")) {
+  new-item -path "C:\IT\Log" -itemtype directory
+}
+if (-not (test-path -path "C:\IT\Scripts")) {
+  new-item -path "C:\IT\Scripts" -itemtype directory
+}
 #Get the Hudu API Module if not installed
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 if (Get-Module -ListAvailable -Name HuduAPI) {
@@ -529,19 +542,6 @@ if (Get-Module -ListAvailable -Name AutotaskAPI) {
   }
 }
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
-#CHECK 'PERSISTENT' FOLDERS
-if (-not (test-path -path "C:\temp")) {
-  new-item -path "C:\temp" -itemtype directory
-}
-if (-not (test-path -path "C:\IT")) {
-  new-item -path "C:\IT" -itemtype directory
-}
-if (-not (test-path -path "C:\IT\Log")) {
-  new-item -path "C:\IT\Log" -itemtype directory
-}
-if (-not (test-path -path "C:\IT\Scripts")) {
-  new-item -path "C:\IT\Scripts" -itemtype directory
-}
 #Set Hudu logon information
 New-HuduAPIKey $script:HuduAPIKey
 New-HuduBaseUrl $script:HuduBaseDomain
