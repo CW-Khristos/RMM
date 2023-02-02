@@ -157,7 +157,8 @@ if (-not $script:blnFAIL) {
   New-HuduBaseUrl $HuduBaseDomain
 
   $SiteLayout = Get-HuduAssetLayouts -name $HuduSiteLayoutName
-  if (!$SiteLayout) { 
+  if (!$SiteLayout) {
+    $script:blnFAIL = $true
     $AssetLayoutFields = @(
       @{
         label = 'Site Name'
@@ -202,13 +203,14 @@ if (-not $script:blnFAIL) {
         position = 7
       }
     )
-    Write-Host "Creating New Site Layout $($HuduSiteLayoutName)"
-    $script:diag += "Creating New Site Layout $($HuduSiteLayoutName)`r`n"
-    $NewLayout = New-HuduAssetLayout -name $HuduSiteLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $true -include_photos $true -include_comments $true -include_files $true -fields $AssetLayoutFields
-    $SiteLayout = Get-HuduAssetLayouts -name $HuduSiteLayoutName
+    Write-Host "Missing Site Layout $($HuduSiteLayoutName)"
+    $script:diag += "Missing Site Layout $($HuduSiteLayoutName)`r`n"
+    #$NewLayout = New-HuduAssetLayout -name $HuduSiteLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $true -include_photos $true -include_comments $true -include_files $true -fields $AssetLayoutFields
+    #$SiteLayout = Get-HuduAssetLayouts -name $HuduSiteLayoutName
   }
   $DeviceLayout = Get-HuduAssetLayouts -name $HuduAssetLayoutName
-  if (!$DeviceLayout) { 
+  if (!$DeviceLayout) {
+    $script:blnFAIL = $true
     $AssetLayoutFields = @(
       @{
         label = 'Device Name'
@@ -272,45 +274,45 @@ if (-not $script:blnFAIL) {
         position = 2
       }
     )
-    Write-Host "Creating New Asset Layout $($HuduAssetLayoutName)"
-    $script:diag += "Creating New Asset Layout $($HuduAssetLayoutName)`r`n"
-    $NewLayout = New-HuduAssetLayout -name $HuduAssetLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $true -include_photos $true -include_comments $true -include_files $true -fields $AssetLayoutFields
-    $DeviceLayout = Get-HuduAssetLayouts -name $HuduAssetLayoutName
-  }
-
-  $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
-  $script:diag += "Start documentation process.`r`nLogging in to Unifi API.`r`n"
-  $script:diag += "$($strLineSeparator)`r`n"
-  write-host "`r`n$($strLineSeparator)"
-  write-host "Start documentation process.`r`nLogging in to Unifi API." -foregroundColor green
-  write-host "$($strLineSeparator)"
-  try {
-    Invoke-RestMethod -Uri "$($UnifiBaseUri)/login" -Method POST -Body $script:uniFiCredentials -SessionVariable websession
-  } catch {
-    $script:blnFAIL = $true
-    $script:diag += "Failed to log in on the Unifi API.`r`n`tError was: $($_.Exception.Message)`r`n"
-    $script:diag += "$($strLineSeparator)`r`n`r`n"
-    write-host "Failed to log in on the Unifi API.`r`n`tError was: $($_.Exception.Message)" -ForegroundColor Red
-    write-host "$($strLineSeparator)`r`n"
-  }
-  $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
-  $script:diag += "Collecting sites from Unifi API.`r`n"
-  $script:diag += "$($strLineSeparator)`r`n"
-  write-host "`r`n$($strLineSeparator)"
-  write-host "Collecting sites from Unifi API." -ForegroundColor Green
-  write-host "$($strLineSeparator)"
-  try {
-    $sites = (Invoke-RestMethod -Uri "$($UnifiBaseUri)/self/sites" -WebSession $websession).data
-    $sites = $sites | sort -property desc
-  } catch {
-    $script:blnFAIL = $true
-    $script:diag += "Failed to collect the sites.`r`n`tError was: $($_.Exception.Message)`r`n"
-    $script:diag += "$($strLineSeparator)`r`n`r`n"
-    write-host "Failed to collect the sites.`r`n`tError was: $($_.Exception.Message)" -ForegroundColor Red
-    write-host "$($strLineSeparator)`r`n"
+    Write-Host "Missing Asset Layout $($HuduAssetLayoutName)"
+    $script:diag += "Missing Asset Layout $($HuduAssetLayoutName)`r`n"
+    #$NewLayout = New-HuduAssetLayout -name $HuduAssetLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $true -include_photos $true -include_comments $true -include_files $true -fields $AssetLayoutFields
+    #$DeviceLayout = Get-HuduAssetLayouts -name $HuduAssetLayoutName
   }
 
   if (-not $script:blnFAIL) {
+    $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
+    $script:diag += "Start documentation process.`r`nLogging in to Unifi API.`r`n"
+    $script:diag += "$($strLineSeparator)`r`n"
+    write-host "`r`n$($strLineSeparator)"
+    write-host "Start documentation process.`r`nLogging in to Unifi API." -foregroundColor green
+    write-host "$($strLineSeparator)"
+    try {
+      Invoke-RestMethod -Uri "$($UnifiBaseUri)/login" -Method POST -Body $script:uniFiCredentials -SessionVariable websession
+    } catch {
+      $script:blnFAIL = $true
+      $script:diag += "Failed to log in on the Unifi API.`r`n`tError was: $($_.Exception.Message)`r`n"
+      $script:diag += "$($strLineSeparator)`r`n`r`n"
+      write-host "Failed to log in on the Unifi API.`r`n`tError was: $($_.Exception.Message)" -ForegroundColor Red
+      write-host "$($strLineSeparator)`r`n"
+    }
+    $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
+    $script:diag += "Collecting sites from Unifi API.`r`n"
+    $script:diag += "$($strLineSeparator)`r`n"
+    write-host "`r`n$($strLineSeparator)"
+    write-host "Collecting sites from Unifi API." -ForegroundColor Green
+    write-host "$($strLineSeparator)"
+    try {
+      $sites = (Invoke-RestMethod -Uri "$($UnifiBaseUri)/self/sites" -WebSession $websession).data
+      $sites = $sites | sort -property desc
+    } catch {
+      $script:blnFAIL = $true
+      $script:diag += "Failed to collect the sites.`r`n`tError was: $($_.Exception.Message)`r`n"
+      $script:diag += "$($strLineSeparator)`r`n`r`n"
+      write-host "Failed to collect the sites.`r`n`tError was: $($_.Exception.Message)" -ForegroundColor Red
+      write-host "$($strLineSeparator)`r`n"
+    }
+
     foreach ($site in $sites) {
       ######################### Unifi Site Documentation ###########################
       #First we will see if there is an Asset that matches the site name with this Asset Layout
@@ -481,11 +483,16 @@ if (-not $script:blnFAIL) {
       $script:diag += "Attempting to map $($site.desc) devices`r`n"
       $script:diag += "$($strLineSeparator)`r`n"
       if (!$SiteLayout) {
-        $script:diag += "Please run the Hudu-Unifi-Documentation.ps1 first to create the Unifi site layout or check the name in 'HuduSiteLayoutName'`r`n"
+        $script:diag += "Please run the Hudu-Unifi-Documentation.ps1 first to create the Unifi site layout or check the name in '$($HuduSiteLayoutName)'`r`n"
         $script:diag += "$($strLineSeparator)`r`n`r`n"
-        Write-Host "Please run the Hudu-Unifi-Documentation.ps1 first to create the Unifi site layout or check the name in 'HuduSiteLayoutName'"
+        Write-Host "Please run the Hudu-Unifi-Documentation.ps1 first to create the Unifi site layout or check the name in '$($HuduSiteLayoutName)'"
         write-host "$($strLineSeparator)`r`n"
-        exit
+        #WRITE TO LOGFILE
+        "$($script:diag)" | add-content $script:logPath -force
+        write-DRMMAlert "Unifi_WatchDog : Execution Failed : Please Create the 'Unifi - AutoDoc' Site Layout"
+        write-DRMMDiag "$($script:diag)"
+        $script:diag = $null
+        exit 1
       }
       $SiteAsset = Get-HuduAssets -name "$($site.desc) - Unifi" -assetlayoutid $SiteLayout.id
       if (!$SiteAsset) {
