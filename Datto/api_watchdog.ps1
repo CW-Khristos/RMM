@@ -1,4 +1,4 @@
-#REGION ----- DECLARATIONS ----
+#region ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
   #Param(
@@ -19,10 +19,16 @@
   $script:blnWARN           = $false
   $script:blnSITE           = $false
   $script:strLineSeparator  = "---------"
-  $script:logPath = "C:\IT\Log\API_WatchDog"
+  $script:logPath           = "C:\IT\Log\API_WatchDog"
   ######################### TLS Settings ###########################
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
+  ######################### Hudu Settings ###########################
+  $script:huduCalls         = 0
+  # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
+  $script:HuduAPIKey        = $env:i_HuduKey
+  # Set the base domain of your Hudu instance without a trailing /
+  $script:HuduBaseDomain    = $env:i_HuduDomain
   ######################### RMM Settings ###########################
   #RMM API CREDS
   $script:rmmKey            = $env:i_rmmKey
@@ -60,15 +66,9 @@
   $script:psaAPI            = $env:i_psaAPI
   $script:psaGenFilter      = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
   $script:psaActFilter      = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
-  ######################### Hudu Settings ###########################
-  $script:huduCalls         = 0
-  # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
-  $script:HuduAPIKey        = $env:i_HuduKey
-  # Set the base domain of your Hudu instance without a trailing /
-  $script:HuduBaseDomain    = $env:i_HuduDomain
-#ENDREGION ----- DECLARATIONS ----
+#endregion ----- DECLARATIONS ----
 
-#REGION ----- FUNCTIONS ----
+#region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
     write-host "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
@@ -489,7 +489,7 @@
       $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n`r`n"
     }
   }
-#ENDREGION ----- FUNCTIONS ----
+#endregion ----- FUNCTIONS ----
 
 #------------
 #BEGIN SCRIPT
@@ -588,6 +588,7 @@ if (-not $script:blnFAIL) {
     if (($($script:typeMap[[int]$($company.CompanyType)]) -ne "Dead") -and 
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Vendor") -and
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Partner") -and
+      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Prospect") -and
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Lead") -and 
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
         #CHECK FOR COMPANY IN DRMM SITES
