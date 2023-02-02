@@ -962,11 +962,11 @@ if (-not $script:blnBREAK) {
         position = 5
       }
     )
-    $script:huduCalls += 2
-    write-host "$($strLineSeparator)`r`nCreating New DNS Asset Layout $($DNSHistoryLayoutName)"
-    $script:diag += "`r`n$($strLineSeparator)`r`nCreating New DNS Asset Layout $($DNSHistoryLayoutName)"
-    $NewLayout = New-HuduAssetLayout -name $DNSHistoryLayoutName -icon "fas fa-sitemap" -color "#00adef" -icon_color "#ffffff" -include_passwords $true -include_photos $false -include_comments $true -include_files $true -fields $AssetLayoutFields
-    $DNSLayout = Get-HuduAssetLayouts -name $DNSHistoryLayoutName
+    #$script:huduCalls += 2
+    write-host "$($strLineSeparator)`r`nMissing DNS Asset Layout $($DNSHistoryLayoutName)"
+    $script:diag += "`r`n$($strLineSeparator)`r`nMissing DNS Asset Layout $($DNSHistoryLayoutName)"
+    #$NewLayout = New-HuduAssetLayout -name $DNSHistoryLayoutName -icon "fas fa-sitemap" -color "#00adef" -icon_color "#ffffff" -include_passwords $true -include_photos $false -include_comments $true -include_files $true -fields $AssetLayoutFields
+    #$DNSLayout = Get-HuduAssetLayouts -name $DNSHistoryLayoutName
   }
   $websites = Get-HuduWebsites | where -filter {$_.disable_dns -eq $false}
   foreach ($website in $websites){
