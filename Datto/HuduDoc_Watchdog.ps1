@@ -10,12 +10,12 @@
  
 .NOTES
     Version                  : 0.1.2 (04 August 2022)
-    Creation Date            : 25 August 2022
+    Creation Date            : 23 August 2022
     Purpose/Change           : Modification of AutoTask and Customer Services MagicDash to integrate NAble / Cove Data Protection
                                https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
                                https://mspp.io/hudu-magic-dash-customer-services/
                                https://mspp.io/hudu-dns-history-and-alerts/
-    File Name                : EventLog_Monitoring_0.1.0.ps1
+    File Name                : HuduDoc_Watchdog.ps1
     Hudu Source              : Luke Whitelock
                                https://mspp.io/author/iqadmin/
     Backup.Management Source : Eric Harless, Head Backup Nerd - N-able 
