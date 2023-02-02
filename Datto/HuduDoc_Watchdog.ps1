@@ -125,7 +125,7 @@ To Do:
   $TableStylingGood               = "<th>", "<th style=`"background-color:#aeeab4`">"
 #endregion ----- DECLARATIONS ----
 
-#REGION ----- FUNCTIONS ----
+#region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
     write-host "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
@@ -139,6 +139,17 @@ To Do:
   } ## write-DRMMAlert
 
 #region ----- MISC FUNCTIONS ----
+  function Convert-UnixTimeToDateTime($inputUnixTime){
+    if ($inputUnixTime -gt 0 ) {
+      $epoch = Get-Date -Date "1970-01-01 00:00:00Z"
+      $epoch = $epoch.ToUniversalTime()
+      $epoch = $epoch.AddSeconds($inputUnixTime)
+      return $epoch
+    } else {
+      return ""
+    }
+  }  ## Convert epoch time to date time
+
   function logERR ($intSTG, $strModule, $strErr) {
     $script:blnWARN = $true
     #CUSTOM ERROR CODES
@@ -201,17 +212,6 @@ To Do:
       $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n`r`n"
     }
   }
-
-  function Convert-UnixTimeToDateTime($inputUnixTime){
-    if ($inputUnixTime -gt 0 ) {
-      $epoch = Get-Date -Date "1970-01-01 00:00:00Z"
-      $epoch = $epoch.ToUniversalTime()
-      $epoch = $epoch.AddSeconds($inputUnixTime)
-      return $epoch
-    } else {
-      return ""
-    }
-  }  ## Convert epoch time to date time
 #endregion ----- MISC FUNCTIONS ----
 
 #region ----- PSA FUNCTIONS ----
@@ -329,80 +329,6 @@ To Do:
     }
   } ## PSA-GetCompanies API Call
 #endregion ----- PSA FUNCTIONS ----
-
-  function Check-DNSChange {
-    Param (
-      [string]$currentDNS = '',
-      [string]$newDNS = '',
-      [string]$recordType = '',
-      [string]$website = '',
-      [string]$companyName = ''
-    )
-    $Comp = Compare-Object -ReferenceObject $($currentDNS -split "`n") -DifferenceObject $($newDNS -split "`n")
-    if ($Comp){
-      # Send Teams Alert
-      if ($enableTeamsAlerts) {
-        $JSONBody = [PSCustomObject][Ordered]@{
-          "@type"      = "MessageCard"
-          "@context"   = "http://schema.org/extensions"
-          "summary"    = "$companyName - $website - DNS $recordType change detected"
-          "themeColor" = '0078D7'
-          "sections"   = @(
-            @{
-              "activityTitle"    = "$companyName - $website - DNS $recordType Change Detected"
-              "facts"            = @(
-                @{
-                  "name"  = "Original DNS Records"
-                  "value" = $((($Comp | where-object -filter {$_.SideIndicator -eq "<="}).InputObject | out-string ) -replace '<[^>]+>',' ')
-                },
-                @{
-                  "name"  = "New DNS Records"
-                  "value" = $((($Comp | where-object -filter {$_.SideIndicator -eq "=>"}).InputObject | out-string ) -replace '<[^>]+>',' ')
-                }
-              )
-              "markdown" = $true
-            }
-          )
-        }
-        $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100          
-        $parameters = @{
-          "URI"         = $teamsWebhook
-          "Method"      = 'POST'
-          "Body"        = $TeamMessageBody
-          "ContentType" = 'application/json'
-        }
-        $result = Invoke-RestMethod @parameters
-      }
-      if ($enableEmailAlerts){
-        $oldVal = ($Comp | where-object -filter {$_.SideIndicator -eq "<="}).InputObject | out-string
-        $newVal = ($Comp | where-object -filter {$_.SideIndicator -eq "=>"}).InputObject | out-string
-        $mailSubject = "$companyName - $website - DNS $recordType change detected"
-        $body = "
-          <h3>$mailSubject</h3>
-          <p>Original DNS Record:</p>
-          <table>
-          $oldVal
-          </table>
-          <p>New DNS Record:</p>
-          <table>
-          $newVal
-          </table>
-          "
-        $password = ConvertTo-SecureString $mailPass -AsPlainText -Force
-        $mailcred = New-Object System.Management.Automation.PSCredential ($mailUser, $password)
-        $sendMailParams = @{
-          From = $mailFrom
-          To = $mailTo
-          Subject = $mailSubject
-          Body = $body
-          SMTPServer = $mailServer
-          UseSsl = $mailUseSSL
-          Credential = $mailcred
-        }
-        Send-MailMessage @sendMailParams -BodyAsHtml
-      }
-    }
-  }
 
 #region ----- Backup.Management Authentication ----
   function Send-APICredentialsCookie {
@@ -576,6 +502,80 @@ To Do:
     }
   } ## Send-GetDevices API Call
 #endregion ----- Backup.Management JSON Calls ----
+
+  function Check-DNSChange {
+    Param (
+      [string]$currentDNS = '',
+      [string]$newDNS = '',
+      [string]$recordType = '',
+      [string]$website = '',
+      [string]$companyName = ''
+    )
+    $Comp = Compare-Object -ReferenceObject $($currentDNS -split "`n") -DifferenceObject $($newDNS -split "`n")
+    if ($Comp){
+      # Send Teams Alert
+      if ($enableTeamsAlerts) {
+        $JSONBody = [PSCustomObject][Ordered]@{
+          "@type"      = "MessageCard"
+          "@context"   = "http://schema.org/extensions"
+          "summary"    = "$companyName - $website - DNS $recordType change detected"
+          "themeColor" = '0078D7'
+          "sections"   = @(
+            @{
+              "activityTitle"    = "$companyName - $website - DNS $recordType Change Detected"
+              "facts"            = @(
+                @{
+                  "name"  = "Original DNS Records"
+                  "value" = $((($Comp | where-object -filter {$_.SideIndicator -eq "<="}).InputObject | out-string ) -replace '<[^>]+>',' ')
+                },
+                @{
+                  "name"  = "New DNS Records"
+                  "value" = $((($Comp | where-object -filter {$_.SideIndicator -eq "=>"}).InputObject | out-string ) -replace '<[^>]+>',' ')
+                }
+              )
+              "markdown" = $true
+            }
+          )
+        }
+        $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100          
+        $parameters = @{
+          "URI"         = $teamsWebhook
+          "Method"      = 'POST'
+          "Body"        = $TeamMessageBody
+          "ContentType" = 'application/json'
+        }
+        $result = Invoke-RestMethod @parameters
+      }
+      if ($enableEmailAlerts){
+        $oldVal = ($Comp | where-object -filter {$_.SideIndicator -eq "<="}).InputObject | out-string
+        $newVal = ($Comp | where-object -filter {$_.SideIndicator -eq "=>"}).InputObject | out-string
+        $mailSubject = "$companyName - $website - DNS $recordType change detected"
+        $body = "
+          <h3>$mailSubject</h3>
+          <p>Original DNS Record:</p>
+          <table>
+          $oldVal
+          </table>
+          <p>New DNS Record:</p>
+          <table>
+          $newVal
+          </table>
+          "
+        $password = ConvertTo-SecureString $mailPass -AsPlainText -Force
+        $mailcred = New-Object System.Management.Automation.PSCredential ($mailUser, $password)
+        $sendMailParams = @{
+          From = $mailFrom
+          To = $mailTo
+          Subject = $mailSubject
+          Body = $body
+          SMTPServer = $mailServer
+          UseSsl = $mailUseSSL
+          Credential = $mailcred
+        }
+        Send-MailMessage @sendMailParams -BodyAsHtml
+      }
+    }
+  }
 
   function Set-BackupDash ($i_Company, $i_CompanyID, $i_AllPartners, $i_AllDevices, $i_Note, $i_URL, $i_BackupID) {
     ######################### Backups Section ###########################
@@ -785,7 +785,7 @@ To Do:
       }
     }
   }
-#ENDREGION ----- FUNCTIONS ----
+#endregion ----- FUNCTIONS ----
 
 #------------
 #BEGIN SCRIPT
@@ -854,7 +854,7 @@ if (-not $script:blnBREAK) {
   } else {
     # Get all the detail assets and loop
     $script:huduCalls += 1
-    $DetailsAssets = Get-HuduAssets -assetlayoutid $DetailsLayout.id
+    $DetailsAssets = Get-HuduAssets -assetlayoutid $DetailsLayout.id | Sort-Object -Property company_name
     foreach ($Asset in $DetailsAssets) {
       write-host "`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
       $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
@@ -968,7 +968,7 @@ if (-not $script:blnBREAK) {
     #$NewLayout = New-HuduAssetLayout -name $DNSHistoryLayoutName -icon "fas fa-sitemap" -color "#00adef" -icon_color "#ffffff" -include_passwords $true -include_photos $false -include_comments $true -include_files $true -fields $AssetLayoutFields
     #$DNSLayout = Get-HuduAssetLayouts -name $DNSHistoryLayoutName
   }
-  $websites = Get-HuduWebsites | where -filter {$_.disable_dns -eq $false}
+  $websites = Get-HuduWebsites | where -filter {$_.disable_dns -eq $false} | Sort-Object -Property company_name
   foreach ($website in $websites){
     $dnsname = ([System.Uri]$website.name).authority
     write-host "$($strLineSeparator)`r`nResolving $($dnsname) for $($website.company_name)"
@@ -1338,9 +1338,8 @@ if (-not $script:blnBREAK) {
   #Create Global Overdue Ticket Report
   if ($CreateAllOverdueTicketsReport -eq $true) {
     $articleHTML = [System.Net.WebUtility]::HtmlDecode($($GlobalOverdue | 
-      where {$_.companyID -eq $company.CompanyID} | 
-        select 'Ticket-Number', 'Company', 'Title', 'Due', 'Resource', 'Last-Update', 'Priority', 'Status' | 
-          Sort-object Company | convertto-html -fragment | out-string))
+      select 'Ticket-Number', 'Company', 'Title', 'Due', 'Resource', 'Last-Update', 'Priority', 'Status' | 
+        Sort-object Company | convertto-html -fragment | out-string))
     $reportDate = get-date
     $body = "<h4>Report last updated: $($reportDate)</h4><figure class=`"table`">$($articleHTML)</figure>"
     #Check if an article already exists
