@@ -102,7 +102,7 @@ try {
   $scheduleset = $scheduleset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
   write-host "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($scheduleset)`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($scheduleset)`r`n$($strLineSeparator)`r`n"
-  new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom14" -value "$($scheduleset)" -force
+  new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($env:udfSchedules)" -value "$($scheduleset)" -force
 } catch {
   $script:blnWARN = $true
   write-host "ERROR ENCOUNTERED"
@@ -126,7 +126,7 @@ try {
   $archiveset = $archiveset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
   write-host "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archiveset)`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archiveset)`r`n$($strLineSeparator)`r`n"
-  new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom15" -value "$($archiveset)" -force
+  new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($env:udfArchives)" -value "$($archiveset)" -force
 } catch {
   $script:blnWARN = $true
   write-host "ERROR ENCOUNTERED"
