@@ -638,12 +638,13 @@ if (-not $script:blnFAIL) {
             if ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
               write-host "UPDATE SITE : $($company.CompanyName)"
               $script:diag += "UPDATE SITE : $($company.CompanyName)`r`n"
+              $note = "$($rmmSite.notes)"
               $params = @{
                 rmmID               = $rmmSite.uid
                 psaID               = $company.CompanyID
                 name                = $company.CompanyName
                 description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nUpdated by API Watchdog\n$($date)"
-                notes               = "$($rmmSite.notes)"
+                notes               = "$($note)"
                 onDemand            = "false"
                 installSplashtop    = "true"
               }
