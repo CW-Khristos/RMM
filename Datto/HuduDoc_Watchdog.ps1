@@ -41,12 +41,12 @@ To Do:
 #First Clear any variables
 #Remove-Variable * -ErrorAction SilentlyContinue
 #region ----- DECLARATIONS ----
-  $script:diag      = $null
-  $script:blnWARN   = $false
-  $script:blnBREAK  = $false
-  $logPath          = "C:\IT\Log\HuduDoc_Watchdog"
-  $strLineSeparator = "----------------------------------"
-  $timestamp        = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+  $script:diag            = $null
+  $script:blnWARN         = $false
+  $script:blnBREAK        = $false
+  $logPath                = "C:\IT\Log\HuduDoc_Watchdog"
+  $strLineSeparator       = "----------------------------------"
+  $timestamp              = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
   ######################### TLS Settings ###########################
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -57,41 +57,45 @@ To Do:
   # Set the base domain of your Hudu instance without a trailing /
   $script:HuduBaseDomain  = $env:HuduDomain
   ######################## Customer Management ##########################
-  $SplitChar            = ":"
-  $ManagementLayoutName = "Customer Management"
-  $AllowedActions       = @("ENABLED", "NOTE", "URL")
-  ######################## DNS Settings ##########################
-  $script:dnsCalls      = 0
-  $DNSHistoryLayoutName = "DNS Entries - Autodoc"
+  $SplitChar              = ":"
+  $ManagementLayoutName   = "Customer Management"
+  $AllowedActions         = @("ENABLED", "NOTE", "URL")
+  #region####################### DNS Settings ##########################
+  $script:dnsCalls        = 0
+  $DNSHistoryLayoutName   = "DNS Entries - Autodoc"
   # Enable sending alerts on dns change to a teams webhook
-  $enableTeamsAlerts    = $false
-  #$teamsWebhook         = "Your Teams Webhook URL"
+  $enableTeamsAlerts      = $false
+  #$teamsWebhook          = "Your Teams Webhook URL"
   # Enable sending alerts on dns change to an email address
-  $enableEmailAlerts    = $false
-  #$mailTo               = "alerts@domain.com"
-  #$mailFrom             = "alerts@domain.com"
-  #$mailServer           = "mailserver.domain.com"
-  #$mailPort             = "25"
-  $mailUseSSL           = $false
-  #$mailUser             = "user"
-  #$mailPass             = "pass"
-  ######################## Backups Settings ##########################
-  $script:bmCalls = 0
-  $script:blnBM   = $false
-  $script:bmRoot  = $env:BackupRoot
-  $script:bmUser  = $env:BackupUser
-  $script:bmPass  = $env:BackupPass
-  $urlJSON        = "https://api.backup.management/jsonapi"
-  $Filter1        = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup.
-  ######################### Autotask Settings ###########################
-  $script:psaCalls    = 0
-  $AutotaskRoot       = $env:ATRoot
-  $AutoTaskAPIBase    = $env:ATAPIBase
-  $ExcludeType        = '[]'
-  $ExcludeQueue       = '[]'
-  $ExcludeStatus      = '[5,20]'
+  $enableEmailAlerts      = $false
+  #$mailTo                = "alerts@domain.com"
+  #$mailFrom              = "alerts@domain.com"
+  #$mailServer            = "mailserver.domain.com"
+  #$mailPort              = "25"
+  $mailUseSSL             = $false
+  #$mailUser              = "user"
+  #$mailPass              = "pass"
+  #endregion
+  #region####################### Backups Settings ##########################
+  $script:bmCalls         = 0
+  $script:blnBM           = $false
+  $script:bmRoot          = $env:BackupRoot
+  $script:bmUser          = $env:BackupUser
+  $script:bmPass          = $env:BackupPass
+  $urlJSON                = "https://api.backup.management/jsonapi"
+  $Filter1                = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup
+  #endregion
+  #region####################### Backupify Settings ##########################
+  #endregion
+  #region######################## Autotask Settings ###########################
+  $script:psaCalls        = 0
+  $AutotaskRoot           = $env:ATRoot
+  $AutoTaskAPIBase        = $env:ATAPIBase
+  $ExcludeType            = '[]'
+  $ExcludeQueue           = '[]'
+  $ExcludeStatus          = '[5,20]'
   #PSA API DATASETS
-  $script:typeMap     = @{
+  $script:typeMap         = @{
     1 = "Customer"
     2 = "Lead"
     3 = "Prospect"
@@ -100,22 +104,22 @@ To Do:
     7 = "Vendor"
     8 = "Partner"
   }
-  $script:classMap    = @{}
-  $script:categoryMap = @{}
-  $GlobalOverdue      = [System.Collections.ArrayList]@()
-  $AutotaskExe        = "/Autotask/AutotaskExtend/ExecuteCommand.aspx?Code=OpenTicketDetail&TicketNumber="
-  $AutotaskDev        = "/Autotask/AutotaskExtend/AutotaskCommand.aspx?&Code=OpenInstalledProduct&InstalledProductID="
-  $psaGenFilter       = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
-  $psaActFilter       = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
-  $TicketFilter       = "{`"filter`":[{`"op`":`"notin`",`"field`":`"queueID`",`"value`":$($ExcludeQueue)},{`"op`":`"notin`",`"field`":`"status`",`"value`":$($ExcludeStatus)},{`"op`":`"notin`",`"field`":`"ticketType`",`"value`":$($ExcludeType)}]}"
+  $script:classMap        = @{}
+  $script:categoryMap     = @{}
+  $GlobalOverdue          = [System.Collections.ArrayList]@()
+  $AutotaskExe            = "/Autotask/AutotaskExtend/ExecuteCommand.aspx?Code=OpenTicketDetail&TicketNumber="
+  $AutotaskDev            = "/Autotask/AutotaskExtend/AutotaskCommand.aspx?&Code=OpenInstalledProduct&InstalledProductID="
+  $psaGenFilter           = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
+  $psaActFilter           = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
+  $TicketFilter           = "{`"filter`":[{`"op`":`"notin`",`"field`":`"queueID`",`"value`":$($ExcludeQueue)},{`"op`":`"notin`",`"field`":`"status`",`"value`":$($ExcludeStatus)},{`"op`":`"notin`",`"field`":`"ticketType`",`"value`":$($ExcludeType)}]}"
   ########################### Autotask Auth ##############################
-  $script:AutotaskAPIUser       = $env:ATAPIUser
-  $script:AutotaskAPISecret     = $env:ATAPISecret
-  $script:AutotaskIntegratorID  = $env:ATIntegratorID
-  $psaHeaders                   = @{
-    'ApiIntegrationCode'        = "$($script:AutotaskIntegratorID)"
-    'UserName'                  = "$($script:AutotaskAPIUser)"
-    'Secret'                    = "$($script:AutotaskAPISecret)"
+  $script:AutotaskAPIUser         = $env:ATAPIUser
+  $script:AutotaskAPISecret       = $env:ATAPISecret
+  $script:AutotaskIntegratorID    = $env:ATIntegratorID
+  $psaHeaders                     = @{
+    'ApiIntegrationCode'          = "$($script:AutotaskIntegratorID)"
+    'UserName'                    = "$($script:AutotaskAPIUser)"
+    'Secret'                      = "$($script:AutotaskAPISecret)"
   }
   ##################### Autotask Report Settings ########################
   $folderID                       = 2
@@ -123,6 +127,7 @@ To Do:
   $globalReportName               = "Autotask - Overdue Ticket Report"
   $TableStylingBad                = "<th>", "<th style=`"background-color:#f8d1d3`">"
   $TableStylingGood               = "<th>", "<th style=`"background-color:#aeeab4`">"
+  #endregion
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
@@ -888,13 +893,13 @@ if (-not $script:blnBREAK) {
             default {'grey'}
           }
           $Param = @{
-            Title = $Service
-            CompanyName = $Asset.company_name
-            Shade = $Colour
+            Title = "$($Service)"
+            CompanyName = "$($Asset.company_name)"
+            Shade = "$($Colour)"
           }
           if ($NoteField.value){
-              $Param['Message'] = $NoteField.value
-              $Param | Add-Member -MemberType NoteProperty -Name 'Message' -Value $NoteField.value
+              $Param['Message'] = "$($NoteField.value)"
+              $Param | Add-Member -MemberType NoteProperty -Name 'Message' -Value "$($NoteField.value)"
           } else {
             $Param['Message'] = switch ($EnabledField.value) {
               $true {"Customer has $($Service)"}
@@ -903,7 +908,7 @@ if (-not $script:blnBREAK) {
             }
           }
           if (($URLField.value) -and ($Service -ne "Backup")) {
-            $Param['ContentLink'] = $URLField.value
+            $Param['ContentLink'] = "$($URLField.value)"
           }
           if ($Service -ne "Backup") {
             $script:huduCalls += 1
@@ -912,7 +917,7 @@ if (-not $script:blnBREAK) {
             $script:diag += "`r`n$($Service) Magic Dash Set`r`n$($strLineSeparator)"
           } elseif ($Service -eq "Backup") {
             switch ($EnabledField.value) {
-              $true {Set-BackupDash $Asset.company_name $Asset.company_id $false $true $NoteField.value $URLField.value $null}
+              $true {Set-BackupDash "$($Asset.company_name)" $Asset.company_id $false $true "$($NoteField.value)" "$($URLField.value)" $null}
               $false {$script:huduCalls += 1;Set-HuduMagicDash @Param}
             }
           }
@@ -975,11 +980,11 @@ if (-not $script:blnBREAK) {
     $script:diag += "`r`n$($strLineSeparator)`r`nResolving $($dnsname) for $($website.company_name)"
     try {
       $script:dnsCalls += 5
-      $arecords = resolve-dnsname $dnsname -type A_AAAA -ErrorAction Stop | select type, IPADDRESS | sort IPADDRESS | convertto-html -fragment | out-string
-      $mxrecords = resolve-dnsname $dnsname -type MX -ErrorAction Stop | sort NameExchange |convertto-html -fragment -property NameExchange | out-string
-      $nsrecords = resolve-dnsname $dnsname -type NS -ErrorAction Stop | sort NameHost | convertto-html -fragment -property NameHost| out-string
-      $txtrecords = resolve-dnsname $dnsname -type TXT -ErrorAction Stop | select @{N='Records';E={$($_.strings)}}| sort Records | convertto-html -fragment -property Records | out-string
-      $soarecords = resolve-dnsname $dnsname -type SOA -ErrorAction Stop | select PrimaryServer, NameAdministrator, SerialNumber | sort NameAdministrator | convertto-html -fragment | out-string
+      $arecords = resolve-dnsname "$($dnsname)" -type "A_AAAA" -ErrorAction Stop | select type, IPADDRESS | sort IPADDRESS | convertto-html -fragment | out-string
+      $mxrecords = resolve-dnsname "$($dnsname)" -type "MX" -ErrorAction Stop | sort NameExchange |convertto-html -fragment -property NameExchange | out-string
+      $nsrecords = resolve-dnsname "$($dnsname)" -type "NS" -ErrorAction Stop | sort NameHost | convertto-html -fragment -property NameHost| out-string
+      $txtrecords = resolve-dnsname "$($dnsname)" -type "TXT" -ErrorAction Stop | select @{N='Records';E={$($_.strings)}}| sort Records | convertto-html -fragment -property Records | out-string
+      $soarecords = resolve-dnsname "$($dnsname)" -type "SOA" -ErrorAction Stop | select PrimaryServer, NameAdministrator, SerialNumber | sort NameAdministrator | convertto-html -fragment | out-string
     } catch {
       $script:diag += "`r`n$($strLineSeparator)`r`n$($dnsname) lookup failed"
       write-host "$($strLineSeparator)`r`n$($dnsname) lookup failed" -foregroundcolor red
@@ -997,17 +1002,17 @@ if (-not $script:blnBREAK) {
     write-host "$($strLineSeparator)`r`n$($dnsname) lookup successful" -foregroundcolor green
     $companyid = $website.company_id
     #Swap out # as Hudu doesn't like it when searching
-    $AssetName = $dnsname
+    $AssetName = "$($dnsname)"
     #Check if there is already an asset
     $script:huduCalls += 1
-    $Asset = Get-HuduAssets -name $AssetName -companyid $companyid -assetlayoutid $DNSLayout.id
+    $Asset = Get-HuduAssets -name "$($AssetName)" -companyid $companyid -assetlayoutid $DNSLayout.id
     #If the Asset does not exist, we edit the body to be in the form of a new asset, if not, we just upload.
     if (!$Asset) {
       try {
         $script:huduCalls += 1
         write-host "$($strLineSeparator)`r`nCreating new DNS Asset`r`n$($strLineSeparator)"
         $script:diag += "`r`n$($strLineSeparator)`r`nCreating new DNS Asset`r`n$($strLineSeparator)"
-        $Asset = New-HuduAsset -name $AssetName -company_id $companyid -asset_layout_id $DNSLayout.id -fields $AssetFields
+        $Asset = New-HuduAsset -name "$($AssetName)" -company_id $companyid -asset_layout_id $DNSLayout.id -fields $AssetFields
       } catch {
         write-host "$($strLineSeparator)`r`nError Creating DNS Asset - $($AssetName)" -foregroundcolor red
         $script:diag += "`r`n$($strLineSeparator)`r`nError Creating DNS Asset - $($AssetName)"
@@ -1020,15 +1025,15 @@ if (-not $script:blnBREAK) {
       $txt_cur_value = ($Asset.fields | where-object -filter {$_.label -eq "TXT Records"}).value
       $soa_cur_value = ($Asset.fields | where-object -filter {$_.label -eq "SOA Records"}).value
       #Compare the new and old values and send alerts
-      Check-DNSChange -currentDNS $a_cur_value -newDNS $arecords -recordType "A / AAAA" -website $AssetName -companyName $website.company_name
-      Check-DNSChange -currentDNS $mx_cur_value -newDNS $mxrecords -recordType "MX" -website $AssetName -companyName $website.company_name
-      Check-DNSChange -currentDNS $ns_cur_value -newDNS $nsrecords -recordType "Name Servers" -website $AssetName -companyName $website.company_name
-      Check-DNSChange -currentDNS $txt_cur_value -newDNS $txtrecords -recordType "TXT" -website $AssetName -companyName $website.company_name
+      Check-DNSChange -currentDNS $a_cur_value -newDNS $arecords -recordType "A / AAAA" -website "$($AssetName)" -companyName "$($website.company_name)"
+      Check-DNSChange -currentDNS $mx_cur_value -newDNS $mxrecords -recordType "MX" -website "$($AssetName)" -companyName "$($website.company_name)"
+      Check-DNSChange -currentDNS $ns_cur_value -newDNS $nsrecords -recordType "Name Servers" -website "$($AssetName)" -companyName "$($website.company_name)"
+      Check-DNSChange -currentDNS $txt_cur_value -newDNS $txtrecords -recordType "TXT" -website "$($AssetName)" -companyName "$($website.company_name)"
       try {
         $script:huduCalls += 1
         write-host "$($strLineSeparator)`r`nUpdating DNS Asset`r`n$($strLineSeparator)"
         $script:diag += "`r`n$($strLineSeparator)`r`nUpdating DNS Asset`r`n$($strLineSeparator)"
-        $Asset = Set-HuduAsset -asset_id $Asset.id -name $AssetName -company_id $companyid -asset_layout_id $DNSLayout.id -fields $AssetFields
+        $Asset = Set-HuduAsset -asset_id $Asset.id -name "$($AssetName)" -company_id $companyid -asset_layout_id $DNSLayout.id -fields $AssetFields
       } catch {
         write-host "$($strLineSeparator)`r`nError Updating DNS Asset - $($AssetName)" -foregroundcolor red
         $script:diag += "`r`n$($strLineSeparator)`r`nError Updating DNS Asset - $($AssetName)"
