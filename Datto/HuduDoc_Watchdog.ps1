@@ -56,10 +56,12 @@ To Do:
   $script:HuduAPIKey      = $env:HuduKey
   # Set the base domain of your Hudu instance without a trailing /
   $script:HuduBaseDomain  = $env:HuduDomain
-  ######################## Customer Management ##########################
+  #region####################### Customer Management ##########################
   $SplitChar              = ":"
   $ManagementLayoutName   = "Customer Management"
   $AllowedActions         = @("ENABLED", "NOTE", "URL")
+  $FieldTiles             = @("FW", "NETWORK", "EMAIL", "ANTI-SPAM", "BACKUPIFY", "BACKUP", "AV", "VOICE", "MSA")
+  #endregion
   #region####################### DNS Settings ##########################
   $script:dnsCalls        = 0
   $DNSHistoryLayoutName   = "DNS Entries - Autodoc"
@@ -795,7 +797,6 @@ To Do:
 #------------
 #BEGIN SCRIPT
 clear-host
-Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 #Start script execution time calculation
 $ScrptStartTime = (get-date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
@@ -811,6 +812,18 @@ if (-not (test-path -path "C:\IT\Log")) {
 }
 if (-not (test-path -path "C:\IT\Scripts")) {
   new-item -path "C:\IT\Scripts" -itemtype directory
+}
+Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+#INSTALL NUGET PROVIDER
+if (-not (Get-PackageProvider -name NuGet)) {
+  Install-PackageProvider -Name NuGet -Force -Confirm:$false
+}
+#INSTALL POWERSHELLGET MODULE
+if (Get-Module -ListAvailable -Name PowershellGet) {
+  Import-Module PowershellGet 
+} else {
+  Install-Module PowershellGet -Force -Confirm:$false
+  Import-Module PowershellGet
 }
 #Get the Hudu API Module if not installed
 if (Get-Module -ListAvailable -Name HuduAPI) {
@@ -863,17 +876,15 @@ if (-not $script:blnBREAK) {
     foreach ($Asset in $DetailsAssets) {
       write-host "`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
       $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
-      # Loop through all the fields on the Asset
-      $Fields = foreach ($field in $Asset.fields) {
-        if ($field.label -like "*:*") {
-          # Split the field name
-          $SplitField = $field.label -split $SplitChar
+      # Return relevant Asset Fields
+      $Fields = foreach ($field in $FieldTiles) {
+        $Asset.fields | where {$_.label -match "$($field):*"} | foreach {
+          $SplitField = $_.label -split $SplitChar
           # Check the field has an allowed action.
           if ($SplitField[1] -notin $AllowedActions) {
             write-host "$($strLineSeparator)`r`nField $($field.label) is not an allowed action"
             $script:diag += "`r`n$($strLineSeparator)`r`nField $($field.label) is not an allowed action"
           } else {
-            # Format an object to work with
             [PSCustomObject]@{
               ServiceName   = $SplitField[0]
               ServiceAction = $SplitField[1]
@@ -882,10 +893,10 @@ if (-not $script:blnBREAK) {
           }
         }
       }
-      foreach ($Service in $Fields.servicename | select-object -unique){
-        $EnabledField = $Fields | Where-Object {$_.servicename -eq $Service -and $_.serviceaction -eq 'ENABLED'}
-        $NoteField = $Fields | Where-Object {$_.servicename -eq $Service -and $_.serviceaction -eq 'NOTE'}
-        $URLField = $Fields | Where-Object {$_.servicename -eq $Service -and $_.serviceaction -eq 'URL'}
+      foreach ($Service in $Fields.ServiceName | select-object -unique){
+        $EnabledField = $Fields | Where-Object {$_.ServiceName -eq $Service -and $_.ServiceAction -eq 'ENABLED'}
+        $NoteField = $Fields | Where-Object {$_.ServiceName -eq $Service -and $_.ServiceAction -eq 'NOTE'}
+        $URLField = $Fields | Where-Object {$_.ServiceName -eq $Service -and $_.ServiceAction -eq 'URL'}
         if ($EnabledField) {
           $Colour = switch ($EnabledField.value) {
             $true {'success'}
@@ -1372,7 +1383,7 @@ if (-not $script:blnBREAK) {
     $script:diag += "`r`n`r`nHuduDoc_WatchDog : Execution Successful"
     "$($script:diag)" | add-content $logPath -force
     write-DRMMAlert "HuduDoc_WatchDog : Execution Successful"
-    #write-DRMMDiag "$($script:diag)"
+    write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 0
   } elseif ($script:blnWARN) {
@@ -1380,7 +1391,7 @@ if (-not $script:blnBREAK) {
     $script:diag += "`r`n`r`nHuduDoc_WatchDog : Execution Completed with Warnings : See Diagnostics"
     "$($script:diag)" | add-content $logPath -force
     write-DRMMAlert "HuduDoc_WatchDog : Execution Completed with Warnings : See Diagnostics"
-    #write-DRMMDiag "$($script:diag)"
+    write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
   }
