@@ -9,7 +9,7 @@
     Combines AutoTask and Customer Services MagicDash and DNS History enhancements to Hudu
  
 .NOTES
-    Version                  : 0.1.2 (04 August 2022)
+    Version                  : 0.1.3 (18 February 2022)
     Creation Date            : 23 August 2022
     Purpose/Change           : Modification of AutoTask and Customer Services MagicDash to integrate NAble / Cove Data Protection
                                https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
