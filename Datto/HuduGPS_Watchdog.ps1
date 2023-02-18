@@ -298,3 +298,5 @@ if (-not $script:blnBREAK) {
   $script:diag = $null
   exit 1
 }
+#END SCRIPT
+#------------
