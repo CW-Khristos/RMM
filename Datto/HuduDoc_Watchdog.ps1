@@ -9,7 +9,7 @@
     Combines AutoTask and Customer Services MagicDash and DNS History enhancements to Hudu
  
 .NOTES
-    Version                  : 0.1.3 (20 February 2022)
+    Version                  : 0.1.3 (21 February 2022)
     Creation Date            : 23 August 2022
     Purpose/Change           : Modification of AutoTask and Customer Services MagicDash to integrate NAble / Cove Data Protection
                                https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
@@ -30,11 +30,13 @@
           Added DNS History Hudu enhancement
     0.1.2 Added Model and Serial Lookup enhancements
           Added Backup.Management dashboards to respective Backup Device Assets
-    0.1.3 Dealing with minor bugs, erro handling, output formatting
-          Major Optimizations in reducing number of subsequent AT and Hudu API Calls
+    0.1.3 Dealing with minor bugs, error handling, output formatting
+          Major Optimizations in reducing number of subsequent AT, Backup.Management, and Hudu API Calls
           Reduction of AT API Calls :
-           - Tested and confirmed more efficient and faster to retrieve filtered set of "all" Tickets vs filtering for each Company
-           - Tested and confirmed more efficient and faster to retrieve filtered set of "active" Assets vs filtering for each Company
+           - Tested and confirmed more efficient and faster to retrieve filtered set of "all" Tickets once vs filtering for each Company each time
+           - Tested and confirmed more efficient and faster to retrieve filtered set of "active" Assets once vs filtering for each Company each time
+          Reduction of Backup.Management API Calls :
+           - Tested and confirmed more efficient and faster to retrieve all Backup Accounts once vs filtering for each Company each time
           Reduction of Hudu API Calls :
            - Switched to collecting each relevant Asset Layout once for the entire script; previously this was done as each was required
           Timing Tweaks :
@@ -57,20 +59,19 @@ To Do:
 #First Clear any variables
 #Remove-Variable * -ErrorAction SilentlyContinue
 #region ----- DECLARATIONS ----
-  $script:diag            = $null
-  $script:blnWARN         = $false
-  $script:blnBREAK        = $false
-  $logPath                = "C:\IT\Log\HuduDoc_Watchdog"
-  $strLineSeparator       = "----------------------------------"
-  $timestamp              = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+  $script:diag                    = $null
+  $script:blnWARN                 = $false
+  $script:blnBREAK                = $false
+  $logPath                        = "C:\IT\Log\HuduDoc_Watchdog"
+  $strLineSeparator               = "----------------------------------"
+  $timestamp                      = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
   ######################### TLS Settings ###########################
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
   #region######################## Hudu Settings ###########################
-  $script:huduCalls       = 0
+  $script:huduCalls               = 0
   #HUDU DATASETS
-  $huduLayouts            = $null
-  $Layouts                = @(
+  $Layouts                        = @(
     "Customer Management",
     "DNS Entries - Autodoc",
     "Printers",
@@ -82,19 +83,18 @@ To Do:
     "UPS",
     "Unknown",
     "Workstation")
+  $huduLayouts                    = $null
   # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
-  $script:HuduAPIKey      = $env:HuduKey
+  $script:HuduAPIKey              = $env:HuduKey
   # Set the base domain of your Hudu instance without a trailing /
-  $script:HuduBaseDomain  = $env:HuduDomain
+  $script:HuduBaseDomain          = $env:HuduDomain
   #endregion
   #region####################### Customer Management ##########################
-  $SplitChar              = ":"
-  $ManagementLayoutName   = "Customer Management"
-  $AllowedActions         = @(
+  $AllowedActions                 = @(
     "ENABLED",
     "NOTE",
     "URL")
-  $FieldTiles             = @(
+  $FieldTiles                     = @(
     "BACKUP",
     "FW",
     "NETWORK",
@@ -104,39 +104,41 @@ To Do:
     "AV",
     "VOICE",
     "MSA")
+  $SplitChar                      = ":"
+  $ManagementLayoutName           = "Customer Management"
   #endregion
   #region####################### DNS Settings ##########################
-  $script:dnsCalls        = 0
-  $DNSHistoryLayoutName   = "DNS Entries - Autodoc"
+  $script:dnsCalls                = 0
   # Enable sending alerts on dns change to a teams webhook
-  $enableTeamsAlerts      = $false
-  #$teamsWebhook          = "Your Teams Webhook URL"
+  $enableTeamsAlerts              = $false
+  #$teamsWebhook                  = "Your Teams Webhook URL"
   # Enable sending alerts on dns change to an email address
-  $enableEmailAlerts      = $false
-  #$mailTo                = "alerts@domain.com"
-  #$mailFrom              = "alerts@domain.com"
-  #$mailServer            = "mailserver.domain.com"
-  #$mailPort              = "25"
-  $mailUseSSL             = $false
-  #$mailUser              = "user"
-  #$mailPass              = "pass"
+  $enableEmailAlerts              = $false
+  #$mailTo                        = "alerts@domain.com"
+  #$mailFrom                      = "alerts@domain.com"
+  #$mailServer                    = "mailserver.domain.com"
+  #$mailPort                      = "25"
+  $mailUseSSL                     = $false
+  #$mailUser                      = "user"
+  #$mailPass                      = "pass"
+  $DNSHistoryLayoutName           = "DNS Entries - Autodoc"
   #endregion
   #region####################### Backups Settings ##########################
-  $script:bmCalls         = 0
-  $script:blnBM           = $false
-  $script:bmRoot          = $env:BackupRoot
-  $script:bmUser          = $env:BackupUser
-  $script:bmPass          = $env:BackupPass
-  $Filter1                = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup
-  $urlJSON                = "https://api.backup.management/jsonapi"
+  $script:bmCalls                 = 0
+  $script:blnBM                   = $false
+  $script:bmRoot                  = $env:BackupRoot
+  $script:bmUser                  = $env:BackupUser
+  $script:bmPass                  = $env:BackupPass
+  $Filter1                        = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup
+  $urlJSON                        = "https://api.backup.management/jsonapi"
   #endregion
   #region####################### Backupify Settings ##########################
-  $script:buCalls         = 0
+  $script:buCalls                 = 0
   #endregion
   #region######################## Autotask Settings ###########################
-  $script:psaCalls        = 0
+  $script:psaCalls                = 0
   #PSA API DATASETS
-  $script:typeMap         = @{
+  $script:typeMap                 = @{
     1 = "Customer"
     2 = "Lead"
     3 = "Prospect"
@@ -145,22 +147,28 @@ To Do:
     7 = "Vendor"
     8 = "Partner"
   }
-  $script:classMap        = @{}
-  $script:categoryMap     = @{}
-  $GlobalOverdue          = [System.Collections.ArrayList]@()
-  #PSA API URLS
-  $AutotaskRoot           = $env:ATRoot
-  $AutoTaskAPIBase        = $env:ATAPIBase
-  $AutotaskExe            = "/Autotask/AutotaskExtend/ExecuteCommand.aspx?Code=OpenTicketDetail&TicketNumber="
-  $AutotaskDev            = "/Autotask/AutotaskExtend/AutotaskCommand.aspx?&Code=OpenInstalledProduct&InstalledProductID="
+  $script:classMap                = @{}
+  $script:categoryMap             = @{}
+  $GlobalOverdue                  = [System.Collections.ArrayList]@()
   #PSA API FILTERS
-  $ExcludeType            = '[]'
-  $ExcludeQueue           = '[]'
-  #EXCLUDE STATUSES : 5 - COMPLETED , 20 - RMM RESOLVED
-  $ExcludeStatus          = '[5,20]'
-  $psaGenFilter           = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
-  $psaActFilter           = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
-  $TicketFilter           = "{`"Filter`":[{`"op`":`"notin`",`"field`":`"queueID`",`"value`":$($ExcludeQueue)},{`"op`":`"notin`",`"field`":`"status`",`"value`":$($ExcludeStatus)},{`"op`":`"notin`",`"field`":`"ticketType`",`"value`":$($ExcludeType)}]}"
+  #Generic Filter - ID -ge 0
+  $psaGenFilter                   = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
+  #IsActive Filter
+  $psaActFilter                   = '{"Filter":[{"op":"and","items":[
+                                    {"field":"IsActive","op":"eq","value":true},
+                                    {"field":"Id","op":"gte","value":0}]}]}'
+  #Ticket Filters
+  $ExcludeType                    = '[]'
+  $ExcludeQueue                   = '[]'
+  $ExcludeStatus                  = '[5,20]'    #EXCLUDE STATUSES : 5 - COMPLETED , 20 - RMM RESOLVED
+  $TicketFilter                   = "{`"Filter`":[{`"op`":`"notin`",`"field`":`"queueID`",`"value`":$($ExcludeQueue)},
+                                    {`"op`":`"notin`",`"field`":`"status`",`"value`":$($ExcludeStatus)},
+                                    {`"op`":`"notin`",`"field`":`"ticketType`",`"value`":$($ExcludeType)}]}"
+  #PSA API URLS
+  $AutotaskRoot                   = $env:ATRoot
+  $AutoTaskAPIBase                = $env:ATAPIBase
+  $AutotaskExe                    = "/Autotask/AutotaskExtend/ExecuteCommand.aspx?Code=OpenTicketDetail&TicketNumber="
+  $AutotaskDev                    = "/Autotask/AutotaskExtend/AutotaskCommand.aspx?&Code=OpenInstalledProduct&InstalledProductID="
   ########################### Autotask Auth ##############################
   $script:AutotaskAPIUser         = $env:ATAPIUser
   $script:AutotaskAPISecret       = $env:ATAPISecret
@@ -525,7 +533,7 @@ To Do:
     $data.params.query = @{}
     $data.params.query.PartnerId = [int]$PartnerId
     $data.params.query.Filter = $Filter1
-    $data.params.query.Columns = @("AU","AR","AN","MN","AL","LN","OP","OI","OS","PD","AP","PF","PN","CD","TS","TL","T3","US","AA843","AA77","AA2048","AA2531","I78")
+    $data.params.query.Columns = @("AU","AR","AN","MN","AL","LN","OP","OI","OS","PD","AP","PF","PN","CD","TS","TL","T3","US","AA843","AA77","AA2531","I78")
     $data.params.query.OrderBy = "CD DESC"
     $data.params.query.StartRecordNumber = 0
     $data.params.query.RecordsCount = 2000
@@ -540,37 +548,44 @@ To Do:
       ContentType = 'application/json; charset=utf-8'
     }
 
-    $script:bmCalls += 1
-    $script:BackupsDetails = @()
-    $script:BackupsResponse = Invoke-RestMethod @params
-    ForEach ( $BackupsResult in $script:BackupsResponse.result.result ) {
-      $script:BackupsDetails += New-Object -TypeName PSObject -Property @{
-        AccountID         = [Int]$BackupsResult.AccountId;
-        PartnerID         = [string]$BackupsResult.PartnerId;
-        DeviceName        = $BackupsResult.Settings.AN -join '' ;
-        ComputerName      = $BackupsResult.Settings.MN -join '' ;
-        DeviceAlias       = $BackupsResult.Settings.AL -join '' ;
-        PartnerName       = $BackupsResult.Settings.AR -join '' ;
-        Reference         = $BackupsResult.Settings.PF -join '' ;
-        Creation          = Convert-UnixTimeToDateTime ($BackupsResult.Settings.CD -join '') ;
-        TimeStamp         = Convert-UnixTimeToDateTime ($BackupsResult.Settings.TS -join '') ;  
-        LastSuccess       = Convert-UnixTimeToDateTime ($BackupsResult.Settings.TL -join '') ;                                                                                                                                                                                                               
-        SelectedGB        = (($BackupsResult.Settings.T3 -join '') /1GB) ;  
-        UsedGB            = (($BackupsResult.Settings.US -join '') /1GB) ;  
-        DataSources       = $BackupsResult.Settings.AP -join '' ;                                                                
-        Account           = $BackupsResult.Settings.AU -join '' ;
-        Location          = $BackupsResult.Settings.LN -join '' ;
-        Notes             = $BackupsResult.Settings.AA843 -join '' ;
-        GUIPassword       = $BackupsResult.Settings.AA2048 -join '' ;
-        IPMGUIPwd         = $BackupsResult.Settings.AA2531 -join '' ;
-        TempInfo          = $BackupsResult.Settings.AA77 -join '' ;
-        Product           = $BackupsResult.Settings.PN -join '' ;
-        ProductID         = $BackupsResult.Settings.PD -join '' ;
-        Profile           = $BackupsResult.Settings.OP -join '' ;
-        OS                = $BackupsResult.Settings.OS -join '' ;                                                                
-        ProfileID         = $BackupsResult.Settings.OI -join '' ;
-        ActiveDatasources = $BackupsResult.Settings.I78 -join ''
+    try {
+      $script:bmCalls += 1
+      $script:BackupsDetails = @()
+      $script:BackupsResponse = Invoke-RestMethod @params
+      ForEach ( $BackupsResult in $script:BackupsResponse.result.result ) {
+        $script:BackupsDetails += New-Object -TypeName PSObject -Property @{
+          AccountID         = [Int]$BackupsResult.AccountId;
+          PartnerID         = [string]$BackupsResult.PartnerId;
+          DeviceName        = $BackupsResult.Settings.AN -join '' ;
+          ComputerName      = $BackupsResult.Settings.MN -join '' ;
+          DeviceAlias       = $BackupsResult.Settings.AL -join '' ;
+          PartnerName       = $BackupsResult.Settings.AR -join '' ;
+          Reference         = $BackupsResult.Settings.PF -join '' ;
+          Creation          = Convert-UnixTimeToDateTime ($BackupsResult.Settings.CD -join '') ;
+          TimeStamp         = Convert-UnixTimeToDateTime ($BackupsResult.Settings.TS -join '') ;  
+          LastSuccess       = Convert-UnixTimeToDateTime ($BackupsResult.Settings.TL -join '') ;                                                                                                                                                                                                               
+          SelectedGB        = (($BackupsResult.Settings.T3 -join '') /1GB) ;  
+          UsedGB            = (($BackupsResult.Settings.US -join '') /1GB) ;  
+          DataSources       = $BackupsResult.Settings.AP -join '' ;                                                                
+          Account           = $BackupsResult.Settings.AU -join '' ;
+          Location          = $BackupsResult.Settings.LN -join '' ;
+          Notes             = $BackupsResult.Settings.AA843 -join '' ;
+          IPMGUIPwd         = $BackupsResult.Settings.AA2531 -join '' ;
+          TempInfo          = $BackupsResult.Settings.AA77 -join '' ;
+          Product           = $BackupsResult.Settings.PN -join '' ;
+          ProductID         = $BackupsResult.Settings.PD -join '' ;
+          Profile           = $BackupsResult.Settings.OP -join '' ;
+          OS                = $BackupsResult.Settings.OS -join '' ;                                                                
+          ProfileID         = $BackupsResult.Settings.OI -join '' ;
+          ActiveDatasources = $BackupsResult.Settings.I78 -join ''
+        }
       }
+      $bmdiag = "Retrieving Backups : Successful`r`n$($strLineSeparator)"
+      logERR 4 "Send-GetBackups" "$($bmdiag)"
+    } catch {
+      $bmdiag = "Error Retrieving Backups : Backup Reports will be Unavailable`r`n$($strLineSeparator)"
+      $bmdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 5 "Send-GetBackups" "$($bmdiag)"
     }
   } ## Send-GetDevices API Call
 #endregion ----- Backup.Management JSON Calls ----
@@ -655,28 +670,11 @@ To Do:
     $bmdiag = "Validating Backups : AUTH STATE : $($script:blnBM)"
     logERR 4 "Set-BackupDash" "$($bmdiag)"
     if ($script:blnBM) {
-      #Fix Mis-Matched Target Partner Names
-      if ($i_Company -eq "Autotask Customer Name") {
-        $bmPartner = "Backup.Management Customer Name"
-      } else {
-        $bmPartner = $i_Company
-      }
-      write-host $strLineSeparator
-      # OBTAIN PARTNER AND BACKUP ACCOUNT ID
-      $bmdiag = "Passed Partner: $($bmPartner)"
-      logERR 4 "Set-BackupDash" "$($bmdiag)"
-      if ($i_AllPartners) {
-        Send-GetPartnerInfo "$($script:bmRoot)"
-        Send-GetBackups "$($script:bmRoot)"
-      } elseif (-not $i_AllPartners) {
-        Send-GetPartnerInfo "$($bmPartner)"
-        Send-GetBackups "$($bmPartner)"
-      }
-
       if ($i_AllDevices) {
         $script:SelectedDevices = $script:BackupsDetails | 
           Select-Object PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-            TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes
+            TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
+              Where-Object {$_.PartnerName -eq "$($i_Company)"}
         $bmdiag = "$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
         logERR 4 "Set-BackupDash" "$($bmdiag)"
       } elseif (-not $i_AllDevices) {
@@ -758,9 +756,8 @@ To Do:
             } else {
               # Get all the detail assets and loop
               foreach ($device in $script:SelectedDevices) { 
-                $AssetName = "$($device.ComputerName)"
-                # Get all the detail assets and loop
                 $script:huduCalls += 1
+                $AssetName = "$($device.ComputerName)"
                 $Asset = Get-HuduAssets -name "$($AssetName)" -companyid $i_CompanyID -assetlayoutid $AssetLayout.id
                 if ($Asset) {
                   $badHTML = $null
@@ -855,7 +852,7 @@ To Do:
       } catch {
         $bmdiag = "$($i_Company)) not found in Hudu or other error occured`r`n$($strLineSeparator)"
         $bmdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-        logERR 4 "Set-BackupDash" "$($bmdiag)"
+        logERR 5 "Set-BackupDash" "$($bmdiag)"
       }
     }
   }
@@ -923,102 +920,173 @@ if (Get-Module -ListAvailable -Name AutotaskAPI) {
   }
 }
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
+write-host "$($strLineSeparator)`r`nInitializing"
+$script:diag += "`r`n$($strLineSeparator)`r`nInitializing`r`n"
+#Attempt Hudu Authentication; Fail Script if this fails
 if (-not $script:blnBREAK) {
-  #Set Hudu logon information
-  New-HuduAPIKey $script:HuduAPIKey
-  New-HuduBaseUrl $script:HuduBaseDomain
-  #Gather Hudu Layouts Only Once
-  $huduLayouts = foreach ($huduLayout in $Layouts) {Get-HuduAssetLayouts -name "$($huduLayout)"}
+  try {
+    $script:huduCalls += 1
+    $authdiag = "Authenticating Hudu`r`n$($strLineSeparator)"
+    logERR 4 "Authenticating Hudu" "$($authdiag)"
+    #Set Hudu logon information
+    New-HuduAPIKey $script:HuduAPIKey
+    New-HuduBaseUrl $script:HuduBaseDomain
+    $authdiag = "Successful`r`n$($strLineSeparator)"
+    logERR 4 "Authenticating Hudu" "$($authdiag)"
+    #Gather Hudu Resources
+    #Gather Hudu Layouts Only Once
+    $hududiag = "Asset Layouts :`r`n$($strLineSeparator)"
+    logERR 4 "Hudu Retrieval" "$($hududiag)"
+    $huduLayouts = foreach ($huduLayout in $Layouts) {$script:huduCalls += 1; Get-HuduAssetLayouts -name "$($huduLayout)"}
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    #Retrieve all Hudu Customer Management Assets Only Once
+    $script:huduCalls += 1
+    $hududiag = "Customer Management Assets :`r`n$($strLineSeparator)"
+    logERR 4 "Hudu Retrieval" "$($hududiag)"
+    $ManagementLayout = $huduLayouts | where {$_.name -eq "$($ManagementLayoutName)"}
+    $ManagementAssets = Get-HuduAssets -AssetLayoutId $ManagementLayout.id | Sort-Object -Property company_name
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    #Retrieve all Hudu DNS Entries Assets Only Once
+    $script:huduCalls += 1
+    $hududiag = "DNS Entries - AutoDoc Assets :`r`n$($strLineSeparator)"
+    logERR 4 "Hudu Retrieval" "$($hududiag)"
+    $DNSLayout = $huduLayouts | where {$_.name -match "$($DNSHistoryLayoutName)"}
+    $DNSAssets = Get-HuduAssets -assetlayoutid $DNSLayout.id | Sort-Object -Property company_name
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+  } catch {
+    $script:blnBREAK = $true
+    $authdiag = "Failed`r`n$($strLineSeparator)"
+    $authdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    logERR 5 "Authenticating Hudu" "$($authdiag)"
+  }
+}
+#Attempt AutoTask Authentication; Fail Script if this fails
+if (-not $script:blnBREAK) {
+  try {
+    $script:psaCalls += 1
+    $authdiag = "Authenticating AutoTask`r`n$($strLineSeparator)"
+    logERR 3 "Authenticating AutoTask" "$($authdiag)"
+    #Autotask Auth
+    $Creds = New-Object System.Management.Automation.PSCredential($script:AutotaskAPIUser, $(ConvertTo-SecureString $script:AutotaskAPISecret -AsPlainText -Force))
+    Add-AutotaskAPIAuth -ApiIntegrationcode "$($script:AutotaskIntegratorID)" -credentials $Creds
+    $authdiag = "Successful`r`n$($strLineSeparator)"
+    logERR 3 "Authenticating AutoTask" "$($authdiag)"
+    #Get Company Classifications and Categories
+    logERR 3 "Autotask Retrieval" "CLASS MAP :`r`n$($strLineSeparator)"
+    PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
+    $script:classMap
+    write-host "$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)"
+    $script:diag += "`r`n$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)`r`n"
+    logERR 3 "Autotask Retrieval" "CATEGORY MAP :`r`n$($strLineSeparator)"
+    PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
+    $script:categoryMap
+    write-host "$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)"
+    $script:diag += "`r`n$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)`r`n"
+    #Get Companies, Tickets, and Resources
+    logERR 3 "Autotask Retrieval" "COMPANIES :`r`n$($strLineSeparator)"
+    PSA-GetCompanies $script:psaHeaders
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    $script:psaCalls += 1
+    logERR 3 "Autotask Retrieval" "TICKETS :`r`n$($strLineSeparator)"
+    $tickets = Get-AutotaskAPIResource -Resource Tickets -SearchQuery "$($TicketFilter)"
+    #$tickets = PSA-FilterQuery $script:psaHeaders "GET" "Tickets" $TicketFilter
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    #Get Ticket Fields
+    logERR 3 "Autotask Retrieval" "TICKET FIELDS :`r`n$($strLineSeparator)"
+    $ticketFields = PSA-Query $script:psaHeaders "GET" "Tickets/entityInformation/fields"
+    #Get Statuses
+    $statusValues = Get-ATFieldHash -name "status" -fieldsIn $ticketFields
+    if (!$ExcludeStatus) {
+      write-host "ExcludeStatus not set please exclude your closed statuses at least from below in the format of '[1,5,7,9]'"
+      $script:diag += "`r`nExcludeStatus not set please exclude your closed statuses at least from below in the format of '[1,5,7,9]'"
+      $statusValues | ft
+    }
+    #Get Ticket types
+    $typeValues = Get-ATFieldHash -name "ticketType" -fieldsIn $ticketFields
+    if (!$ExcludeType) {
+      write-host "ExcludeType not set please exclude types from below in the format of '[1,5,7,9]"
+      $script:diag += "`r`nExcludeType not set please exclude types from below in the format of '[1,5,7,9]"
+      $typeValues | ft
+    }
+    #Get Queue Types
+    $queueValues = Get-ATFieldHash -name "queueID" -fieldsIn $ticketFields
+    if (!$ExcludeType) {
+      write-host "ExcludeQueue not set please exclude types from below in the format of '[1,5,7,9]"
+      $script:diag += "`r`nExcludeQueue not set please exclude types from below in the format of '[1,5,7,9]"
+      $queueValues | ft
+    }
+    #Get Creator Types
+    $creatorValues = Get-ATFieldHash -name "creatorType" -fieldsIn $ticketFields
+    #Get Issue Types
+    $issueValues = Get-ATFieldHash -name "issueType" -fieldsIn $ticketFields
+    #Get Priority Types
+    $priorityValues = Get-ATFieldHash -name "priority" -fieldsIn $ticketFields
+    #Get Source Types
+    $sourceValues = Get-ATFieldHash -name "source" -fieldsIn $ticketFields
+    #Get Sub Issue Types
+    $subissueValues = Get-ATFieldHash -name "subIssueType" -fieldsIn $ticketFields
+    #Get Categories
+    $catValues = Get-ATFieldHash -name "ticketCategory" -fieldsIn $ticketFields
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    #$resourceValues
+    logERR 3 "Autotask Retrieval" "RESOURCES :`r`n$($strLineSeparator)"
+    $resources = PSA-FilterQuery $script:psaHeaders "GET" "Resources" $psaGenFilter
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    #Grab All Assets for All Companies in a Single Call
+    $configitems = $null
+    $script:psaCalls += 1
+    logERR 3 "Autotask Retrieval" "PSA ASSETS :`r`n$($strLineSeparator)"
+    $psaAssetFilter = "{`"Filter`":[{`"field`":`"IsActive`",`"op`":`"eq`",`"value`":true}]}"
+    $configitems = Get-AutotaskAPIResource -Resource ConfigurationItems -SearchQuery "$($psaAssetFilter)"
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    #Get PSA Asset Fields
+    logERR 3 "Autotask Retrieval" "ASSET FIELDS :`r`n$($strLineSeparator)"
+    $assetFields = PSA-Query $script:psaHeaders "GET" "ConfigurationItems/entityInformation/fields"
+    #Get PSA Asset Manufacturer Data Map
+    $assetMakes = Get-ATFieldHash -name "rmmDeviceAuditManufacturerID" -fieldsIn $assetFields
+    #Get PSA Asset Model Data Map
+    $assetModels = Get-ATFieldHash -name "rmmDeviceAuditModelID" -fieldsIn $assetFields
+    write-host "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+  } catch {
+    $script:blnBREAK = $true
+    $authdiag = "Failed`r`n$($strLineSeparator)"
+    $authdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    logERR 5 "Authenticating AutoTask" "$($authdiag)"
+  }
+}
+if (-not $script:blnBREAK) {
+  #Retrieve all Backup Accounts Only Once
+  $bmdiag = "Authenticating Backups`r`n$($strLineSeparator)"
+  logERR 4 "Authenticating Backups" "$($bmdiag)"
+  Send-APICredentialsCookie
+  $bmdiag = "AUTH STATE : $($script:blnBM)"
+  logERR 4 "Authenticating Backups" "$($bmdiag)"
+  if ($script:blnBM) {
+    # OBTAIN PARTNER AND BACKUP ACCOUNT ID
+    $bmdiag = "Passed Partner: $($script:bmRoot)`r`n$($strLineSeparator)"
+    logERR 4 "Backups Retrieval" "$($bmdiag)"
+    Send-GetPartnerInfo "$($script:bmRoot)"
+    Send-GetBackups "$($script:bmRoot)"
+  } elseif (-not $script:blnBM) {
+    $bmdiag = "Error Authenticating : Backup Reports will be Unavailable`r`n$($strLineSeparator)"
+    $authdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    logERR 5 "Backups Retrieval" "$($bmdiag)"
+  }
+  write-host "Initializing Done`r`n$($strLineSeparator)"
+  $script:diag += "`r`nInitializing Done`r`n$($strLineSeparator)`r`n"
   #region######################## Autotask  Section ###########################
   # https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
   #QUERY PSA API
   logERR 3 "Autotask Processing" "Beginning Autotask Processing`r`n$($strLineSeparator)"
-  #Autotask Auth
-  $script:psaCalls += 1
-  $Creds = New-Object System.Management.Automation.PSCredential($script:AutotaskAPIUser, $(ConvertTo-SecureString $script:AutotaskAPISecret -AsPlainText -Force))
-  Add-AutotaskAPIAuth -ApiIntegrationcode "$($script:AutotaskIntegratorID)" -credentials $Creds
-  #Get Company Classifications and Categories
-  logERR 3 "Autotask Retrieval" "CLASS MAP :`r`n$($strLineSeparator)"
-  PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
-  $script:classMap
-  write-host "$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)"
-  $script:diag += "`r`n$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)`r`n"
-  logERR 3 "Autotask Retrieval" "CATEGORY MAP :`r`n$($strLineSeparator)"
-  PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
-  $script:categoryMap
-  write-host "$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)"
-  $script:diag += "`r`n$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)`r`n"
-  #Get Companies, Tickets, and Resources
-  logERR 3 "Autotask Retrieval" "COMPANIES :`r`n$($strLineSeparator)"
-  PSA-GetCompanies $script:psaHeaders
-  write-host "Done`r`n$($strLineSeparator)"
-  $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
-  $script:psaCalls += 1
-  logERR 3 "Autotask Retrieval" "TICKETS :`r`n$($strLineSeparator)"
-  $tickets = Get-AutotaskAPIResource -Resource Tickets -SearchQuery "$($TicketFilter)"
-  #$tickets = PSA-FilterQuery $script:psaHeaders "GET" "Tickets" $TicketFilter
-  write-host "Done`r`n$($strLineSeparator)"
-  $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
-  #Get Ticket Fields
-  logERR 3 "Autotask Retrieval" "TICKET FIELDS :`r`n$($strLineSeparator)"
-  $ticketFields = PSA-Query $script:psaHeaders "GET" "Tickets/entityInformation/fields"
-  #Get Statuses
-  $statusValues = Get-ATFieldHash -name "status" -fieldsIn $ticketFields
-  if (!$ExcludeStatus) {
-    write-host "ExcludeStatus not set please exclude your closed statuses at least from below in the format of '[1,5,7,9]'"
-    $script:diag += "`r`nExcludeStatus not set please exclude your closed statuses at least from below in the format of '[1,5,7,9]'"
-    $statusValues | ft
-  }
-  #Get Ticket types
-  $typeValues = Get-ATFieldHash -name "ticketType" -fieldsIn $ticketFields
-  if (!$ExcludeType) {
-    write-host "ExcludeType not set please exclude types from below in the format of '[1,5,7,9]"
-    $script:diag += "`r`nExcludeType not set please exclude types from below in the format of '[1,5,7,9]"
-    $typeValues | ft
-  }
-  #Get Queue Types
-  $queueValues = Get-ATFieldHash -name "queueID" -fieldsIn $ticketFields
-  if (!$ExcludeType) {
-    write-host "ExcludeQueue not set please exclude types from below in the format of '[1,5,7,9]"
-    $script:diag += "`r`nExcludeQueue not set please exclude types from below in the format of '[1,5,7,9]"
-    $queueValues | ft
-  }
-  #Get Creator Types
-  $creatorValues = Get-ATFieldHash -name "creatorType" -fieldsIn $ticketFields
-  #Get Issue Types
-  $issueValues = Get-ATFieldHash -name "issueType" -fieldsIn $ticketFields
-  #Get Priority Types
-  $priorityValues = Get-ATFieldHash -name "priority" -fieldsIn $ticketFields
-  #Get Source Types
-  $sourceValues = Get-ATFieldHash -name "source" -fieldsIn $ticketFields
-  #Get Sub Issue Types
-  $subissueValues = Get-ATFieldHash -name "subIssueType" -fieldsIn $ticketFields
-  #Get Categories
-  $catValues = Get-ATFieldHash -name "ticketCategory" -fieldsIn $ticketFields
-  write-host "Done`r`n$($strLineSeparator)"
-  $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
-  #$resourceValues
-  logERR 3 "Autotask Retrieval" "RESOURCES :`r`n$($strLineSeparator)"
-  $resources = PSA-FilterQuery $script:psaHeaders "GET" "Resources" $psaGenFilter
-  write-host "Done`r`n$($strLineSeparator)"
-  $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
-  #Grab All Assets for All Companies in a Single Call
-  $configitems = $null
-  $script:psaCalls += 1
-  logERR 3 "Autotask Retrieval" "PSA ASSETS :`r`n$($strLineSeparator)"
-  $psaAssetFilter = "{`"Filter`":[{`"field`":`"IsActive`",`"op`":`"eq`",`"value`":true}]}"
-  $configitems = Get-AutotaskAPIResource -Resource ConfigurationItems -SearchQuery "$($psaAssetFilter)"
-  write-host "Done`r`n$($strLineSeparator)"
-  $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
-  #Get PSA Asset Fields
-  logERR 3 "Autotask Retrieval" "ASSET FIELDS :`r`n$($strLineSeparator)"
-  $assetFields = PSA-Query $script:psaHeaders "GET" "ConfigurationItems/entityInformation/fields"
-  #Get PSA Asset Manufacturer Data Map
-  $assetMakes = Get-ATFieldHash -name "rmmDeviceAuditManufacturerID" -fieldsIn $assetFields
-  #Get PSA Asset Model Data Map
-  $assetModels = Get-ATFieldHash -name "rmmDeviceAuditModelID" -fieldsIn $assetFields
-  write-host "Done`r`n$($strLineSeparator)"
-  $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   #region###############    PSA Counters - Tallied for All Companies
   $totCompany = 0
   $procCompany = 0
@@ -1217,7 +1285,7 @@ if (-not $script:blnBREAK) {
                 write-host "Type : $($psaAsset.rmmTypeID)`r`nName : $($psaAsset.refTitle)"
                 write-host "Make : $($psaAsset.make)`r`nModel : $($psaAsset.model)`r`nModel ID : $($psaAsset.rmmModelID)"
                 write-host "S/N : $($psaAsset.serial)`r`nMAC : $($psaAsset.rmmDevMAC)`r`nDevice IP : $($psaAsset.rmmDevIP)"
-                $script:diag += "`r`n$($strLineSeparator)`r`nProcessing $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
+                $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
                 $script:diag += "`r`nType : $($psaAsset.rmmTypeID)`r`nName : $($psaAsset.refTitle)"
                 $script:diag += "`r`nMake : $($psaAsset.make)`r`nModel : $($psaAsset.model)`r`nModel ID : $($psaAsset.rmmModelID)"
                 $script:diag += "`r`nS/N : $($psaAsset.serial)`r`nMAC : $($psaAsset.rmmDevMAC)`r`nDevice IP : $($psaAsset.rmmDevIP)"
@@ -1369,17 +1437,12 @@ if (-not $script:blnBREAK) {
   #region######################## Customer Management Section ###########################
   # https://mspp.io/hudu-magic-dash-customer-services/
   logERR 3 "Customer Management" "Beginning Customer Management Processing`r`n$($strLineSeparator)"
-  # Get the Asset Layout
-  #$script:huduCalls += 1
-  $DetailsLayout = $huduLayouts | where {$_.name -match "$($ManagementLayoutName)"} #Get-HuduAssetLayouts -name $ManagementLayoutName
   # Check we found the layout
-  if (($DetailsLayout | measure-object).count -ne 1) {
+  if (($ManagementLayout | measure-object).count -ne 1) {
     logERR 3 "Customer Management" "No / multiple layout(s) found with name $($ManagementLayoutName)`r`n$($strLineSeparator)"
   } else {
-    # Get all the detail assets and loop
-    $script:huduCalls += 1
-    $DetailsAssets = Get-HuduAssets -assetlayoutid $DetailsLayout.id | Sort-Object -Property company_name
-    foreach ($Asset in $DetailsAssets) {
+    # Loop through all Hudu Customer Management Assets
+    foreach ($Asset in $ManagementAssets) {
       write-host "`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
       $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
       # Return relevant Asset Fields
@@ -1455,8 +1518,6 @@ if (-not $script:blnBREAK) {
   #region######################## DNS History Section ###########################
   # https://mspp.io/hudu-dns-history-and-alerts/
   logERR 3 "DNS History" "Beginning DNS History Processing`r`n$($strLineSeparator)"
-  #$script:huduCalls += 1
-  $DNSLayout = $huduLayouts | where {$_.name -match "$($DNSHistoryLayoutName)"} #Get-HuduAssetLayouts -name $DNSHistoryLayoutName
   if (!$DNSLayout) { 
     $AssetLayoutFields = @(
       @{
@@ -1490,14 +1551,11 @@ if (-not $script:blnBREAK) {
         position = 5
       }
     )
-    #$script:huduCalls += 1 #2
     logERR 3 "DNS History" "Missing DNS Asset Layout $($DNSHistoryLayoutName)`r`n$($strLineSeparator)"
-    #$NewLayout = New-HuduAssetLayout -name $DNSHistoryLayoutName -icon "fas fa-sitemap" -color "#00adef" -icon_color "#ffffff" -include_passwords $true -include_photos $false -include_comments $true -include_files $true -fields $AssetLayoutFields
-    #$DNSLayout = $huduLayouts | where {$_.name -match "$($DNSHistoryLayoutName)"} #Get-HuduAssetLayouts -name $DNSHistoryLayoutName
   } elseif ($DNSLayout) {
     $script:huduCalls += 1
-    $websites = Get-HuduWebsites | where -filter {$_.disable_dns -eq $false} | Sort-Object -Property company_name
-    foreach ($website in $websites) {
+    $script:websites = Get-HuduWebsites | where -filter {$_.disable_dns -eq $false} | Sort-Object -Property company_name
+    foreach ($website in $script:websites) {
       $dnsname = ([System.Uri]$website.name).authority
       write-host "$($strLineSeparator)`r`nResolving $($dnsname) for $($website.company_name)"
       $script:diag += "`r`n$($strLineSeparator)`r`nResolving $($dnsname) for $($website.company_name)"
@@ -1529,7 +1587,7 @@ if (-not $script:blnBREAK) {
       $script:diag += "`r`n$($strLineSeparator)`r`n$($dnsname) lookup successful"
       write-host "$($strLineSeparator)`r`n$($dnsname) lookup successful" -foregroundcolor green
       #Check if there is already an asset
-      $Asset = Get-HuduAssets -name "$($AssetName)" -companyid $companyid -assetlayoutid $DNSLayout.id
+      $Asset = $DNSAssets | where {$_.name -eq "$($AssetName)"}    #Get-HuduAssets -name "$($AssetName)" -companyid $companyid -assetlayoutid $DNSLayout.id
       #If the Asset does not exist, we edit the body to be in the form of a new asset, if not, we just upload.
       if (!$Asset) {
         try {
