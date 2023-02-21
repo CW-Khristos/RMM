@@ -30,7 +30,23 @@
           Added DNS History Hudu enhancement
     0.1.2 Added Model and Serial Lookup enhancements
           Added Backup.Management dashboards to respective Backup Device Assets
-    
+    0.1.3 Dealing with minor bugs, erro handling, output formatting
+          Major Optimizations in reducing number of subsequent AT and Hudu API Calls
+          Reduction of AT API Calls :
+           - Tested and confirmed more efficient and faster to retrieve filtered set of "all" Tickets vs filtering for each Company
+           - Tested and confirmed more efficient and faster to retrieve filtered set of "active" Assets vs filtering for each Company
+          Reduction of Hudu API Calls :
+           - Switched to collecting each relevant Asset Layout once for the entire script; previously this was done as each was required
+          Timing Tweaks :
+           - Added 1/4 second delay when encountering Companies which will be "Skipped" in Processing; this was to create some time buffer between Hudu requests
+           - Added 10 millisecond delay when encountering Assets which will be accessing Hudu Assets during Processing
+           - Target Runtime :: < 30min - Current Runtime :: 26 Minutes : 5 Seconds : 282 Milliseconds
+             Total Companies : 266
+              - Processed : 99 - Skipped : 167 - Failed : 0
+             Total Tickets : 177
+              - Processed : 177 - Skipped : 0 - Failed : 0
+             Total Assets : 1404
+              - Processed : 1334 - Skipped : 70 - Failed : 12
 To Do:
 
 #>
@@ -985,6 +1001,14 @@ if (-not $script:blnBREAK) {
   $resources = PSA-FilterQuery $script:psaHeaders "GET" "Resources" $psaGenFilter
   write-host "Done`r`n$($strLineSeparator)"
   $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+  #Grab All Assets for All Companies in a Single Call
+  $configitems = $null
+  $script:psaCalls += 1
+  logERR 3 "Autotask Retrieval" "PSA ASSETS :`r`n$($strLineSeparator)"
+  $psaAssetFilter = "{`"Filter`":[{`"field`":`"IsActive`",`"op`":`"eq`",`"value`":true}]}"
+  $configitems = Get-AutotaskAPIResource -Resource ConfigurationItems -SearchQuery "$($psaAssetFilter)"
+  write-host "Done`r`n$($strLineSeparator)"
+  $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   #Get PSA Asset Fields
   logERR 3 "Autotask Retrieval" "ASSET FIELDS :`r`n$($strLineSeparator)"
   $assetFields = PSA-Query $script:psaHeaders "GET" "ConfigurationItems/entityInformation/fields"
@@ -1127,12 +1151,6 @@ if (-not $script:blnBREAK) {
         }
         #endregion
         #region###############    Filter PSA Assets to Company
-        $script:psaCalls += 1
-        $psaAssetFilter = "{`"Filter`":[{`"op`":`"and`",`"items`":[
-          {`"field`":`"IsActive`",`"op`":`"eq`",`"value`":true},
-          {`"field`":`"companyID`",`"op`":`"eq`",`"value`":$($company.CompanyID)}]}]}"
-        $configitems = $null
-        $configitems = Get-AutotaskAPIResource -Resource ConfigurationItems -SearchQuery "$($psaAssetFilter)"
         #USELESS PROPERTIES : dattoInternalIP, dattoSerialNumber, rMMDeviceAuditOperatingSystem
         $custAssets = $null
         $custAssets = $configitems | 
@@ -1191,11 +1209,11 @@ if (-not $script:blnBREAK) {
                 write-host "$($strLineSeparator)`r`nProcessing $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
                 write-host "Type : $($psaAsset.rmmTypeID)`r`nName : $($psaAsset.refTitle)"
                 write-host "Make : $($psaAsset.make)`r`nModel : $($psaAsset.model)`r`nModel ID : $($psaAsset.rmmModelID)"
-                write-host "MAC : $($psaAsset.rmmDevMAC)`r`nDevice IP : $($psaAsset.rmmDevIP)"
+                write-host "S/N : $($psaAsset.serial)`r`nMAC : $($psaAsset.rmmDevMAC)`r`nDevice IP : $($psaAsset.rmmDevIP)"
                 $script:diag += "`r`n$($strLineSeparator)`r`nProcessing $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
                 $script:diag += "`r`nType : $($psaAsset.rmmTypeID)`r`nName : $($psaAsset.refTitle)"
                 $script:diag += "`r`nMake : $($psaAsset.make)`r`nModel : $($psaAsset.model)`r`nModel ID : $($psaAsset.rmmModelID)"
-                $script:diag += "`r`nMAC : $($psaAsset.rmmDevMAC)`r`nDevice IP : $($psaAsset.rmmDevIP)"
+                $script:diag += "`r`nS/N : $($psaAsset.serial)`r`nMAC : $($psaAsset.rmmDevMAC)`r`nDevice IP : $($psaAsset.rmmDevIP)"
                 if (($type -ne "UPS") -and ($type -ne "Network Appliance") -and ($type -ne "Unkown")) {
                   try {
                     start-sleep -milliseconds 10
@@ -1205,12 +1223,27 @@ if (-not $script:blnBREAK) {
                     $AssetLayout = $huduLayouts | where {$_.name -match "$($type)"} #Get-HuduAssetLayouts -name "$($type)"
                     $Asset = Get-HuduAssets -name "$($psaAsset.refTitle)" -companyid $huduCompany.id -assetlayoutid $AssetLayout.id
                     if (($Asset | measure-object).count -ne 1) {
-                      $psadiag = "No / multiple layout(s) found with name $($psaAsset.refTitle)`r`n$($strLineSeparator)"
+                      $psadiag = "No / multiple layout(s) found with Name : $($psaAsset.refTitle)`r`n$($strLineSeparator)"
                       logERR 3 "Update PSA Asset" "$($psadiag)"
-                      $skipPSAassets += 1
-                      $skipCoAssets += 1
+                      try {
+                        $Asset = Get-HuduAssets -name "$($psaAsset.refTitle)" -companyid $huduCompany.id -assetlayoutid $AssetLayout.id -primaryserial "$($psaAsset.serial)"
+                        if (($Asset | measure-object).count -ne 1) {
+                          $psadiag = "No / multiple layout(s) found with Name : $($psaAsset.refTitle) - Serial : $($psaAsset.serial)`r`n$($strLineSeparator)"
+                          logERR 3 "Update PSA Asset" "$($psadiag)"
+                          write-host "Skipped`r`n$($strLineSeparator)" -foregroundcolor yellow
+                          $script:diag += "`r`mSkipped`r`n$($strLineSeparator)"
+                          $skipPSAassets += 1
+                          $skipCoAssets += 1
+                        }
+                      } catch {
+                        $psadiag = "Error retrieving Hudu Asset - $($psaAsset.refTitle)`r`n$($strLineSeparator)`r`n"
+                        $psadiag += "$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)`r`n"
+                        logERR 3 "Retrieve Hudu PSA Asset" "$($psadiag)"
+                        $failPSAassets += 1
+                        $failCoAssets += 1
+                      }
                     } #else {
-                    if ($Asset) {
+                    if (($Asset | measure-object).count -eq 1) {
                       if (($type -eq "Workstation") -or ($type -eq "Server")) {
                         $AssetFields = @{
                           'control_tools'         = "$($psaAsset.RMMLink)$($psaAsset.PSALink)"
@@ -1218,9 +1251,13 @@ if (-not $script:blnBREAK) {
                           'manufacturer'          = $psaAsset.make
                           'model'                 = $psaAsset.model
                           'model_lookup'          = $psaAsset.ModelLink
-                          'serial_number'         = ($Asset.fields | where-object -filter {$_.label -eq "Serial Number"}).value
+                          'serial_number'         = $psaAsset.serial
                           'serial_lookup'         = $psaAsset.SerialLink
-                          'has_notes'             = ($Asset.fields | where-object -filter {$_.label -eq "Has Notes"}).value
+                          'has_notes'             = if ($null -eq ($Asset.fields | where-object -filter {$_.label -eq "Has Notes"}).value) {
+                                                      $false
+                                                    } else {
+                                                      ($Asset.fields | where-object -filter {$_.label -eq "Has Notes"}).value
+                                                    }
                           'mac_address'           = $psaAsset.rmmDevMAC #($Asset.fields | where-object -filter {$_.label -eq "MAC Address"}).value
                           'ip_address'            = $psaAsset.rmmDevIP #($Asset.fields | where-object -filter {$_.label -eq "IP Address"}).value
                           'gateway'               = ($Asset.fields | where-object -filter {$_.label -eq "Gateway"}).value
@@ -1236,9 +1273,13 @@ if (-not $script:blnBREAK) {
                           'manufacturer'          = $psaAsset.make
                           'model'                 = $psaAsset.model
                           'model_lookup'          = $psaAsset.ModelLink
-                          'serial_number'         = ($Asset.fields | where-object -filter {$_.label -eq "Serial Number"}).value
+                          'serial_number'         = $psaAsset.serial
                           'serial_lookup'         = $psaAsset.SerialLink
-                          'has_notes'             = ($Asset.fields | where-object -filter {$_.label -eq "Has Notes"}).value
+                          'has_notes'             = if ($null -eq ($Asset.fields | where-object -filter {$_.label -eq "Has Notes"}).value) {
+                                                      $false
+                                                    } else {
+                                                      ($Asset.fields | where-object -filter {$_.label -eq "Has Notes"}).value
+                                                    }
                           'mac_address'           = $psaAsset.rmmDevMAC #($Asset.fields | where-object -filter {$_.label -eq "MAC Address"}).value
                           'ip_address'            = $psaAsset.rmmDevIP #($Asset.fields | where-object -filter {$_.label -eq "IP Address"}).value
                           'gateway'               = ($Asset.fields | where-object -filter {$_.label -eq "Gateway"}).value
@@ -1249,8 +1290,8 @@ if (-not $script:blnBREAK) {
                       #$AssetFields | out-string
                       try {
                         $script:huduCalls += 1
-                        write-host "$($AssetFields | out-string)$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
-                        $script:diag += "`r`n$($AssetFields | out-string)$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)`r`n"
+                        write-host "$($AssetFields | out-string)$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)`r`n"
+                        $script:diag += "`r`n$($AssetFields | out-string))$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
                         $Asset = Set-HuduAsset -asset_id $Asset.id -name "$($psaAsset.refTitle)" -company_id $huduCompany.id -assetlayoutid $AssetLayout.id -fields $AssetFields
                         $procPSAassets += 1
                         $procCoAssets += 1
@@ -1279,7 +1320,7 @@ if (-not $script:blnBREAK) {
         $procCompany += 1
     } else {
       write-host "$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)" -foregroundcolor yellow
-      $script:diag += "$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)"
+      $script:diag += "`r`m$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)"
       #$psadiag = "Skipped`r`n$($strLineSeparator)"
       #logERR 3 "Autotask Processing" "$($psadiag)"
       $skipCompany += 1
@@ -1359,42 +1400,44 @@ if (-not $script:blnBREAK) {
         $URLField = $Fields | Where-Object {$_.ServiceName -eq $Service -and $_.ServiceAction -eq 'URL'}
         write-host "URLField :`r`n$($URLField)`r`n$($strLineSeparator)"
         if ($EnabledField) {
-          $Colour = switch ($EnabledField.value) {
-            $true {'success'}
-            $false {'grey'}
-            default {'grey'}
-          }
-          $Param = @{
-            Title = "$($Service)"
-            CompanyName = "$($Asset.company_name)"
-            Shade = "$($Colour)"
-          }
-          if ($NoteField.value){
-              $Param['Message'] = "$($NoteField.value)"
-              $Param | Add-Member -MemberType NoteProperty -Name 'Message' -Value "$($NoteField.value)"
-          } else {
-            $Param['Message'] = switch ($EnabledField.value) {
-              $true {"Customer has $($Service)"}
-              $false {"No $($Service)"}
-              default {"No $($Service)"}
-            }
-          }
-          if (($URLField.value) -and ($Service -ne "Backup")) {
-            $Param['ContentLink'] = "$($URLField.value)"
-          }
-          if ($Service -ne "Backup") {
-            $script:huduCalls += 1
-            Set-HuduMagicDash @Param
-            write-host "$($strLineSeparator)"
-            logERR 3 "Customer Management" "$($Service) Magic Dash Set`r`n$($strLineSeparator)"
-          } elseif ($Service -eq "Backup") {
-            switch ($EnabledField.value) {
-              $true {Set-BackupDash "$($Asset.company_name)" $Asset.company_id $false $true "$($NoteField.value)" "$($URLField.value)" $null}
-              $false {$script:huduCalls += 1; Set-HuduMagicDash @Param}
-            }
-          }
+          logERR 3 "Customer Management" "Enabled Field found`r`n$($strLineSeparator)"
         } else {
+          $EnabledField.value = $false
           logERR 3 "Customer Management" "No Enabled Field was found`r`n$($strLineSeparator)"
+        }
+        $Colour = switch ($EnabledField.value) {
+          $true {'success'}
+          $false {'grey'}
+          default {'grey'}
+        }
+        $Param = @{
+          Title = "$($Service)"
+          CompanyName = "$($Asset.company_name)"
+          Shade = "$($Colour)"
+        }
+        if ($NoteField.value){
+            $Param['Message'] = "$($NoteField.value)"
+            $Param | Add-Member -MemberType NoteProperty -Name 'Message' -Value "$($NoteField.value)"
+        } else {
+          $Param['Message'] = switch ($EnabledField.value) {
+            $true {"Customer has $($Service)"}
+            $false {"No $($Service)"}
+            default {"No $($Service)"}
+          }
+        }
+        if (($URLField.value) -and ($Service -ne "Backup")) {
+          $Param['ContentLink'] = "$($URLField.value)"
+        }
+        if ($Service -ne "Backup") {
+          $script:huduCalls += 1
+          Set-HuduMagicDash @Param
+          write-host "$($strLineSeparator)"
+          logERR 3 "Customer Management" "$($Service) Magic Dash Set`r`n$($strLineSeparator)"
+        } elseif ($Service -eq "Backup") {
+          switch ($EnabledField.value) {
+            $true {Set-BackupDash "$($Asset.company_name)" $Asset.company_id $false $true "$($NoteField.value)" "$($URLField.value)" $null}
+            $false {$script:huduCalls += 1; Set-HuduMagicDash @Param}
+          }
         }
       }
     }
@@ -1532,19 +1575,17 @@ if (-not $script:blnBREAK) {
     $enddiag = "`r`n`r`nExecution Successful : $($finish)"
     logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "HuduDoc_WatchDog : Execution Successful : $($finish)"
+    write-DRMMAlert "HuduDoc_WatchDog : Successful : Diagnostics - $($logPath) : $($finish)"
     write-DRMMDiag "$($script:diag)"
-    $script:diag = $null
     exit 0
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
     $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
-    $enddiag = "`r`n`r`nExecution Completed with Warnings : See Diagnostics : $($finish)"
+    $enddiag = "`r`n`r`nExecution Completed with Warnings : $($finish)"
     logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "HuduDoc_WatchDog : Execution Completed with Warnings : See Diagnostics : $($finish)"
-    write-DRMMDiag "$($script:diag)"
-    $script:diag = $null
+    write-DRMMAlert "HuduDoc_WatchDog : Warning : Diagnostics - $($logPath) : $($finish)"
+    #write-DRMMDiag "$($script:diag)"
     exit 1
   }
 } elseif ($script:blnBREAK) {
@@ -1554,12 +1595,11 @@ if (-not $script:blnBREAK) {
   $null | set-content $logPath -force
   #WRITE TO LOGFILE
   $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
-  $enddiag = "`r`n`r`nExecution Failure : See Diagnostics : $($finish)"
+  $enddiag = "`r`n`r`nExecution Failure : $($finish)"
   logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "HuduDoc_WatchDog : Execution Failure : See Diagnostics : $($finish)"
-  write-DRMMDiag "$($script:diag)"
-  $script:diag = $null
+  write-DRMMAlert "HuduDoc_WatchDog : Failure : Diagnostics - $($logPath) : $($finish)"
+  #write-DRMMDiag "$($script:diag)"
   exit 1
 }
 #END SCRIPT
