@@ -1238,7 +1238,7 @@ if (-not $script:blnBREAK) {
                           $psadiag = "No / multiple layout(s) found with Name : $($psaAsset.refTitle) - Serial : $($psaAsset.serial)`r`n$($strLineSeparator)"
                           logERR 3 "Update PSA Asset" "$($psadiag)"
                           write-host "Skipped`r`n$($strLineSeparator)" -foregroundcolor yellow
-                          $script:diag += "`r`mSkipped`r`n$($strLineSeparator)"
+                          $script:diag += "`r`nSkipped`r`n$($strLineSeparator)"
                           $skipPSAassets += 1
                           $skipCoAssets += 1
                         }
@@ -1298,7 +1298,7 @@ if (-not $script:blnBREAK) {
                       try {
                         $script:huduCalls += 1
                         write-host "$($AssetFields | out-string)$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)`r`n"
-                        $script:diag += "`r`n$($AssetFields | out-string))$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
+                        $script:diag += "`r`n$($AssetFields | out-string)$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
                         $Asset = Set-HuduAsset -asset_id $Asset.id -name "$($psaAsset.refTitle)" -company_id $huduCompany.id -assetlayoutid $AssetLayout.id -fields $AssetFields
                         $procPSAassets += 1
                         $procCoAssets += 1
@@ -1327,7 +1327,7 @@ if (-not $script:blnBREAK) {
         $procCompany += 1
     } else {
       write-host "$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)" -foregroundcolor yellow
-      $script:diag += "`r`m$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)"
+      $script:diag += "`r`n$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)"
       #$psadiag = "Skipped`r`n$($strLineSeparator)"
       #logERR 3 "Autotask Processing" "$($psadiag)"
       $skipCompany += 1
