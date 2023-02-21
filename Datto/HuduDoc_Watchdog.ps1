@@ -1151,46 +1151,52 @@ if (-not $script:blnBREAK) {
         }
         #endregion
         #region###############    Filter PSA Assets to Company
+        #Arrange collected Asset data for Hudu
         #USELESS PROPERTIES : dattoInternalIP, dattoSerialNumber, rMMDeviceAuditOperatingSystem
         $custAssets = $null
-        $custAssets = $configitems | 
+        $custAssets = foreach ($psaAsset in ($configitems | 
           where {$_.companyID -eq $company.CompanyID} | 
             select id, referenceNumber, referenceTitle, serialNumber, rmmDeviceID, rmmDeviceUID, 
               rmmDeviceAuditManufacturerID, rmmDeviceAuditModelID, rmmDeviceAuditDeviceTypeID, 
-              rmmDeviceAuditIPAddress, rmmDeviceAuditMacAddress, dattoHostname
-        #Arrange collected Asset data for Hudu
-        $outAssets = $null
-        $outAssets = foreach ($psaAsset in $custAssets) {
-          $totPSAassets += 1
-          $assetMake = $assetMakes["$($psaAsset.rmmDeviceAuditManufacturerID)"]
-          $assetModel = $assetModels["$($psaAsset.rmmDeviceAuditModelID)"]
-          [PSCustomObject]@{
-            'RMMLink'     = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"https://concord.rmm.datto.com/device/$($psaAsset.rmmDeviceID)`"><b>Open $($psaAsset.referenceTitle) in RMM</b></a></button></p>"
-            'PSALink'     =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"$($AutotaskRoot)$($AutotaskDev)$($psaAsset.id)`"><b>Open $($psaAsset.referenceTitle) in PSA</b></a></button></p>"
-            'make'        = $assetMake
-            'model'       = $assetModel
-            'ModelLink'   =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"http://www.google.com/search?hl=en&q=$($assetMake)+$($assetModel)`"><b>$($assetMake) $($assetModel)</b></a></button></p>"
-            'SerialLink'  =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"http://www.google.com/search?hl=en&q=$($assetMake)+$($psaAsset.serialNumber)`"><b>$($assetMake) $($psaAsset.serialNumber)</b></a></button></p>"
-            'dattoHost'   =	$psaAsset.dattoHostname
-            'refNumber'   =	$psaAsset.referenceNumber
-            'refTitle'    =	$psaAsset.referenceTitle
-            'rmmID'       =	$psaAsset.rmmDeviceID
-            'rmmUID'      =	$psaAsset.rmmDeviceUID
-            'serial'      =	$psaAsset.serialNumber
-            'rmmTypeID'   = $psaAsset.rmmDeviceAuditDeviceTypeID
-            'rmmModelID'  = $psaAsset.rmmDeviceAuditModelID
-            'rmmDevIP'    = $psaAsset.rmmDeviceAuditIPAddress
-            'rmmDevMAC'   = $psaAsset.rmmDeviceAuditMacAddress
-          }
+              rmmDeviceAuditIPAddress, rmmDeviceAuditMacAddress, dattoHostname)) {
+                  $totPSAassets += 1
+                  $assetMake = $assetMakes["$($psaAsset.rmmDeviceAuditManufacturerID)"]
+                  $assetModel = $assetModels["$($psaAsset.rmmDeviceAuditModelID)"]
+                  [PSCustomObject]@{
+                    'RMMLink'     = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
+                      <a target=`"_blank`" href=`"https://concord.rmm.datto.com/device/$($psaAsset.rmmDeviceID)`">
+                      <b>Open $($psaAsset.referenceTitle) in RMM</b></a></button></p>"
+                    'PSALink'     =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
+                      <a target=`"_blank`" href=`"$($AutotaskRoot)$($AutotaskDev)$($psaAsset.id)`">
+                      <b>Open $($psaAsset.referenceTitle) in PSA</b></a></button></p>"
+                    'make'        = $assetMake
+                    'model'       = $assetModel
+                    'ModelLink'   =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
+                      <a target=`"_blank`" href=`"http://www.google.com/search?hl=en&q=$($assetMake)+$($assetModel)`">
+                      <b>$($assetMake) $($assetModel)</b></a></button></p>"
+                    'SerialLink'  =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
+                      <a target=`"_blank`" href=`"http://www.google.com/search?hl=en&q=$($assetMake)+$($psaAsset.serialNumber)`">
+                      <b>$($assetMake) $($psaAsset.serialNumber)</b></a></button></p>"
+                    'dattoHost'   =	$psaAsset.dattoHostname
+                    'refNumber'   =	$psaAsset.referenceNumber
+                    'refTitle'    =	$psaAsset.referenceTitle
+                    'rmmID'       =	$psaAsset.rmmDeviceID
+                    'rmmUID'      =	$psaAsset.rmmDeviceUID
+                    'serial'      =	$psaAsset.serialNumber
+                    'rmmTypeID'   = $psaAsset.rmmDeviceAuditDeviceTypeID
+                    'rmmModelID'  = $psaAsset.rmmDeviceAuditModelID
+                    'rmmDevIP'    = $psaAsset.rmmDeviceAuditIPAddress
+                    'rmmDevMAC'   = $psaAsset.rmmDeviceAuditMacAddress
+                  }
         }
-        write-host "$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($outAssets).count) Assets`r`n$($strLineSeparator)"
-        $script:diag += "`r`n$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($outAssets).count) Assets`r`n$($strLineSeparator)"
-        if (@($outAssets).count -gt 0) {
-          $test = [System.Net.WebUtility]::HtmlDecode(($outAssets | 
+        write-host "$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
+        $script:diag += "`r`n$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
+        if (@($custAssets).count -gt 0) {
+          $test = [System.Net.WebUtility]::HtmlDecode(($custAssets | 
             select-object 'RMMLink', 'PSALink', 'make', 'model', 'ModelLink', 'dattoSerial', 'SerialLink', 
               'dattoHost', 'refNumber', 'refTitle', 'rmmID', 'rmmUID', 'serial', 'rmmTypeID', 'rmmModelID', 'rmmInIP', 'rmmDevIP', 'rmmDevMAC' | 
                 convertto-html -fragment | out-string) -replace $TableStylingGood)
-          foreach ($psaAsset in $outAssets) {
+          foreach ($psaAsset in $custAssets) {
             if ((($null -ne $psaAsset.rmmTypeID) -and ($psaAsset.rmmTypeID -ne "")) -and 
               (($null -ne $psaAsset.refTitle) -and ($psaAsset.refTitle -ne ""))) {
                 #Map rmmTypeID to Hudu Asset Types
