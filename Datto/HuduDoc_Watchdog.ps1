@@ -269,27 +269,29 @@ To Do:
     $avgHudu = [math]::Round(($script:huduCalls / $Minutes))
     #DISPLAY API THRESHOLDS
     $psa = PSA-GetThreshold $script:psaHeaders
-    write-host "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
+    write-host "`r`n$($strLineSeparator)`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
     write-host "Backup.Management API : $($script:bmCalls) - Backupify Calls : $($script:buCalls)"
     write-host "DNS Calls : $($script:dnsCalls)"
+    write-host "$($strLineSeparator)`r`nAPI Limits :$($strLineSeparator)"
     write-host "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold)"
-    write-host "API Limits - Hudu API (per Minute) : 300"
+    write-host "API Limits - Hudu API (per Minute) : $($avgHudu) / 300`r`n$($strLineSeparator)"
     write-host "Total Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
-    $script:diag += "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
+    $script:diag += "`r`n$($strLineSeparator)`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
     $script:diag += "`r`nBackup.Management API : $($script:bmCalls) - Backupify Calls : $($script:buCalls)"
     $script:diag += "`r`nDNS Calls : $($script:dnsCalls)"
-    $script:diag += "`r`nAPI Limits :`r`nPSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold)"
-    $script:diag += "`r`nAPI Limits - Hudu API (per Minute) : $($avgHudu) / 300"
+    $script:diag += "`r`n$($strLineSeparator)`r`nAPI Limits :`r`n$($strLineSeparator)"
+    $script:diag += "`r`nAPI Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold)"
+    $script:diag += "`r`nAPI Limits - Hudu API (per Minute) : $($avgHudu) / 300`r`n$($strLineSeparator)"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     if ($Minutes -eq 0) {
-      write-host "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds"
-      $script:diag += "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
+      write-host "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
+      $script:diag += "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)`r`n"
     } elseif ($Minutes -gt 0) {
       $amin = [string]($asecs / 60)
       $amin = $amin.split(".")[0]
       $amin = $amin.SubString(0,[math]::min(2,$amin.length))
-      write-host "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
-      $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n`r`n"
+      write-host "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
+      $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)`r`n"
     }
   }
 #endregion ----- MISC FUNCTIONS ----
@@ -1472,7 +1474,7 @@ if (-not $script:blnBREAK) {
         if ($EnabledField) {
           logERR 3 "Customer Management" "Enabled Field found`r`n$($strLineSeparator)"
         } else {
-          $EnabledField.value = $false
+          #$EnabledField.value = $false
           logERR 3 "Customer Management" "No Enabled Field was found`r`n$($strLineSeparator)"
         }
         $Colour = switch ($EnabledField.value) {
