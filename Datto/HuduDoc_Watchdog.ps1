@@ -707,6 +707,7 @@ To Do:
             where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
               select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
                 TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes).count
+        #Update 'Tile' Shade based on Overdue Backups
         if ($overdue -ge 1) {
           $shade = "warning"
           $MagicMessage = "$($overdue) / $(@($script:SelectedDevices).count) Backups Overdue"
@@ -730,7 +731,7 @@ To Do:
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
           $goodbody = "<h2>$($i_Company) Backups:</h2><figure class=`"table`">$($goodHTML)</figure>"
         }
-
+        #Update 'Tile' Shade based on Overdue Backups
         if ($overdue -ge 2) {$shade = "danger"}
         $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"$($i_URL)`"><b>Open Backup.Management</b></a></button></p>"
         $body = "$($body)<h4>Report last updated: $($timestamp)</h4>$($badbody)$($goodbody)"
