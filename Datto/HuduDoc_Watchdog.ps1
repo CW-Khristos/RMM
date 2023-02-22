@@ -1643,7 +1643,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
     write-DRMMAlert "HuduDoc_WatchDog : Successful : Diagnostics - $($logPath) : $($finish)"
-    write-DRMMDiag "$($script:diag)"
+    #write-DRMMDiag "$($script:diag)"
     exit 0
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
