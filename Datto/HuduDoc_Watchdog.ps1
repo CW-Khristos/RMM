@@ -125,6 +125,12 @@ To Do:
   #endregion
   #region####################### Backups Settings ##########################
   $script:bmCalls                 = 0
+  #region###############    Backups Counters - Tallied for All Companies
+  $totBackups                     = 0
+  $procBackups                    = 0
+  $skipBackups                    = 0
+  $failBackups                    = 0
+  #endregion
   $script:blnBM                   = $false
   $script:bmRoot                  = $env:BackupRoot
   $script:bmUser                  = $env:BackupUser
@@ -137,6 +143,20 @@ To Do:
   #endregion
   #region######################## Autotask Settings ###########################
   $script:psaCalls                = 0
+  #region###############    PSA Counters - Tallied for All Companies
+  $totCompany                     = 0
+  $procCompany                    = 0
+  $skipCompany                    = 0
+  $failCompany                    = 0
+  $totPSAassets                   = 0
+  $procPSAassets                  = 0
+  $skipPSAassets                  = 0
+  $failPSAassets                  = 0
+  $totPSAtickets                  = 0
+  $procPSAtickets                 = 0
+  $skipPSAtickets                 = 0
+  $failPSAtickets                 = 0
+  #endregion
   #PSA API DATASETS
   $script:typeMap                 = @{
     1 = "Customer"
@@ -668,7 +688,6 @@ To Do:
 
   function Set-BackupDash ($i_Company, $i_CompanyID, $i_AllPartners, $i_AllDevices, $i_Note, $i_URL, $i_BackupID) {
     ######################### Backups Section ###########################
-    Send-APICredentialsCookie
     $bmdiag = "Validating Backups : AUTH STATE : $($script:blnBM)"
     logERR 4 "Set-BackupDash" "$($bmdiag)"
     if ($script:blnBM) {
@@ -755,9 +774,11 @@ To Do:
             if (($AssetLayout | measure-object).count -le 0) {
               $bmdiag = "No layout(s) found in $($type)`r`n$($strLineSeparator)"
               logERR 4 "Set-BackupDash" "$($bmdiag)"
+              $skipBackups += 1
             } else {
               # Get all the detail assets and loop
-              foreach ($device in $script:SelectedDevices) { 
+              foreach ($device in $script:SelectedDevices) {
+                $totBackups += 1
                 $script:huduCalls += 1
                 $AssetName = "$($device.ComputerName)"
                 $Asset = Get-HuduAssets -name "$($AssetName)" -companyid $i_CompanyID -assetlayoutid $AssetLayout.id
@@ -804,10 +825,12 @@ To Do:
                     $bmdiag = "Updated $($AssetName) in $($i_Company) $($type) Assets`r`n$($strLineSeparator)"
                     logERR 4 "Set-BackupDash" "$($bmdiag)"
                     $script:huduCalls += 1
+                    $procBackups += 1
                   } catch {
                     $bmdiag = "Error Updating $($AssetName) in $($i_Company) $($type) Assets`r`n$($strLineSeparator)"
                     $bmdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
                     logERR 4 "Set-BackupDash" "$($bmdiag)"
+                    $failBackups += 1
                   }
                 }
               }
@@ -817,6 +840,7 @@ To Do:
           $bmdiag = "$($i_Company) not found in Hudu or other error occured`r`n$($strLineSeparator)"
           $bmdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
           logERR 4 "Set-BackupDash" "$($bmdiag)"
+          $failBackups += 1
         }
       } else {
         try {
@@ -1089,20 +1113,6 @@ if (-not $script:blnBREAK) {
   # https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
   #QUERY PSA API
   logERR 3 "Autotask Processing" "Beginning Autotask Processing`r`n$($strLineSeparator)"
-  #region###############    PSA Counters - Tallied for All Companies
-  $totCompany = 0
-  $procCompany = 0
-  $skipCompany = 0
-  $failCompany = 0
-  $totPSAassets = 0
-  $procPSAassets = 0
-  $skipPSAassets = 0
-  $failPSAassets = 0
-  $totPSAtickets = 0
-  $procPSAtickets = 0
-  $skipPSAtickets = 0
-  $failPSAtickets = 0
-  #endregion
   #region###############    Enumerate through each Company retrieved from PSA
   logERR 3 "Autotask Processing" "PROCESSING COMPANIES :`r`n$($strLineSeparator)"
   foreach ($company in $script:CompanyDetails) {
@@ -1514,6 +1524,10 @@ if (-not $script:blnBREAK) {
       }
     }
   }
+  $cmdiag = "Customer Management : Completed`r`n$($strLineSeparator)`r`n"
+  $cmdiag += "Total Backups : $($totBackups)`r`n"
+  $cmdiag += "`t- Processed : $($procBackups) - Skipped : $($skipBackups) - Failed : $($failBackups)`r`n$($strLineSeparator)"
+  logERR 3 "Customer Management" "$($cmdiag)"
   write-host "Done`r`n$($strLineSeparator)"
   $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   #endregion
