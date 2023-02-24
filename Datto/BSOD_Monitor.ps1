@@ -9,8 +9,9 @@
   $script:bitarch = $null
   $script:blnWARN = $false
   $script:blnBREAK = $false
+  $BSODFilter = $null
+  $exePath = "$($env:strPath)"
   $logPath = "C:\IT\Log\BSOD_Monitor"
-  $exePath = "$($env:BlueScreenViewPath)"
   $strLineSeparator = "----------------------------------"
 #endregion ----- DECLARATIONS ----
 
@@ -211,25 +212,34 @@
 
   function run-Remove () {
     #CHECK IF BLUESCREENVIEW IS RUNNING
+    $remdiag = "Checking if BlueScreenView is Running`r`n$($strLineSeparator)"
+    logERR 3 "run-Remove" "$($remdiag)"
     $process = tasklist | findstr /B "BlueScreenView"
+    write-host "Status : $($process)`r`n$($strLineSeparator)"
+    $script:diag += "Status : $($process)`r`n$($strLineSeparator)`r`n"
     if ($process) {                   #BLUESCREENVIEW RUNNING
       $running = $true
       $result = taskkill /IM "BlueScreenView" /F
+      $remdiag = "Terminating BlueScreenView`r`n$($strLineSeparator)"
+      logERR 3 "run-Remove" "$($remdiag)"
+      write-host "$($result)`r`n$($strLineSeparator)"
+      $script:diag += "$($result)`r`n$($strLineSeparator)`r`n"
     } elseif (-not $process) {        #BLUESCREENVIEW NOT RUNNING
       $running = $false
     }
     #REMOVE FILES
-    write-host "Removing BlueScreenView Files"
-    $script:diag += "Removing BlueScreenView Files`r`n"
+    $remdiag = "Removing BlueScreenView Files`r`n$($strLineSeparator)"
+    logERR 3 "run-Remove" "$($remdiag)"
     try {
-      remove-item -path "$($exePath)" -recurse -force -erroraction stop
+      remove-item -path "$($exePath)" -recurse -force -erroraction continue
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
-        write-host "NOT PRESENT : $($exePath)"
-        $script:diag += "NOT PRESENT : $($exePath)"
+        write-host "NOT PRESENT : $($_.fullname)`r`n$($strLineSeparator)"
+        $script:diag += "NOT PRESENT : $($_.fullname)`r`n$($strLineSeparator)`r`n"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
-        write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $script:blnWARN = $true
+        write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)`r`n"
       }
     }
   }
@@ -290,33 +300,60 @@ $null | set-content $logPath -force
 $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
-    $enddiag = "Execution Successful : $($finish)`r`n$($strLineSeparator)`r`n"
+    $result = "$($env:strTask) : Execution Successful : $($finish)"
+    $enddiag = "$($result)`r`n$($strLineSeparator)`r`n"
   } elseif ($script:blnWARN) {
-    $enddiag = "Execution Completed with Warnings : $($finish)`r`n$($strLineSeparator)`r`n"
+    $result = "$($env:strTask) : Execution Completed with Warnings : $($finish)"
+    $enddiag = "$($result)`r`n$($strLineSeparator)`r`n"
   }
   if (-not $BSODFilter) {
-    $enddiag += "`tHealthy - No BSODs found in the last 12 hours`r`n$($strLineSeparator)"
+    if ($env:strTask -eq "DEPLOY") {
+      $alert = "- BSODView Files Deployed"
+      $enddiag += "`t- BSODView Files Deployed`r`n$($strLineSeparator)"
+    } elseif ($env:strTask -eq "MONITOR") {
+      $alert = "- Healthy - No BSODs found in the last 12 hours"
+      $enddiag += "`t- Healthy - No BSODs found in the last 12 hours`r`n$($strLineSeparator)"
+    } elseif ($env:strTask -eq "UPGRADE") {
+      $alert = "- BSODView Files Replaced"
+      $enddiag += "`t- BSODView Files Replaced`r`n$($strLineSeparator)"
+    } elseif ($env:strTask -eq "REMOVE") {
+      $alert = "- BSODView Files Removed"
+      $enddiag += "`t- BSODView Files Removed`r`n$($strLineSeparator)"
+    }
     logERR 3 "BSOD_Monitor" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "BSOD_Monitor : Healthy - No BSODs found in the last 12 hours : $($finish)"
+    write-DRRMAlert "BSOD_Monitor : $($result) : $($alert)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   } elseif ($BSODFilter) {
-    $enddiag += "`tUnhealthy - BSOD found. Check Diagnostics`r`n$($strLineSeparator)"
+    if ($env:strTask -eq "DEPLOY") {
+      $alert = "- BSODView Files Deployed"
+      $enddiag += "`t- BSODView Files Deployed`r`n$($strLineSeparator)"
+    } elseif ($env:strTask -eq "MONITOR") {
+      $alert = "- Unhealthy - BSOD found : Diagnostics - $($logPath)"
+      $enddiag += "`t- Unhealthy - BSOD found : Diagnostics - $($logPath)`r`n$($strLineSeparator)"
+    } elseif ($env:strTask -eq "UPGRADE") {
+      $alert = "- BSODView Files Replaced"
+      $enddiag += "`t- BSODView Files Replaced`r`n$($strLineSeparator)"
+    } elseif ($env:strTask -eq "REMOVE") {
+      $alert = "- BSODView Files Removed"
+      $enddiag += "`t- BSODView Files Removed`r`n$($strLineSeparator)"
+    }
     logERR 3 "BSOD_Monitor" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "BSOD_Monitor : Unhealthy - BSOD found. Check Diagnostics : $($finish)"
+    write-DRRMAlert "BSOD_Monitor : $($result) : $($alert)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   }
 } elseif ($script:blnBREAK) {
   #WRITE TO LOGFILE
-  $enddiag = "Execution Failed : $($finish)`r`n$($strLineSeparator)`r`n"
+  $result = "$($env:strTask) : Execution Failed : $($finish)"
+  $enddiag = "$($result)`r`n$($strLineSeparator)`r`n"
   logERR 4 "BSOD_Monitor" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "BSOD_Monitor : Failure : Diagnostics - $($logPath) : $($finish)"
+  write-DRMMAlert "BSOD_Monitor : $($result) : Diagnostics - $($logPath)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 }
