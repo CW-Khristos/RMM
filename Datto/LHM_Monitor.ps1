@@ -105,12 +105,12 @@
     dir-Check
     #CHECK IF LHM IS RUNNING
     $varAttempts = 0
-    $running = get-process "LibreHardwareMonitor.exe"
+    $running = get-process "LibreHardwareMonitor.exe" -erroraction silentlycontinue
     while (($running) -and ($varAttempts -lt 3)) {
       $varAttempts++
       $result = taskkill /IM "LibreHardwareMonitor.exe" /F
       start-sleep -seconds 5
-      $result = get-process "LibreHardwareMonitor.exe"
+      $result = get-process "LibreHardwareMonitor.exe" -erroraction silentlycontinue
       if ($result) {                   #LHM STILL RUNNING
         $running = $true
       } elseif (-not $result) {        #LHM NO LONGER RUNNING
@@ -120,17 +120,17 @@
     if (-not $running) {
       try {
         if (test-path -path "C:\IT\LHM.zip") {remove-item "C:\IT\LHM.zip" -force -erroraction continue}
-        move-item LHM.zip "C:\IT" -force     #DISABLE FOR 'Monitor' COMPONENT - 'Monitor' Components can't have files attached
+        #move-item LHM.zip "C:\IT" -force     #DISABLE FOR 'Monitor' COMPONENT - 'Monitor' Components can't have files attached
         #DOWNLOAD LHM.ZIP FROM GITHUB
         if (-not (test-path -path "C:\IT\LHM.zip")) {
           try {
             #IPM-Khristos
-            start-bitstransfer -source $srcLHM -destination "C:\IT\LHM.zip" -force -erroraction stop
+            start-bitstransfer -source $srcLHM -destination "C:\IT\LHM.zip" -erroraction stop
           } catch {
             try {
               #IPM-Khristos
               $web = new-object system.net.webclient
-              $web.downloadfile($srcLHM, "C:\IT\LHM.zip") -force -erroraction stop
+              $web.downloadfile($srcLHM, "C:\IT\LHM.zip")
             } catch {
               $depdiag = "FAILED TO DOWNLOAD LHM"
               logERR 2 "run-Deploy" "$($depdiag)"
@@ -332,7 +332,7 @@
     write-host "$($strLineSeparator)`r`nRemoving LHM Files`r`n$($strLineSeparator)"
     $script:diag += "$($strLineSeparator)`r`nRemoving LHM Files`r`n$($strLineSeparator)`r`n"
     try {
-      remove-item -path "C:\IT\LHM" -recurse -force -erroraction stop
+      remove-item -path "C:\IT\LHM" -recurse -force -erroraction continue
       remove-item -path "C:\IT\LHM.zip" -force -erroraction silentlycontinue
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
@@ -354,7 +354,7 @@ $ScrptStartTime = (get-date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
-if ($strTask -eq "DEPLOY") {
+if ($env:strTask -eq "DEPLOY") {
   $taskdiag = "Deploying LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Deploy" "$($taskdiag)"
   try {
@@ -363,7 +363,7 @@ if ($strTask -eq "DEPLOY") {
   } catch {
     
   }
-} elseif ($strTask -eq "MONITOR") {
+} elseif ($env:strTask -eq "MONITOR") {
   $taskdiag = "Monitoring LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Monitor" "$($taskdiag)"
   try {
@@ -372,7 +372,7 @@ if ($strTask -eq "DEPLOY") {
   } catch {
     
   }
-} elseif ($strTask -eq "UPGRADE") {
+} elseif ($env:strTask -eq "UPGRADE") {
   $taskdiag = "Replacing LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Upgrade" "$($taskdiag)"
   try {
@@ -381,7 +381,7 @@ if ($strTask -eq "DEPLOY") {
   } catch {
     
   }
-} elseif ($strTask -eq "REMOVE") {
+} elseif ($env:strTask -eq "REMOVE") {
   $taskdiag = "Removing LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Remove" "$($taskdiag)"
   try {
@@ -408,7 +408,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "LHM : $($script:varAlertMsg) : $($finish)"
+    write-DRRMAlert "LHM : $($env:strTask) : $($script:varAlertMsg) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   } else {
@@ -416,7 +416,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "LHM : No nodes reporting over threshold : $($finish)"
+    write-DRRMAlert "LHM : $($env:strTask) : No nodes reporting over threshold : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   }
@@ -425,7 +425,7 @@ if (-not $script:blnBREAK) {
   $enddiag += "Execution Failed : $($finish)`r`n$($strLineSeparator)"
   logERR 4 "END" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "LHM : Failure : Diagnostics - $($logPath) : $($finish)"
+  write-DRMMAlert "LHM : $($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 }
