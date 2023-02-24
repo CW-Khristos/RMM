@@ -1140,7 +1140,7 @@ if (-not $script:blnBREAK) {
         #Find Company in Hudu
         $script:huduCalls += 1
         $huduCompany = Get-HuduCompanies -Name "$($company.CompanyName)"
-        #region###############    Arrange collected Ticket data for Hudu
+        #region###############    Arrange PSA Ticket data for Hudu
         $custTickets = $tickets | 
           where {$_.companyID -eq $company.CompanyID} | 
             select id, ticketNUmber, createdate, title, description, dueDateTime, assignedResourceID, lastActivityPersonType, lastCustomerVisibleActivityDateTime, priority, source, status, issueType, subIssueType, ticketType
