@@ -235,7 +235,7 @@ namespace Win32{
         write-Script "$($scrCompare)" $false
         #COMPARE STRATUP SCRIPT FILE AS 'COMPARE.CMD' TO 'BGILAUNCH.CMD' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cmdScript) -DifferenceObject $(Get-Content $scrCompare)) {
-            "Files are different"
+          "Files are different"
         } else {
           "Files are same"
         }
@@ -249,7 +249,8 @@ namespace Win32{
         move-item default.bgi "$($cfgCompare)" -force
         #COMPARE COMPONENT ATTACHED 'DEFAULT.BGI' FILE AS 'COMPARE.BGI' TO 'DEFAULT.BGI' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cfgDefault) -DifferenceObject $(Get-Content $cfgCompare)) {
-            "Files are different"
+          "Files are different"
+          move-item default.bgi "$($cfgDefault)" -force
         } else {
           "Files are same"
         }
