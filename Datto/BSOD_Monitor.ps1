@@ -98,8 +98,8 @@
     if (-not (test-path -path "C:\IT\Scripts")) {
       new-item -path "C:\IT\Scripts" -itemtype directory -force
     }
-    if (-not (test-path -path "C:\IT\BlueScreenView")) {
-      new-item -path "C:\IT\BlueScreenView" -itemtype directory -force | out-string
+    if (-not (test-path -path "$($exePath)")) {
+      new-item -path "$($exePath)" -itemtype directory -force | out-string
     }
   }
 
