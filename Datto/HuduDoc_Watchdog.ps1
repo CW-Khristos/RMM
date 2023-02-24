@@ -1653,7 +1653,7 @@ if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     #WRITE TO LOGFILE
     $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
-    $enddiag = "`r`n`r`nExecution Successful : $($finish)"
+    $enddiag = "Execution Successful : $($finish)"
     logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
     write-DRMMAlert "HuduDoc_WatchDog : Successful : Diagnostics - $($logPath) : $($finish)"
@@ -1662,7 +1662,7 @@ if (-not $script:blnBREAK) {
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
     $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
-    $enddiag = "`r`n`r`nExecution Completed with Warnings : $($finish)"
+    $enddiag = "Execution Completed with Warnings : $($finish)"
     logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
     write-DRMMAlert "HuduDoc_WatchDog : Warning : Diagnostics - $($logPath) : $($finish)"
@@ -1676,7 +1676,7 @@ if (-not $script:blnBREAK) {
   $null | set-content $logPath -force
   #WRITE TO LOGFILE
   $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
-  $enddiag = "`r`n`r`nExecution Failure : $($finish)"
+  $enddiag = "Execution Failure : $($finish)"
   logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
   write-DRMMAlert "HuduDoc_WatchDog : Failure : Diagnostics - $($logPath) : $($finish)"
