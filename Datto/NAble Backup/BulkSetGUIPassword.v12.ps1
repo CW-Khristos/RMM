@@ -94,6 +94,13 @@
   }
   clear-host
   $ErrorActionPreference = 'Continue'
+  #SANITIZE DRMM VARIABLES
+  if (($null -eq $script:i_BackupUser) -or ($script:i_BackupUser -eq "")) {
+    $script:i_BackupUser = $env:BackupUser
+  }
+  if (($null -eq $script:i_BackupPWD) -or ($script:i_BackupPWD -eq "")) {
+    $script:i_BackupPWD = $env:BackupPass
+  }
   Write-Host "  Bulk Set GUI Password `n"
   $script:diag += "  Bulk Set GUI Password `r`n`r`n"
   #$Syntax = Get-Command $PSCommandPath -Syntax ; Write-Host "Script Parameter Syntax:`n`n  $Syntax"
@@ -117,7 +124,7 @@
   $script:diag += "  -i_PartnerName = $($env:i_PartnerName)`r`n"
   Write-Host "  -i_BackupName = $($env:i_BackupName)"
   $script:diag += "  -i_BackupName = $($env:i_BackupName)`r`n"
-  Write-Host "  -i_BackupUser = $($env:i_BackupUser)"
+  Write-Host "  -i_BackupUser = $($script:i_BackupUser)"
   $script:diag += "  -i_BackupUser = {ENCRYPTED}`r`n"
   Write-Host "  -i_BackupPWD = {ENCRYPTED}"
   $script:diag += "  -i_BackupPWD = {ENCRYPTED}`r`n"
@@ -194,13 +201,13 @@
     ## SET BACKUP CREDENTIALS
     $BackupCred = New-Object -TypeName PSObject
     $BackupCred | Add-Member -MemberType NoteProperty -Name PartnerName -Value "$($PartnerName)"
-    if ((($null -eq $env:i_BackupUser) -or ($env:i_BackupUser -eq "")) -or 
-      (($null -eq $env:i_BackupPWD) -or ($env:i_BackupPWD -eq ""))) {           ## NO CREDENTIALS PASSED
+    if ((($null -eq $script:i_BackupUser) -or ($script:i_BackupUser -eq "")) -or 
+      (($null -eq $script:i_BackupPWD) -or ($script:i_BackupPWD -eq ""))) {           ## NO CREDENTIALS PASSED
         $BackupCred = Get-Credential -UserName "" -Message 'Enter Login Email and Password for N-able Backup.Management API'
-    } elseif ((($null -ne $env:i_BackupUser) -and ($env:i_BackupUser -ne "")) -and 
-      (($null -ne $env:i_BackupPWD) -and ($env:i_BackupPWD -ne ""))) {          ## CREDENTIALS PASSED
-        $BackupCred | Add-Member -MemberType NoteProperty -Name UserName -Value "$($env:i_BackupUser)"
-        $BackupCred | Add-Member -MemberType NoteProperty -Name Password -Value "$($env:i_BackupPWD)"
+    } elseif ((($null -ne $script:i_BackupUser) -and ($script:i_BackupUser -ne "")) -and 
+      (($null -ne $script:i_BackupPWD) -and ($script:i_BackupPWD -ne ""))) {          ## CREDENTIALS PASSED
+        $BackupCred | Add-Member -MemberType NoteProperty -Name UserName -Value "$($script:i_BackupUser)"
+        $BackupCred | Add-Member -MemberType NoteProperty -Name Password -Value "$($script:i_BackupPWD)"
     }
     ## WRITE API FILE
     $PartnerName | out-file $APIcredfile
