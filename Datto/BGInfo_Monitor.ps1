@@ -9,20 +9,31 @@
 # Modifications : Christopher Bledsoe - cbledsoe@ipmcomputers.com
 
 #region ----- DECLARATIONS ----
+  #VERSION FOR SCRIPT UPDATE
+  $strSCR = "BGInfo_Monitor"
+  $strVER = [version]"0.1.0"
+  $strREPO = "RMM"
+  $strBRCH = "dev"
+  $strDIR = "Datto/BGInfo"
   $script:diag = $null
   $script:blnWARN = $false
   $script:blnBREAK = $false
   $logPath = "C:\IT\Log\BG_Info"
   $strLineSeparator = "----------------------------------"
+  $bgFiles = @(
+    "Bginfo4.exe",
+    "Bginfo8.exe",
+    "default.bgi"
+  )
   $bgKeys = @(
     "HKCU:\Software\Winternals\BGInfo",
     "HKLM:\Software\Winternals\BGInfo"
   )
   $cfgDefault = "C:\IT\BGInfo\default.bgi"
   $cmdScript = "C:\IT\Scripts\BGILaunch.cmd"
-  $prevScript = "$($env:ProgramData)\Microsoft\Windows\Start Menu\Programs\StartUp\BGILaunch.cmd"
-  $newLink = "$($env:ProgramData)\Microsoft\Windows\Start Menu\Programs\StartUp\BGInfo - Shortcut.lnk"
-  $allLink = "$($env:ALLUSERSPROFILE)\Microsoft\Windows\Start Menu\Programs\StartUp\BGInfo - Shortcut.lnk"
+  $prevScript = "$($ProgramData)\Microsoft\Windows\Start Menu\Programs\StartUp\BGILaunch.cmd"
+  $newLink = "$($ProgramData)\Microsoft\Windows\Start Menu\Programs\StartUp\BGInfo - Shortcut.lnk"
+  $allLink = "$($ALLUSERSPROFILE)\Microsoft\Windows\Start Menu\Programs\StartUp\BGInfo - Shortcut.lnk"
   #Set Wallpaper Code
   $wallpaper = "C:\Windows\Web\Wallpaper\Windows\img0.jpg"
   $wpCode = @' 
@@ -73,29 +84,141 @@ namespace Win32{
     switch ($intSTG) {
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - ($($strModule)) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+      }
+    }
+  }
+
+  function chkAU {
+    param (
+      $ver, $repo, $brch, $dir, $scr
+    )
+    $blnXML = $true
+    $xmldiag = $null
+    #RETRIEVE VERSION XML FROM GITHUB
+    $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
+    write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
+    $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/Datto/version.xml"
+    try {
+      $verXML = New-Object System.Xml.XmlDocument
+      $verXML.Load($srcVER)
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      $xmldiag += "XML.Load() - Could not open $($srcVER)`r`n$($err)`r`n"
+      write-host "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
+      try {
+        $web = new-object system.net.webclient
+        [xml]$verXML = $web.DownloadString($srcVER)
+      } catch {
+        $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $xmldiag += "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)`r`n"
+        write-host "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
+        try {
+          start-bitstransfer -erroraction stop -source $srcVER -destination "C:\IT\Scripts\version.xml"
+          [xml]$verXML = "C:\IT\Scripts\version.xml"
+        } catch {
+          $blnXML = $false
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+          $xmldiag += "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n"
+          write-host "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
+        }
+      }
+    }
+    #READ VERSION XML DATA INTO NESTED HASHTABLE FOR LATER USE
+    try {
+      if (-not $blnXML) {
+        write-host $blnXML
+      } elseif ($blnXML) {
+        foreach ($objSCR in $verXML.SCRIPTS.ChildNodes) {
+          if ($objSCR.name -match $strSCR) {
+            #CHECK LATEST VERSION
+            $xmldiag += "`r`n`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)`r`n"
+            write-host "`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)"
+            if ([version]$objSCR.innertext -gt $strVER) {
+              $xmldiag += "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              write-host "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              #REMOVE PREVIOUS COPIES OF SCRIPT
+              if (test-path -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1") {
+                remove-item -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1" -force -erroraction stop
+              }
+              #DOWNLOAD LATEST VERSION OF ORIGINAL SCRIPT
+              if (($null -eq $strDIR) -or ($strDIR -eq "")) {
+                $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strSCR)_$($objSCR.innertext).ps1"
+              } elseif (($null -ne $strDIR) -and ($strDIR -ne "")) {
+                $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/$($strSCR)_$($objSCR.innertext).ps1"
+              }
+              Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
+              #RE-EXECUTE LATEST VERSION OF SCRIPT
+              $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n`r`n"
+              write-host "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              $output = C:\Windows\System32\cmd.exe "/C powershell -executionpolicy bypass -file `"C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1`""
+              foreach ($line in $output) {$stdout += "$($line)`r`n"}
+              $xmldiag += "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)`r`n"
+              write-host "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)"
+              $xmldiag += "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
+              write-host "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
+              $script:blnBREAK = $true
+            } elseif ([version]$objSCR.innertext -le $strVER) {
+              $xmldiag += "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
+              write-host "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
+            }
+            break
+          }
+        }
+      }
+      $script:diag += "$($xmldiag)"
+      $xmldiag = $null
+    } catch {
+      $script:blnBREAK = $false
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      $xmldiag += "Error reading Version XML : $($srcVER)`r`n$($err)`r`n"
+      write-host "Error reading Version XML : $($srcVER)`r`n$($err)"
+      $script:diag += "$($xmldiag)"
+      $xmldiag = $null
+    }
+  } ## chkAU
+
+  function download-Files ($file) {
+    $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/$($file)"
+    try {
+      $web = new-object system.net.webclient
+      $dlFile = $web.downloadfile($strURL, "C:\IT\BGInfo\$($file)")
+    } catch {
+      $dldiag = "Web.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+      write-host "Web.DownloadFile() - Could not download $($strURL)" -foregroundcolor red
+      write-host "$($dldiag)"
+      $script:diag += "$($dldiag)"
+      logERR 3 "download-Files" "$($dldiag)"
+      try {
+        start-bitstransfer -source $strURL -destination "C:\IT\BGInfo\$($file)" -erroraction stop
+      } catch {
+        $dldiag = "BITS.Transfer() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+        write-host "BITS.Transfer() - Could not download $($strURL)" -foregroundcolor red
+        write-host "$($dldiag)"
+        $script:diag += "$($dldiag)"
+        logERR 2 "download-Files" "$($dldiag)"
       }
     }
   }
@@ -192,15 +315,19 @@ namespace Win32{
     #CHECK 'PERSISTENT' FOLDERS
     dir-Check
     # install the executable somewhere we can bank on its presence
-    move-item bginfo4.exe "C:\IT\BGInfo" -force
-    move-item bginfo8.exe "C:\IT\BGInfo" -force
+    try {
+      move-item bginfo4.exe "C:\IT\BGInfo" -force -erroraction stop
+      move-item bginfo8.exe "C:\IT\BGInfo" -force -erroraction stop
+    } catch {
+      foreach ($file in $bgFiles) {download-Files $file}
+    }
     # check for BGIs
     if (!(test-path *.bgi)) {
       $timestanp = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
       $mondiag = "- ERROR: There needs to be at least one .bgi file for the Component to work`r`n"
       $mondiag += "  Execution cannot continue. Exiting`r`n"
       $mondiag += "`r`n`r`nExecution Failed : $($timestanp)"
-      logERR 2 "BG_Info" "$($mondiag)"
+      logERR 2 "run-Deploy" "$($mondiag)"
     } else {
       if (test-path *.bgi -exclude default.bgi) {
         $varArgs=(ls *.bgi -Exclude default.bgi | Select-Object -First 1).Name
@@ -235,23 +362,44 @@ namespace Win32{
         write-Script "$($scrCompare)" $false
         #COMPARE STRATUP SCRIPT FILE AS 'COMPARE.CMD' TO 'BGILAUNCH.CMD' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cmdScript) -DifferenceObject $(Get-Content $scrCompare)) {
-          "Files are different"
+          "CMD Files are different"
         } else {
-          "Files are same"
+          "CMD Files are same"
         }
       }
       #CHECK BGINFO CONFIGURATION FILE 'DEFAULT.BGI'
       $result = test-path -path "$($cfgDefault)"
       if (-not $result) {               #FILE DOES NOT EXIST, DEPLOY COMPONENT ATTACHED 'DEFAULT.BGI'
-        move-item default.bgi "$($cfgDefault)" -force
+        run-Deploy
       } elseif ($result) {              #FILE EXISTS
         $cfgCompare = "C:\IT\BGInfo\compare.bgi"
-        move-item default.bgi "$($cfgCompare)" -force
+        $cfgOriginal = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/default.bgi"
+        try {
+          $web = new-object system.net.webclient
+          $dlFile = $web.downloadfile($cfgOriginal, $cfgCompare)
+        } catch {
+          $dldiag = "Web.DownloadFile() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+          write-host "Web.DownloadFile() - Could not download $($cfgOriginal)" -foregroundcolor red
+          write-host "$($dldiag)"
+          $script:diag += "$($dldiag)"
+          logERR 3 "run-Monitor" "$($dldiag)"
+          try {
+            start-bitstransfer -source $cfgOriginal -destination $cfgCompare -erroraction stop
+          } catch {
+            $dldiag = "BITS.Transfer() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+            write-host "BITS.Transfer() - Could not download $($cfgOriginal)" -foregroundcolor red
+            write-host "$($dldiag)"
+            $script:diag += "$($dldiag)"
+            logERR 3 "run-Monitor" "$($dldiag)"
+          }
+        }
+        # BELOW DOESN'T WORK FOR NON-SCRIPT TYPE COMPONENTS
+        #move-item default.bgi "$($cfgCompare)" -force
         #COMPARE COMPONENT ATTACHED 'DEFAULT.BGI' FILE AS 'COMPARE.BGI' TO 'DEFAULT.BGI' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cfgDefault) -DifferenceObject $(Get-Content $cfgCompare)) {
-          "Files are different"
+          "BGI Files are different"
         } else {
-          "Files are same"
+          "BGI Files are same"
         }
       }
       #CHECK IF BGINFO IS ALREADY RUNNING
@@ -260,9 +408,6 @@ namespace Win32{
         $running = $true
       } elseif (-not $process) {        #BGINFO NOT RUNNING
         $running = $false
-        $timestanp = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
-        $mondiag = "`r`n`r`nExecution Failed : $($timestanp)"
-        logERR 2 "BG_Info" "$($mondiag)"
       }
     }
   }
@@ -358,8 +503,8 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
 if ($env:strTask -eq "DEPLOY") {
-  write-host "Install and configure BGInfo Files and Startup`r`n$($strLineSeparator)"
-  $script:diag += "Install and configure BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`nInstall and configure BGInfo Files and Startup`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nInstall and configure BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
   try {
     run-Deploy -erroraction stop
     
@@ -367,8 +512,8 @@ if ($env:strTask -eq "DEPLOY") {
     
   }
 } elseif ($env:strTask -eq "MONITOR") {
-  write-host "Monitoring BGInfo Files and Startup`r`n$($strLineSeparator)"
-  $script:diag += "Monitoring BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`nMonitoring BGInfo Files and Startup`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nMonitoring BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
   try {
     run-Monitor -erroraction stop
     
@@ -376,8 +521,8 @@ if ($env:strTask -eq "DEPLOY") {
     
   }
 } elseif ($env:strTask -eq "UPGRADE") {
-  write-host "Replacing BGInfo Files and Startup`r`n$($strLineSeparator)"
-  $script:diag += "Replacing BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`nReplacing BGInfo Files and Startup`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nReplacing BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
   try {
     run-Upgrade -erroraction stop
     
@@ -385,8 +530,8 @@ if ($env:strTask -eq "DEPLOY") {
     
   }
 } elseif ($env:strTask -eq "REMOVE") {
-  write-host "Removing BGInfo Files and Startup`r`n$($strLineSeparator)"
-  $script:diag += "Removing BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`nRemoving BGInfo Files and Startup`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nRemoving BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
   try {
     run-Remove -erroraction stop
     
@@ -403,7 +548,7 @@ $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     #WRITE TO LOGFILE
-    $enddiag = "`r`n`r`nExecution Successful : $($finish)"
+    $enddiag = "Execution Successful : $($finish)"
     logERR 3 "BG_Info" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
     write-DRMMAlert "BG_Info : $($env:strTask) Successful : Diagnostics - $($logPath) : $($finish)"
@@ -411,7 +556,7 @@ if (-not $script:blnBREAK) {
     exit 0
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
-    $enddiag = "`r`n`r`nExecution Completed with Warnings : $($finish)"
+    $enddiag = "Execution Completed with Warnings : $($finish)"
     logERR 3 "BG_Info" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
     write-DRMMAlert "BG_Info : $($env:strTask) Warning : Diagnostics - $($logPath) : $($finish)"
@@ -420,7 +565,7 @@ if (-not $script:blnBREAK) {
   }
 } elseif ($script:blnBREAK) {
   #WRITE TO LOGFILE
-  $enddiag = "`r`n`r`nExecution Failed : $($finish)"
+  $enddiag = "Execution Failed : $($finish)"
   logERR 4 "BG_Info" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
   write-DRMMAlert "BG_Info : $($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
