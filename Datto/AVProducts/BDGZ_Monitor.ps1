@@ -149,6 +149,7 @@ if ($script:blnDL) {
     } catch {
       $script:diag += "Unable to determine latest version of eps.rmm.exe`r`n"
       $script:diag += "Invoke-WebRequest() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat`r`n"
+
       write-host "Unable to determine latest version of eps.rmm.exe"
       write-host "Invoke-WebRequest() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat" -foregroundcolor red
       $script:diag += "$($_.Exception)`r`n"
@@ -157,12 +158,14 @@ if ($script:blnDL) {
       try {
         $script:diag += "Web.DownloadFile() - Determining latest version of eps.rmm.exe`r`n"
         write-host "Web.DownloadFile() - Determining latest version of eps.rmm.exe" -foregroundcolor yellow
+
         $web = new-object system.net.webclient
         $web.downloadfile("http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat", "C:\IT\latest.dat")
         $script:epsVER = get-content -path "C:\IT\latest.dat"
       } catch {
         $script:diag += "Unable to determine latest version of eps.rmm.exe`r`n"
         $script:diag += "Web.DownloadFile() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat`r`n"
+
         write-host "Unable to determine latest version of eps.rmm.exe"
         write-host "Web.DownloadFile() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat" -foregroundcolor red
         $script:diag += "$($_.Exception)`r`n"
@@ -177,6 +180,7 @@ if ($script:blnDL) {
         try {
           $script:diag += "BITS.Transfer() - Downloading latest version of eps.rmm.exe ($($script:epsVER))`r`n"
           write-host "BITS.Transfer() - Downloading latest version of eps.rmm.exe ($($script:epsVER))" -foregroundcolor yellow
+
           start-bitstransfer -erroraction stop -source $script:epsSRC -destination $script:epsEXE
           (get-childitem -path $script:epsEXE).creationtime = (get-date)
         } catch {
@@ -185,6 +189,7 @@ if ($script:blnDL) {
           try {
             $script:diag += "Web.DownloadFile() - Downloading latest version of eps.rmm.exe ($($script:epsVER))`r`n"
             write-host "Web.DownloadFile() - Downloading latest version of eps.rmm.exe ($($script:epsVER))" -foregroundcolor yellow
+
             $web = new-object system.net.webclient
             $web.downloadfile($script:epsSRC, $script:epsEXE)
             (get-childitem -path $script:epsEXE).creationtime = (get-date)
