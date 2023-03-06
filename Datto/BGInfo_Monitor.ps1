@@ -250,7 +250,6 @@ namespace Win32{
         #COMPARE COMPONENT ATTACHED 'DEFAULT.BGI' FILE AS 'COMPARE.BGI' TO 'DEFAULT.BGI' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cfgDefault) -DifferenceObject $(Get-Content $cfgCompare)) {
           "Files are different"
-          move-item default.bgi "$($cfgDefault)" -force
         } else {
           "Files are same"
         }
@@ -400,33 +399,31 @@ if ($env:strTask -eq "DEPLOY") {
 StopClock
 #CLEAR LOGFILE
 $null | set-content $logPath -force
+$finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     #WRITE TO LOGFILE
-    $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
     $enddiag = "`r`n`r`nExecution Successful : $($finish)"
     logERR 3 "BG_Info" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "BG_Info : Successful : Diagnostics - $($logPath) : $($finish)"
+    write-DRMMAlert "BG_Info : $($env:strTask) Successful : Diagnostics - $($logPath) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
-    $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
     $enddiag = "`r`n`r`nExecution Completed with Warnings : $($finish)"
     logERR 3 "BG_Info" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "BG_Info : Warning : Diagnostics - $($logPath) : $($finish)"
+    write-DRMMAlert "BG_Info : $($env:strTask) Warning : Diagnostics - $($logPath) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   }
 } elseif ($script:blnBREAK) {
   #WRITE TO LOGFILE
-  $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
   $enddiag = "`r`n`r`nExecution Failed : $($finish)"
   logERR 4 "BG_Info" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "BG_Info : Failure : Diagnostics - $($logPath) : $($finish)"
+  write-DRMMAlert "BG_Info : $($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
