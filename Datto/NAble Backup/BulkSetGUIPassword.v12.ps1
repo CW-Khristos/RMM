@@ -130,6 +130,8 @@
   $script:diag += "  -i_BackupPWD = {ENCRYPTED}`r`n"
   Write-Host "  -i_UDFpassword = $($env:i_UDFpassword)"
   $script:diag += "  -i_UDFpassword = $($env:i_UDFpassword)`r`n"
+  Write-Host "  -i_UDFaccount = $($env:i_UDFaccount)"
+  $script:diag += "  -i_UDFaccount = $($env:i_UDFaccount)`r`n"
   
   #$scriptpath = $MyInvocation.MyCommand.Path
   #$dir = Split-Path $scriptpath
@@ -338,15 +340,15 @@
     } else {
       Write-Host "$($Script:strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($Script:strLineSeparator)"
       $script:diag += "$($Script:strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($Script:strLineSeparator)`r`n"
-      $Script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
-      Send-GetPartnerInfo $Script:partnername
+      #$Script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
+      #Send-GetPartnerInfo $Script:partnername
     }
 
     if ($partner.error) {
       Write-Host "  $($partner.error.message)"
       $script:diag += "  $($partner.error.message)`r`n"
-      $Script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
-      Send-GetPartnerInfo $Script:partnername
+      #$Script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
+      #Send-GetPartnerInfo $Script:partnername
     }
   } ## Send-GetPartnerInfo API Call
 
@@ -548,9 +550,14 @@
       `n    }
       `n"
 
-    $Script:updateCC = Invoke-RestMethod $urlJSON -Method 'POST' -Headers $headers -Body $body
-    Write-Host "$($Script:strLineSeparator)`r`n  UpdateCC : $($Script:updateCC)"
-    $script:diag += "$($Script:strLineSeparator)`r`n  UpdateCC : $($Script:updateCC)`r`n"
+    try {
+      $Script:updateCC = Invoke-RestMethod $urlJSON -Method 'POST' -Headers $headers -Body $body
+      Write-Host "$($Script:strLineSeparator)`r`n  UpdateCC : SUCCESS"
+      $script:diag += "$($Script:strLineSeparator)`r`n  UpdateCC : SUCCESS`r`n"
+    } catch {
+      Write-Host "$($Script:strLineSeparator)`r`n  UpdateCC : FAILURE"
+      $script:diag += "$($Script:strLineSeparator)`r`n  UpdateCC : FAILURE`r`n"
+    }
   } ## UpdateCustomColumn API Call
 #endregion ----- Backup.Management JSON Calls ----
 #endregion ----- FUNCTIONS ----
@@ -589,7 +596,7 @@ try {
       Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
     Write-Host "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
     $script:diag += "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
-  } elseif (-not $allDevices) {
+  } elseif (-not $AllDevices) {
     #$script:SelectedDevices = $DeviceDetail | 
     #  Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
     #  Out-GridView -title "Current Partner | $partnername" -OutputMode Multiple
@@ -602,7 +609,7 @@ try {
     }
   }    
 
-  if($null -eq $SelectedDevices) {
+  if ($null -eq $SelectedDevices) {
     # Cancel was pressed
     # Run cancel script
     Write-Host "$($Script:strLineSeparator)`r`n  No Devices Selected"
@@ -615,7 +622,7 @@ try {
       Select-Object PartnerId,PartnerName,Reference,@{Name="AccountID"; Expression={[int]$_.AccountId}},DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp | 
         Sort-object AccountId | Format-Table
 
-    if ($env:i_BackupCMD -eq "SetGUIPassword") {
+    if ($env:i_BackupCMD -eq "-SetGUIPassword") {
       #$SecurePassword = Read-Host "  Enter Backup Manager GUI Password to be applied to $($SelectedDevices.AccountId.count) Devices" -AsSecureString
       Write-Host "$($Script:strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient."
       $script:diag += "$($Script:strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient.`r`n"
@@ -642,19 +649,21 @@ try {
   }
 } catch {
   $script:blnWARN = $true
+  write-host "ERROR :`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+  $script:diag += "`r`nERROR :`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
 }
 #CLEAR LOGFILE
 $null | set-content $logPath -force
 # DATTO OUTPUT
 if (-not $script:blnWARN) {
+  "$($script:diag)" | add-content $logPath -force
   write-DRMMAlert "MSP_Backup : GUI Password Set : $(get-date)"
   write-DRMMDiag "$($script:diag)"
-  "$($script:diag)" | add-content $logPath -force
   exit 0
 } elseif ($script:blnWARN) {
+  "$($script:diag)" | add-content $logPath -force
   write-DRMMAlert "MSP_Backup : Execution Failure : $(get-date)"
   write-DRMMDiag "$($script:diag)"
-  "$($script:diag)" | add-content $logPath -force
   exit 1
 }
 #END SCRIPT
