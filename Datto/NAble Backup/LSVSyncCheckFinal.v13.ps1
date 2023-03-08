@@ -36,11 +36,11 @@ $script:blnWARN = $false
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
   
   Function Convert-FromUnixDate ($UnixDate) {
      [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($UnixDate))
@@ -64,6 +64,12 @@ $script:blnWARN = $false
       Write-Host "Remote Synchronization: $($BackupServSync)"
       $script:remote = "Remote Sync : $($BackupServSync)"
       $script:diag += "Remote Synchronization: $($BackupServSync)`r`n"
+      $percentage = $BackupServSync.replace('%', "")
+      if ([int]$percentage -lt [int]$env:syncThreshold) {
+        $script:blnWARN = $true
+        write-host "`tWARNING : Remote Sync is below Threshold ($($env:syncThreshold))"
+        $script:diag += "`tWARNING : Remote Sync is below Threshold ($($env:syncThreshold))`r`n"
+      }
     } else {
       Write-Host "Remote Synchronization Data Invalid or Not Found"
       $script:remote = "Remote Sync : Data Invalid or Not Found"
@@ -104,9 +110,9 @@ $script:blnWARN = $false
 #BEGIN SCRIPT
 clear-host
 #Paths of both RMM & Standalone
-$MOB_path = "$env:ALLUSERSPROFILE\Managed Online Backup\Backup Manager\StatusReport.xml"
-$SA_path = "$env:ALLUSERSPROFILE\MXB\Backup Manager\StatusReport.xml"
-$CLI_path = "$env:PROGRAMFILES\Backup Manager\clienttool.exe"
+$MOB_path = "$($env:ALLUSERSPROFILE)\Managed Online Backup\Backup Manager\StatusReport.xml"
+$SA_path = "$($env:ALLUSERSPROFILE)\MXB\Backup Manager\StatusReport.xml"
+$CLI_path = "$($env:PROGRAMFILES)\Backup Manager\clienttool.exe"
 
 #Boolean vars to indicate if each exists
 $test_MOB = Test-Path $MOB_path
@@ -185,12 +191,12 @@ if ($true_path) {
 #DATTO OUTPUT
 write-host 'DATTO OUTPUT :'
 if ($script:blnWARN) {
-  write-DRRMAlert "MSP Backup Sync : Warning - $($script:remote) - LSV : $($LSV_Enabled) - $($script:lsv) - LSV Location : $($LSV_Location)"
+  write-DRMMAlert "MSP Backup Sync : Warning - $($script:remote) - LSV : $($LSV_Enabled) - $($script:lsv) - LSV Location : $($LSV_Location)"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "MSP Backup Sync : Healthy - $($script:remote) - LSV : $($LSV_Enabled) - $($script:lsv) - LSV Location : $($LSV_Location)"
+  write-DRMMAlert "MSP Backup Sync : Healthy - $($script:remote) - LSV : $($LSV_Enabled) - $($script:lsv) - LSV Location : $($LSV_Location)"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 0
