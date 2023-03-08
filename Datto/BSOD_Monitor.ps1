@@ -215,8 +215,6 @@
     $remdiag = "Checking if BlueScreenView is Running`r`n$($strLineSeparator)"
     logERR 3 "run-Remove" "$($remdiag)"
     $process = tasklist | findstr /B "BlueScreenView"
-    write-host "Status : $($process)`r`n$($strLineSeparator)"
-    $script:diag += "Status : $($process)`r`n$($strLineSeparator)`r`n"
     if ($process) {                   #BLUESCREENVIEW RUNNING
       $running = $true
       $result = taskkill /IM "BlueScreenView" /F
@@ -227,6 +225,8 @@
     } elseif (-not $process) {        #BLUESCREENVIEW NOT RUNNING
       $running = $false
     }
+    write-host "`tStatus : $($running)`r`n$($strLineSeparator)"
+    $script:diag += "`r`n`tStatus : $($running)`r`n$($strLineSeparator)`r`n"
     #REMOVE FILES
     $remdiag = "Removing BlueScreenView Files`r`n$($strLineSeparator)"
     logERR 3 "run-Remove" "$($remdiag)"
@@ -256,8 +256,8 @@ Get-OSArch
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
 if ($env:strTask -eq "DEPLOY") {
-  write-host "Deploying BlueScreenView Files`r`n$($strLineSeparator)"
-  $script:diag += "Deploying BlueScreenView Files`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`nDeploying BlueScreenView Files`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nDeploying BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
     run-Deploy -erroraction stop
     
@@ -265,8 +265,8 @@ if ($env:strTask -eq "DEPLOY") {
     write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
   }
 } elseif ($env:strTask -eq "MONITOR") {
-  write-host "Monitoring BlueScreenView Files`r`n$($strLineSeparator)"
-  $script:diag += "Monitoring BlueScreenView Files`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`nMonitoring BlueScreenView Files`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nMonitoring BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
     run-Monitor -erroraction stop
     
@@ -274,8 +274,8 @@ if ($env:strTask -eq "DEPLOY") {
     
   }
 } elseif ($env:strTask -eq "UPGRADE") {
-  write-host "Replacing BlueScreenView Files`r`n$($strLineSeparator)"
-  $script:diag += "Replacing BlueScreenView Files`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`nReplacing BlueScreenView Files`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nReplacing BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
     run-Upgrade -erroraction stop
     
@@ -283,8 +283,8 @@ if ($env:strTask -eq "DEPLOY") {
     
   }
 } elseif ($env:strTask -eq "REMOVE") {
-  write-host "Removing BlueScreenView Files`r`n$($strLineSeparator)"
-  $script:diag += "Removing BlueScreenView Files`r`n$($strLineSeparator)`r`n"
+  write-host "$($strLineSeparator)`r`nRemoving BlueScreenView Files`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nRemoving BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
     run-Remove -erroraction stop
     
@@ -323,7 +323,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "BSOD_Monitor" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "BSOD_Monitor : $($result) : $($alert)"
+    write-DRMMAlert "BSOD_Monitor : $($result) : $($alert)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   } elseif ($BSODFilter) {
