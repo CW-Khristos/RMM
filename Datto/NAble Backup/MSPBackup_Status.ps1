@@ -107,12 +107,6 @@ try {
       'End'         = $session.end
     }
   }
-
-  if (-not $Backups) {
-    logERR 4 "MSPBackup_Status" "No Backups in past 24 Hours"
-  } elseif ($Backups) {
-    $FailedBackups = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed"))}
-  }
 } catch {
   $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
   logERR 2 "MSPBackup_Status" "Failed to Query Backup Sessions`r`n$($err)"
@@ -120,20 +114,30 @@ try {
 #DATTO OUTPUT
 #Stop script execution time calculation
 StopClock
+$sessions = $SessionsList | out-string
+$failed = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed"))} | out-string
+logERR 3 "MSPBackup_Status" "Failed:`r`n$($failed)"
+logERR 3 "MSPBackup_Status" "Sessions:`r`n$($sessions)"
+if (-not $Backups) {
+  logERR 4 "MSPBackup_Status" "No Backups in past 24 Hours"
+} elseif ($Backups) {
+  $script:blnWARN = $true
+  $FailedBackups = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed"))}
+}
 $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     write-DRMMAlert "MSPBackup_Status : Healthy. No Failed Backups : $($finish)"
-    write-DRMMDiag ($script:diag, "Failed:`r`n" + $FailedBackups, "Sessions:`r`n" + $SessionsList | Out-String)
+    write-DRMMDiag "$($script:diag)"
     exit 0
   } elseif ($script:blnWARN) {
     write-DRMMAlert "MSPBackup_Status : Failed Backups Found. Please Check Diagnostics : $($finish)"
-    write-DRMMDiag ($script:diag, "Failed:`r`n" + $FailedBackups, "Sessions:`r`n" + $SessionsList | Out-String)
+    write-DRMMDiag "$($script:diag)"
     exit 1
   }
 } elseif ($script:blnBREAK) {
   write-DRMMAlert "MSPBackup_Status : Execution Failed : $($finish)"
-  write-DRMMDiag ($script:diag, "Failed:`r`n" + $FailedBackups, "Sessions:`r`n" + $SessionsList | Out-String)
+  write-DRMMDiag "$($script:diag)"
   exit 1
 }
 #END SCRIPT
