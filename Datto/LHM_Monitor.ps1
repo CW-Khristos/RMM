@@ -43,7 +43,7 @@
     $Minutes = $sw.Elapsed.Minutes
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
-    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    $ScriptStopTime = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
     write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     $script:diag += "`r`n`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
@@ -350,7 +350,7 @@
 #BEGIN SCRIPT
 clear-host
 #Start script execution time calculation
-$ScrptStartTime = (get-date).ToString('dd-MM-yyyy hh:mm:ss')
+$ScrptStartTime = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
