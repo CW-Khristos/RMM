@@ -112,8 +112,6 @@ try {
   logERR 2 "MSPBackup_Status" "Failed to Query Backup Sessions`r`n$($err)"
 }
 #DATTO OUTPUT
-#Stop script execution time calculation
-StopClock
 $AllSessions = $SessionsList | out-string
 $FailedBackups = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed") -and ($_.state -ne "InProcess"))} | out-string
 logERR 3 "MSPBackup_Status" "Failed:`r`n$($FailedBackups)"
@@ -124,6 +122,8 @@ if (-not $SessionsList) {
   $script:blnWARN = $true
   logERR 4 "MSPBackup_Status" "Failed Backups Detected"
 }
+#Stop script execution time calculation
+StopClock
 $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
