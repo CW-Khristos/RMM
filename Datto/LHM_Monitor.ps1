@@ -11,7 +11,7 @@
   $script:diag = $null
   $script:blnWARN = $false
   $script:blnBREAK = $false
-  $script:varAlertMsg = "ALERT! "
+  $script:varAlertMsg = "LHM : "
   $logPath = "C:\IT\Log\LHM_Monitor"
   $strLineSeparator = "----------------------------------"
   $srcLHM = "https://github.com/CW-Khristos/RMM/raw/dev/Datto/LHM/LHM.zip"
@@ -408,7 +408,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert ": $($env:strTask) : $($script:varAlertMsg) : $($finish)"
+    write-DRRMAlert "$($env:strTask) : $($script:varAlertMsg) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   } else {
@@ -416,7 +416,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert ": $($env:strTask) : No nodes reporting over threshold : $($finish)"
+    write-DRRMAlert "$($env:strTask) : No nodes reporting over threshold : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   }
@@ -425,7 +425,7 @@ if (-not $script:blnBREAK) {
   $enddiag += "Execution Failed : $($finish)`r`n$($strLineSeparator)"
   logERR 4 "END" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert ": $($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
+  write-DRMMAlert "$($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 }
