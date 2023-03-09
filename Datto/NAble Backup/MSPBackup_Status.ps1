@@ -115,7 +115,7 @@ try {
 #Stop script execution time calculation
 StopClock
 $AllSessions = $SessionsList | out-string
-$FailedBackups = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed"))} | out-string
+$FailedBackups = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed") -and ($_.state -ne "InProcess"))} | out-string
 logERR 3 "MSPBackup_Status" "Failed:`r`n$($FailedBackups)"
 logERR 3 "MSPBackup_Status" "Sessions:`r`n$($AllSessions)"
 if (-not $SessionsList) {
