@@ -396,7 +396,7 @@ if ($env:strTask -eq "DEPLOY") {
 StopClock
 #CLEAR LOGFILE
 $null | set-content $logPath -force
-$finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+$finish = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     $enddiag = "Execution Successful : $($finish)`r`n$($strLineSeparator)`r`n"
@@ -408,7 +408,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "LHM : $($env:strTask) : $($script:varAlertMsg) : $($finish)"
+    write-DRRMAlert ": $($env:strTask) : $($script:varAlertMsg) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   } else {
@@ -416,7 +416,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "LHM : $($env:strTask) : No nodes reporting over threshold : $($finish)"
+    write-DRRMAlert ": $($env:strTask) : No nodes reporting over threshold : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   }
@@ -425,7 +425,7 @@ if (-not $script:blnBREAK) {
   $enddiag += "Execution Failed : $($finish)`r`n$($strLineSeparator)"
   logERR 4 "END" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "LHM : $($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
+  write-DRMMAlert ": $($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 }
