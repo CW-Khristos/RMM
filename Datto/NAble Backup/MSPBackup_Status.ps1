@@ -114,15 +114,15 @@ try {
 #DATTO OUTPUT
 #Stop script execution time calculation
 StopClock
-$sessions = $SessionsList | out-string
-$failed = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed"))} | out-string
-logERR 3 "MSPBackup_Status" "Failed:`r`n$($failed)"
-logERR 3 "MSPBackup_Status" "Sessions:`r`n$($sessions)"
-if (-not $Backups) {
+$AllSessions = $SessionsList | out-string
+$FailedBackups = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed"))} | out-string
+logERR 3 "MSPBackup_Status" "Failed:`r`n$($FailedBackups)"
+logERR 3 "MSPBackup_Status" "Sessions:`r`n$($AllSessions)"
+if (-not $SessionsList) {
   logERR 4 "MSPBackup_Status" "No Backups in past 24 Hours"
-} elseif ($Backups) {
+} elseif ($FailedBackups) {
   $script:blnWARN = $true
-  $FailedBackups = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed"))}
+  logERR 4 "MSPBackup_Status" "Failed Backups Detected"
 }
 $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
 if (-not $script:blnBREAK) {
