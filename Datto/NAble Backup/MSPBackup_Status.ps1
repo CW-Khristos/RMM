@@ -113,7 +113,9 @@ try {
 }
 #DATTO OUTPUT
 $AllSessions = $SessionsList | out-string
-$FailedBackups = $Backups | where {(($null -ne $_.state) -and ($_.state -ne "Completed") -and ($_.state -ne "InProcess"))} | out-string
+$FailedBackups = $Backups | where {(($null -ne $_.state) -and 
+  ((($_.state -eq "Failed") -or ($_.state -eq "CompletedWithErrors")) -or 
+  (($_.state -eq "InProcess" -and $session.start -lt $Date))))} | out-string
 logERR 3 "MSPBackup_Status" "Failed:`r`n$($FailedBackups)"
 logERR 3 "MSPBackup_Status" "Sessions:`r`n$($AllSessions)"
 if (-not $SessionsList) {
