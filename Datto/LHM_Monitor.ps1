@@ -11,7 +11,7 @@
   $script:diag = $null
   $script:blnWARN = $false
   $script:blnBREAK = $false
-  $script:varAlertMsg = "LHM : "
+  $script:varAlertMsg = ""
   $logPath = "C:\IT\Log\LHM_Monitor"
   $strLineSeparator = "----------------------------------"
   $srcLHM = "https://github.com/CW-Khristos/RMM/raw/dev/Datto/LHM/LHM.zip"
@@ -208,7 +208,7 @@
       $running = tasklist | findstr /B "LibreHardwareMonitor.exe"
       if ($running) {                   #LHM ALREADY RUNNING
       } elseif (-not $running) {        #LHM NOT RUNNING
-        $timestanp = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+        $timestanp = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
         $mondiag = "LibreHardwareMonitor Not Running : $($timestanp)`r`n$($strLineSeparator)"
         logERR 3 "run-Monitor" "$($mondiag)"
       }
@@ -283,7 +283,7 @@
             if ($blnIdle) {
               $varThreshold = [math]::round(($varThreshold - 10))
               if ($sensor.value -gt $varThreshold) {
-                $sensordiag = "Idle Temp Warning (Warn : $($varThreshold)�C): $($sensor.name) node @ $($sensor.value)�C!"
+                $sensordiag = "Idle Temp Warning (Warn : $($varThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
                 $mondiag += "$($sensordiag)"
                 $script:varAlertMsg += "$($sensordiag)"
                 write-host "`t$($sensordiag)"
@@ -292,7 +292,7 @@
             } elseif (-not $blnIdle) {
               $varThreshold = [math]::round(($varThreshold))
               if ($sensor.value -gt $varThreshold) {
-                $sensordiag = "Full-Load Temp Warning (Warn : $($varThreshold)�C): $($sensor.name) node @ $($sensor.value)�C!"
+                $sensordiag = "Full-Load Temp Warning (Warn : $($varThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
                 $mondiag += "$($sensordiag)"
                 $script:varAlertMsg += "$($sensordiag)"
                 write-host "`t$($sensordiag)"
