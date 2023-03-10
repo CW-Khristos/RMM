@@ -39,7 +39,7 @@
     $Minutes = $sw.Elapsed.Minutes
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
-    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    $ScriptStopTime = "$((get-date).ToString('yyyy-MM-dd hh:mm:ss'))"
     write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
@@ -83,7 +83,7 @@
 $Date = (get-date).AddHours(-24)
 #Start script execution time calculation
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
-$ScrptStartTime = (get-date).ToString('dd-MM-yyyy hh:mm:ss')
+$ScrptStartTime = (get-date).ToString('yyyy-MM-dd hh:mm:ss')
 #RETRIEVE SESSION LIST FROM WITHIN ELECTED TIME RANGE ABOVE AND ONLY RETURN 'FAILED' BACKUPS
 logERR 3 "MSPBackup_Status" "Querying Backup Sessions"
 try {
@@ -126,7 +126,7 @@ if (-not $SessionsList) {
 }
 #Stop script execution time calculation
 StopClock
-$finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+$finish = "$((get-date).ToString('yyyy-MM-dd hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     write-DRMMAlert "MSPBackup_Status : Healthy. No Failed Backups : $($finish)"
