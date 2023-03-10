@@ -5,11 +5,11 @@
 
 .DESCRIPTION 
     Modification of AutoTask and Customer Services MagicDash to integrate NAble / Cove Data Protection
-    Pulls and refreshes appropriate Customer NAble / Cove Data Protection Dashboard
+    Pulls and refreshes appropriate Customer NAble / Cove Data Protection Dashboard and Recovery Verification
     Combines AutoTask and Customer Services MagicDash and DNS History enhancements to Hudu
  
 .NOTES
-    Version                  : 0.1.3 (21 February 2022)
+    Version                  : 0.1.4 (10 March 2023)
     Creation Date            : 23 August 2022
     Purpose/Change           : Modification of AutoTask and Customer Services MagicDash to integrate NAble / Cove Data Protection
                                https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
@@ -49,6 +49,9 @@
               - Processed : 177 - Skipped : 0 - Failed : 0
              Total Assets : 1404
               - Processed : 1334 - Skipped : 70 - Failed : 12
+    0.1.4 Added retrieval of Backup.Management Recovery Verification statistics
+          Added Revovery Verification statistics to Set-BackupDash function to add Recovery Verification to Backup MagicDash
+           - Still need to capture Last Recovery timestamps and status for updating Hudu "Next Verification" field on Backup Assets
 To Do:
 
 #>
@@ -610,6 +613,92 @@ To Do:
       logERR 5 "Send-GetBackups" "$($bmdiag)"
     }
   } ## Send-GetDevices API Call
+
+  function Get-DRStatistics {
+    Param ([Parameter(Mandatory=$False)][Int]$PartnerId) #end param
+
+    $Script:url2 = "https://api.backup.management/draas/actual-statistics/v1/dashboard/?" #fields=backup_cloud_device_id,plan_device_id,backup_cloud_partner_id,last_recovery_session_id,current_recovery_status,last_recovery_status,last_recovery_timestamp,last_recovery_duration_user,plan_name,backup_cloud_partner_name,backup_cloud_device_name,backup_cloud_device_machine_name,region_name,type,recovery_target_type,recovery_agent_name,backup_cloud_device_status,backup_cloud_device_name,backup_cloud_partner_name,colorbar,last_recovery_boot_status,current_recovery_status,last_recovery_timestamp,last_recovery_errors_count,last_recovery_duration_user,plan_name,last_recovery_screenshot_presented,backup_cloud_device_status,last_recovery_restored_files_count,last_recovery_selected_files_count,region_name,data_sources,last_recovery_status,last_recovery_restored_size,last_recovery_selected_size,backup_cloud_device_machine_os_type,recovery_session_progress,recovery_agent_state,backup_cloud_device_alias,recovery_target_type,recovery_target_vm_virtual_switch,recovery_target_vhd_path,recovery_target_local_speed_vault,recovery_target_lsv_path,recovery_target_enable_replication_service,recovery_target_vm_address,recovery_target_subnet_mask,recovery_target_gateway,recovery_target_dns_server,recovery_target_enable_machine_boot&sort=last_recovery_timestamp&filter%5Btype%5D=RECOVERY_TESTING&filter%5Bpartner_materialized_path.contains%5D=/$($PartnerId)/"
+    $data = @{}
+    $data.visa = $Script:visa
+    $data.params = @{}
+    $data.params.query = @{}
+    $data.params.query.PartnerId = $PartnerId
+    #$data.params.query.sort = "backup_cloud_partner_name"
+    #$data.params.query.Filter = @("%5Btype%5D=RECOVERY_TESTIN", "%5Bpartner_materialized_path.contains%5D=/$($PartnerId)/")
+    $data.params.query.fields = @(
+      "backup_cloud_device_id",
+      "plan_device_id",
+      "last_recovery_session_id",
+      "current_recovery_status",
+      "last_recovery_status",
+      "last_recovery_timestamp",
+      "last_recovery_duration_user",
+      "plan_name",
+      "backup_cloud_partner_name",
+      "backup_cloud_device_name",
+      "backup_cloud_device_machine_name",
+      "region_name",
+      "type",
+      "recovery_target_type",
+      "recovery_agent_name",
+      "backup_cloud_device_status",
+      "backup_cloud_device_name",
+      "backup_cloud_partner_name",
+      "colorbar",
+      "last_recovery_boot_status",
+      "current_recovery_status",
+      "last_recovery_timestamp",
+      "last_recovery_errors_count",
+      "last_recovery_duration_user",
+      "plan_name",
+      "last_recovery_screenshot_presented",
+      "backup_cloud_device_status",
+      "last_recovery_restored_files_count",
+      "last_recovery_selected_files_count",
+      "region_name",
+      "data_sources",
+      "last_recovery_status",
+      "last_recovery_restored_size",
+      "last_recovery_selected_size",
+      "backup_cloud_device_machine_os_type",
+      "recovery_session_progress",
+      "recovery_agent_state",
+      "backup_cloud_device_alias",
+      "recovery_target_type",
+      "recovery_target_vm_virtual_switch",
+      "recovery_target_vhd_path",
+      "recovery_target_local_speed_vault",
+      "recovery_target_lsv_path",
+      "recovery_target_enable_replication_service",
+      "recovery_target_vm_address",
+      "recovery_target_subnet_mask",
+      "recovery_target_gateway",
+      "recovery_target_dns_server",
+      "recovery_target_enable_machine_boot"
+    )
+
+    $params = @{
+      Uri         = $url2
+      Method      = 'GET'
+      Headers     = @{ 'Authorization' = "Bearer $Script:visa" }
+      WebSession  = $websession
+      ContentType = 'application/json; charset=utf-8'
+    }
+
+    try {
+      $Script:DRStatisticsResponse = Invoke-RestMethod @params
+      $Script:DRStatistics = $Script:DRStatisticsResponse.data.attributes | sort-object -property backup_cloud_partner_name | Select-object *
+      $Script:DRStatistics | foreach-object { $_.last_recovery_selected_size = [Math]::Round([Decimal]($($_.last_recovery_selected_size) /1GB),2) }
+      $Script:DRStatistics | foreach-object { $_.last_recovery_restored_size = [Math]::Round([Decimal]($($_.last_recovery_restored_size) /1GB),2) }
+      $Script:DRStatistics | foreach-object { $_.last_recovery_timestamp = Convert-UnixTimeToDateTime $($_.last_recovery_timestamp) }
+      $bmdiag = "Retrieving Recovery Verification : Successful`r`n$($strLineSeparator)"
+      logERR 4 "Get-DRStatistics" "$($bmdiag)"
+    } catch {
+      $bmdiag = "Error Retrieving Recovery Verification : Recovery Verification Reports will be Unavailable`r`n$($strLineSeparator)"
+      $bmdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 5 "Get-DRStatistics" "$($bmdiag)"
+    }
+  } ## Get-DRStatistics API Call
 #endregion ----- Backup.Management JSON Calls ----
 
   function Check-DNSChange {
@@ -687,49 +776,73 @@ To Do:
   }
 
   function Set-BackupDash ($i_Company, $i_CompanyID, $i_AllPartners, $i_AllDevices, $i_Note, $i_URL, $i_BackupID) {
-    ######################### Backups Section ###########################
     $bmdiag = "Validating Backups : AUTH STATE : $($script:blnBM)"
     logERR 4 "Set-BackupDash" "$($bmdiag)"
     if ($script:blnBM) {
+      $badHTML = $null
+      $goodHTML = $null
+      $shade = "success"
+      $reportDate = get-date
       if ($i_AllDevices) {
-        $script:SelectedDevices = $script:BackupsDetails | 
-          Select-Object PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-            TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
-              Where-Object {$_.PartnerName -eq "$($i_Company)"}
+        #BACKUPS
+        $script:SelectedDevices = $script:BackupsDetails | where {$_.PartnerName -eq "$($i_Company)"} | 
+          select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
+            TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes
         $bmdiag = "$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
-        logERR 4 "Set-BackupDash" "$($bmdiag)"
+        logERR 4 "Set-BackupDash : Backups" "$($bmdiag)"
+        #RECOVERIES
+        $script:SelectedRecoveries = $Script:DRStatistics | where {$_.backup_cloud_partner_name -eq "$($i_Company)"} | 
+          select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,
+            plan_name,data_sources,backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,
+              current_recovery_status,last_recovery_timestamp,recovery_target_type
+        $bmdiag = "$($SelectedRecoveries.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
+        logERR 4 "Set-BackupDash : Recoveries" "$($bmdiag)"
       } elseif (-not $i_AllDevices) {
         if (($null -ne $i_BackupID) -and ($i_BackupID -ne "")) {
-          $script:SelectedDevices = $script:BackupsDetails | 
-            Select-Object PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-              TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
-                Where-object {$_.DeviceName -eq $i_BackupID}
+          #BACKUPS
+          $script:SelectedDevices = $script:BackupsDetails | where {$_.DeviceName -eq $i_BackupID} | 
+            select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
+              TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes
           $bmdiag = "$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
-          logERR 4 "Set-BackupDash" "$($bmdiag)"
+          logERR 4 "Set-BackupDash : Backups" "$($bmdiag)"
+          #RECOVERIES
+          $script:SelectedRecoveries = $Script:DRStatistics | where {$_.backup_cloud_device_machine_name -eq $i_BackupID} | 
+            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,
+              plan_name,data_sources,backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,
+                current_recovery_status,last_recovery_timestamp,recovery_target_type
+          $bmdiag = "$($SelectedRecoveries.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
+          logERR 4 "Set-BackupDash : Recoveries" "$($bmdiag)"
         }
-      }    
+      }
 
       if (@($script:SelectedDevices).count -gt 0) {
-        # OK was pressed, $Selection contains what was chosen
-        # Run OK script
+        #BACKUPS
         $selected = $script:SelectedDevices | 
-          Select-Object PartnerId,PartnerName,@{Name="AccountID"; Expression={[int]$_.AccountId}},ComputerName,DeviceName,OS,IPMGUIPwd,
+          select PartnerId,PartnerName,@{Name="AccountID"; Expression={[int]$_.AccountId}},ComputerName,DeviceName,OS,IPMGUIPwd,
             TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
-              Sort-object AccountId | Format-Table | out-string
-        write-host "`r`n$($strLineSeparator)`r`n$($selected)`r`n$($strLineSeparator)`r`n"
-        $badHTML = $null
-        $goodHTML = $null
-        $shade = "success"
-        $reportDate = get-date
-        $MagicMessage = "$(@($script:SelectedDevices).count) Protected Devices"
+              Sort-object AccountId | format-table | out-string
         $overdue = @($script:SelectedDevices | 
-            where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
-              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-                TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes).count
+          where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
+            select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
+              TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes).count
+        write-host "`r`n$($strLineSeparator)`r`n`tBackups :`r`n$($selected)`r`n$($strLineSeparator)`r`n"
+        #RECOVERIES
+        if (@($script:SelectedRecoveries).count -gt 0) {
+          $recoveries = $script:SelectedRecoveries | 
+            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,
+              plan_name,data_sources,backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,
+                current_recovery_status,last_recovery_timestamp,recovery_target_type | format-table | out-string
+          $failed = @($script:SelectedRecoveries | where {$_.last_recovery_status -ne "Completed"}).count
+          write-host "`r`n$($strLineSeparator)`r`n`tRecoveries :`r`n$($recoveries)`r`n$($strLineSeparator)`r`n"
+        }
+        $MagicMessage = "$(@($script:SelectedDevices).count) Protected Devices`r`n"
+        $MagicMessage += "     $(@($script:SelectedRecoveries).count) Recovery Verification Devices"
         #Update 'Tile' Shade based on Overdue Backups
-        if ($overdue -ge 1) {
+        if (($overdue -ge 1) -or ($failed -ge 1)) {
           $shade = "warning"
-          $MagicMessage = "$($overdue) / $(@($script:SelectedDevices).count) Backups Overdue"
+          $MagicMessage = "$($overdue) / $(@($script:SelectedDevices).count) Backups Overdue`r`n"
+          $MagicMessage += "     $($failed) / $(@($script:SelectedRecoveries).count) Recoveries Failed"
+          #BACKUPS
           $badHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
               select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
@@ -742,16 +855,28 @@ To Do:
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
           $badbody = "<h2>Overdue Backups:</h2><figure class=`"table`">$($badHTML)</figure>"
           $badbody = "$($badbody)<h2>Completed Backups:</h2><figure class=`"table`">$($goodHTML)</figure>"
+          #RECOVERIES
+          $badHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedRecoveries | 
+            where {$_.last_recovery_status -ne "Completed"} | convertto-html -fragment | out-string) -replace $TableStylingBad)
+          $goodHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedRecoveries | 
+            where {$_.last_recovery_status -eq "Completed"} | convertto-html -fragment | out-string) -replace $TableStylingGood)
+          $badbody = "$($badbody)<h2>Failed Recovery Verifications:</h2><figure class=`"table`">$($badHTML)</figure>"
+          $badbody = "$($badbody)<h2>Completed Recovery Verifications:</h2><figure class=`"table`">$($goodHTML)</figure>"
         } else {
+          #BACKUPS
           $goodHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -ge $reportDate.AddDays(-1)} | 
               select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
                 TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
           $goodbody = "<h2>$($i_Company) Backups:</h2><figure class=`"table`">$($goodHTML)</figure>"
+          #RECOVERIES
+          $goodHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedRecoveries | 
+            where {$_.last_recovery_status -ne "Completed"} | convertto-html -fragment | out-string) -replace $TableStylingGood)
+          $goodbody = "$($goodbody)<h2>$($i_Company) Recovery Verifications:</h2><figure class=`"table`">$($goodHTML)</figure>"
         }
         #Update 'Tile' Shade based on Overdue Backups
-        if ($overdue -ge 2) {$shade = "danger"}
+        if (($overdue -ge 2) -or ($failed -ge 2)) {$shade = "danger"}
         $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"$($i_URL)`"><b>Open Backup.Management</b></a></button></p>"
         $body = "$($body)<h4>Report last updated: $($timestamp)</h4>$($badbody)$($goodbody)"
         $body = $body.replace("<table>",'<table style="width: 100%;">')
@@ -768,7 +893,6 @@ To Do:
           $arrayAssets = @("Server","Workstation")
           foreach ($type in $arrayAssets) {
             # Get the Asset Layout
-            #$script:huduCalls += 1
             $AssetLayout = $huduLayouts | where {$_.name -match "$($type)"} #Get-HuduAssetLayouts -name "$($type)"
             # Check we found the layout
             if (($AssetLayout | measure-object).count -le 0) {
@@ -840,7 +964,6 @@ To Do:
           $bmdiag = "$($i_Company) not found in Hudu or other error occured`r`n$($strLineSeparator)"
           $bmdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
           logERR 4 "Set-BackupDash" "$($bmdiag)"
-          $failBackups += 1
         }
       } else {
         try {
