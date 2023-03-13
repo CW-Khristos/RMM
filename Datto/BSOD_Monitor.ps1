@@ -297,7 +297,7 @@ if ($env:strTask -eq "DEPLOY") {
 StopClock
 #CLEAR LOGFILE
 $null | set-content $logPath -force
-$finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+$finish = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     $result = "$($env:strTask) : Execution Successful : $($finish)"
