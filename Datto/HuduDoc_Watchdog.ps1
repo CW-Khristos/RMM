@@ -67,7 +67,7 @@ To Do:
   $script:blnBREAK                = $false
   $logPath                        = "C:\IT\Log\HuduDoc_Watchdog"
   $strLineSeparator               = "----------------------------------"
-  $timestamp                      = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+  $timestamp                      = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
   ######################### TLS Settings ###########################
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
