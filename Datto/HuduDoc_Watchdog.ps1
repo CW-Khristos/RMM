@@ -935,6 +935,7 @@ To Do:
                     'model_lookup'          = ($Asset.fields | where-object -filter {$_.label -eq "Model Lookup"}).value
                     'serial_number'         = ($Asset.fields | where-object -filter {$_.label -eq "Serial Number"}).value
                     'serial_lookup'         = ($Asset.fields | where-object -filter {$_.label -eq "Serial Lookup"}).value
+                    'warranty_expiry'       = ($Asset.fields | where-object -filter {$_.label -eq "Warranty Expiry"}).value
                     'has_notes'             = ($Asset.fields | where-object -filter {$_.label -eq "Has Notes"}).value
                     'mac_address'           = ($Asset.fields | where-object -filter {$_.label -eq "MAC Address"}).value
                     'ip_address'            = ($Asset.fields | where-object -filter {$_.label -eq "IP Address"}).value
@@ -1463,6 +1464,7 @@ if (-not $script:blnBREAK) {
                           'model_lookup'          = $psaAsset.ModelLink
                           'serial_number'         = $psaAsset.serial
                           'serial_lookup'         = $psaAsset.SerialLink
+                          'warranty_expiry'       = ($Asset.fields | where-object -filter {$_.label -eq "Warranty Expiry"}).value
                           'has_notes'             = if ($null -eq ($Asset.fields | where-object -filter {$_.label -eq "Has Notes"}).value) {
                                                       $false
                                                     } else {
@@ -1773,9 +1775,9 @@ if (-not $script:blnBREAK) {
   StopClock
   #CLEAR LOGFILE
   $null | set-content $logPath -force
+  $finish = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
   if (-not $script:blnWARN) {
     #WRITE TO LOGFILE
-    $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
     $enddiag = "Execution Successful : $($finish)"
     logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
@@ -1784,7 +1786,6 @@ if (-not $script:blnBREAK) {
     exit 0
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
-    $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
     $enddiag = "Execution Completed with Warnings : $($finish)"
     logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
@@ -1798,7 +1799,6 @@ if (-not $script:blnBREAK) {
   #CLEAR LOGFILE
   $null | set-content $logPath -force
   #WRITE TO LOGFILE
-  $finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
   $enddiag = "Execution Failure : $($finish)"
   logERR 3 "HuduDoc_WatchDog" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
