@@ -86,9 +86,15 @@
 #REGION ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:i_PAV' TO '$i_PAV' TO UTILIZE IN CLI
-  Param(
-    [Parameter(Mandatory=$true)]$i_PAV
-  )
+  #Param(
+  #  [Parameter(Mandatory=$true)]$i_PAV
+  #)
+  #VERSION FOR SCRIPT UPDATE
+  $strSCR           = "AVHealth"
+  $strVER           = [version]"0.2.5"
+  $strREPO          = "RMM"
+  $strBRCH          = "dev"
+  $strDIR           = "Datto"
   $script:diag = $null
   $script:bitarch = $null
   $script:OSCaption = $null
@@ -120,6 +126,7 @@
   $script:o_CompAV = $null
   $script:o_CompPath = $null
   $script:o_CompState = $null
+  $logPath = "C:\IT\Log\AV_Health_$($strVER).log"
   #SUPPORTED AV VENDORS
   $script:avVendors = @(
     "Sophos"
@@ -163,8 +170,6 @@
     "Worry-Free Business Security"
     "Windows Defender"
   )
-  $ver = "0.2.5"
-  $logPath = "C:\IT\Log\AV_Health_$($ver).log"
   #AV PRODUCT XML NC REPOSITORY URLS FOR FALLBACK - CHANGE THESE TO MATCH YOUR NCENTRAL URLS AFTER UPLOADING EACH XML TO REPO
   $script:ncxmlSOPHOS = "https://nableserver/download/repository/1639682702/sophos.xml"
   $script:ncxmlSYMANTEC = "https://nableserver/download/repository/1238159723/symantec.xml"
@@ -219,57 +224,31 @@
     param (
       $dest, $state
     )
+    #$dest = @{}
     $xmldiag = $null
     if (-not $script:blnPSXML) {                                                                    #AV PRODUCT STATES NOT LOADED INTO HASHTABLE
-      #$dest = @{}
       $script:blnPSXML = $true
-      #RETRIEVE AV PRODUCT STATE XML FROM GITHUB
       $xmldiag += "Loading : AV Product State XML`r`n"
       write-host "Loading : AV Product State XML" -foregroundcolor yellow
-      $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/dev/AVProducts/productstate.xml"
-      try {
-        $psXML = New-Object System.Xml.XmlDocument
-        $psXML.Load($srcAVP)
-      } catch {
-        $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
-        write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
-        write-host $_.Exception
-        write-host $_.scriptstacktrace
-        write-host $_
+      if (test-path "C:\IT\Scripts\productstate.xml") {
         try {
-          $web = new-object system.net.webclient
-          [xml]$psXML = $web.DownloadString($srcAVP)
+          $psXML = New-Object System.Xml.XmlDocument
+          $psXML.Load("C:\IT\Scripts\productstate.xml")
         } catch {
-          $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
-          write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
+          $script:blnPSXML = $false
+          $xmldiag += "XML.Load() - Could not open C:\IT\Scripts\productstate.xml`r`n"
+          write-host "XML.Load() - Could not open C:\IT\Scripts\productstate.xml" -foregroundcolor red
           write-host $_.Exception
           write-host $_.scriptstacktrace
           write-host $_
-          try {
-            start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
-            [xml]$psXML = "C:\IT\Scripts\productstate.xml"
-          } catch {
-            $script:blnPSXML = $false
-            $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
-            write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-            write-host $_.Exception
-            write-host $_.scriptstacktrace
-            write-host $_
-          }
         }
       }
-      #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
       if (-not $script:blnPSXML) {
-        $xmldiag += "`r`nFailed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
-        $xmldiag += "Loading : AV Product State XML`r`n"
-        write-host "Failed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
-        write-host "Loading : AV Product State XML" -foregroundcolor yellow
-        $srcAVP = $script:ncxmlPRODUCTSTATE
-        $script:diag += "$($xmldiag)"
+        #RETRIEVE AV PRODUCT STATE XML FROM GITHUB
+        $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/dev/AVProducts/productstate.xml"
         try {
           $psXML = New-Object System.Xml.XmlDocument
           $psXML.Load($srcAVP)
-          $script:blnPSXML = $true
         } catch {
           $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
           write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
@@ -279,7 +258,6 @@
           try {
             $web = new-object system.net.webclient
             [xml]$psXML = $web.DownloadString($srcAVP)
-            $script:blnPSXML = $true
           } catch {
             $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
             write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
@@ -289,45 +267,87 @@
             try {
               start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
               [xml]$psXML = "C:\IT\Scripts\productstate.xml"
-              $script:blnPSXML = $true
             } catch {
               $script:blnPSXML = $false
               $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
               write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-              $script:defstatus = "Definition Status : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
-              $script:rtstatus = "Real-Time Scanning : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
               write-host $_.Exception
               write-host $_.scriptstacktrace
               write-host $_
             }
           }
         }
-      }
-      #READ AV PRODUCT STATE XML DATA INTO NESTED HASHTABLE FOR LATER USE
-      try {
-        if ($script:blnPSXML) {
-          foreach ($itm in $psXML.NODE.ChildNodes) {
-            if ($itm.name -notmatch "#comment") {                                                   #AVOID 'BUG' WITH A KEY AS '#comment'
-              $hash = @{
-                defstatus = "$($itm.defstatus)"
-                displayval = "$($itm.rtstatus)"
-              }
-              if ($dest.containskey($itm.name)) {
-                continue
-              } elseif (-not $dest.containskey($itm.name)) {
-                $dest.add($itm.name, $hash)
+        #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
+        if (-not $script:blnPSXML) {
+          $xmldiag += "`r`nFailed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
+          $xmldiag += "Loading : AV Product State XML`r`n"
+          write-host "Failed : AV Product State XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
+          write-host "Loading : AV Product State XML" -foregroundcolor yellow
+          $srcAVP = $script:ncxmlPRODUCTSTATE
+          $script:diag += "$($xmldiag)"
+          try {
+            $psXML = New-Object System.Xml.XmlDocument
+            $psXML.Load($srcAVP)
+            $script:blnPSXML = $true
+          } catch {
+            $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
+            write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
+            write-host $_.Exception
+            write-host $_.scriptstacktrace
+            write-host $_
+            try {
+              $web = new-object system.net.webclient
+              [xml]$psXML = $web.DownloadString($srcAVP)
+              $script:blnPSXML = $true
+            } catch {
+              $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
+              write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
+              write-host $_.Exception
+              write-host $_.scriptstacktrace
+              write-host $_
+              try {
+                start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
+                [xml]$psXML = "C:\IT\Scripts\productstate.xml"
+                $script:blnPSXML = $true
+              } catch {
+                $script:blnPSXML = $false
+                $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
+                write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
+                $script:defstatus = "Definition Status : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
+                $script:rtstatus = "Real-Time Scanning : Unknown (WMI Check)`r`nUnable to download AV Product State XML"
+                write-host $_.Exception
+                write-host $_.scriptstacktrace
+                write-host $_
               }
             }
           }
-          #IF FIRST CALL OF 'Get-AVState', STILL NEED TO INTERPRET PASSED PRODUCT STATE
-          #CALL 'Get-AVState' AGAIN NOW THAT THE HASHTABLE IS POPULATED
-          Get-AVState $dest $state
         }
-      } catch {
-        $script:blnPSXML = $false
-        write-host $_.Exception
-        write-host $_.scriptstacktrace
-        write-host $_
+        #READ AV PRODUCT STATE XML DATA INTO NESTED HASHTABLE FOR LATER USE
+        try {
+          if ($script:blnPSXML) {
+            foreach ($itm in $psXML.NODE.ChildNodes) {
+              if ($itm.name -notmatch "#comment") {                                                   #AVOID 'BUG' WITH A KEY AS '#comment'
+                $hash = @{
+                  defstatus = "$($itm.defstatus)"
+                  displayval = "$($itm.rtstatus)"
+                }
+                if ($dest.containskey($itm.name)) {
+                  continue
+                } elseif (-not $dest.containskey($itm.name)) {
+                  $dest.add($itm.name, $hash)
+                }
+              }
+            }
+            #IF FIRST CALL OF 'Get-AVState', STILL NEED TO INTERPRET PASSED PRODUCT STATE
+            #CALL 'Get-AVState' AGAIN NOW THAT THE HASHTABLE IS POPULATED
+            Get-AVState $dest $state
+          }
+        } catch {
+          $script:blnPSXML = $false
+          write-host $_.Exception
+          write-host $_.scriptstacktrace
+          write-host $_
+        }
       }
     } elseif ($script:blnPSXML) {                                                                   #AV PRODUCT STATES ALREADY LOADED IN HASHTABLE
       #SET '$script:defstatus' AND '$script:rtstatus' TO INTERPRET PASSED PRODUCT STATE FROM POPULATED HASHTABLE
@@ -349,99 +369,116 @@
     )
     #$dest = @{}
     $xmldiag = $null
-    $script:blnAVXML = $true
-    #RETRIEVE AV VENDOR XML FROM GITHUB
-    $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
-    write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
-    $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/AVProducts/" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
-    $script:diag += "$($xmldiag)"
-    try {
-      $avXML = New-Object System.Xml.XmlDocument
-      $avXML.Load($srcAVP)
-    } catch {
-      $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
-      write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
-      $script:diag += "$($xmldiag)"
-      write-host $_.Exception
-      write-host $_.scriptstacktrace
-      write-host $_
-      try {
-        $web = new-object system.net.webclient
-        [xml]$avXML = $web.DownloadString($srcAVP)
-      } catch {
-        $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
-        write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
-        $script:diag += "$($xmldiag)"
-        write-host $_.Exception
-        write-host $_.scriptstacktrace
-        write-host $_
+    if (-not $script:blnAVXML) {
+      $script:blnAVXML = $true
+      $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
+      write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
+      if (test-path "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml") {
         try {
-          start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
-          [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
+          $avXML = New-Object System.Xml.XmlDocument
+          $avXML.Load("C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml")
         } catch {
           $script:blnAVXML = $false
-          $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
-          write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
-          $script:diag += "$($xmldiag)"
+          $xmldiag += "XML.Load() - Could not open C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml`r`n"
+          write-host "XML.Load() - Could not open C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml" -foregroundcolor red
           write-host $_.Exception
           write-host $_.scriptstacktrace
           write-host $_
         }
       }
-    }
-    #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
-    if (-not $script:blnAVXML) {
-      $xmldiag += "`r`nFailed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
-      $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
-      write-host "Failed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
-      write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
-      switch ($src) {
-        "Sophos" {$srcAVP = $script:ncxmlSOPHOS}
-        "Symantec" {$srcAVP = $script:ncxmlSYMANTEC}
-        "Trend Micro" {$srcAVP = $script:ncxmlTRENDMICRO}
-        "Windows Defender" {$srcAVP = $script:ncxmlWINDEFEND}
-      }
-      try {
-        $avXML = New-Object System.Xml.XmlDocument
-        $avXML.Load($srcAVP)
-        $script:blnAVXML = $true
-      } catch {
-        $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
-        write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
+      if (-not $script:blnAVXML) {
+        #RETRIEVE AV VENDOR XML FROM GITHUB
+        $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/AVProducts/" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
         $script:diag += "$($xmldiag)"
-        write-host $_.Exception
-        write-host $_.scriptstacktrace
-        write-host $_
         try {
-          $web = new-object system.net.webclient
-          [xml]$avXML = $web.DownloadString($srcAVP)
-          $script:blnAVXML = $true
+          $avXML = New-Object System.Xml.XmlDocument
+          $avXML.Load($srcAVP)
         } catch {
-          $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
-          write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
+          $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
+          write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
           $script:diag += "$($xmldiag)"
           write-host $_.Exception
           write-host $_.scriptstacktrace
           write-host $_
           try {
-            start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
-            [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
-            $script:blnAVXML = $true
+            $web = new-object system.net.webclient
+            [xml]$avXML = $web.DownloadString($srcAVP)
           } catch {
-            $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
-            write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
+            $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
+            write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
+            $script:diag += "$($xmldiag)"
             write-host $_.Exception
             write-host $_.scriptstacktrace
             write-host $_
-            #Stop script execution time calculation
-            StopClock
-            #DATTO OUTPUT
+            try {
+              start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
+              [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
+            } catch {
+              $script:blnAVXML = $false
+              $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
+              write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
+              $script:diag += "$($xmldiag)"
+              write-host $_.Exception
+              write-host $_.scriptstacktrace
+              write-host $_
+            }
+          }
+        }
+        #NABLE FALLBACK IF GITHUB IS NOT ACCESSIBLE
+        if (-not $script:blnAVXML) {
+          $xmldiag += "`r`nFailed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server`r`n"
+          $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
+          write-host "Failed : AV Product XML Retrieval from GitHub; Attempting download from NAble Server" -foregroundcolor yellow
+          write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
+          switch ($src) {
+            "Sophos" {$srcAVP = $script:ncxmlSOPHOS}
+            "Symantec" {$srcAVP = $script:ncxmlSYMANTEC}
+            "Trend Micro" {$srcAVP = $script:ncxmlTRENDMICRO}
+            "Windows Defender" {$srcAVP = $script:ncxmlWINDEFEND}
+          }
+          try {
+            $avXML = New-Object System.Xml.XmlDocument
+            $avXML.Load($srcAVP)
+            $script:blnAVXML = $true
+          } catch {
+            $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
+            write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
             $script:diag += "$($xmldiag)"
-            write-DRMMAlert "Could not download AV Product XML"
-            write-DRMMDiag "$($script:diag)"
-            $script:blnAVXML = $false
-            $xmldiag = $null
-            exit 1
+            write-host $_.Exception
+            write-host $_.scriptstacktrace
+            write-host $_
+            try {
+              $web = new-object system.net.webclient
+              [xml]$avXML = $web.DownloadString($srcAVP)
+              $script:blnAVXML = $true
+            } catch {
+              $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
+              write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
+              $script:diag += "$($xmldiag)"
+              write-host $_.Exception
+              write-host $_.scriptstacktrace
+              write-host $_
+              try {
+                start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
+                [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
+                $script:blnAVXML = $true
+              } catch {
+                $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
+                write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
+                write-host $_.Exception
+                write-host $_.scriptstacktrace
+                write-host $_
+                #Stop script execution time calculation
+                StopClock
+                #DATTO OUTPUT
+                $script:diag += "$($xmldiag)"
+                write-DRMMAlert "Could not download AV Product XML"
+                write-DRMMDiag "$($script:diag)"
+                $script:blnAVXML = $false
+                $xmldiag = $null
+                exit 1
+              }
+            }
           }
         }
       }
@@ -451,7 +488,7 @@
       if ($script:blnAVXML) {
         foreach ($itm in $avXML.NODE.ChildNodes) {
           if ($itm.name -notmatch "#comment") {                                                     #AVOID 'BUG' WITH A KEY AS '#comment'
-            if ($i_PAV -match "Sophos") {                                                           #BUILD HASHTABLE FOR SOPHOS
+            if ($env:i_PAV -match "Sophos") {                                                       #BUILD HASHTABLE FOR SOPHOS
               $hash = @{
                 display = "$($itm.$script:bitarch.display)"
                 displayval = "$($itm.$script:bitarch.displayval)"
@@ -1270,7 +1307,7 @@ if (-not ($script:blnAVXML)) {
           $i_tamper = $script:pavkey[$node].tamper
           $i_tamperval = $script:pavkey[$node].tamperval
           #AV PENDING REBOOT
-          if ($i_PAV -match "Sophos") {
+          if ($env:i_PAV -match "Sophos") {
             $i_reboot = $script:pavkey[$node].reboot
             $i_rebootval1 = $script:pavkey[$node].rebootval1
             $i_rebootval2 = $script:pavkey[$node].rebootval2
