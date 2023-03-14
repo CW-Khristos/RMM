@@ -103,7 +103,7 @@
   $script:computername = $null
   $script:blnWMI = $true
   $script:blnPAV = $false
-  $script:blnAVXML = $true
+  $script:blnAVXML = $false
   $script:blnPSXML = $false
   $script:blnWARN = $false
   $script:avs = @{}
@@ -370,11 +370,11 @@
     #$dest = @{}
     $xmldiag = $null
     if (-not $script:blnAVXML) {
-      $script:blnAVXML = $true
       $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
       write-host "Loading : '$($src)' AV Product XML" -foregroundcolor yellow
       if (test-path "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml") {
         try {
+          $script:blnAVXML = $true
           $avXML = New-Object System.Xml.XmlDocument
           $avXML.Load("C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml")
         } catch {
