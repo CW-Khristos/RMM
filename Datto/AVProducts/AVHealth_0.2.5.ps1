@@ -739,6 +739,8 @@ if (-not (test-path -path "C:\IT\Scripts")) {
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 Get-OSArch
+write-host "Monitoring AV Product : $env:i_PAV"
+$script:diag += "`r`nMonitoring AV Product : $env:i_PAV`r`n"
 Get-AVXML $env:i_PAV $script:pavkey
 if (-not ($script:blnAVXML)) {
   #AV DETAILS
