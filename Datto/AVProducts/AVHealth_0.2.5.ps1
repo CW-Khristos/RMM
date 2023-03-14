@@ -227,11 +227,11 @@
     #$dest = @{}
     $xmldiag = $null
     if (-not $script:blnPSXML) {                                                                    #AV PRODUCT STATES NOT LOADED INTO HASHTABLE
-      $script:blnPSXML = $true
       $xmldiag += "Loading : AV Product State XML`r`n"
       write-host "Loading : AV Product State XML" -foregroundcolor yellow
       if (test-path "C:\IT\Scripts\productstate.xml") {
         try {
+          $script:blnPSXML = $true
           $psXML = New-Object System.Xml.XmlDocument
           $psXML.Load("C:\IT\Scripts\productstate.xml")
         } catch {
@@ -247,6 +247,7 @@
         #RETRIEVE AV PRODUCT STATE XML FROM GITHUB
         $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/dev/AVProducts/productstate.xml"
         try {
+          $script:blnPSXML = $true
           $psXML = New-Object System.Xml.XmlDocument
           $psXML.Load($srcAVP)
         } catch {
@@ -286,9 +287,9 @@
           $srcAVP = $script:ncxmlPRODUCTSTATE
           $script:diag += "$($xmldiag)"
           try {
+            $script:blnPSXML = $true
             $psXML = New-Object System.Xml.XmlDocument
             $psXML.Load($srcAVP)
-            $script:blnPSXML = $true
           } catch {
             $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
             write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
@@ -298,7 +299,6 @@
             try {
               $web = new-object system.net.webclient
               [xml]$psXML = $web.DownloadString($srcAVP)
-              $script:blnPSXML = $true
             } catch {
               $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
               write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
@@ -308,7 +308,6 @@
               try {
                 start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\productstate.xml"
                 [xml]$psXML = "C:\IT\Scripts\productstate.xml"
-                $script:blnPSXML = $true
               } catch {
                 $script:blnPSXML = $false
                 $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
@@ -391,6 +390,7 @@
         $srcAVP = "https://raw.githubusercontent.com/CW-Khristos/scripts/master/AVProducts/" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
         $script:diag += "$($xmldiag)"
         try {
+          $script:blnAVXML = $true
           $avXML = New-Object System.Xml.XmlDocument
           $avXML.Load($srcAVP)
         } catch {
@@ -437,9 +437,9 @@
             "Windows Defender" {$srcAVP = $script:ncxmlWINDEFEND}
           }
           try {
+            $script:blnAVXML = $true
             $avXML = New-Object System.Xml.XmlDocument
             $avXML.Load($srcAVP)
-            $script:blnAVXML = $true
           } catch {
             $xmldiag += "XML.Load() - Could not open $($srcAVP)`r`n"
             write-host "XML.Load() - Could not open $($srcAVP)" -foregroundcolor red
@@ -450,7 +450,6 @@
             try {
               $web = new-object system.net.webclient
               [xml]$avXML = $web.DownloadString($srcAVP)
-              $script:blnAVXML = $true
             } catch {
               $xmldiag += "Web.DownloadString() - Could not download $($srcAVP)`r`n"
               write-host "Web.DownloadString() - Could not download $($srcAVP)" -foregroundcolor red
@@ -461,7 +460,6 @@
               try {
                 start-bitstransfer -erroraction stop -source $srcAVP -destination "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
                 [xml]$avXML = "C:\IT\Scripts\" + $src.replace(" ", "").replace("-", "").tolower() + ".xml"
-                $script:blnAVXML = $true
               } catch {
                 $xmldiag += "BITS.Transfer() - Could not download $($srcAVP)`r`n"
                 write-host "BITS.Transfer() - Could not download $($srcAVP)" -foregroundcolor red
