@@ -1678,7 +1678,7 @@ if (-not ($script:blnAVXML)) {
               }
             }
           } catch {
-            $rebootWARN = $true
+            $rebootWARN = $false
             $script:diag += "Could not validate Registry data : -path 'HKLM:$($i_reboot)' -name '$($i_rebootval1)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
             write-host "Could not validate Registry data : -path 'HKLM:$($i_reboot)' -name '$($i_rebootval1)'" -foregroundcolor red
             $reboot = "Unknown (REG Check)"
