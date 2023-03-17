@@ -11,10 +11,10 @@
     Script will output logfile to C:\IT\Log\Sophos_Uninstall
  
 .NOTES
-    Version        : 0.1.0 (25 January 2023)
+    Version        : 0.1.2 (2 February 2023)
     Creation Date  : 25 January 2023
     Purpose/Change : Provide modern Powershell conversion of Sophos Uninstall BAT Script : https://support.sophos.com/support/s/article/KB-000035419?language=en_US
-    File Name      : Sophos_Uninstall_0.1.0.ps1 
+    File Name      : Sophos_Uninstall.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com - Khristos#8436
     Requires       : PowerShell Version 2.0+ installed
     Thanks         : Brian Ellis - Third Party Verification and Addition / Change Suggestions
@@ -26,6 +26,7 @@
           Added checks to cleanup some remnant HitmanPro files and folders
           Added OS Type detection for handling WMI 'SecurityCenter2' Namespace instances
           Added 'chkAU' automated update function
+    0.1.2 Troubleshooting 'file lock' issues when attempting to cleanup folder directories
 
 .TODO
 
@@ -34,7 +35,7 @@
 #region ----- DECLARATIONS ----
   #VERSION FOR SCRIPT UPDATE
   $strSCR             = "Sophos_Uninstall"
-  $strVER             = [version]"0.1.0"
+  $strVER             = [version]"0.1.2"
   $strREPO            = "RMM"
   $strBRCH            = "dev"
   $strDIR             = "Datto/AVProducts"
@@ -130,7 +131,12 @@
         $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Sophos_Uninstall - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
         write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Sophos_Uninstall - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
       }
-      default {                                                                       #'ERRRET'=3+
+      3 {                                                                             #'ERRRET'=3+
+        $script:blnWARN = $false
+        write-host "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Sophos_Uninstall - $($strErr)`r`n$($strLineSeparator)`r`n"
+        $script:diag += "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Sophos_Uninstall - $($strErr)`r`n$($strLineSeparator)`r`n`r`n"
+      }
+      default {                                                                       #'ERRRET'=4+
         write-host "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Sophos_Uninstall - $($strErr)`r`n$($strLineSeparator)`r`n"
         $script:diag += "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Sophos_Uninstall - $($strErr)`r`n$($strLineSeparator)`r`n`r`n"
       }
@@ -144,15 +150,9 @@
     $blnXML = $true
     $xmldiag = $null
     #RETRIEVE VERSION XML FROM GITHUB
-    if (($null -eq $strDIR) -or ($strDIR -eq "")) {
-      $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
-      write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
-      $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/version.xml"
-    } elseif (($null -ne $strDIR) -and ($strDIR -ne "")) {
-      $xmldiag += "Loading : '$($strREPO)/$($strBRCH)/$($strDIR)' Version XML`r`n"
-      write-host "Loading : '$($strREPO)/$($strBRCH)/$($strDIR)' Version XML" -foregroundcolor yellow
-      $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/version.xml"
-    }
+    $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
+    write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
+    $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/Datto/version.xml"
     try {
       $verXML = New-Object System.Xml.XmlDocument
       $verXML.Load($srcVER)
@@ -259,6 +259,7 @@
           $script:diag += "`t`t - USING MSIEXEC : $($regitem.UninstallString):`r`n"
           $output = Get-ProcessOutput -FileName "msiexec.exe" -Args "$($regitem.UninstallString) /quiet /qn /norestart REBOOT=ReallySuppress"
         } catch {
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
           logERR 3 $err
         }
       } elseif ($regitem.UninstallString -notlike "*msiexec*") {
@@ -267,6 +268,7 @@
           $script:diag += "`t`t - USING EXE : $($regitem.UninstallString):`r`n"
           $output = Get-ProcessOutput -FileName "$($regitem.UninstallString)" -Args "/quiet"
         } catch {
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
           logERR 3 $err
         }
       }
@@ -330,53 +332,53 @@ if (-not $script:blnBREAK) {
   #PROCESS UNINSTALLS
   write-host "$($strLineSeparator)`r`nPROCESSING SOPHOS EXE UNINSTALLS`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nPROCESSING SOPHOS EXE UNINSTALLS`r`n$($strLineSeparator)`r`n"
-  try {
-    if (test-path -path "C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe") {
+  if (test-path -path "C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe") {
+    try {
       write-host "$($strLineSeparator)`r`nTRYING 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe'"
       $script:diag += "$($strLineSeparator)`r`nTRYING 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe'`r`n"
       $output = Get-ProcessOutput -FileName "C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe" -Args "--quiet"
       #PARSE OUTPUT LINE BY LINE
       $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       $lines
-    } else {
-      write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe'"
-      $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe'`r`n"
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 4 $err
     }
-  } catch {
-    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-    logERR 3 $err
+  } else {
+    write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe'"
+    $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallcli.exe'`r`n"
   }
-  try {
-    if (test-path -path "C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe") {
+  if (test-path -path "C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe") {
+    try {
       write-host "$($strLineSeparator)`r`nTRYING 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'"
       $script:diag += "$($strLineSeparator)`r`nTRYING 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'`r`n"
       $output = Get-ProcessOutput -FileName "C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe" -Args "--quiet"
       #PARSE OUTPUT LINE BY LINE
       $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       $lines
-    } else {
-      write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'"
-      $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'`r`n"
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 4 $err
     }
-  } catch {
-    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-    logERR 3 $err
+  } else {
+    write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'"
+    $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'`r`n"
   }
-  try {
-    if (test-path -path "C:\Program Files\Sophos\Sophos Endpoint Agent\SophosUninstall.exe") {
+  if (test-path -path "C:\Program Files\Sophos\Sophos Endpoint Agent\SophosUninstall.exe") {
+    try {
       write-host "$($strLineSeparator)`r`nTRYING 'C:\Program Files\Sophos\Sophos Endpoint Agent\SophosUninstall.exe'"
       $script:diag += "$($strLineSeparator)`r`nTRYING 'C:\Program Files\Sophos\Sophos Endpoint Agent\SophosUninstall.exe'`r`n"
       $output = Get-ProcessOutput -FileName "C:\Program Files\Sophos\Sophos Endpoint Agent\SophosUninstall.exe" -Args "--quiet"
       #PARSE OUTPUT LINE BY LINE
       $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       $lines
-    } else {
-      write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'"
-      $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'`r`n"
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 4 $err
     }
-  } catch {
-    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-    logERR 3 $err
+  } else {
+    write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'"
+    $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files\Sophos\Sophos Endpoint Agent\uninstallgui.exe'`r`n"
   }
   write-host "$($strLineSeparator)`r`nCOMPLETED SOPHOS EXE UNINSTALLS`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nCOMPLETED SOPHOS EXE UNINSTALLS`r`n$($strLineSeparator)`r`n"
@@ -390,65 +392,149 @@ if (-not $script:blnBREAK) {
   #LOOP THROUGH EACH UNINSTALL STRING
   try {
     foreach ($string32 in $key32) {
-      write-host "$($string32)`r`n$($strLineSeparator)`r`n"
+      #write-host "$($string32)`r`n$($strLineSeparator)`r`n"
       RegUninstall $string32
     }
     foreach ($string64 in $key64) {
-      write-host $string64
+      #write-host "$($string64)`r`n$($strLineSeparator)`r`n"
       RegUninstall $string64
     }
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-    logERR 3 $err
+    logERR 4 $err
   }
   write-host "$($strLineSeparator)`r`nCOMPLETED SOPHOS REG UNINSTALLS`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nCOMPLETED SOPHOS REG UNINSTALLS`r`n$($strLineSeparator)`r`n"
   write-host "$($strLineSeparator)`r`nPROCESSING FINAL EXE UNINSTALLS`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nPROCESSING FINAL EXE UNINSTALLS`r`n$($strLineSeparator)`r`n"
   #UNINSTALL HITMAN PRO
-  try {
-    if (test-path -path "C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe") {
+  if (test-path -path "C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe") {
+    try {
       write-host "$($strLineSeparator)`r`nTRYING `"C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe`" -Args `"--quiet`""
       $script:diag += "$($strLineSeparator)`r`nTRYING `"C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe`" -Args `"--quiet`"`r`n"
       $output = Get-ProcessOutput -FileName "C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe" -Args "--quiet"
       #PARSE OUTPUT LINE BY LINE
       $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       $lines
-    } else {
-      write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe'"
-      $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe'`r`n"
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 4 $err
     }
-  } catch {
-    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-    logERR 3 $err
+  } else {
+    write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe'"
+    $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files (x86)\HitmanPro.Alert\Uninstall.exe'`r`n"
   }
-  try {
-    if (test-path -path "C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe") {
+  if (test-path -path "C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe") {
+    try {
       write-host "$($strLineSeparator)`r`nTRYING `"C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe`" -Args `"/uninstall /quiet`""
       $script:diag += "$($strLineSeparator)`r`nTRYING `"C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe`" -Args `"/uninstall /quiet`"`r`n"
       $output = Get-ProcessOutput -FileName "C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe" -Args "/uninstall /quiet"
       #PARSE OUTPUT LINE BY LINE
       $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       $lines
-    } else {
-      write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe'"
-      $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe'`r`n"
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 4 $err
     }
-  } catch {
-    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-    logERR 3 $err
+  } else {
+    write-host "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe'"
+    $script:diag += "$($strLineSeparator)`r`nNON-EXISTENT : 'C:\Program Files (x86)\HitmanPro.Alert\hmpalert.exe'`r`n"
   }
   write-host "$($strLineSeparator)`r`nCOMPLETED FINAL EXE UNINSTALLS`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nCOMPLETED FINAL EXE UNINSTALLS`r`n$($strLineSeparator)`r`n"
   #CLEANUP REMAINING FOLDERS
+  write-host "$($strLineSeparator)`r`nCLEANING UP FOLDER DIRECTORIES`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nCLEANING UP FOLDER DIRECTORIES`r`n$($strLineSeparator)`r`n"
+  #TASKKILL 'LIBREHARDWAREMONITOR.EXE' - FOR SOME STUPID REASON; IT KEEPS A FILE LOCK ON SOPHOS PROGRAMDATA FILES
+  $output = Get-ProcessOutput -FileName "C:\Windows\System32\cmd.exe" -Args '/c taskkill /IM "LibreHardwareMonitor.exe" /F /T'
+  #PARSE OUTPUT LINE BY LINE
+  $lines = $output.StandardError.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+  $lines
+  $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+  $lines
+  #SOPHOS
+  if (test-path -path "C:\Program Files\Sophos") {
+    <#--      PS freezes attempting to use 'remove-item' on these items; even with '-force' switch--#>
+    get-childitem -path "C:\Program Files\Sophos\AutoUpdate" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\AutoUpdate" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Endpoint Defense" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Endpoint Defense" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos ML Engine" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos ML Engine" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Standalone Engine" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Standalone Engine" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Data Protection" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Data Protection" -force -erroraction silentlycontinue
+  }
+  if (test-path -path "C:\Program Files (x86)\Sophos") {
+    <#--      PS freezes attempting to use 'remove-item' on these items; even with '-force' switch--#>
+    get-childitem -path "C:\Program Files\Sophos\AutoUpdate" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\AutoUpdate" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Endpoint Defense" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Endpoint Defense" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos ML Engine" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos ML Engine" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Standalone Engine" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Standalone Engine" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Data Protection" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Data Protection" -force -erroraction silentlycontinue
+  }
+  if (test-path -path "C:\ProgramData\Sophos") {
+    <#--      RE-ENABLE THIS IF CANNOT REMOVE
+    $output = Get-ProcessOutput -FileName "C:\Windows\System32\cmd.exe" -Args '/c rmdir /s /q "C:\ProgramData\Sophos"'
+    #PARSE OUTPUT LINE BY LINE
+    $lines = $output.StandardError.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+    $lines
+    $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+    $lines
+    --#>
+    <#--      PS freezes attempting to use 'remove-item' on these items; even with '-force' switch--#>
+    get-childitem -path "C:\ProgramData\Sophos" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\ProgramData\Sophos" -force -erroraction silentlycontinue
+  }
+  #HITMAN PRO
   if (test-path -path "C:\Program Files (x86)\HitmanPro.Alert") {
-    get-childitem -path "C:\Program Files (x86)\HitmanPro.Alert" -recurse | remove-item
-    remove-item -path "C:\Program Files (x86)\HitmanPro.Alert" -force
+    <#--      UNABLE TO REMOVE; MULTIPLE PROGRAMS CONTINUE TO MAINTAIN FILE LOCKS ON HITMANPRO 'UPDATEFILES' DATA
+    $output = Get-ProcessOutput -FileName "C:\Windows\System32\cmd.exe" -Args '/c rmdir /s /q "C:\Program Files (x86)\HitmanPro.Alert"'
+    #PARSE OUTPUT LINE BY LINE
+    $lines = $output.StandardError.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+    $lines
+    $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+    $lines
+    get-childitem -path "C:\Program Files (x86)\HitmanPro.Alert" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files (x86)\HitmanPro.Alert" -force -erroraction silentlycontinue
+    --#>
+  }
+  if (test-path -path "C:\ProgramData\HitmanPro.Alert") {
+    $output = Get-ProcessOutput -FileName "C:\Windows\System32\cmd.exe" -Args '/c rmdir /s /q "C:\ProgramData\HitmanPro.Alert"'
+    #PARSE OUTPUT LINE BY LINE
+    $lines = $output.StandardError.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+    $lines
+    $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
+    $lines
+    get-childitem -path "C:\ProgramData\HitmanPro.Alert" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\ProgramData\HitmanPro.Alert" -force -erroraction silentlycontinue
   }
   #CLEANUP WMI INSTANCES
   if ($script:producttype -ne "Workstation") {
-    (Get-WmiObject -Namespace "root/SecurityCenter2" -Class FirewallProduct | ?{$_.displayname -like 'sophos*'}).delete()
-    (Get-WmiObject -Namespace "root/SecurityCenter2" -Class AntiVirusProduct | ?{$_.displayname -like 'sophos*'}).delete()
+    write-host "$($strLineSeparator)`r`nCLEANING UP WMI NAMESPACE INSTANCES`r`n$($strLineSeparator)"
+    $script:diag += "$($strLineSeparator)`r`nCLEANING UP WMI NAMESPACE INSTANCES`r`n$($strLineSeparator)`r`n"
+    $delFW = Get-WmiObject -Namespace "root/SecurityCenter2" -Class FirewallProduct | ?{$_.displayname -like 'sophos*'}
+    foreach ($fw in $delFW) {
+      write-host "`tREMOVING WMI 'FIREWALL' NAMESPACE INSTANCE : $($fw)`r`n`t$($strLineSeparator)"
+      $script:diag += "`tREMOVING WMI 'FIREWALL' NAMESPACE INSTANCE : $($fw)`r`n`t$($strLineSeparator)`r`n"
+      $fw.delete()
+    }
+    $delAV = Get-WmiObject -Namespace "root/SecurityCenter2" -Class AntiVirusProduct | ?{$_.displayname -like 'sophos*'}
+    foreach ($av in $delAV) {
+      write-host "`tREMOVING WMI 'ANTIVIRUS' NAMESPACE INSTANCE : $($av)`r`n`t$($strLineSeparator)"
+      $script:diag += "`tREMOVING 'ANTIVIRUS' NAMESPACE INSTANCE : $($av)`r`n`t$($strLineSeparator)`r`n"
+      $av.delete()
+    }
   }
 }
 #Stop script execution time calculation
