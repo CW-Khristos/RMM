@@ -1669,7 +1669,7 @@ if (-not ($script:blnAVXML)) {
               write-host "$($avs[$av].display) reports '$($rval2)' for 'Urgent Reboot Required' (Expected : '0')" -foregroundcolor yellow
               if ((-not $rval1) -and (-not $rval2)) {
                 $reboot = "$($false) (REG Check)"
-              } elseif ($rval -or $rval2) {
+              } elseif ($rval1 -or $rval2) {
                 $rebootWARN = $true
                 $reboot = "$($true) (REG Check)"
               } else {
