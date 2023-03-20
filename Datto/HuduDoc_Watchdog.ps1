@@ -15,6 +15,7 @@
                                https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
                                https://mspp.io/hudu-magic-dash-customer-services/
                                https://mspp.io/hudu-dns-history-and-alerts/
+                               https://mspp.io/hudu-warranty-expiration-tracking/
     File Name                : HuduDoc_Watchdog.ps1
     Hudu Source              : Luke Whitelock
                                https://mspp.io/author/iqadmin/
@@ -1364,35 +1365,35 @@ if (-not $script:blnBREAK) {
             select id, referenceNumber, referenceTitle, serialNumber, rmmDeviceID, rmmDeviceUID, 
               rmmDeviceAuditManufacturerID, rmmDeviceAuditModelID, rmmDeviceAuditDeviceTypeID, 
               rmmDeviceAuditIPAddress, rmmDeviceAuditMacAddress, dattoHostname)) {
-                  $totPSAassets += 1
-                  $assetMake = $assetMakes["$($psaAsset.rmmDeviceAuditManufacturerID)"]
-                  $assetModel = $assetModels["$($psaAsset.rmmDeviceAuditModelID)"]
-                  [PSCustomObject]@{
-                    'RMMLink'     = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
-                      <a target=`"_blank`" href=`"https://concord.rmm.datto.com/device/$($psaAsset.rmmDeviceID)`">
-                      <b>Open $($psaAsset.referenceTitle) in RMM</b></a></button></p>"
-                    'PSALink'     =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
-                      <a target=`"_blank`" href=`"$($AutotaskRoot)$($AutotaskDev)$($psaAsset.id)`">
-                      <b>Open $($psaAsset.referenceTitle) in PSA</b></a></button></p>"
-                    'make'        = $assetMake
-                    'model'       = $assetModel
-                    'ModelLink'   =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
-                      <a target=`"_blank`" href=`"http://www.google.com/search?hl=en&q=$($assetMake)+$($assetModel)`">
-                      <b>$($assetMake) $($assetModel)</b></a></button></p>"
-                    'SerialLink'  =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
-                      <a target=`"_blank`" href=`"http://www.google.com/search?hl=en&q=$($assetMake)+$($psaAsset.serialNumber)`">
-                      <b>$($assetMake) $($psaAsset.serialNumber)</b></a></button></p>"
-                    'dattoHost'   =	$psaAsset.dattoHostname
-                    'refNumber'   =	$psaAsset.referenceNumber
-                    'refTitle'    =	$psaAsset.referenceTitle
-                    'rmmID'       =	$psaAsset.rmmDeviceID
-                    'rmmUID'      =	$psaAsset.rmmDeviceUID
-                    'serial'      =	$psaAsset.serialNumber
-                    'rmmTypeID'   = $psaAsset.rmmDeviceAuditDeviceTypeID
-                    'rmmModelID'  = $psaAsset.rmmDeviceAuditModelID
-                    'rmmDevIP'    = $psaAsset.rmmDeviceAuditIPAddress
-                    'rmmDevMAC'   = $psaAsset.rmmDeviceAuditMacAddress
-                  }
+                $totPSAassets += 1
+                $assetMake = $assetMakes["$($psaAsset.rmmDeviceAuditManufacturerID)"]
+                $assetModel = $assetModels["$($psaAsset.rmmDeviceAuditModelID)"]
+                [PSCustomObject]@{
+                  'RMMLink'     = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
+                    <a target=`"_blank`" href=`"https://concord.rmm.datto.com/device/$($psaAsset.rmmDeviceID)`">
+                    <b>Open $($psaAsset.referenceTitle) in RMM</b></a></button></p>"
+                  'PSALink'     =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
+                    <a target=`"_blank`" href=`"$($AutotaskRoot)$($AutotaskDev)$($psaAsset.id)`">
+                    <b>Open $($psaAsset.referenceTitle) in PSA</b></a></button></p>"
+                  'make'        = $assetMake
+                  'model'       = $assetModel
+                  'ModelLink'   =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
+                    <a target=`"_blank`" href=`"http://www.google.com/search?hl=en&q=$($assetMake)+$($assetModel)`">
+                    <b>$($assetMake) $($assetModel)</b></a></button></p>"
+                  'SerialLink'  =	"<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">
+                    <a target=`"_blank`" href=`"http://www.google.com/search?hl=en&q=$($assetMake)+$($psaAsset.serialNumber)`">
+                    <b>$($assetMake) $($psaAsset.serialNumber)</b></a></button></p>"
+                  'dattoHost'   =	$psaAsset.dattoHostname
+                  'refNumber'   =	$psaAsset.referenceNumber
+                  'refTitle'    =	$psaAsset.referenceTitle
+                  'rmmID'       =	$psaAsset.rmmDeviceID
+                  'rmmUID'      =	$psaAsset.rmmDeviceUID
+                  'serial'      =	$psaAsset.serialNumber
+                  'rmmTypeID'   = $psaAsset.rmmDeviceAuditDeviceTypeID
+                  'rmmModelID'  = $psaAsset.rmmDeviceAuditModelID
+                  'rmmDevIP'    = $psaAsset.rmmDeviceAuditIPAddress
+                  'rmmDevMAC'   = $psaAsset.rmmDeviceAuditMacAddress
+                }
         }
         write-host "$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
         $script:diag += "`r`n$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
@@ -1623,8 +1624,8 @@ if (-not $script:blnBREAK) {
           Shade = "$($Colour)"
         }
         if ($NoteField.value){
-            $Param['Message'] = "$($NoteField.value)"
-            $Param | Add-Member -MemberType NoteProperty -Name 'Message' -Value "$($NoteField.value)"
+          $Param['Message'] = "$($NoteField.value)"
+          $Param | Add-Member -MemberType NoteProperty -Name 'Message' -Value "$($NoteField.value)"
         } else {
           $Param['Message'] = switch ($EnabledField.value) {
             $true {"Customer has $($Service)"}
@@ -1632,9 +1633,7 @@ if (-not $script:blnBREAK) {
             default {"No $($Service)"}
           }
         }
-        if (($URLField.value) -and ($Service -ne "Backup")) {
-          $Param['ContentLink'] = "$($URLField.value)"
-        }
+        if (($URLField.value) -and ($Service -ne "Backup")) {$Param['ContentLink'] = "$($URLField.value)"}
         if ($Service -ne "Backup") {
           $script:huduCalls += 1
           Set-HuduMagicDash @Param
