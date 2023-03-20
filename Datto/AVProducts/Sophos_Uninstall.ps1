@@ -226,8 +226,8 @@
     } catch {
       $script:blnBREAK = $false
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      $xmldiag += "CClutter : Error reading Version XML : $($srcVER)`r`n$($err)`r`n"
-      write-host "CClutter : Error reading Version XML : $($srcVER)`r`n$($err)"
+      $xmldiag += "Sophos_Uninstall : Error reading Version XML : $($srcVER)`r`n$($err)`r`n"
+      write-host "Sophos_Uninstall : Error reading Version XML : $($srcVER)`r`n$($err)"
       $script:diag += "$($xmldiag)"
       $xmldiag = $null
     }
