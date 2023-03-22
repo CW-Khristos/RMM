@@ -29,7 +29,7 @@
     0.1.2 Optimized to reduced use of 'If' blocks for querying registry values
           Added support for monitoring on Servers using 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' since WMI SecurityCenter2 Namespace does not exist on Server OSes
           Note : Obtaining AV Products from 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' only works *if* the AV Product registers itself in that key!
-            If the above registry check fails to find any registered AV Products; script will attempt to fallback to WMI "root\cimv2" Namespace and "Win32_Product" Class -filter "Name like '$i_PAV'"
+            If the above registry check fails to find any registered AV Products; script will attempt to fallback to WMI "root\cimv2" Namespace and "Win32_Product" Class -filter "Name like '$env:i_PAV'"
     0.1.3 Correcting some bugs and adding better error handling
     0.1.4 Enhanced error handling a bit more to include $_.scriptstacktrace
           Switched to reading AV Product 'Definition' XML data into hashtable format to allow flexible and efficient support of Servers; plan to utilize this method for all devices vs. direcly pulling XML data on each check
@@ -46,7 +46,7 @@
     0.1.7 Bugfixes for monitoring 'Trend Micro' and 'Worry-Free Business Security' and multiple AVs on Servers.
             These 2 'Trend Micro' AV Products are actually the same product; this is simply to deal with differing names in Registry Keys that cannot be changed with Trend Micro installed
     0.1.8 Optimization and more bugfixes
-          Switched to allow passing of '$i_PAV' via command line; this must be disabled in the AMP code to function properly with NCentral
+          Switched to allow passing of '$env:i_PAV' via command line; this must be disabled in the AMP code to function properly with NCentral
           Corrected issue where 'Windows Defender' would be populated twice in Competitor AV; this was caused because WMI may report multiple instances of the same AV Product causing competitor check to do multiple runs
           Switched to using a hashtable for storing detected AV Products; this was to prevent duplicate entires for the same AV Product caused by WMI
           Moved code to retrieve Vendor AV Product XMLs to 'Get-AVXML' function to allow dynamic loading of Vendor XMLs and fallback to validating each AV Product from each supported Vendor
@@ -88,11 +88,11 @@
 #REGION ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:i_PAV' TO '$i_PAV' TO UTILIZE IN CLI
-  Param(
-    [Parameter(Mandatory=$true)]$i_PAV,
-    [Parameter(Mandatory=$false)]$rebootTime,
-    [Parameter(Mandatory=$false)]$rebootDelay
-  )
+  #Param(
+  #  [Parameter(Mandatory=$true)]$i_PAV,
+  #  [Parameter(Mandatory=$false)]$rebootTime,
+  #  [Parameter(Mandatory=$false)]$rebootDelay
+  #)
   #VERSION FOR SCRIPT UPDATE
   $strSCR               = "AVHealth"
   $strVER               = [version]"0.2.6"
@@ -493,7 +493,7 @@
       if ($script:blnAVXML) {
         foreach ($itm in $avXML.NODE.ChildNodes) {
           if ($itm.name -notmatch "#comment") {                                                     #AVOID 'BUG' WITH A KEY AS '#comment'
-            if ($i_PAV -match "Sophos") {                                                       #BUILD HASHTABLE FOR SOPHOS
+            if ($env:i_PAV -match "Sophos") {                                                       #BUILD HASHTABLE FOR SOPHOS
               $hash = @{
                 display = "$($itm.$script:bitarch.display)"
                 displayval = "$($itm.$script:bitarch.displayval)"
@@ -527,7 +527,7 @@
                 infectval = "$($itm.$script:bitarch.infectval)"
                 threat = "$($itm.$script:bitarch.threat)"
               }
-            } elseif ($i_PAV -notmatch "Trend Micro") {                                                   #BUILD HASHTABLE FOR ALL AV PRODUCTS EXCEPT TREND MICRO
+            } elseif ($env:i_PAV -notmatch "Trend Micro") {                                                   #BUILD HASHTABLE FOR ALL AV PRODUCTS EXCEPT TREND MICRO
               $hash = @{
                 display = "$($itm.$script:bitarch.display)"
                 displayval = "$($itm.$script:bitarch.displayval)"
@@ -557,7 +557,7 @@
                 infectval = "$($itm.$script:bitarch.infectval)"
                 threat = "$($itm.$script:bitarch.threat)"
               }
-            } elseif ($i_PAV -match "Trend Micro") {                                                #BUILD HASHTABLE FOR CURSED TREND MICRO
+            } elseif ($env:i_PAV -match "Trend Micro") {                                                #BUILD HASHTABLE FOR CURSED TREND MICRO
               $hash = @{
                 display = "$($itm.$script:bitarch.display)"
                 displayval = "$($itm.$script:bitarch.displayval)"
@@ -776,9 +776,9 @@ if (-not (test-path -path "C:\IT\Scripts")) {
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 Get-OSArch
-write-host "Monitoring AV Product : $i_PAV"
-$script:diag += "`r`nMonitoring AV Product : $i_PAV`r`n"
-Get-AVXML $i_PAV $script:pavkey
+write-host "Monitoring AV Product : $env:i_PAV"
+$script:diag += "`r`nMonitoring AV Product : $env:i_PAV`r`n"
+Get-AVXML $env:i_PAV $script:pavkey
 if (-not ($script:blnAVXML)) {
   #AV DETAILS
   $script:o_AVname = "Selected AV Product Not Found`r`nUnable to download AV Vendor XML`r`n"
@@ -844,9 +844,9 @@ if (-not ($script:blnAVXML)) {
         write-host "`r`nPerforming AV Product discovery" -foregroundcolor yellow
         foreach ($av in $AntiVirusProduct) {
           #PRIMARY AV REGISTERED UNDER 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\'
-          if ($av -match $i_PAV) {
+          if ($av -match $env:i_PAV) {
             $script:blnPAV = $true
-          } elseif (($i_PAV -eq "Trend Micro") -and ($av -match "Worry-Free Business Security")) {
+          } elseif (($env:i_PAV -eq "Trend Micro") -and ($av -match "Worry-Free Business Security")) {
             $script:blnPAV = $true
           }
           $script:diag += "`r`nFound 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\$($av)'`r`n"
@@ -919,9 +919,9 @@ if (-not ($script:blnAVXML)) {
                   write-host "DISPLAY KEY TYPE : $($strName.GetType())"
                   if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
-                  } elseif (($i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X"
                   }
                   write-host "NORMALIZED DISPLAY VALUE : $($strName)"
@@ -1020,9 +1020,9 @@ if (-not ($script:blnAVXML)) {
                   write-host "DISPLAY KEY TYPE : $($strName.GetType())"
                   if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
-                  } elseif (($i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X"
                   }
                   write-host "NORMALIZED DISPLAY VALUE : $($strName)"
@@ -1164,7 +1164,7 @@ if (-not ($script:blnAVXML)) {
                   $strName = "Windows Defender"
                 } elseif (($strName -match "Sophos") -and ($strName -match "BETA")) {               #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                   $strName = "Sophos Intercept X Beta"
-                } elseif (($i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {    #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
+                } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {    #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
                   $strName = "Sophos Intercept X"
                 }
                 write-host "NORMALIZED DISPLAY VALUE : $($strName)"
@@ -1278,8 +1278,8 @@ if (-not ($script:blnAVXML)) {
     foreach ($av in $avs.keys) {                                                                    #ITERATE THROUGH EACH FOUND AV PRODUCT
       if (($avs[$av].display -ne $null) -and ($avs[$av].display -ne "")) {
         #NEITHER PRIMARY AV PRODUCT NOR WINDOWS DEFENDER
-        if (($avs[$av].display -notmatch $i_PAV) -and ($avs[$av].display -notmatch "Windows Defender")) {
-          if (($i_PAV -eq "Trend Micro") -and (($avs[$av].display -notmatch "Trend Micro") -and ($avs[$av].display -notmatch "Worry-Free Business Security"))) {
+        if (($avs[$av].display -notmatch $env:i_PAV) -and ($avs[$av].display -notmatch "Windows Defender")) {
+          if (($env:i_PAV -eq "Trend Micro") -and (($avs[$av].display -notmatch "Trend Micro") -and ($avs[$av].display -notmatch "Worry-Free Business Security"))) {
             $script:o_AVcon = 1
             $script:o_CompAV += "$($avs[$av].display)`r`n"
             $script:o_CompPath += "$($avs[$av].path)`r`n"
@@ -1291,7 +1291,7 @@ if (-not ($script:blnAVXML)) {
             } elseif (-not $script:blnWMI) {
               $script:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
             }
-          } elseif ($i_PAV -ne "Trend Micro") {
+          } elseif ($env:i_PAV -ne "Trend Micro") {
             $script:o_AVcon = 1
             $script:o_CompAV += "$($avs[$av].display)`r`n"
             $script:o_CompPath += "$($avs[$av].path)`r`n"
@@ -1302,21 +1302,21 @@ if (-not ($script:blnAVXML)) {
               $script:o_CompState += "$($avs[$av].display) - Real-Time Scanning : $($avs[$av].rt) - Definitions : N/A (WMI Check)`r`n"
             }
           }
-          Pop-Warnings $script:avwarn $i_PAV "AV Conflict detected`r`n"
+          Pop-Warnings $script:avwarn $env:i_PAV "AV Conflict detected`r`n"
         }
         #PRIMARY AV PRODUCT
-        if (($avs[$av].display -match $i_PAV) -or 
-          (($i_PAV -eq "Trend Micro") -and (($avs[$av].display -match "Trend Micro") -or ($avs[$av].display -match "Worry-Free Business Security")))) {
+        if (($avs[$av].display -match $env:i_PAV) -or 
+          (($env:i_PAV -eq "Trend Micro") -and (($avs[$av].display -match "Trend Micro") -or ($avs[$av].display -match "Worry-Free Business Security")))) {
           #PARSE XML FOR SPECIFIC VENDOR AV PRODUCT
           $node = $avs[$av].display.replace(" ", "").replace("-", "").toupper()
           #AV DETAILS
           $script:o_AVname = $avs[$av].display
           $script:o_AVpath = $avs[$av].path
           #AV PRODUCT VERSION
-          if ($i_PAV -notmatch "Trend Micro") {
+          if ($env:i_PAV -notmatch "Trend Micro") {
             $i_verkey = $script:pavkey[$node].ver
             $i_verval = $script:pavkey[$node].verval
-          } elseif ($i_PAV -match "Trend Micro") {
+          } elseif ($env:i_PAV -match "Trend Micro") {
             $i_verkey = $script:pavkey[$node].corever
             $i_verval = $script:pavkey[$node].coreverval
             $i_vckey = $script:pavkey[$node].vcver
@@ -1324,7 +1324,7 @@ if (-not ($script:blnAVXML)) {
           }
           #AV PRODUCT COMPONENTS VERSIONS
           $i_compverkey = $script:pavkey[$node].compver
-          if ($i_PAV -match "Trend Micro") {
+          if ($env:i_PAV -match "Trend Micro") {
             $i_compverval = $script:pavkey[$node].compverval
           }
           #AV PRODUCT STATE
@@ -1346,7 +1346,7 @@ if (-not ($script:blnAVXML)) {
           $i_tamper = $script:pavkey[$node].tamper
           $i_tamperval = $script:pavkey[$node].tamperval
           #AV PENDING REBOOT
-          if ($i_PAV -match "Sophos") {
+          if ($env:i_PAV -match "Sophos") {
             $i_reboot = $script:pavkey[$node].reboot
             $i_rebootval1 = $script:pavkey[$node].rebootval1
             $i_rebootval2 = $script:pavkey[$node].rebootval2
@@ -1381,7 +1381,7 @@ if (-not ($script:blnAVXML)) {
           try {
             $script:diag += "Reading : -path 'HKLM:$($i_compverkey)'`r`n"
             write-host "Reading : -path 'HKLM:$($i_compverkey)'" -foregroundcolor yellow
-            if ($i_PAV -match "Sophos") {                                                       #SOPHOS COMPONENT VERSIONS
+            if ($env:i_PAV -match "Sophos") {                                                       #SOPHOS COMPONENT VERSIONS
               $compverkey = get-childitem -path "HKLM:$($i_compverkey)" -erroraction silentlycontinue
               foreach ($component in $compverkey) {
                 if (($component -ne $null) -and ($component -ne "")) {
@@ -1396,14 +1396,14 @@ if (-not ($script:blnAVXML)) {
               foreach ($component in $sort) {
                 $o_compver += "$($component.name) Version : $($component.value)`r`n"
               }
-            } elseif ($i_PAV -match "Trend Micro") {                                                #CURSED TREND MICRO
+            } elseif ($env:i_PAV -match "Trend Micro") {                                                #CURSED TREND MICRO
               $compverkey = get-itemproperty -path "HKLM:$($i_compverkey)" -name "$($i_compverval)" -erroraction silentlycontinue
               $compverkey = $compverkey.$i_compverval.split("/")
             }
           } catch {
-            if ($i_PAV -match "Sophos") {
+            if ($env:i_PAV -match "Sophos") {
               write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($component.PSChildName)'" -foregroundcolor red
-            } elseif ($i_PAV -notmatch "Sophos") {
+            } elseif ($env:i_PAV -notmatch "Sophos") {
               write-host "Could not validate Registry data : 'HKLM:$($i_compverkey)' for '$($avs[$av].display)'" -foregroundcolor red
             }
             $o_compver = "Components : N/A`r`n"
@@ -1436,7 +1436,7 @@ if (-not ($script:blnAVXML)) {
           # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\UpdateAgent=dword:00000000
           # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\UpdateOngoing=dword:00000000
           # 'HKLM\SOFTWARE\WOW6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.\Updating=dword:00000000
-          if ($i_PAV -notmatch "Trend Micro") {                                                     #HANDLE ALL AV PRODUCTS EXCEPT TREND MICRO
+          if ($env:i_PAV -notmatch "Trend Micro") {                                                     #HANDLE ALL AV PRODUCTS EXCEPT TREND MICRO
             try {
               $script:diag += "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'`r`n"
               write-host "Reading : -path 'HKLM:$($i_statkey)' -name '$($i_statval)'" -foregroundcolor yellow
@@ -1470,7 +1470,7 @@ if (-not ($script:blnAVXML)) {
               write-host $_.scriptstacktrace
               write-host $_
             }
-          } elseif ($i_PAV -match "Trend Micro") {                                                  #HANDLE TREND MICRO AV PRODUCT
+          } elseif ($env:i_PAV -match "Trend Micro") {                                                  #HANDLE TREND MICRO AV PRODUCT
             try {
               write-host "'Trend Micro' Detected : Reading : -path 'HKLM:$($i_vckey)' -name '$($i_vcval)'" -foregroundcolor yellow
               $vckey = get-itemproperty -path "HKLM:$($i_vckey)" -name "$($i_vcval)" -erroraction stop
@@ -1596,7 +1596,7 @@ if (-not ($script:blnAVXML)) {
             write-host $_
           }
           $script:o_AVStatus += "Real-Time Scanning : $($script:o_RTstate)"
-          if (($i_PAV -match "Sophos") -and ($script:o_AVVersion -match "\d{4}\.\d\.\d\.\d+")) {
+          if (($env:i_PAV -match "Sophos") -and ($script:o_AVVersion -match "\d{4}\.\d\.\d\.\d+")) {
             $script:diag += "SOPHOS INTERCEPT X v$($script:o_AVVersion) : DISABLE REAL-TIME WARNINGS`r`n"
             write-host "SOPHOS INTERCEPT X v$($script:o_AVVersion) : DISABLE REAL-TIME WARNINGS"
             $rtWARN = $false
@@ -1727,21 +1727,21 @@ if (-not ($script:blnAVXML)) {
           if ($rebootWARN) {
             $rebootWARN = $false
             $script:blnWARN = $true
-            $blnReboot = check-Reboot $rebootTime
+            $blnReboot = check-Reboot $env:rebootTime
             write-host "Reboot Flag : $($blnReboot)"
             if ($blnReboot) {
               try {
-                shutdown /r /t $rebootDelay /d p:2:1 /c "IPM Computers : AV Health : $($avs[$av].display) reports a reboot is required, this reboot is manadated by your IT Staff"
-                $script:diag += "Reboot has been set; system will reboot in $($rebootDelay) minutes`r`n"
-                write-host "Reboot has been set; system will reboot in $($rebootDelay) minutes" -foregroundcolor yellow
+                shutdown /r /t $env:rebootDelay /d p:2:1 /c "IPM Computers : AV Health : $($avs[$av].display) reports a reboot is required, this reboot is manadated by your IT Staff"
+                $script:diag += "Reboot has been set; system will reboot in $($env:rebootDelay) minutes`r`n"
+                write-host "Reboot has been set; system will reboot in $($env:rebootDelay) minutes" -foregroundcolor yellow
               } catch {
                 write-host $_.scriptstacktrace
                 write-host $_
               }
             } elseif ($blnReboot) {
               $time = get-date.tostring('yyyy-MM-dd HH:mm:ss')
-              $script:diag += "Current System Time $($time) not within configured Reboot Window : $($env:rebootWindow)`r`n"
-              write-host "Current System Time $($time) not within configured Reboot Window : $($env:rebootWindow)`r`n" -foregroundcolor yellow
+              $script:diag += "Current System Time $($time) not within configured Reboot Window : $($env:rebootTime)`r`n"
+              write-host "Current System Time $($time) not within configured Reboot Window : $($env:rebootTime)`r`n" -foregroundcolor yellow
             }
             Pop-Warnings $script:avwarn $($avs[$av].display) "Reboot Required : $($reboot) - Urgent Reboot Required : $($rval2) (REG Check)`r`n"
           }
@@ -1909,9 +1909,9 @@ if (-not ($script:blnAVXML)) {
             Pop-Warnings $script:avwarn $($avs[$av].display) "$($script:o_DefStatus)`r`n"
           }
           #GET PRIMARY AV PRODUCT DETECTED ALERTS VIA REGISTRY
-          if ($script:zNoAlert -notcontains $i_PAV) {
+          if ($script:zNoAlert -notcontains $env:i_PAV) {
             try {
-              if ($i_PAV -match "Sophos") {
+              if ($env:i_PAV -match "Sophos") {
                 $script:diag += "Reading : -path 'HKLM:$($i_alert)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_alert)'" -foregroundcolor yellow
                 $alertkey = get-ItemProperty -path "HKLM:$($i_alert)" -erroraction silentlycontinue
@@ -1926,7 +1926,7 @@ if (-not ($script:blnAVXML)) {
                 }
               }
               # NOT ACTUAL DETECTIONS - SAVE BELOW CODE FOR 'CONFIGURED ALERTS' METRIC
-              #elseif ($i_PAV -match "Trend Micro") {
+              #elseif ($env:i_PAV -match "Trend Micro") {
               #  if ($script:producttype -eq "Workstation") {
               #    $i_alert += "Client"
               #    write-host "Reading : -path 'HKLM:$i_alert'" -foregroundcolor yellow
@@ -1956,8 +1956,8 @@ if (-not ($script:blnAVXML)) {
           }
           #GET PRIMARY AV PRODUCT DETECTED INFECTIONS VIA REGISTRY
           $infectWARN = $false
-          if ($script:zNoInfect -notcontains $i_PAV) {
-            if ($i_PAV -match "Sophos") {                                                       #SOPHOS DETECTED INFECTIONS
+          if ($script:zNoInfect -notcontains $env:i_PAV) {
+            if ($env:i_PAV -match "Sophos") {                                                       #SOPHOS DETECTED INFECTIONS
               try {
                 $script:diag += "Reading : -path 'HKLM:$($i_infect)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_infect)'" -foregroundcolor yellow
@@ -1980,7 +1980,7 @@ if (-not ($script:blnAVXML)) {
                 write-host $_.scriptstacktrace
                 write-host $_
               }
-            } elseif ($i_PAV -match "Trend Micro") {                                            #TREND MICRO DETECTED INFECTIONS
+            } elseif ($env:i_PAV -match "Trend Micro") {                                            #TREND MICRO DETECTED INFECTIONS
               try {
                 $script:diag += "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor yellow
@@ -1999,7 +1999,7 @@ if (-not ($script:blnAVXML)) {
                 write-host $_.scriptstacktrace
                 write-host $_
               }
-            } elseif ($i_PAV -match "Symantec") {                                               #SYMANTEC DETECTED INFECTIONS
+            } elseif ($env:i_PAV -match "Symantec") {                                               #SYMANTEC DETECTED INFECTIONS
               try {
                 $script:diag += "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'`r`n"
                 write-host "Reading : -path 'HKLM:$($i_infect)' -name '$($i_infectval)'" -foregroundcolor yellow
@@ -2040,12 +2040,12 @@ if (-not ($script:blnAVXML)) {
           }
           #GET PRIMARY AV PRODUCT DETECTED THREATS VIA REGISTRY
           $threatWARN = $false
-          if ($script:zNoThreat -notcontains $i_PAV) {
+          if ($script:zNoThreat -notcontains $env:i_PAV) {
             try {
               $script:diag += "Reading : -path 'HKLM:$($i_threat)'`r`n"
               write-host "Reading : -path 'HKLM:$($i_threat)'" -foregroundcolor yellow
               $threatkey = get-childitem -path "HKLM:$($i_threat)" -erroraction silentlycontinue
-              if ($i_PAV -match "Sophos") {
+              if ($env:i_PAV -match "Sophos") {
                 if ($threatkey.count -gt 0) {
                   #$threatWARN = $true
                   foreach ($threat in $threatkey) {
@@ -2153,12 +2153,12 @@ $null | set-content $logPath -force
 "$($script:diag)" | add-content $logPath -force
 write-host 'DATTO OUTPUT :'
 if ($script:blnWARN) {
-  write-DRMMAlert "AV Health : $($i_PAV) : Warning"
+  write-DRMMAlert "AV Health : $($env:i_PAV) : Warning"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRMMAlert "AV Health : $($i_PAV) : Healthy"
+  write-DRMMAlert "AV Health : $($env:i_PAV) : Healthy"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 0
