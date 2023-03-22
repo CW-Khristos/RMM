@@ -73,7 +73,7 @@ namespace Win32{
     $Minutes = $sw.Elapsed.Minutes
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
-    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    $ScriptStopTime = (Get-Date).ToString('yyyy-MM-dd hh:mm:ss')
     write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
@@ -323,7 +323,7 @@ namespace Win32{
     }
     # check for BGIs
     if (!(test-path *.bgi)) {
-      $timestanp = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+      $timestanp = "$((Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))"
       $mondiag = "- ERROR: There needs to be at least one .bgi file for the Component to work`r`n"
       $mondiag += "  Execution cannot continue. Exiting`r`n"
       $mondiag += "`r`n`r`nExecution Failed : $($timestanp)"
@@ -498,7 +498,7 @@ namespace Win32{
 #BEGIN SCRIPT
 clear-host
 #Start script execution time calculation
-$ScrptStartTime = (get-date).ToString('dd-MM-yyyy hh:mm:ss')
+$ScrptStartTime = (get-date).ToString('yyyy-MM-dd hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
@@ -544,7 +544,7 @@ if ($env:strTask -eq "DEPLOY") {
 StopClock
 #CLEAR LOGFILE
 $null | set-content $logPath -force
-$finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+$finish = "$((Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     #WRITE TO LOGFILE
