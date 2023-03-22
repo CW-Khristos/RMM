@@ -74,8 +74,6 @@
             This is mostly due to 'Trend Micro' 'ClientUpgradeStatus' values being deemed unreliable for accurately determining if the AV Product itself is up-to-date and thus the need to use an completely different method from other AV Products
           Added retrieval for 'Trend Micro' 'VCVersion' and proper comparison to determine if both Core AV and VC components are up-to-date with their respective expected versions                                                                                                                                                                       
     0.2.6 Added 'check-Reboot' functin to allow for scheduling reboots against local "agent" time
-          Could not get a working method of calling shutdown.exe from within PS script
-          Added 'Get-ProcessOutput' function to handle calling shutdown.exe from within PS script
 
 .TODO
     Still need more AV Product registry samples for identifying keys to monitor for relevant data
