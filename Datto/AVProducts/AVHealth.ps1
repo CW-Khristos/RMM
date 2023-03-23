@@ -725,13 +725,13 @@
     $rebootdiag += "End Window : $($endwindow)`r`n"
     if (($curTime -ge $startWindow) -and ($curTime -le $endWindow)) {
       #Execute stuff
-      $rebootdiag += "Current Time : $($curTime) is Inside Window : $($runTime) +-(5min); Triggering Reboot"
+      $rebootdiag += "Current Time : $($curTime) is Inside Window : $($runTime) +-(5min); Triggering Reboot`r`n"
       $script:diag += "$($rebootdiag)"
       write-host "$($rebootdiag)"
       return $true
     } else {
       #Do Nothing obviously
-      $rebootdiag += "Current Time : $($curTime) is Outside Window : $($runTime) +-(5min); Exiting"
+      $rebootdiag += "Current Time : $($curTime) is Outside Window : $($runTime) +-(5min); Exiting`r`n"
       $script:diag += "$($rebootdiag)"
       write-host "$($rebootdiag)"
       return $false
