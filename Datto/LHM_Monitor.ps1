@@ -281,18 +281,18 @@
           $mondiag = $null
           foreach ($sensor in $arrSensors.getEnumerator()) {
             if ($blnIdle) {
-              $varThreshold = [math]::round(($varThreshold - 10))
-              if ($sensor.value -gt $varThreshold) {
-                $sensordiag = "Idle Temp Warning (Warn : $($varThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
+              $evalThreshold = [math]::round(($varThreshold - 10))
+              if ($sensor.value -gt $evalThreshold) {
+                $sensordiag = "Idle Temp Warning (Warn : $($evalThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
                 $mondiag += "$($sensordiag)"
                 $script:varAlertMsg += "$($sensordiag)"
                 write-host "`t$($sensordiag)"
                 $script:diag += "`r`n`t$($sensordiag)`r`n"
               }
             } elseif (-not $blnIdle) {
-              $varThreshold = [math]::round(($varThreshold))
-              if ($sensor.value -gt $varThreshold) {
-                $sensordiag = "Full-Load Temp Warning (Warn : $($varThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
+              $evalThreshold = [math]::round(($varThreshold))
+              if ($sensor.value -gt $evalThreshold) {
+                $sensordiag = "Full-Load Temp Warning (Warn : $($evalThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
                 $mondiag += "$($sensordiag)"
                 $script:varAlertMsg += "$($sensordiag)"
                 write-host "`t$($sensordiag)"
