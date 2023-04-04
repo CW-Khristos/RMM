@@ -159,7 +159,7 @@ if ($Company) {
 		}
 
 		#Collect Data
-		$AllsmbShares = Get-SmbShare | Where-Object {( (@('Remote Admin', 'Default share', 'Remote IPC') -notcontains $_.Description) ) -and $_.ShareType -eq 'FileSystemDirectory'}
+		$AllsmbShares = Get-SmbShare | Where-Object {( (@('Remote Admin', 'Default share', 'Remote IPC', 'Printer Drivers') -notcontains $_.Description) ) -and $_.ShareType -eq 'FileSystemDirectory'}
 		foreach ($SMBShare in $AllSMBShares) {
       $output = Get-ProcessOutput -FileName "C:\Windows\System32\net.exe" -Args "share `"$($SMBShare.name)`""
       $NetOut = $output.StandardOutput -split "Permission"
