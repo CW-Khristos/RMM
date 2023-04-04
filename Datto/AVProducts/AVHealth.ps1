@@ -853,6 +853,7 @@ if (-not ($script:blnAVXML)) {
           write-host "`r`nFound 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\$($av)'" -foregroundcolor yellow
           #RETRIEVE DETECTED AV PRODUCT VENDOR XML
           foreach ($vendor in $script:avVendors) {
+            $script:blnAVXML = $false
             if ($av -match $vendor) {
               Get-AVXML $vendor $script:vavkey
               break
@@ -965,6 +966,7 @@ if (-not ($script:blnAVXML)) {
         $script:diag += "`r`nPrimary AV Product not found / No AV Products found; will check each AV Product in all Vendor XMLs`r`n"
         write-host "`r`nPrimary AV Product not found / No AV Products found; will check each AV Product in all Vendor XMLs" -foregroundcolor yellow
         foreach ($vendor in $script:avVendors) {
+          $script:blnAVXML = $false
           Get-AVXML $vendor $script:vavkey
         }
         foreach ($key in $script:vavkey.keys) {                                                     #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
