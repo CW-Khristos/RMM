@@ -76,16 +76,17 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #QUERY BACKUP SCHEDULES
 try {
   $schedule = .\clienttool.exe control.schedule.list
-  $schedule = $schedule | where {$_ -like "* yes *"}
-  write-host "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)`r`n`t$($schedule)`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)`r`n`t$($schedule)`r`n$($strLineSeparator)"
+  $schedule = $schedule | where {$_ -like "* yes *"} | out-string
+  $array = $schedule.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
+  write-host "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)`r`n"
+  foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
+  write-host "$($strLineSeparator)"
+  $script:diag += "`r`n$($strLineSeparator)"
   $array = $schedule.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
   write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
-  foreach ($item in $array) {
-    write-host "`t$($item)"
-    $script:diag += "`t$($item)`r`n"
-  }
+  foreach ($item in $array) {write-host "`t$($item)"; $script:diag += "`t$($item)`r`n"}
   if ($array.count -lt 11) {
     $scheduleset = "$($array[2])-$($array[4]) : $($array[7])-$($array[5]) - $($array[6])"
   } elseif ($array.count -ge 11) {
@@ -100,37 +101,48 @@ try {
   }
   $scheduleset = $scheduleset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
   $scheduleset = $scheduleset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
-  write-host "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($scheduleset)`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($scheduleset)`r`n$($strLineSeparator)`r`n"
+  $array = $scheduleset.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
+  write-host "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n"
+  foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
+  write-host "$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`n"
   new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($env:udfSchedules)" -value "$($scheduleset)" -force
 } catch {
   $script:blnWARN = $true
-  write-host "ERROR ENCOUNTERED"
-  $script:diag += "`r`nERROR ENCOUNTERED`r`n"
+  $err = "$($_.scriptstacktrace)`r`n$($_.Exception)`r`n$($_)`r`n"
+  write-host "ERROR ENCOUNTERED`r`n$($err)"
+  $script:diag += "`r`nERROR ENCOUNTERED`r`n$($err)`r`n"
 }
 #QUERY ARCHIVE SCHEDULES
 try {
   $archive = .\clienttool.exe control.archiving.list
-  $archive = $archive | where {$_ -like "* yes *"}
-  write-host "$($strLineSeparator)`r`nARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archive)`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archive)`r`n$($strLineSeparator)`r`n"
+  $archive = $archive | where {$_ -like "* yes *"} | out-string
+  $array = $archive.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
+  write-host "$($strLineSeparator)`r`nARCHIVE :`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nARCHIVE :`r`n$($strLineSeparator)`r`n"
+  foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
+  write-host "$($strLineSeparator)"
+  $script:diag += "`r`n$($strLineSeparator)"
   $array = $archive.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
   write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
-  foreach ($item in $array) {
-    write-host "`t$($item)"
-    $script:diag += "`t$($item)`r`n"
-  }
+  foreach ($item in $array) {write-host "`t$($item)"; $script:diag += "`t$($item)`r`n"}
   $archiveset = "$($array[2]) - $($array[4]) - Datasources : $($array[5]) - Archive Time : $($array[6]) - Archive Months : $($array[7]) - Archive Days : $($array[8])"
   $archiveset = $archiveset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
   $archiveset = $archiveset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
-  write-host "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archiveset)`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($archiveset)`r`n$($strLineSeparator)`r`n"
+  $array = $archiveset.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
+  write-host "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n"
+  foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
+  write-host "$($strLineSeparator)"
+  $script:diag += "$($strLineSeparator)`r`n"
   new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($env:udfArchives)" -value "$($archiveset)" -force
 } catch {
   $script:blnWARN = $true
-  write-host "ERROR ENCOUNTERED"
-  $script:diag += "`r`nERROR ENCOUNTERED`r`n"
+  $err = "$($_.scriptstacktrace)`r`n$($_.Exception)`r`n$($_)`r`n"
+  write-host "ERROR ENCOUNTERED`r`n$($err)"
+  $script:diag += "`r`nERROR ENCOUNTERED`r`n$($err)`r`n"
 }
 #Stop script execution time calculation
 StopClock
