@@ -919,9 +919,9 @@
     [datetime]$timeWindow = [datetime]$window
     [datetime]$runTime = $timeWindow.ToString('yyyy-MM-dd HH:mm:ss')
     $rebootdiag += "Scheduled Run : $($runtime)`r`n"
-    [datetime]$startWindow = ($timeWindow).AddMinutes(-5)     #5 Minutes before scheduled time
+    [datetime]$startWindow = ($timeWindow).AddMinutes(-30)  #30 Minutes before scheduled time
     $rebootdiag += "Start Window : $($startwindow)`r`n"
-    [datetime]$endWindow = ($timeWindow).AddMinutes(5)     #5 Minutes after scheduled time
+    [datetime]$endWindow = ($timeWindow).AddMinutes(30)     #30 Minutes after scheduled time
     $rebootdiag += "End Window : $($endwindow)`r`n"
     if (($curTime -ge $startWindow) -and ($curTime -le $endWindow)) {
       #Execute stuff
