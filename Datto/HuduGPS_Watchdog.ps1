@@ -23,11 +23,12 @@
   $script:HuduAPIKey      = $env:HuduKey
   # Set the base domain of your Hudu instance without a trailing /
   $script:HuduBaseDomain  = $env:HuduDomain
+  $script:Customer        = $env:CS_PROFILE_NAME
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-host "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
@@ -147,22 +148,22 @@ if (-not (Get-PackageProvider -name NuGet)) {
 }
 #INSTALL POWERSHELLGET MODULE
 if (Get-Module -ListAvailable -Name PowershellGet) {
-  Import-Module PowershellGet 
+  Import-Module PowershellGet -force
 } else {
-  Install-Module PowershellGet -Force -Confirm:$false
-  Import-Module PowershellGet
+  Install-Module PowershellGet -force -Confirm:$false
+  Import-Module PowershellGet -force
 }
 #Get the Hudu API Module if not installed
 if (Get-Module -ListAvailable -Name HuduAPI) {
   try {
-    Import-Module HuduAPI
+    Import-Module HuduAPI -force
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
 } else {
   try {
-    Install-Module HuduAPI -Force -Confirm:$false
-    Import-Module HuduAPI
+    install-module HuduAPI -MaximumVersion 2.3.2 -force -confirm:$false
+    Import-Module HuduAPI -force
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
@@ -226,11 +227,13 @@ if (-not $script:blnBREAK) {
   $script:diag += "`r`nLONG : $($long) - LONG (DEG) : $($degLONG)`r`n"
   write-host "URL : $($gpsURL)"
   $script:diag += "`r`nURL : $($gpsURL)`r`n"
+  write-host "$($env:CS_PROFILE_NAME)"
+  $script:diag += "$($env:CS_PROFILE_NAME)`r`n"
   #########
   #Set Hudu logon information
   New-HuduAPIKey $script:HuduAPIKey
   New-HuduBaseUrl $script:HuduBaseDomain
-  $huduCompany = Get-HuduCompanies -Name "$($env:CS_PROFILE_NAME)"
+  $huduCompany = Get-HuduCompanies -Name "$($script:Customer)"
   try {
     switch ($script:producttype) {
       "Workstation" {$script:producttype = "Workstation";break}
