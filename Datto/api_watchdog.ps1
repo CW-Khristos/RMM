@@ -520,7 +520,7 @@ if (Get-Module -ListAvailable -Name HuduAPI) {
   }
 } else {
   try {
-    Install-Module HuduAPI -Force -Confirm:$false
+    install-module HuduAPI -MaximumVersion 2.3.2 -force -confirm:$false
     Import-Module HuduAPI
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
