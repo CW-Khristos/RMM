@@ -79,14 +79,14 @@ To Do:
     "Customer Management",
     "DNS Entries - Autodoc",
     "Printers",
-    "Network - AP",
+    "Network - APs",
     "Network - NAS/SAN",
-    "Network - Switch",
-    "Network - Router",
-    "Server",
+    "Network - Switches",
+    "Network - Routers",
+    "Servers",
     "UPS",
     "Unknown",
-    "Workstation")
+    "Workstations")
   $huduLayouts                    = $null
   # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
   $script:HuduAPIKey              = $env:HuduKey
@@ -826,7 +826,9 @@ To Do:
           where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
             select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
               TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes).count
-        write-host "`r`n$($strLineSeparator)`r`n`tBackups :`r`n$($selected)`r`n$($strLineSeparator)`r`n"
+        $bmdiag = $selected | out-string
+        $bmdiag = "`r`n$($strLineSeparator)`r`n`tBackups :`r`n$($bmdiag)`r`n$($strLineSeparator)`r`n"
+        logERR 4 "Set-BackupDash : Backups" "$($bmdiag)"
         #RECOVERIES
         if (@($script:SelectedRecoveries).count -gt 0) {
           $recoveries = $script:SelectedRecoveries | 
@@ -834,15 +836,18 @@ To Do:
               plan_name,data_sources,backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,
                 current_recovery_status,last_recovery_timestamp,recovery_target_type | format-table | out-string
           $failed = @($script:SelectedRecoveries | where {$_.last_recovery_status -ne "Completed"}).count
-          write-host "`r`n$($strLineSeparator)`r`n`tRecoveries :`r`n$($recoveries)`r`n$($strLineSeparator)`r`n"
+          $bmdiag = $recoveries | out-string
+          $bmdiag = "`r`n$($strLineSeparator)`r`n`tRecoveries :`r`n$($bmdiag)`r`n$($strLineSeparator)`r`n"
+          $bmdiag = "$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
+          logERR 4 "Set-BackupDash : Recoveries" "$($bmdiag)"
         }
-        $MagicMessage = "$(@($script:SelectedDevices).count) Protected Devices`r`n"
-        $MagicMessage += "     $(@($script:SelectedRecoveries).count) Recovery Verification Devices"
+        $MagicMessage = "$(@($script:SelectedDevices).count) Protected Devices / `r`n"
+        $MagicMessage += " $(@($script:SelectedRecoveries).count) Recovery Verification Devices"
         #Update 'Tile' Shade based on Overdue Backups
         if (($overdue -ge 1) -or ($failed -ge 1)) {
           $shade = "warning"
           $MagicMessage = "$($overdue) / $(@($script:SelectedDevices).count) Backups Overdue`r`n"
-          $MagicMessage += "     $($failed) / $(@($script:SelectedRecoveries).count) Recoveries Failed"
+          $MagicMessage += " $($failed) / $(@($script:SelectedRecoveries).count) Recoveries Failed"
           #BACKUPS
           $badHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
@@ -1227,6 +1232,7 @@ if (-not $script:blnBREAK) {
     logERR 4 "Backups Retrieval" "$($bmdiag)"
     Send-GetPartnerInfo "$($script:bmRoot)"
     Send-GetBackups "$($script:bmRoot)"
+    Get-DRStatistics "$($PartnerId)"
   } elseif (-not $script:blnBM) {
     $bmdiag = "Error Authenticating : Backup Reports will be Unavailable`r`n$($strLineSeparator)"
     $authdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
@@ -1407,13 +1413,13 @@ if (-not $script:blnBREAK) {
               (($null -ne $psaAsset.refTitle) -and ($psaAsset.refTitle -ne ""))) {
                 #Map rmmTypeID to Hudu Asset Types
                 $type = switch ($psaAsset.rmmTypeID) {
-                  1   {'Workstation'}
-                  2   {'Workstation'}
-                  3   {'Server'}
+                  1   {'Workstations'}
+                  2   {'Workstations'}
+                  3   {'Servers'}
                   6   {'Printers'}
-                  7   {'Network - AP'}
-                  9   {'Network - Switch'}
-                  10  {'Network - Router'}
+                  7   {'Network - APs'}
+                  9   {'Network - Switches'}
+                  10  {'Network - Routers'}
                   11  {'UPS'}
                   12  {'Unknown'}
                   15  {'Network - NAS/SAN'}
