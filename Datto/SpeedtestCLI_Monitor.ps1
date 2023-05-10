@@ -174,14 +174,13 @@
     if (-not $result) {                   #PATH DOES NOT EXIST, DEPLOY SPEEDTEST
       run-Deploy
     } elseif ($result) {                  #PATH EXISTS
-      #CHECK EXECUTABLE AND DLL
+      #CHECK EXECUTABLE
       $exeFile = test-path -path "$($exePath)\speedtest.exe"
-      $txtFile = test-path -path "$($exePath)\readme.md"
-      if ((-not $exeFile) -or (-not $txtFile)) {
+      if (-not $exeFile) {
         run-Deploy
       }
       try {
-        $out = Get-ProcessOutput -File "$($exePath)\speedtest.exe" -Wait
+        $out = Get-ProcessOutput -File "$($exePath)\speedtest.exe"
         write-host "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)`r`n$($strLineSeparator)"
         $script:diag += "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)`r`n$($strLineSeparator)`r`n"
       } catch {
