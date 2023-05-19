@@ -131,12 +131,12 @@ if ($script:blnFAIL) {
   $script:diag += "$($strLineSeparator)`r`nDEPLOYING DomainService`r`n"
   move-item DomainService_v3.164x64.zip "$($env:strDeploy)"
   $shell = New-Object -ComObject Shell.Application
-  $zip = $shell.Namespace("$($env:strDeploy)DomainService_v3.164x64.zip")
+  $zip = $shell.Namespace("$($env:strDeploy)\DomainService_v3.164x64.zip")
   $items = $zip.items()
   $shell.Namespace("$($env:strDeploy)").CopyHere($items, 1556)
   $script:diag += "DomainService EXTRACTED TO '$($env:strDeploy)'`r`n$($strLineSeparator)`r`n"
   write-host "DomainService EXTRACTED TO '$($env:strDeploy)'`r`n$($strLineSeparator)"
-  remove-item "$($env:strDeploy)DomainService_v3.164x64.zip"
+  remove-item "$($env:strDeploy)\DomainService_v3.164x64.zip"
   $strEXE = "$($env:strDeploy)\DomainService.exe"
   #INSTALL
   try {
