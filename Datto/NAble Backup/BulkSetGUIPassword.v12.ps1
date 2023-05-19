@@ -605,7 +605,7 @@ try {
         Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
           Where-object {$_.DeviceName -eq $xmlBackupID}
       Write-Host "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
-      $script:diag += "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
+      $script:diag += "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
     }
   }    
 
