@@ -118,7 +118,7 @@ if ($script:blnFAIL) {
     try {
       write-host "$($strLineSeparator)`r`nSTOPPING DomainService"
       $script:diag += "$($strLineSeparator)`r`nSTOPPING DomainService`r`n"
-      stop-service -name "RuffianDomainService" -wait
+      stop-service -name "RuffianDomainService"
       write-host "$($strLineSeparator)`r`nSTOPPED DomainService`r`nREMOVING FILES"
       $script:diag += "$($strLineSeparator)`r`nSTOPPED DomainService`r`nREMOVING FILES`r`n"
       get-childitem "$($env:strDeploy)" | remove-item -force -erroraction continue
