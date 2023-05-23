@@ -29,11 +29,11 @@
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
   
   function StopClock {
     #Stop script execution time calculation
@@ -408,7 +408,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "$($env:strTask) : $($script:varAlertMsg) : $($finish)"
+    write-DRMMAlert "$($env:strTask) : $($script:varAlertMsg) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   } else {
@@ -416,7 +416,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "$($env:strTask) : No nodes reporting over threshold : $($finish)"
+    write-DRMMAlert "$($env:strTask) : No nodes reporting over threshold : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   }
