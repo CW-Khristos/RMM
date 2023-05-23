@@ -302,7 +302,7 @@ clear-host
 $ScrptStartTime = (get-date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #FORMAT COMPANY NAME
-if (-not $varCompany) {$varCompany = "$($CS_PROFILE_NAME)"}
+if (-not $varCompany) {$varCompany = "$($env:CS_PROFILE_NAME)"}
 if ($varCompany -match ' ') {$varCompany = $varCompany.replace(' ','%20')}
 #FORMAT CW URL
 if ($CWControlInstallURL -match "|") {$CWControlInstallURL = $CWControlInstallURL.replace('|','&')}
