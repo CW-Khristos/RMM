@@ -782,6 +782,7 @@
             $allout += "`t  - Warning Comp. Temp Time (NVMe) : $($script:arrDRV[$script:i].nvmewctemp)`r`n"
             $allout += "`t  - Critical Comp. Temp Time (NVMe) : $($script:arrDRV[$script:i].nvmecctemp)`r`n"
             logERR 3 "run-Monitor" "$($allout)`r`n$($strLineSeparator)"
+            break
           }
         }
       } catch {
