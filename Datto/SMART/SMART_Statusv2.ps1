@@ -475,7 +475,6 @@
         #DOWNLOAD SMARTCTL FROM GITHUB
         if (-not (test-path -path "$($exePath)\$($smartEXE)")) {
           try {
-            #IPM-Khristos
             $depdiag = " - BITS.Transfer - Downloading : $($srcSMART) : $($exePath)\$($smartEXE)"
             logERR 3 "run-Deploy" "$($depdiag)"
             start-bitstransfer -erroraction stop -source "$($srcSMART)" -destination "$($exePath)\$($smartEXE)"
@@ -486,7 +485,6 @@
             $depdiag = " - BITS.Transfer - FAILED TO DOWNLOAD SMARTCTL`r`n$($err)"
             logERR 3 "run-Deploy" "$($depdiag)"
             try {
-              #IPM-Khristos
               $depdiag = " - Web.DownloadFile - Downloading : $($srcSMART) : $($exePath)\$($smartEXE)`r`n$($strLineSeparator)"
               logERR 3 "run-Deploy" "$($depdiag)"
               $web = new-object system.net.webclient
@@ -494,7 +492,6 @@
               $depdiag = " - SMARTCTL Downloaded Successfully`r`n$($strLineSeparator)"
               logERR 3 "run-Deploy" "$($depdiag)"
             } catch {
-              #IPM-Khristos
               $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
               $depdiag = " - Web.DownloadFile - FAILED TO DOWNLOAD SMARTCTL`r`n$($err)"
               logERR 2 "run-Deploy" "$($depdiag)"
@@ -504,7 +501,6 @@
         #DOWNLOAD UPDATE-SMART-DRIVEDB.EXE FROM GITHUB
         if (-not (test-path -path "$($exePath)\$($dbEXE)")) {
           try {
-            #IPM-Khristos
             $depdiag = " - BITS.Transfer - Downloading : $($srcDB) : $($exePath)\$($dbEXE)"
             logERR 3 "run-Deploy" "$($depdiag)"
             start-bitstransfer -erroraction stop -source "$($srcDB)" -destination "$($exePath)\$($dbEXE)"
@@ -515,7 +511,6 @@
             $depdiag = " - BITS.Transfer - FAILED TO DOWNLOAD UPDATE-SMART-DRIVEDB`r`n$($err)"
             logERR 3 "run-Deploy" "$($depdiag)"
             try {
-              #IPM-Khristos
               $depdiag = " - Web.DownloadFile - Downloading : $($srcDB) : $($exePath)\$($dbEXE)`r`n$($strLineSeparator)"
               logERR 3 "run-Deploy" "$($depdiag)"
               $web = new-object system.net.webclient
@@ -523,7 +518,6 @@
               $depdiag = " - UPDATE-SMART-DRIVEDB Downloaded Successfully`r`n$($strLineSeparator)"
               logERR 3 "run-Deploy" "$($depdiag)"
             } catch {
-              #IPM-Khristos
               $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
               $depdiag = " - Web.DownloadFile - FAILED TO DOWNLOAD UPDATE-SMART-DRIVEDB`r`n$($err)"
               logERR 2 "run-Deploy" "$($depdiag)"
@@ -582,10 +576,8 @@
         #DOWNLOAD SMARTCTL.EXE IF NEEDED
         if (-not (test-path -path "$($exePath)\$($smartEXE)" -pathtype leaf)) {
           try {
-            #IPM-Khristos
             start-bitstransfer -erroraction stop -source "$($srcSMART)" -destination "$($exePath)\$($smartEXE)"
           } catch {
-            #IPM-Khristos
             $web = new-object system.net.webclient
             $web.downloadfile("$($srcSMART)", "$($exePath)\$($smartEXE)")
           }
@@ -593,10 +585,8 @@
         #DOWNLOAD UPDATE-SMART-DRIVEDB.EXE IF NEEDED
         if (-not (test-path -path "$($exePath)\$($dbEXE)" -pathtype leaf)) {
           try {
-            #IPM-Khristos
             start-bitstransfer -erroraction stop -source "$($srcDB)" -destination "$($exePath)\$($dbEXE)"
           } catch {
-            #IPM-Khristos
             $web = new-object system.net.webclient
             $web.downloadfile("$($srcDB)", "$($exePath)\$($dbEXE)")
           }
