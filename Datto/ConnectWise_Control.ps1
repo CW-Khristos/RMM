@@ -15,6 +15,8 @@
   $CWKeyThumbprint            = "$($env:ConnectWiseControlPublicKeyThumbprint)"
   $CWControlInstallURL        = "$($env:ConnectWiseControlInstallerUrl)"
   $ConnectWiseControlBaseUrl  = "$($env:ConnectWiseControlBaseUrl)"
+  #SET TLS SECURITY
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
