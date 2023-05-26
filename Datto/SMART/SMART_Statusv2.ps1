@@ -658,7 +658,7 @@
             logERR 3 "run-Monitor" "$($mondiag)"
             $script:selecteddrive = $script:arrDRV | select-object * | where-object {$_.drvID -eq $objDRV.drvID}
             #GET BASIC SMART HEALTH
-            $output = Get-ProcessOutput -FileName "$($exePath)\$($smartEXE)" -Args "-H $($objDRV.drvID)"
+            $output = Get-ProcessOutput -FileName "$($exePath)\$($smartEXE)" -Args "-H $($objDRV.drvID) -T verypermissive"
             #PARSE SMARTCTL OUTPUT LINE BY LINE
             $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
             foreach ($line in $lines) {
@@ -672,7 +672,7 @@
               }
             }
             #GET SMART ATTRIBUTES
-            $output = Get-ProcessOutput -FileName "$($exePath)\$($smartEXE)" -Args "-A $($objDRV.drvID)"
+            $output = Get-ProcessOutput -FileName "$($exePath)\$($smartEXE)" -Args "-A $($objDRV.drvID) -T verypermissive"
             #PARSE SMARTCTL OUTPUT LINE BY LINE
             $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
             foreach ($line in $lines) {
