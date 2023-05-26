@@ -50,6 +50,8 @@ namespace Win32{
     }
  } 
 '@
+  #SET TLS SECURITY
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
