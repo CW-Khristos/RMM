@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><Policy ID="82770eff-3adc-4fc9-8dfa-5308d54b59c2" Name="Check-Reboots" Description="Q2hlY2tzIGRldmljZSByZWJvb3QgaGlzdG9yeSBvdmVyIGxhc3QgMzAgZGF5cyBmcm9tIHJlbGV2YW50IHdpbmRvd3MgZXZlbnQgbG9ncy4=" Version="2.10.0.19" RemoteCategory="0" ExecutionType="Local" MinimumPSVersionRequired="0.0.0">
+  <Object ID="{861cdd05-4587-4566-b70d-6e4eda44c6ac}" Type="{B6FA6D8B-EEAA-47A6-8463-7F9A4F5BBB6E}" Data="&lt;xml&gt;&lt;OutputParameters&gt;&lt;Parameter ParameterName=&quot;strFSEnabled&quot; Label=&quot;Fast Startup Status&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.Fast Startup Enabled&quot; /&gt;&lt;Parameter ParameterName=&quot;DaysSinceLastColdBoot&quot; Label=&quot;Days Since Last Cold Boot&quot; ParameterType=&quot;number&quot; Value=&quot;Run PowerShell Script.Days Since Last Cold Boot&quot; /&gt;&lt;Parameter ParameterName=&quot;strTSLB&quot; Label=&quot;Time since last Boot&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.Time Since Last Boot&quot; /&gt;&lt;Parameter ParameterName=&quot;strTSLCB&quot; Label=&quot;Time since last Cold Boot&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.Time Since Last Cold Boot&quot; /&gt;&lt;Parameter ParameterName=&quot;strTSLFS&quot; Label=&quot;Time since last Fast Startup&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.Time Since Last Fast Startup&quot; /&gt;&lt;Parameter ParameterName=&quot;strTSLR&quot; Label=&quot;Time since last Resume&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.Time Since Last Resume&quot; /&gt;&lt;Parameter ParameterName=&quot;AllBootupsCount&quot; Label=&quot;All Bootups Count&quot; ParameterType=&quot;number&quot; Value=&quot;Run PowerShell Script.All Bootups Count&quot; /&gt;&lt;Parameter ParameterName=&quot;AllColdBootsCount&quot; Label=&quot;All Cold Boots Count&quot; ParameterType=&quot;number&quot; Value=&quot;Run PowerShell Script.All Cold Boots Count&quot; /&gt;&lt;Parameter ParameterName=&quot;AllFastBootsCount&quot; Label=&quot;All Fast Boots Count&quot; ParameterType=&quot;number&quot; Value=&quot;Run PowerShell Script.All Fast Startups Count&quot; /&gt;&lt;Parameter ParameterName=&quot;AllResumesCount&quot; Label=&quot;All Resumes Count&quot; ParameterType=&quot;number&quot; Value=&quot;Run PowerShell Script.All Resumes Count&quot; /&gt;&lt;Parameter ParameterName=&quot;AllSleepEventsCount&quot; Label=&quot;All Sleep Events Count&quot; ParameterType=&quot;number&quot; Value=&quot;Run PowerShell Script.All Sleep Events Count&quot; /&gt;&lt;Parameter ParameterName=&quot;AllWakeEventsCount&quot; Label=&quot;All Wake Events Count&quot; ParameterType=&quot;number&quot; Value=&quot;Run PowerShell Script.All Wake Events Count&quot; /&gt;&lt;/OutputParameters&gt;&lt;/xml&gt;" />
+  <LinkManager xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/PolicyExecutor">
+    <hashset xmlns:d2p1="http://schemas.datacontract.org/2004/07/System">
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.strFSEnabled</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>strFSEnabled</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.DaysSinceLastColdBoot</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>DaysSinceLastColdBoot</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.strTSLB</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>strTSLB</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.strTSLCB</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>strTSLCB</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.strTSLFS</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>strTSLFS</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.strTSLR</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>strTSLR</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.AllBootupsCount</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AllBootupsCount</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.AllColdBootsCount</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AllColdBootsCount</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.AllFastBootsCount</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AllFastBootsCount</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.AllResumesCount</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AllResumesCount</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.AllSleepEventsCount</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AllSleepEventsCount</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>94180dae-8efd-40d2-8f4d-c2711fa2f2c4.AllWakeEventsCount</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>AllWakeEventsCount</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+    </hashset>
+  </LinkManager>
+  <Diagnostics OriginalVersion="2.19.0.10" />
+  <Activity mc:Ignorable="sads sap" x:Class="Policy Builder" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:p="clr-namespace:PolicyExecutor;assembly=PolicyExecutionEngine" xmlns:sads="http://schemas.microsoft.com/netfx/2010/xaml/activities/debugger" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:Members>
+      <x:Property Name="PolicyGUID" Type="InArgument(x:String)" />
+    </x:Members>
+    <sap:VirtualizedContainerService.HintSize>490,571</sap:VirtualizedContainerService.HintSize>
+    <mva:VisualBasic.Settings>Assembly references and imported namespaces serialized as XML namespaces</mva:VisualBasic.Settings>
+    <p:PolicySequence DisplayName="Policy Builder" sap:VirtualizedContainerService.HintSize="490,571" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
+      <p:PolicySequence.Activities>
+        <p:RunPowerShellScript AssemblyName="PolicyExecutionEngine, Version=2.16.1.4, Culture=neutral, PublicKeyToken=null" DisplayName="Run PowerShell Script" sap:VirtualizedContainerService.HintSize="454,348" Moniker="94180dae-8efd-40d2-8f4d-c2711fa2f2c4" OutPut_64="[RunPowerShellScript_OutPut_64]" Result="[RunPowerShellScript_Result]" ResultString="[RunPowerShellScript_ResultString]" Results_x64="[RunPowerShellScript_Results_x64]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="RunPowerShellScript" genArgEvent="f550b7a4-6607-44a5-b60f-379d27cc20db" m_bTextLinkChange="False" script="JABEAGEAeQBzAFAAYQBzAHQAIAA9ACAAMwAwACAAIwBIAG8AdwAgAGYAYQByACAAYgBhAGMAawAgAHQAbwAgAGMAaABlAGMAawAgAGUAdgBlAG4AdAAgAGwAbwBnAA0ACgAkAHQAbwBkAGEAeQAgAD0AIABHAGUAdAAtAEQAYQB0AGUADQAKACQAUwB0AGEAcgB0AEQAYQB0AGUAIAA9ACAAJAB0AG8AZABhAHkALgBBAGQAZABEAGEAeQBzACgALQAkAEQAYQB5AHMAUABhAHMAdAApAA0ACgAkAHMAdAByAFIAZQBzAHUAbAB0ACAAPQAgACIATABvAGcAcwAgAGEAbABsACAATwBrACIADQAKAA0ACgAkAEEAbABsAFMAbABlAGUAcABFAHYAZQBuAHQAcwAgAD0AIABUAHIAeQB7AEcAZQB0AC0AVwBpAG4ARQB2AGUAbgB0ACAALQBGAGkAbAB0AGUAcgBIAGEAcwBoAHQAYQBiAGwAZQAgAEAAewBQAHIAbwB2AGkAZABlAHIAbgBhAG0AZQA9ACcATQBpAGMAcgBvAHMAbwBmAHQALQBXAGkAbgBkAG8AdwBzAC0ASwBlAHIAbgBlAGwALQBQAG8AdwBlAHIAJwA7AGkAZAA9ADQAMgA7AFMAdABhAHIAdABUAGkAbQBlAD0AJABTAHQAYQByAHQARABhAHQAZQB9ACAALQBFAHIAcgBvAHIAQQBjAHQAaQBvAG4AIABTAGkAbABlAG4AdABsAHkAQwBvAG4AdABpAG4AdQBlAH0AIABDAGEAdABjAGgAIAB7ACQAcwB0AHIAUgBlAHMAdQBsAHQAIAA9ACAAJwBFAHIAcgBvAHIAIABhAGMAYwBlAHMAcwBpAG4AZwAgAE0AaQBjAHIAbwBzAG8AZgB0AC0AVwBpAG4AZABvAHcAcwAtAEsAZQByAG4AZQBsAC0AUABvAHcAZQByACAATABvAGcAJwB9AA0ACgAkAEEAbABsAFcAYQBrAGUARQB2AGUAbgB0AHMAIAA9ACAAVAByAHkAewBHAGUAdAAtAFcAaQBuAEUAdgBlAG4AdAAgAC0ARgBpAGwAdABlAHIASABhAHMAaAB0AGEAYgBsAGUAIABAAHsAUAByAG8AdgBpAGQAZQByAG4AYQBtAGUAPQAnAE0AaQBjAHIAbwBzAG8AZgB0AC0AVwBpAG4AZABvAHcAcwAtAFAAbwB3AGUAcgAtAFQAcgBvAHUAYgBsAGUAcwBoAG8AbwB0AGUAcgAnADsAaQBkAD0AMQA7AFMAdABhAHIAdABUAGkAbQBlAD0AJABTAHQAYQByAHQARABhAHQAZQB9ACAALQBFAHIAcgBvAHIAQQBjAHQAaQBvAG4AIABTAGkAbABlAG4AdABsAHkAQwBvAG4AdABpAG4AdQBlAH0AIABDAGEAdABjAGgAIAB7ACQAcwB0AHIAUgBlAHMAdQBsAHQAIAA9ACAAJwBFAHIAcgBvAHIAIABhAGMAYwBlAHMAcwBpAG4AZwAgAE0AaQBjAHIAbwBzAG8AZgB0AC0AVwBpAG4AZABvAHcAcwAtAFAAbwB3AGUAcgAtAFQAcgBvAHUAYgBsAGUAcwBoAG8AbwB0AGUAcgAgAEwAbwBnACcAfQANAAoAJABBAGwAbABCAG8AbwB0AHUAcABzACAAPQAgAFQAcgB5AHsARwBlAHQALQBXAGkAbgBFAHYAZQBuAHQAIAAtAEYAaQBsAHQAZQByAEgAYQBzAGgAdABhAGIAbABlACAAQAB7AFAAcgBvAHYAaQBkAGUAcgBuAGEAbQBlAD0AJwBNAGkAYwByAG8AcwBvAGYAdAAtAFcAaQBuAGQAbwB3AHMALQBLAGUAcgBuAGUAbAAtAGIAbwBvAHQAJwA7AGkAZAA9ADIANwA7AFMAdABhAHIAdABUAGkAbQBlAD0AJABTAHQAYQByAHQARABhAHQAZQB9ACAALQBFAHIAcgBvAHIAQQBjAHQAaQBvAG4AIABTAGkAbABlAG4AdABsAHkAQwBvAG4AdABpAG4AdQBlAH0AIABDAGEAdABjAGgAIAB7ACQAcwB0AHIAUgBlAHMAdQBsAHQAIAA9ACAAJwBFAHIAcgBvAHIAIABhAGMAYwBlAHMAcwBpAG4AZwAgAE0AaQBjAHIAbwBzAG8AZgB0AC0AVwBpAG4AZABvAHcAcwAtAEsAZQByAG4AZQBsAC0AYgBvAG8AdAAgAEwAbwBnACcAfQANAAoAJABMAGEAcwB0AEIAbwBvAHQAIAA9ACAAJABBAGwAbABCAG8AbwB0AHUAcABzACAAfAAgAFMAZQBsAGUAYwB0AC0ATwBiAGoAZQBjAHQAIAAtAEYAaQByAHMAdAAgADEADQAKACQAQQBsAGwAQwBvAGwAZABCAG8AbwB0AHMAIAA9ACAAJABBAGwAbABCAG8AbwB0AHUAcABzACAAfAAgAD8AewAkAF8ALgBtAGUAcwBzAGEAZwBlACAALQBtAGEAdABjAGgAIAAnAFQAaABlACAAYgBvAG8AdAAgAHQAeQBwAGUAIAB3AGEAcwAgADAAeAAwAC4AJwB9AA0ACgAkAEwAYQBzAHQAQwBvAGwAZABCAG8AbwB0ACAAPQAgACQAQQBsAGwAQwBvAGwAZABCAG8AbwB0AHMAIAB8ACAAUwBlAGwAZQBjAHQALQBPAGIAagBlAGMAdAAgAC0ARgBpAHIAcwB0ACAAMQANAAoAJABBAGwAbABGAGEAcwB0AEIAbwBvAHQAcwAgAD0AIAAkAEEAbABsAEIAbwBvAHQAdQBwAHMAIAB8ACAAPwB7ACQAXwAuAG0AZQBzAHMAYQBnAGUAIAAtAG0AYQB0AGMAaAAgACcAVABoAGUAIABiAG8AbwB0ACAAdAB5AHAAZQAgAHcAYQBzACAAMAB4ADEALgAnAH0ADQAKACQATABhAHMAdABGAGEAcwB0AEIAbwBvAHQAIAA9ACAAJABBAGwAbABGAGEAcwB0AEIAbwBvAHQAcwAgAHwAIABTAGUAbABlAGMAdAAtAE8AYgBqAGUAYwB0ACAALQBGAGkAcgBzAHQAIAAxAA0ACgAkAEEAbABsAFIAZQBzAHUAbQBlAHMAIAA9ACAAJABBAGwAbABCAG8AbwB0AHUAcABzACAAfAAgAD8AewAkAF8ALgBtAGUAcwBzAGEAZwBlACAALQBtAGEAdABjAGgAIAAnAFQAaABlACAAYgBvAG8AdAAgAHQAeQBwAGUAIAB3AGEAcwAgADAAeAAyAC4AJwB9AA0ACgAkAEwAYQBzAHQAUgBlAHMAdQBtAGUAIAA9ACAAJABBAGwAbABSAGUAcwB1AG0AZQBzACAAfAAgAFMAZQBsAGUAYwB0AC0ATwBiAGoAZQBjAHQAIAAtAEYAaQByAHMAdAAgADEADQAKAA0ACgANAAoAJABzAHQAcgBMAGEAcwB0AEIAbwBvAHQAVAB5AHAAZQAgAD0AIABzAHcAaQB0AGMAaAAgACgAJABMAGEAcwB0AEIAbwBvAHQALgBtAGUAcwBzAGEAZwBlACkADQAKAHsADQAKACAAIAAgACAAIgBUAGgAZQAgAGIAbwBvAHQAIAB0AHkAcABlACAAdwBhAHMAIAAwAHgAMAAuACIAIAB7ACIAQwBvAGwAZAAgAGIAbwBvAHQAIgB9AA0ACgAgACAAIAAgACIAVABoAGUAIABiAG8AbwB0ACAAdAB5AHAAZQAgAHcAYQBzACAAMAB4ADEALgAiACAAewAiAEYAYQBzAHQAIABTAHQAYQByAHQAdQBwACIAfQANAAoAIAAgACAAIAAiAFQAaABlACAAYgBvAG8AdAAgAHQAeQBwAGUAIAB3AGEAcwAgADAAeAAyAC4AIgAgAHsAIgBSAGUAcwB1AG0AZQAgAGYAcgBvAG0AIABIAGkAYgBlAHIAbgBhAHQAaQBvAG4AIgB9AA0ACgB9AA0ACgANAAoAaQBmACgAJABMAGEAcwB0AEIAbwBvAHQAKQB7AA0ACgAgACAAIAAgACQAVABpAG0AZQBTAGkAbgBjAGUATABhAHMAdABCAG8AbwB0ACAAPQAgACgARwBlAHQALQBEAGEAdABlACkAIAAtACAAJABMAGEAcwB0AEIAbwBvAHQALgBUAGkAbQBlAEMAcgBlAGEAdABlAGQADQAKACAAIAAgACAAJABzAHQAcgBUAFMATABCACAAPQAgACIAJAAoACQAVABpAG0AZQBTAGkAbgBjAGUATABhAHMAdABCAG8AbwB0AC4ARABhAHkAcwApACAARABhAHkAcwAgACQAKAAkAFQAaQBtAGUAUwBpAG4AYwBlAEwAYQBzAHQAQgBvAG8AdAAuAGgAbwB1AHIAcwApACAASABvAHUAcgBzACAAJAAoACQAVABpAG0AZQBTAGkAbgBjAGUATABhAHMAdABCAG8AbwB0AC4AbQBpAG4AdQB0AGUAcwApACAATQBpAG4AdQB0AGUAcwAgAHMAaQBuAGMAZQAgAGwAYQBzAHQAIABCAG8AbwB0ACIADQAKACAAIAAgACAAfQAgAEUAbABzAGUAIAB7AA0ACgAgACAAIAAgACQAcwB0AHIAVABTAEwAQgAgAD0AIAAiAEQAZQB2AGkAYwBlACAAaABhAHMAIABuAG8AdAAgAGIAZQBlAG4AIABiAG8AbwB0AGUAZAAgAGkAbgAgAG8AdgBlAHIAIAAkAEQAYQB5AHMAUABhAHMAdAAgAEQAYQB5AHMAIgANAAoAIAAgACAAIAB9AA0ACgANAAoAaQBmACgAJABMAGEAcwB0AEMAbwBsAGQAQgBvAG8AdAApAHsADQAKACAAIAAgACAAJABUAGkAbQBlAFMAaQBuAGMAZQBMAGEAcwB0AEMAbwBsAGQAQgBvAG8AdAAgAD0AIAAoAEcAZQB0AC0ARABhAHQAZQApACAALQAgACQATABhAHMAdABDAG8AbABkAEIAbwBvAHQALgBUAGkAbQBlAEMAcgBlAGEAdABlAGQADQAKACAAIAAgACAAJABEAGEAeQBzAFMAaQBuAGMAZQBMAGEAcwB0AEMAbwBsAGQAQgBvAG8AdAAgAD0AIABbAG0AYQB0AGgAXQA6ADoAUgBvAHUAbgBkACgAJABUAGkAbQBlAFMAaQBuAGMAZQBMAGEAcwB0AEMAbwBsAGQAQgBvAG8AdAAuAFQAbwB0AGEAbABEAGEAeQBzACwAMQApAA0ACgAgACAAIAAgACQAcwB0AHIAVABTAEwAQwBCACAAPQAgACIAJAAoACQAVABpAG0AZQBTAGkAbgBjAGUATABhAHMAdABDAG8AbABkAEIAbwBvAHQALgBEAGEAeQBzACkAIABEAGEAeQBzACAAJAAoACQAVABpAG0AZQBTAGkAbgBjAGUATABhAHMAdABDAG8AbABkAEIAbwBvAHQALgBoAG8AdQByAHMAKQAgAEgAbwB1AHIAcwAgACQAKAAkAFQAaQBtAGUAUwBpAG4AYwBlAEwAYQBzAHQAQwBvAGwAZABCAG8AbwB0AC4AbQBpAG4AdQB0AGUAcwApACAATQBpAG4AdQB0AGUAcwAgAHMAaQBuAGMAZQAgAGwAYQBzAHQAIABDAG8AbABkACAAQgBvAG8AdAAiAA0ACgAgACAAIAAgAH0AIABFAGwAcwBlACAAewANAAoAIAAgACAAIAAkAHMAdAByAFQAUwBMAEMAQgAgAD0AIAAiAE4AbwAgAEMAbwBsAGQAIABCAG8AbwB0ACAAZQB2AGUAbgB0AHMAIAByAGUAYwBvAHIAZABlAGQAIABpAG4AIABvAHYAZQByACAAJABEAGEAeQBzAFAAYQBzAHQAIABEAGEAeQBzACIADQAKACAAIAAgACAAfQANAAoADQAKAGkAZgAoACQATABhAHMAdABGAGEAcwB0AEIAbwBvAHQAKQB7AA0ACgAgACAAIAAgACQAVABpAG0AZQBTAGkAbgBjAGUATABhAHMAdABGAGEAcwB0AFMAdABhAHIAdAAgAD0AIAAoAEcAZQB0AC0ARABhAHQAZQApACAALQAgACQATABhAHMAdABGAGEAcwB0AEIAbwBvAHQALgBUAGkAbQBlAEMAcgBlAGEAdABlAGQADQAKACAAIAAgACAAJABzAHQAcgBUAFMATABGAFMAIAA9ACAAIgAkACgAJABUAGkAbQBlAFMAaQBuAGMAZQBMAGEAcwB0AEYAYQBzAHQAUwB0AGEAcgB0AC4ARABhAHkAcwApACAARABhAHkAcwAgACQAKAAkAFQAaQBtAGUAUwBpAG4AYwBlAEwAYQBzAHQARgBhAHMAdABTAHQAYQByAHQALgBoAG8AdQByAHMAKQAgAEgAbwB1AHIAcwAgACQAKAAkAFQAaQBtAGUAUwBpAG4AYwBlAEwAYQBzAHQARgBhAHMAdABTAHQAYQByAHQALgBtAGkAbgB1AHQAZQBzACkAIABNAGkAbgB1AHQAZQBzACAAcwBpAG4AYwBlACAAbABhAHMAdAAgAEYAYQBzAHQAIABTAHQAYQByAHQAdQBwACIADQAKACAAIAAgACAAfQAgAEUAbABzAGUAIAB7AA0ACgAgACAAIAAgACQAcwB0AHIAVABTAEwARgBTACAAPQAgACIATgBvACAARgBhAHMAdAAgAFMAdABhAHIAdAB1AHAAIABlAHYAZQBuAHQAcwAgAHIAZQBjAG8AcgBkAGUAZAAgAGkAbgAgAG8AdgBlAHIAIAAkAEQAYQB5AHMAUABhAHMAdAAgAEQAYQB5AHMAIgANAAoAIAAgACAAIAB9AA0ACgANAAoAaQBmACgAJABMAGEAcwB0AFIAZQBzAHUAbQBlACkAewANAAoAIAAgACAAIAAkAFQAaQBtAGUAUwBpAG4AYwBlAEwAYQBzAHQAUgBlAHMAdQBtAGUAIAA9ACAAKABHAGUAdAAtAEQAYQB0AGUAKQAgAC0AIAAkAEwAYQBzAHQAUgBlAHMAdQBtAGUALgBUAGkAbQBlAEMAcgBlAGEAdABlAGQADQAKACAAIAAgACAAJABzAHQAcgBUAFMATABSACAAPQAgACIAJAAoACQAVABpAG0AZQBTAGkAbgBjAGUATABhAHMAdABSAGUAcwB1AG0AZQAuAEQAYQB5AHMAKQAgAEQAYQB5AHMAIAAkACgAJABUAGkAbQBlAFMAaQBuAGMAZQBMAGEAcwB0AFIAZQBzAHUAbQBlAC4AaABvAHUAcgBzACkAIABIAG8AdQByAHMAIAAkACgAJABUAGkAbQBlAFMAaQBuAGMAZQBMAGEAcwB0AFIAZQBzAHUAbQBlAC4AbQBpAG4AdQB0AGUAcwApACAATQBpAG4AdQB0AGUAcwAgAHMAaQBuAGMAZQAgAGwAYQBzAHQAIABSAGUAcwB1AG0AZQAgAEYAcgBvAG0AIABIAGkAYgBlAHIAbgBhAHQAaQBvAG4AIgANAAoAIAAgACAAIAB9ACAARQBsAHMAZQAgAHsADQAKACAAIAAgACAAJABzAHQAcgBUAFMATABSACAAPQAgACIATgBvACAAUgBlAHMAdQBtAGUAIABGAHIAbwBtACAASABpAGIAZQByAG4AYQB0AGkAbwBuACAAZQB2AGUAbgB0AHMAIAByAGUAYwBvAHIAZABlAGQAIABpAG4AIABvAHYAZQByACAAJABEAGEAeQBzAFAAYQBzAHQAIABEAGEAeQBzACIADQAKACAAIAAgACAAfQANAAoADQAKACQAcgBlAGcAUwB1AGIASwBlAHkAIAA9ACAARwBlAHQALQBJAHQAZQBtAFAAcgBvAHAAZQByAHQAeQAgAC0AUABhAHQAaAAgACIASABLAEwATQA6AFwAUwBZAFMAVABFAE0AXABDAHUAcgByAGUAbgB0AEMAbwBuAHQAcgBvAGwAUwBlAHQAXABDAG8AbgB0AHIAbwBsAFwAUwBlAHMAcwBpAG8AbgAgAE0AYQBuAGEAZwBlAHIAXABQAG8AdwBlAHIAIgANAAoAaQBmACgAJAByAGUAZwBTAHUAYgBLAGUAeQAuAEgAaQBiAGUAcgBiAG8AbwB0AEUAbgBhAGIAbABlAGQAIAAtAGUAcQAgACQAbgB1AGwAbAApAA0ACgAgACAAIAAgAHsADQAKACAAIAAgACAAJABzAHQAcgBGAFMARQBuAGEAYgBsAGUAZAAgAD0AIAAiAEgAaQBiAGUAcgBiAG8AbwB0AEUAbgBhAGIAbABlAGQAIABSAGUAZwBpAHMAdAByAHkAIABQAHIAbwBwAGUAcgB0AHkAIABNAGkAcwBzAGkAbgBnACIADQAKACAAIAAgACAAfQAgAGUAbABzAGUAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAaQBmACgAJAByAGUAZwBTAHUAYgBLAGUAeQAuAEgAaQBiAGUAcgBiAG8AbwB0AEUAbgBhAGIAbABlAGQAKQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAewANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAJABzAHQAcgBGAFMARQBuAGEAYgBsAGUAZAAgAD0AIAAiAEYAYQBzAHQAIABTAHQAYQByAHQAdQBwACAAaQBzACAARQBuAGEAYgBsAGUAZAAiAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB9ACAARQBsAHMAZQAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACQAcwB0AHIARgBTAEUAbgBhAGIAbABlAGQAIAA9ACAAIgBGAGEAcwB0ACAAUwB0AGEAcgB0AHUAcAAgAGkAcwAgAEQAaQBzAGEAYgBsAGUAZAAiAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB9AA0ACgAgACAAIAAgAH0ADQAKAA0ACgAkAEEAbABsAEIAbwBvAHQAdQBwAHMAQwBvAHUAbgB0ACAAPQAgACQAQQBsAGwAQgBvAG8AdAB1AHAAcwAuAGMAbwB1AG4AdAANAAoAJABBAGwAbABDAG8AbABkAEIAbwBvAHQAcwBDAG8AdQBuAHQAIAA9ACAAJABBAGwAbABDAG8AbABkAEIAbwBvAHQAcwAuAGMAbwB1AG4AdAANAAoAJABBAGwAbABGAGEAcwB0AEIAbwBvAHQAcwBDAG8AdQBuAHQAIAA9ACAAJABBAGwAbABGAGEAcwB0AEIAbwBvAHQAcwAuAGMAbwB1AG4AdAANAAoAJABBAGwAbABSAGUAcwB1AG0AZQBzAEMAbwB1AG4AdAAgAD0AIAAkAEEAbABsAFIAZQBzAHUAbQBlAHMALgBjAG8AdQBuAHQADQAKACQAQQBsAGwAUwBsAGUAZQBwAEUAdgBlAG4AdABzAEMAbwB1AG4AdAAgAD0AIAAkAEEAbABsAFMAbABlAGUAcABFAHYAZQBuAHQAcwAuAGMAbwB1AG4AdAANAAoAJABBAGwAbABXAGEAawBlAEUAdgBlAG4AdABzAEMAbwB1AG4AdAAgAD0AIAAkAEEAbABsAFcAYQBrAGUARQB2AGUAbgB0AHMALgBDAG8AdQBuAHQADQAKAA0ACgAkAHMAdAByAFIAZQBzAHUAbAB0AA0ACgAkAHMAdAByAEYAUwBFAG4AYQBiAGwAZQBkAA0ACgAkAEQAYQB5AHMAUwBpAG4AYwBlAEwAYQBzAHQAQwBvAGwAZABCAG8AbwB0AA0ACgAkAHMAdAByAFQAUwBMAEIADQAKACQAcwB0AHIAVABTAEwAQwBCAA0ACgAkAHMAdAByAFQAUwBMAEYAUwANAAoAJABzAHQAcgBUAFMATABSAA0ACgANAAoAJABBAGwAbABCAG8AbwB0AHUAcABzAEMAbwB1AG4AdAANAAoAJABBAGwAbABDAG8AbABkAEIAbwBvAHQAcwBDAG8AdQBuAHQADQAKACQAQQBsAGwARgBhAHMAdABCAG8AbwB0AHMAQwBvAHUAbgB0AA0ACgAkAEEAbABsAFIAZQBzAHUAbQBlAHMAQwBvAHUAbgB0AA0ACgAkAEEAbABsAFMAbABlAGUAcABFAHYAZQBuAHQAcwBDAG8AdQBuAHQADQAKACQAQQBsAGwAVwBhAGsAZQBFAHYAZQBuAHQAcwBDAG8AdQBuAHQADQAKAA0ACgA=">
+          <p:RunPowerShellScript.InArgs>
+            <scg:Dictionary x:TypeArguments="x:String, p:InArg" />
+          </p:RunPowerShellScript.InArgs>
+          <p:RunPowerShellScript.OutArgs>
+            <p:OutArg x:Key="strFSEnabled" ArgType="string" DisplayName="Fast Startup Enabled" Name="strFSEnabled">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_strFSEnabled]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="DaysSinceLastColdBoot" ArgType="number" DisplayName="Days Since Last Cold Boot" Name="DaysSinceLastColdBoot">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:Double">[RunPowerShellScript_DaysSinceLastColdBoot]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="strTSLB" ArgType="string" DisplayName="Time Since Last Boot" Name="strTSLB">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_strTSLB]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="strTSLCB" ArgType="string" DisplayName="Time Since Last Cold Boot" Name="strTSLCB">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_strTSLCB]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="strTSLFS" ArgType="string" DisplayName="Time Since Last Fast Startup" Name="strTSLFS">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_strTSLFS]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="strTSLR" ArgType="string" DisplayName="Time Since Last Resume" Name="strTSLR">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_strTSLR]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="AllBootupsCount" ArgType="number" DisplayName="All Bootups Count" Name="AllBootupsCount">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:Double">[RunPowerShellScript_AllBootupsCount]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="AllColdBootsCount" ArgType="number" DisplayName="All Cold Boots Count" Name="AllColdBootsCount">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:Double">[RunPowerShellScript_AllColdBootsCount]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="AllFastBootsCount" ArgType="number" DisplayName="All Fast Startups Count" Name="AllFastBootsCount">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:Double">[RunPowerShellScript_AllFastBootsCount]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="AllResumesCount" ArgType="number" DisplayName="All Resumes Count" Name="AllResumesCount">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:Double">[RunPowerShellScript_AllResumesCount]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="AllSleepEventsCount" ArgType="number" DisplayName="All Sleep Events Count" Name="AllSleepEventsCount">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:Double">[RunPowerShellScript_AllSleepEventsCount]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+            <p:OutArg x:Key="AllWakeEventsCount" ArgType="number" DisplayName="All Wake Events Count" Name="AllWakeEventsCount">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:Double">[RunPowerShellScript_AllWakeEventsCount]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+          </p:RunPowerShellScript.OutArgs>
+        </p:RunPowerShellScript>
+      </p:PolicySequence.Activities>
+      <p:PolicySequence.Variables>
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_OutPut_64" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_ResultString" />
+        <Variable x:TypeArguments="scg:IEnumerable(x:Object)" Name="RunPowerShellScript_Results_x64" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_Result" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_strFSEnabled" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_DaysSinceLastColdBoot" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_strTSLB" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_strTSLCB" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_strTSLFS" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_AllBootupsCount" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_AllColdBootsCount" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_AllFastBootsCount" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_AllResumesCount" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_AllSleepEventsCount" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_AllWakeEventsCount" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_strTSLR" />
+      </p:PolicySequence.Variables>
+    </p:PolicySequence>
+  </Activity>
+</Policy>

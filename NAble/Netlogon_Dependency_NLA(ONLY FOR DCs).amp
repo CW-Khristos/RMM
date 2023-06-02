@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><Policy ID="69cac038-7b1c-4a61-9dfa-2f75b85f7488" Name="Add Netlogon Dependency to Network Location Awareness (ONLY FOR DOMAIN CONTROLLERS)" Description="KlRBUkdFVCBPTkxZIERPTUFJTiBDT05UUk9MTEVSUyoKQWRkcyBOZXRsb2dvbiB0byB0aGUgbGlzdCBvZiBOZXR3b3JrIExvY2F0aW9uIEF3YXJlbmVzcyBkZXBlbmRlbmNpZXMgdG8gcHJldmVudCBhIERvbWFpbiBDb250cm9sbGVyIGZyb20gaW5jb3JyZWN0bHkgc2hvd2luZyB0aGUgUHVibGljIG5ldHdvcmsgY2F0ZWdvcnkvcHJvZmlsZSBvbiBpdHMgTEFOIGNvbm5lY3Rpb24u" Version="2.16.0.1" MinRequiredVersion="2.16.0.1" RemoteCategory="0" ExecutionType="CurrentLoggedOnUser" MinimumPSVersionRequired="0.0.0">
+  <Object ID="{b2680e88-21da-4cfc-b87f-8e442a2352ef}" Type="{B6FA6D8B-EEAA-47A6-8463-7F9A4F5BBB6E}" Data="&lt;xml&gt;&lt;GlobalVariables&gt;&lt;Parameter ParameterName=&quot;DependencyList&quot; Label=&quot;Dependency List&quot; ParameterType=&quot;string&quot; Value=&quot;&quot; /&gt;&lt;/GlobalVariables&gt;&lt;/xml&gt;" />
+  <LinkManager xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/PolicyExecutor">
+    <hashset xmlns:d2p1="http://schemas.datacontract.org/2004/07/System" />
+  </LinkManager>
+  <Diagnostics OriginalVersion="2.18.3.1" />
+  <Activity mc:Ignorable="sads sap" x:Class="Policy Builder" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:p="clr-namespace:PolicyExecutor;assembly=PolicyExecutionEngine" xmlns:sads="http://schemas.microsoft.com/netfx/2010/xaml/activities/debugger" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:Members>
+      <x:Property Name="PolicyGUID" Type="InArgument(x:String)" />
+    </x:Members>
+    <sap:VirtualizedContainerService.HintSize>1127,3806</sap:VirtualizedContainerService.HintSize>
+    <mva:VisualBasic.Settings>Assembly references and imported namespaces serialized as XML namespaces</mva:VisualBasic.Settings>
+    <p:PolicySequence DisplayName="Policy Builder" sap:VirtualizedContainerService.HintSize="1127,3806" MinRequiredVersion="2.16.0.1" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
+      <p:PolicySequence.Activities>
+        <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="1091,181" MinRequiredVersion="2.10.0.19" Moniker="d750dc2c-411b-4d03-9b6a-99b477d9bb27" Result="[Assignment_Result_2]" ResultString="[Assignment_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="config nlasvc depend= " Value_Type="x:String" Variable="[DependencyList]" Variable_DisplayArg="Global Variables.Dependency List" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:Assignment.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="config nlasvc depend= " />
+            </InArgument>
+          </p:Assignment.Value>
+        </p:Assignment>
+        <p:GetServicesDependedOn Service_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DependsOn="[GetServicesDependedOn_DependsOn]" DisplayName="Get Services Depended On" sap:VirtualizedContainerService.HintSize="1091,88" MinRequiredVersion="2.10.0.19" Moniker="e2ea336b-df76-44b9-8a9d-f29b06590c64" Result="[GetServicesDependedOn_Result]" ResultString="[GetServicesDependedOn_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" Service="nlasvc" Service_DisplayArg="nlasvc" Service_Item="{x:Null}" TypeName="GetServicesDependedOn" m_bTextLinkChange="False" />
+        <p:DoesListContain Collection_ItemProp="{x:Null}" ExpectedValue_ItemProp="{x:Null}" MatchExactValue_ItemProp="{x:Null}" PropertyName_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" Collection="[GetServicesDependedOn_DependsOn]" Collection_DisplayArg="Get Services Depended On.DependsOn" Collection_Item="{x:Null}" Conditional="[DoesListContain_Conditional]" DisplayName="Does Collection Contain" ExpectedValue="Netlogon" ExpectedValue_DisplayArg="Netlogon" ExpectedValue_Item="{x:Null}" sap:VirtualizedContainerService.HintSize="1091,196" MatchExactValue="True" MatchExactValue_DisplayArg="" MatchExactValue_Item="{x:Null}" MinRequiredVersion="2.10.0.19" Moniker="88a058b9-32d1-4e20-a8f3-7a01aa3db36a" PropertyName="Name" PropertyName_DisplayArg="Name" PropertyName_Item="{x:Null}" Result="[DoesListContain_Result]" ResultString="[DoesListContain_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="DoesListContain" m_bTextLinkChange="False" />
+        <p:IfObject CaseSensitive_ItemProp="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_ItemProp="{x:Null}" VerboseOutput_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="False" CaseSensitive_DisplayArg="false" CaseSensitive_Item="{x:Null}" Condition="does not equal" Condition_DisplayArg="does not equal" Condition_Item="{x:Null}" DisplayName="If" sap:VirtualizedContainerService.HintSize="1091,2998" MinRequiredVersion="2.16.0.1" Moniker="23605a5f-1fcf-4b21-90a4-4f790437cfe5" Result="[IfObject_Result]" ResultString="[IfObject_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfObject" Value_DisplayArg="True" Value_Type="x:String" Variable="[DoesListContain_Conditional]" Variable_DisplayArg="Does Collection Contain.Conditional" Variable_Item="{x:Null}" Variable_Type="x:String" VerboseOutput="False" VerboseOutput_DisplayArg="" VerboseOutput_Item="{x:Null}" m_bTextLinkChange="False">
+          <p:IfObject.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="1059,2725.5" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:ForEachLoop CollectionName_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" CollectionName="[GetServicesDependedOn_DependsOn]" CollectionName_DisplayArg="Get Services Depended On.DependsOn" CollectionName_Item="{x:Null}" DisplayName="ForEach" sap:VirtualizedContainerService.HintSize="1021,1779" ItemValue="[ForEachLoop_ItemValue]" MinRequiredVersion="2.10.0.19" Moniker="e5fdd7ad-7a69-45dd-9149-aa23d41cc61c" Result="[ForEachLoop_Result]" ResultString="[ForEachLoop_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="ForEachLoop" m_bTextLinkChange="False">
+                  <p:ForEachLoop.Each>
+                    <p:ForEachSequence DisplayName="Each" sap:VirtualizedContainerService.HintSize="989,1679">
+                      <p:ForEachSequence.Activities>
+                        <p:FormatString Input0="{x:Null}" Input1_DisplayArg="{x:Null}" Input1_ItemProp="{x:Null}" Text_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Format String" FormattedString="[FormatString_FormattedString_2]" sap:VirtualizedContainerService.HintSize="951,160" Input0_DisplayArg="ForEach.Get Services Depended On.DependsOn.Name" Input0_Item="[ForEachLoop_ItemValue]" Input0_ItemProp="Name" Input1="{x:Null}" Input1_Item="{x:Null}" MinRequiredVersion="2.10.0.19" Moniker="f134cab8-eae5-4ad7-9546-44df7e2ef290" Result="[FormatString_Result_2]" ResultString="[FormatString_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" Text="{}{0}" Text_DisplayArg="{}{0}" Text_Item="{x:Null}" TypeName="FormatString" m_bTextLinkChange="False" />
+                        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="True" CaseSensitive_DisplayArg="false" Condition="equals" Condition_DisplayArg="equals" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="951,1329" MinRequiredVersion="2.16.0.1" Moniker="52015039-32c0-4620-8baf-6cbef3c0f30b" Result="[IfElse_Result]" ResultString="[IfElse_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="TCP/IP Protocol Driver" Value_Type="x:String" Variable="[FormatString_FormattedString_2]" Variable_DisplayArg="Format String.FormattedString" Variable_Type="x:String" m_bTextLinkChange="False">
+                          <p:IfElse.ElseOption>
+                            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="506,1092.5" Name="SequenceActivity">
+                              <p:SequenceActivity.Activities>
+                                <p:RunPowerShellScript AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Run PowerShell Script" sap:VirtualizedContainerService.HintSize="468,521.5" MinRequiredVersion="2.10.0.19" Moniker="f738502a-e6e2-4c78-aba9-bd31a284936c" OutPut_64="[RunPowerShellScript_OutPut_64]" Result="[RunPowerShellScript_Result]" ResultString="[RunPowerShellScript_ResultString]" Results_x64="[RunPowerShellScript_Results_x64]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="RunPowerShellScript" genArgEvent="a64b060f-3a33-45fa-b738-2ee757dd9311" m_bTextLinkChange="False" script="JABTAGUAcgB2AGkAYwBlACAAPQAgAGcAZQB0AC0AcwBlAHIAdgBpAGMAZQAgAC0AZABpAHMAcABsAGEAeQBuAGEAbQBlACAAIgAkAEQAaQBzAHAAbABhAHkATgBhAG0AZQAiAA0ACgAkAFMAZQByAHYAaQBjAGUATgBhAG0AZQAgAD0AIAAkAFMAZQByAHYAaQBjAGUALgBOAGEAbQBlAA0ACgByAGUAdAB1AHIAbgAgACQAUwBlAHIAdgBpAGMAZQBOAGEAbQBlAA==">
+                                  <p:RunPowerShellScript.InArgs>
+                                    <p:InArg Item="{x:Null}" ItemProp="{x:Null}" x:Key="DisplayName" ArgType="string" DisplayArg="Format String.FormattedString" DisplayName="Service Display Name" Name="DisplayName" isRequired="False">
+                                      <p:InArg.Arg>
+                                        <InArgument x:TypeArguments="x:Object">[FormatString_FormattedString_2]</InArgument>
+                                      </p:InArg.Arg>
+                                    </p:InArg>
+                                  </p:RunPowerShellScript.InArgs>
+                                  <p:RunPowerShellScript.OutArgs>
+                                    <p:OutArg x:Key="ServiceName" ArgType="string" DisplayName="Service Name" Name="ServiceName">
+                                      <p:OutArg.Arg>
+                                        <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_ServiceName]</OutArgument>
+                                      </p:OutArg.Arg>
+                                    </p:OutArg>
+                                  </p:RunPowerShellScript.OutArgs>
+                                </p:RunPowerShellScript>
+                                <p:FormatString Input0_Item="{x:Null}" Input0_ItemProp="{x:Null}" Input1_Item="{x:Null}" Input1_ItemProp="{x:Null}" Text_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Format String" FormattedString="[FormatString_FormattedString_1]" sap:VirtualizedContainerService.HintSize="468,160" Input0="[DependencyList]" Input0_DisplayArg="Global Variables.Dependency List" Input1="[RunPowerShellScript_ServiceName]" Input1_DisplayArg="Run PowerShell Script.Service Name" MinRequiredVersion="2.10.0.19" Moniker="b85287e4-3951-46c6-af18-1198ef67003d" Result="[FormatString_Result_1]" ResultString="[FormatString_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" Text="{}{0}{1}/" Text_DisplayArg="{}{0}{1}/" Text_Item="{x:Null}" TypeName="FormatString" m_bTextLinkChange="False" />
+                                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="468,181" MinRequiredVersion="2.10.0.19" Moniker="d6417bd6-10a2-47e1-bfbf-b8b71c5e3119" Result="[Assignment_Result]" ResultString="[Assignment_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value="[FormatString_FormattedString_1]" Value_DisplayArg="Format String.FormattedString" Value_Type="x:String" Variable="[DependencyList]" Variable_DisplayArg="Global Variables.Dependency List" Variable_Type="x:String" m_bTextLinkChange="False" />
+                              </p:SequenceActivity.Activities>
+                              <p:SequenceActivity.Variables>
+                                <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_OutPut_64" />
+                                <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_ResultString" />
+                                <Variable x:TypeArguments="scg:IEnumerable(x:Object)" Name="RunPowerShellScript_Results_x64" />
+                                <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_Result" />
+                                <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_ServiceName" />
+                                <Variable x:TypeArguments="x:String" Name="FormatString_FormattedString_1" />
+                                <Variable x:TypeArguments="x:Double" Name="FormatString_Result_1" />
+                                <Variable x:TypeArguments="x:String" Name="FormatString_ResultString_1" />
+                                <Variable x:TypeArguments="x:Double" Name="Assignment_Result" />
+                                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString" />
+                              </p:SequenceActivity.Variables>
+                            </p:SequenceActivity>
+                          </p:IfElse.ElseOption>
+                          <p:IfElse.IfOption>
+                            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="401,531" Name="SequenceActivity">
+                              <p:SequenceActivity.Activities>
+                                <p:FormatString Input0_Item="{x:Null}" Input0_ItemProp="{x:Null}" Input1="{x:Null}" Input1_DisplayArg="{x:Null}" Input1_Item="{x:Null}" Input1_ItemProp="{x:Null}" Text_Item="{x:Null}" Text_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Format String" FormattedString="[FormatString_FormattedString_3]" sap:VirtualizedContainerService.HintSize="363,160" Input0="[DependencyList]" Input0_DisplayArg="Global Variables.Dependency List" MinRequiredVersion="2.10.0.19" Moniker="de38846e-a76a-4594-b288-fc27da59f859" Result="[FormatString_Result_3]" ResultString="[FormatString_ResultString_3]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" Text="{}{0}TcpIp/" Text_DisplayArg="{}{0}TcpIp/" TypeName="FormatString" m_bTextLinkChange="False" />
+                                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="363,181" MinRequiredVersion="2.10.0.19" Moniker="e9f283c7-0683-4639-b255-a6a6fdd8a920" Result="[Assignment_Result_3]" ResultString="[Assignment_ResultString_3]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value="[FormatString_FormattedString_3]" Value_DisplayArg="Format String.FormattedString" Value_Type="x:String" Variable="[DependencyList]" Variable_DisplayArg="Global Variables.Dependency List" Variable_Type="x:String" m_bTextLinkChange="False" />
+                              </p:SequenceActivity.Activities>
+                              <p:SequenceActivity.Variables>
+                                <Variable x:TypeArguments="x:String" Name="FormatString_FormattedString_3" />
+                                <Variable x:TypeArguments="x:Double" Name="FormatString_Result_3" />
+                                <Variable x:TypeArguments="x:String" Name="FormatString_ResultString_3" />
+                                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_3" />
+                                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_3" />
+                              </p:SequenceActivity.Variables>
+                            </p:SequenceActivity>
+                          </p:IfElse.IfOption>
+                          <p:IfElse.Value>
+                            <InArgument x:TypeArguments="x:Object">
+                              <p:ObjectLiteral Value="TCP/IP Protocol Driver" />
+                            </InArgument>
+                          </p:IfElse.Value>
+                        </p:IfElse>
+                      </p:ForEachSequence.Activities>
+                      <p:ForEachSequence.Variables>
+                        <Variable x:TypeArguments="x:String" Name="FormatString_FormattedString_2" />
+                        <Variable x:TypeArguments="x:Double" Name="FormatString_Result_2" />
+                        <Variable x:TypeArguments="x:String" Name="FormatString_ResultString_2" />
+                        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString" />
+                        <Variable x:TypeArguments="x:Double" Name="IfElse_Result" />
+                      </p:ForEachSequence.Variables>
+                    </p:ForEachSequence>
+                  </p:ForEachLoop.Each>
+                </p:ForEachLoop>
+                <p:FormatString Input0_Item="{x:Null}" Input0_ItemProp="{x:Null}" Input1_ItemProp="{x:Null}" Text_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Format String" FormattedString="[FormatString_FormattedString]" sap:VirtualizedContainerService.HintSize="1021,160" Input0="[DependencyList]" Input0_DisplayArg="Global Variables.Dependency List" Input1_DisplayArg="" Input1_Item="{x:Null}" MinRequiredVersion="2.10.0.19" Moniker="4741a3eb-b3c3-4bb1-9c72-675520328ecb" Result="[FormatString_Result]" ResultString="[FormatString_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" Text="{}{0}Netlogon" Text_DisplayArg="{}{0}Netlogon" Text_Item="{x:Null}" TypeName="FormatString" m_bTextLinkChange="False">
+                  <p:FormatString.Input1>
+                    <InArgument x:TypeArguments="x:String">
+                      <Literal x:TypeArguments="x:String">
+                        <Literal.Result>
+                          <OutArgument x:TypeArguments="x:String" />
+                        </Literal.Result>
+                      </Literal>
+                    </InArgument>
+                  </p:FormatString.Input1>
+                </p:FormatString>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="1021,181" MinRequiredVersion="2.10.0.19" Moniker="cd5827de-64b7-4c5e-8f76-94020c6d0c64" Result="[Assignment_Result_1]" ResultString="[Assignment_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value="[FormatString_FormattedString]" Value_DisplayArg="Format String.FormattedString" Value_Type="x:String" Variable="[DependencyList]" Variable_DisplayArg="Global Variables.Dependency List" Variable_Type="x:String" m_bTextLinkChange="False" />
+                <p:RunProgram Arguments_Item="{x:Null}" Arguments_ItemProp="{x:Null}" Program_ItemProp="{x:Null}" RunAsType_ItemProp="{x:Null}" WaitForCompletion_ItemProp="{x:Null}" WindowType_ItemProp="{x:Null}" WorkingDirectory_DisplayArg="{x:Null}" WorkingDirectory_ItemProp="{x:Null}" Arguments="[DependencyList]" Arguments_DisplayArg="Global Variables.Dependency List" AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Run Program" sap:VirtualizedContainerService.HintSize="1021,335.5" MinRequiredVersion="2.10.0.19" Moniker="ca92f097-f3fa-44f9-a51f-9841a1be9dce" ProcessID="[RunProgram_ProcessID]" Program="C:\WINDOWS\System32\sc.exe" Program_DisplayArg="C:\WINDOWS\System32\sc.exe" Program_Item="{x:Null}" Result="[RunProgram_Result]" ResultString="[RunProgram_ResultString]" RunAsCurrentLoggedOnUser="True" RunAsType="LocalSystem" RunAsType_DisplayArg="LocalSystem" RunAsType_Item="{x:Null}" ScriptExecutionMethod="None" TypeName="RunProgram" WaitForCompletion="True" WaitForCompletion_DisplayArg="" WaitForCompletion_Item="{x:Null}" WindowType="Hidden" WindowType_DisplayArg="Hidden" WindowType_Item="{x:Null}" WorkingDirectory="{x:Null}" WorkingDirectory_Item="{x:Null}" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="RunProgram_ProcessID" />
+                <Variable x:TypeArguments="x:String" Name="RunProgram_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="RunProgram_Result" />
+                <Variable x:TypeArguments="x:Object" Name="ForEachLoop_ItemValue" />
+                <Variable x:TypeArguments="x:String" Name="ForEachLoop_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="ForEachLoop_Result" />
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_1" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_1" />
+                <Variable x:TypeArguments="x:String" Name="FormatString_FormattedString" />
+                <Variable x:TypeArguments="x:String" Name="FormatString_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="FormatString_Result" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfObject.IfOption>
+          <p:IfObject.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="True" />
+            </InArgument>
+          </p:IfObject.Value>
+        </p:IfObject>
+      </p:PolicySequence.Activities>
+      <p:PolicySequence.Variables>
+        <Variable x:TypeArguments="x:String" Name="DoesListContain_Conditional" />
+        <Variable x:TypeArguments="x:String" Name="DoesListContain_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="DoesListContain_Result" />
+        <Variable x:TypeArguments="x:String" Name="IfObject_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="IfObject_Result" />
+        <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_2" />
+        <Variable x:TypeArguments="x:Double" Name="Assignment_Result_2" />
+        <Variable x:TypeArguments="scg:IEnumerable(x:Object)" Name="GetServicesDependedOn_DependsOn" />
+        <Variable x:TypeArguments="x:String" Name="GetServicesDependedOn_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="GetServicesDependedOn_Result" />
+        <Variable x:TypeArguments="x:String" Name="DependencyList" />
+      </p:PolicySequence.Variables>
+    </p:PolicySequence>
+  </Activity>
+</Policy>

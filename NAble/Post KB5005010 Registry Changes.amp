@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><Policy ID="2db4f2f3-7262-4e99-ac3f-ca0bd6880f84" Name="Post KB5005010 Registry Changes" Description="UmVzdHJpY3RzIHRoZSBpbnN0YWxsYXRpb24gb2YgbmV3IHVuc2lnbmVkIHByaW50ZXIgZHJpdmVycyB0byBhZG1pbmlzdHJhdG9ycyBhbmQgb3RoZXIgcmVnaXN0cnkgY2hhbmdlcyByZWNvbW1lbmRlZCBieSBNaWNyb3NvZnQgYWZ0ZXIgYXBwbHlpbmcgS0I1MDA1MDEw" Version="2.16.0.1" MinRequiredVersion="2.16.0.1" RemoteCategory="0" ExecutionType="Local" MinimumPSVersionRequired="0.0.0">
+  <Object ID="{6e93682b-ea14-40d6-b34c-2e16017c4b28}" Type="{B6FA6D8B-EEAA-47A6-8463-7F9A4F5BBB6E}" Data="&lt;xml&gt;&lt;GlobalVariables&gt;&lt;Parameter ParameterName=&quot;Sentinel&quot; Label=&quot;Sentinel&quot; ParameterType=&quot;number&quot; Value=&quot;0&quot; /&gt;&lt;Parameter ParameterName=&quot;RestrictDriverInstallationToAdministrators&quot; Label=&quot;RestrictDriverInstallationToAdministrators&quot; ParameterType=&quot;string&quot; Value=&quot;Unknown&quot; /&gt;&lt;Parameter ParameterName=&quot;NoWarningNoElevationOnUpdate&quot; Label=&quot;NoWarningNoElevationOnUpdate&quot; ParameterType=&quot;string&quot; Value=&quot;Unknown&quot; /&gt;&lt;Parameter ParameterName=&quot;NoWarningNoElevationOnInstall&quot; Label=&quot;NoWarningNoElevationOnInstall&quot; ParameterType=&quot;string&quot; Value=&quot;Unknown&quot; /&gt;&lt;/GlobalVariables&gt;&lt;/xml&gt;" />
+  <LinkManager xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/PolicyExecutor">
+    <hashset xmlns:d2p1="http://schemas.datacontract.org/2004/07/System" />
+  </LinkManager>
+  <Diagnostics OriginalVersion="2.18.3.1" />
+  <Activity mc:Ignorable="sads sap" x:Class="Policy Builder" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:p="clr-namespace:PolicyExecutor;assembly=PolicyExecutionEngine" xmlns:sads="http://schemas.microsoft.com/netfx/2010/xaml/activities/debugger" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:Members>
+      <x:Property Name="PolicyGUID" Type="InArgument(x:String)" />
+    </x:Members>
+    <sap:VirtualizedContainerService.HintSize>1338,6158</sap:VirtualizedContainerService.HintSize>
+    <mva:VisualBasic.Settings>Assembly references and imported namespaces serialized as XML namespaces</mva:VisualBasic.Settings>
+    <p:PolicySequence DisplayName="Policy Builder" sap:VirtualizedContainerService.HintSize="1338,6158" MinRequiredVersion="2.16.0.1" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
+      <p:PolicySequence.Activities>
+        <p:RegistryValueExists BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" Property_Item="{x:Null}" Property_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" Conditional="[RegistryValueExists_Conditional]" DisplayName="RestrictDriverInstallationToAdministrators Exists" sap:VirtualizedContainerService.HintSize="1302,160" Key="Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.10.0.19" Moniker="3046de3f-08cc-4574-8876-4cd5db143b76" Property="RestrictDriverInstallationToAdministrators" Property_DisplayArg="RestrictDriverInstallationToAdministrators" Result="[RegistryValueExists_Result]" ResultString="[RegistryValueExists_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="RegistryValueExists" m_bTextLinkChange="False" />
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="False" CaseSensitive_DisplayArg="false" Condition="equals" Condition_DisplayArg="equals" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="1302,619" MinRequiredVersion="2.16.0.1" Moniker="4ebc5dbf-3f2f-4deb-a68f-e77e52f551d0" Result="[IfElse_Result]" ResultString="[IfElse_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="True" Value_Type="x:String" Variable="[RegistryValueExists_Conditional]" Variable_DisplayArg="RestrictDriverInstallationToAdministrators Exists.Conditional" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="575,382" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:CreateRegistryKey BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" NewKey_Item="{x:Null}" NewKey_ItemProp="{x:Null}" PropType_Item="{x:Null}" PropType_ItemProp="{x:Null}" PropertyName_Item="{x:Null}" PropertyName_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Create Registry Key" sap:VirtualizedContainerService.HintSize="537,232" MinRequiredVersion="2.10.0.19" Moniker="e1b0e78b-c43f-414f-b546-0c228db2111b" NewKey="Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" NewKey_DisplayArg="Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" PropType="DWord" PropType_DisplayArg="DWord" PropertyName="RestrictDriverInstallationToAdministrators" PropertyName_DisplayArg="RestrictDriverInstallationToAdministrators" Result="[CreateRegistryKey_Result]" ResultString="[CreateRegistryKey_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="CreateRegistryKey" Value="1" Value_DisplayArg="1" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="CreateRegistryKey_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="CreateRegistryKey_Result" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="575,382" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:SetRegistryValue BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" PropertyName_Item="{x:Null}" PropertyName_ItemProp="{x:Null}" PropertyType_Item="{x:Null}" PropertyType_ItemProp="{x:Null}" PropertyValue_Item="{x:Null}" PropertyValue_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Set Registry Value" sap:VirtualizedContainerService.HintSize="537,232" Key="Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.18.0.1" Moniker="9c111c7a-61f3-4375-b310-78690e80d9ab" PropertyName="RestrictDriverInstallationToAdministrators" PropertyName_DisplayArg="RestrictDriverInstallationToAdministrators" PropertyType="DWord" PropertyType_DisplayArg="DWord" PropertyValue="1" PropertyValue_DisplayArg="1" Result="[SetRegistryValue_Result]" ResultString="[SetRegistryValue_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="SetRegistryValue" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="SetRegistryValue_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="SetRegistryValue_Result" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="True" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+        <p:RegistryValueExists BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" Property_Item="{x:Null}" Property_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" Conditional="[RegistryValueExists_Conditional_1]" DisplayName="NoWarningNoElevationOnInstall Exists" sap:VirtualizedContainerService.HintSize="1302,160" Key="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.10.0.19" Moniker="c6927d67-dad3-4126-b182-747b9bf6a945" Property="NoWarningNoElevationOnInstall" Property_DisplayArg="NoWarningNoElevationOnInstall" Result="[RegistryValueExists_Result_1]" ResultString="[RegistryValueExists_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="RegistryValueExists" m_bTextLinkChange="False" />
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="False" CaseSensitive_DisplayArg="false" Condition="equals" Condition_DisplayArg="equals" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="1302,619" MinRequiredVersion="2.16.0.1" Moniker="1432683f-d1b9-48ab-9a91-b51f60911d33" Result="[IfElse_Result_1]" ResultString="[IfElse_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="True" Value_Type="x:String" Variable="[RegistryValueExists_Conditional_1]" Variable_DisplayArg="NoWarningNoElevationOnInstall Exists.Conditional" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="587,382" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:CreateRegistryKey BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" NewKey_Item="{x:Null}" NewKey_ItemProp="{x:Null}" PropType_Item="{x:Null}" PropType_ItemProp="{x:Null}" PropertyName_Item="{x:Null}" PropertyName_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Create Registry Key" sap:VirtualizedContainerService.HintSize="549,232" MinRequiredVersion="2.10.0.19" Moniker="e6f5d51e-855a-46d3-a0cd-769fa683c121" NewKey="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" NewKey_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" PropType="DWord" PropType_DisplayArg="DWord" PropertyName="NoWarningNoElevationOnInstall" PropertyName_DisplayArg="NoWarningNoElevationOnInstall" Result="[CreateRegistryKey_Result_1]" ResultString="[CreateRegistryKey_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="CreateRegistryKey" Value="0" Value_DisplayArg="0" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="CreateRegistryKey_Result_1" />
+                <Variable x:TypeArguments="x:String" Name="CreateRegistryKey_ResultString_1" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="587,382" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:SetRegistryValue BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" PropertyName_Item="{x:Null}" PropertyName_ItemProp="{x:Null}" PropertyType_Item="{x:Null}" PropertyType_ItemProp="{x:Null}" PropertyValue_Item="{x:Null}" PropertyValue_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Set Registry Value" sap:VirtualizedContainerService.HintSize="549,232" Key="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.18.0.1" Moniker="12f7475b-482c-4501-aebb-d0d9a2647268" PropertyName="NoWarningNoElevationOnInstall" PropertyName_DisplayArg="NoWarningNoElevationOnInstall" PropertyType="DWord" PropertyType_DisplayArg="DWord" PropertyValue="0" PropertyValue_DisplayArg="0" Result="[SetRegistryValue_Result_1]" ResultString="[SetRegistryValue_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="SetRegistryValue" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="SetRegistryValue_Result_1" />
+                <Variable x:TypeArguments="x:String" Name="SetRegistryValue_ResultString_1" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="True" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+        <p:RegistryValueExists BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" Property_Item="{x:Null}" Property_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" Conditional="[RegistryValueExists_Conditional_2]" DisplayName="NoWarningNoElevationOnUpdate Exists" sap:VirtualizedContainerService.HintSize="1302,160" Key="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.10.0.19" Moniker="2c975286-d40f-454b-8fa6-430fd063a1f9" Property="NoWarningNoElevationOnUpdate" Property_DisplayArg="NoWarningNoElevationOnUpdate" Result="[RegistryValueExists_Result_2]" ResultString="[RegistryValueExists_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="RegistryValueExists" m_bTextLinkChange="False" />
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="False" CaseSensitive_DisplayArg="false" Condition="equals" Condition_DisplayArg="equals" DisplayName="If/Else" sap:VirtualizedContainerService.HintSize="1302,619" MinRequiredVersion="2.16.0.1" Moniker="d09cec2b-7523-49d6-ac33-d349d83f9b6e" Result="[IfElse_Result_2]" ResultString="[IfElse_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="True" Value_Type="x:String" Variable="[RegistryValueExists_Conditional_2]" Variable_DisplayArg="NoWarningNoElevationOnUpdate Exists.Conditional" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="587,382" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:CreateRegistryKey BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" NewKey_Item="{x:Null}" NewKey_ItemProp="{x:Null}" PropType_Item="{x:Null}" PropType_ItemProp="{x:Null}" PropertyName_Item="{x:Null}" PropertyName_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Create Registry Key" sap:VirtualizedContainerService.HintSize="549,232" MinRequiredVersion="2.10.0.19" Moniker="e5145c0f-1dbf-4a28-9135-554f26373186" NewKey="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" NewKey_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" PropType="DWord" PropType_DisplayArg="DWord" PropertyName="NoWarningNoElevationOnUpdate" PropertyName_DisplayArg="NoWarningNoElevationOnUpdate" Result="[CreateRegistryKey_Result_2]" ResultString="[CreateRegistryKey_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="CreateRegistryKey" Value="0" Value_DisplayArg="0" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="CreateRegistryKey_Result_2" />
+                <Variable x:TypeArguments="x:String" Name="CreateRegistryKey_ResultString_2" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="587,382" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:SetRegistryValue BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" PropertyName_Item="{x:Null}" PropertyName_ItemProp="{x:Null}" PropertyType_Item="{x:Null}" PropertyType_ItemProp="{x:Null}" PropertyValue_Item="{x:Null}" PropertyValue_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Set Registry Value" sap:VirtualizedContainerService.HintSize="549,232" Key="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.18.0.1" Moniker="c47fd530-d0af-431d-b6df-e6f1dd6eab6f" PropertyName="NoWarningNoElevationOnUpdate" PropertyName_DisplayArg="NoWarningNoElevationOnUpdate" PropertyType="DWord" PropertyType_DisplayArg="DWord" PropertyValue="0" PropertyValue_DisplayArg="0" Result="[SetRegistryValue_Result_2]" ResultString="[SetRegistryValue_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="SetRegistryValue" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:Double" Name="SetRegistryValue_Result_2" />
+                <Variable x:TypeArguments="x:String" Name="SetRegistryValue_ResultString_2" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="True" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+        <p:GetRegistryValue BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" Property_Item="{x:Null}" Property_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Get Registry Value NoWarningNoElevationOnInstall" sap:VirtualizedContainerService.HintSize="1302,81" Key="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.10.0.19" Moniker="cf486439-c25e-495b-b5d8-3bf84e87ca58" Property="NoWarningNoElevationOnInstall" Property_DisplayArg="NoWarningNoElevationOnInstall" Result="[GetRegistryValue_Result]" ResultString="[GetRegistryValue_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="GetRegistryValue" Value="[GetRegistryValue_Value]" m_bTextLinkChange="False">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+        </p:GetRegistryValue>
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="False" CaseSensitive_DisplayArg="false" Condition="does not equal" Condition_DisplayArg="does not equal" DisplayName="If/Else NoWarningNoElevationOnInstall" sap:VirtualizedContainerService.HintSize="1302,919" MinRequiredVersion="2.16.0.1" Moniker="21f57656-1d09-46f2-8bfd-f380220bcb1e" Result="[IfElse_Result_5]" ResultString="[IfElse_ResultString_5]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="0" Value_Type="x:String" Variable="[GetRegistryValue_Value]" Variable_DisplayArg="Get Registry Value NoWarningNoElevationOnInstall.Value" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="455,332" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="417,182" MinRequiredVersion="2.10.0.19" Moniker="52b8d18b-1821-4763-a5af-d5e002f593ce" Result="[Assignment_Result_5]" ResultString="[Assignment_ResultString_5]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Set" Value_Type="x:String" Variable="[NoWarningNoElevationOnInstall]" Variable_DisplayArg="Global Variables.NoWarningNoElevationOnInstall" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="Set" />
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_5" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_5" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="803,682" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="765,182" MinRequiredVersion="2.10.0.19" Moniker="a03f1f0d-2b7d-478c-8ae4-9f04e472d954" Result="[Assignment_Result]" ResultString="[Assignment_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Not Set" Value_Type="x:String" Variable="[NoWarningNoElevationOnInstall]" Variable_DisplayArg="Global Variables.NoWarningNoElevationOnInstall" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="Not Set" />
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="765,182" MinRequiredVersion="2.10.0.19" Moniker="6b267bc8-5301-473d-b862-c0f77b861d79" Result="[Assignment_Result_6]" ResultString="[Assignment_ResultString_6]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="1" Value_Type="x:Double" Variable="[Sentinel]" Variable_DisplayArg="Global Variables.Sentinel" Variable_Type="x:Double" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral>
+                        <p:ObjectLiteral.Value>
+                          <x:Double>1</x:Double>
+                        </p:ObjectLiteral.Value>
+                      </p:ObjectLiteral>
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+                <p:Log Message_Item="{x:Null}" Message_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Log" sap:VirtualizedContainerService.HintSize="765,88" LogMessage="[Log_LogMessage]" Message="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint\NoWarningNoElevationOnInstall Not set to 0" Message_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint\NoWarningNoElevationOnInstall Not set to 0" MinRequiredVersion="2.10.0.19" Moniker="b085e718-b918-49fe-9eb3-b61564c03032" Result="[Log_Result]" ResultString="[Log_ResultString]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="Log" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result" />
+                <Variable x:TypeArguments="x:String" Name="Log_LogMessage" />
+                <Variable x:TypeArguments="x:String" Name="Log_ResultString" />
+                <Variable x:TypeArguments="x:Double" Name="Log_Result" />
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_6" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_6" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="0" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+        <p:GetRegistryValue BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" Property_Item="{x:Null}" Property_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Get Registry Value NoWarningNoElevationOnUpdate" sap:VirtualizedContainerService.HintSize="1302,160" Key="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.10.0.19" Moniker="acd4fc45-db6e-4cea-ab20-b49a28c9b49e" Property="NoWarningNoElevationOnUpdate" Property_DisplayArg="NoWarningNoElevationOnUpdate" Result="[GetRegistryValue_Result_1]" ResultString="[GetRegistryValue_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="GetRegistryValue" Value="[GetRegistryValue_Value_1]" m_bTextLinkChange="False" />
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="False" CaseSensitive_DisplayArg="false" Condition="does not equal" Condition_DisplayArg="does not equal" DisplayName="If/Else NoWarningNoElevationOnUpdate" sap:VirtualizedContainerService.HintSize="1302,919" MinRequiredVersion="2.16.0.1" Moniker="535a3a99-c95d-4150-8287-bb88f0c47517" Result="[IfElse_Result_4]" ResultString="[IfElse_ResultString_4]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="0" Value_Type="x:String" Variable="[GetRegistryValue_Value_1]" Variable_DisplayArg="Get Registry Value NoWarningNoElevationOnUpdate.Value" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="463,332" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="425,182" MinRequiredVersion="2.10.0.19" Moniker="b542ed52-e8ef-4c9c-a94e-f9a1b6ddfc13" Result="[Assignment_Result_4]" ResultString="[Assignment_ResultString_4]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Set" Value_Type="x:String" Variable="[NoWarningNoElevationOnUpdate]" Variable_DisplayArg="Global Variables.NoWarningNoElevationOnUpdate" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="Set" />
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_4" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_4" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="463,682" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="425,182" MinRequiredVersion="2.10.0.19" Moniker="731f6111-00b9-4867-adf0-1cb006b3351f" Result="[Assignment_Result_1]" ResultString="[Assignment_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Not Set" Value_Type="x:String" Variable="[NoWarningNoElevationOnUpdate]" Variable_DisplayArg="Global Variables.NoWarningNoElevationOnUpdate" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="Not Set" />
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="425,182" MinRequiredVersion="2.10.0.19" Moniker="d2530e41-3f46-458e-9a2d-648efccf17dc" Result="[Assignment_Result_7]" ResultString="[Assignment_ResultString_7]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="1" Value_Type="x:Double" Variable="[Sentinel]" Variable_DisplayArg="Global Variables.Sentinel" Variable_Type="x:Double" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral>
+                        <p:ObjectLiteral.Value>
+                          <x:Double>1</x:Double>
+                        </p:ObjectLiteral.Value>
+                      </p:ObjectLiteral>
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+                <p:Log Message_Item="{x:Null}" Message_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Log" sap:VirtualizedContainerService.HintSize="425,88" LogMessage="[Log_LogMessage_1]" Message="NoWarningNoElevationOnUpdate Not set to 0" Message_DisplayArg="NoWarningNoElevationOnUpdate Not set to 0" MinRequiredVersion="2.10.0.19" Moniker="f797eb44-6295-4ef8-8ac2-c29df4dcc43b" Result="[Log_Result_1]" ResultString="[Log_ResultString_1]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="Log" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_1" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_1" />
+                <Variable x:TypeArguments="x:String" Name="Log_LogMessage_1" />
+                <Variable x:TypeArguments="x:String" Name="Log_ResultString_1" />
+                <Variable x:TypeArguments="x:Double" Name="Log_Result_1" />
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_7" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_7" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="0" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+        <p:GetRegistryValue BaseKey_Item="{x:Null}" BaseKey_ItemProp="{x:Null}" Key_Item="{x:Null}" Key_ItemProp="{x:Null}" Property_Item="{x:Null}" Property_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" BaseKey="HKLM" BaseKey_DisplayArg="HKLM" DisplayName="Get Registry Value RestrictDriverInstallationToAdministrators" sap:VirtualizedContainerService.HintSize="1302,160" Key="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" Key_DisplayArg="SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" MinRequiredVersion="2.10.0.19" Moniker="e3b4975e-9143-454a-882f-ebe6627ce191" Property="RestrictDriverInstallationToAdministrators" Property_DisplayArg="RestrictDriverInstallationToAdministrators" Result="[GetRegistryValue_Result_2]" ResultString="[GetRegistryValue_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="GetRegistryValue" Value="[GetRegistryValue_Value_2]" m_bTextLinkChange="False" />
+        <p:IfElse CaseSensitive_Item="{x:Null}" CaseSensitive_ItemProp="{x:Null}" Condition_Item="{x:Null}" Condition_ItemProp="{x:Null}" Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" CaseSensitive="False" CaseSensitive_DisplayArg="false" Condition="does not equal" Condition_DisplayArg="does not equal" DisplayName="If/Else RestrictDriverInstallationToAdministrators Check" sap:VirtualizedContainerService.HintSize="1302,919" MinRequiredVersion="2.16.0.1" Moniker="42aa10a2-07ad-47b0-81f5-235d04484562" Result="[IfElse_Result_3]" ResultString="[IfElse_ResultString_3]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="IfElse" Value_DisplayArg="1" Value_Type="x:String" Variable="[GetRegistryValue_Value_2]" Variable_DisplayArg="Get Registry Value RestrictDriverInstallationToAdministrators.Value" Variable_Type="x:String" m_bTextLinkChange="False">
+          <p:IfElse.ElseOption>
+            <p:SequenceActivity DisplayName="Else" sap:VirtualizedContainerService.HintSize="511,332" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="473,182" MinRequiredVersion="2.10.0.19" Moniker="550c6683-25ba-4040-9af0-d0d2f80723d6" Result="[Assignment_Result_3]" ResultString="[Assignment_ResultString_3]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Set" Value_Type="x:String" Variable="[RestrictDriverInstallationToAdministrators]" Variable_DisplayArg="Global Variables.RestrictDriverInstallationToAdministrators" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="Set" />
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_3" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_3" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.ElseOption>
+          <p:IfElse.IfOption>
+            <p:SequenceActivity DisplayName="Then" sap:VirtualizedContainerService.HintSize="511,682" Name="SequenceActivity">
+              <p:SequenceActivity.Activities>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="473,182" MinRequiredVersion="2.10.0.19" Moniker="5fb3e44e-8e0c-4133-be4f-e413b6e01533" Result="[Assignment_Result_2]" ResultString="[Assignment_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="Not Set" Value_Type="x:String" Variable="[RestrictDriverInstallationToAdministrators]" Variable_DisplayArg="Global Variables.RestrictDriverInstallationToAdministrators" Variable_Type="x:String" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral Value="Not Set" />
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+                <p:Assignment Value_Item="{x:Null}" Value_ItemProp="{x:Null}" Variable_Item="{x:Null}" Variable_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Global Variable Assignment" sap:VirtualizedContainerService.HintSize="473,182" MinRequiredVersion="2.10.0.19" Moniker="3d533ee6-1aa5-44f9-b42f-5bf83740ccf9" Result="[Assignment_Result_8]" ResultString="[Assignment_ResultString_8]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="None" TypeName="Assignment" Value_DisplayArg="1" Value_Type="x:Double" Variable="[Sentinel]" Variable_DisplayArg="Global Variables.Sentinel" Variable_Type="x:Double" m_bTextLinkChange="False">
+                  <p:Assignment.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <p:ObjectLiteral>
+                        <p:ObjectLiteral.Value>
+                          <x:Double>1</x:Double>
+                        </p:ObjectLiteral.Value>
+                      </p:ObjectLiteral>
+                    </InArgument>
+                  </p:Assignment.Value>
+                </p:Assignment>
+                <p:Log Message_Item="{x:Null}" Message_ItemProp="{x:Null}" AssemblyName="PolicyExecutionEngine, Version=2.18.1.1, Culture=neutral, PublicKeyToken=null" DisplayName="Log" sap:VirtualizedContainerService.HintSize="473,88" LogMessage="[Log_LogMessage_2]" Message="RestrictDriverInstallationToAdministrators not set to 1" Message_DisplayArg="RestrictDriverInstallationToAdministrators not set to 1" MinRequiredVersion="2.10.0.19" Moniker="ba9f0209-d614-4dc7-9619-588de9fe7824" Result="[Log_Result_2]" ResultString="[Log_ResultString_2]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="Log" m_bTextLinkChange="False" />
+              </p:SequenceActivity.Activities>
+              <p:SequenceActivity.Variables>
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_2" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_2" />
+                <Variable x:TypeArguments="x:String" Name="Log_LogMessage_2" />
+                <Variable x:TypeArguments="x:String" Name="Log_ResultString_2" />
+                <Variable x:TypeArguments="x:Double" Name="Log_Result_2" />
+                <Variable x:TypeArguments="x:String" Name="Assignment_ResultString_8" />
+                <Variable x:TypeArguments="x:Double" Name="Assignment_Result_8" />
+              </p:SequenceActivity.Variables>
+            </p:SequenceActivity>
+          </p:IfElse.IfOption>
+          <p:IfElse.Value>
+            <InArgument x:TypeArguments="x:Object">
+              <p:ObjectLiteral Value="1" />
+            </InArgument>
+          </p:IfElse.Value>
+        </p:IfElse>
+      </p:PolicySequence.Activities>
+      <p:PolicySequence.Variables>
+        <Variable x:TypeArguments="x:String" Name="RegistryValueExists_Conditional" />
+        <Variable x:TypeArguments="x:String" Name="RegistryValueExists_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="RegistryValueExists_Result" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result" />
+        <Variable x:TypeArguments="x:String" Name="RegistryValueExists_Conditional_1" />
+        <Variable x:TypeArguments="x:Double" Name="RegistryValueExists_Result_1" />
+        <Variable x:TypeArguments="x:String" Name="RegistryValueExists_ResultString_1" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result_1" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_1" />
+        <Variable x:TypeArguments="x:String" Name="RegistryValueExists_Conditional_2" />
+        <Variable x:TypeArguments="x:Double" Name="RegistryValueExists_Result_2" />
+        <Variable x:TypeArguments="x:String" Name="RegistryValueExists_ResultString_2" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result_2" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_2" />
+        <Variable x:TypeArguments="x:String" Name="GetRegistryValue_Value" />
+        <Variable x:TypeArguments="x:String" Name="GetRegistryValue_ResultString" />
+        <Variable x:TypeArguments="x:Double" Name="GetRegistryValue_Result" />
+        <Variable x:TypeArguments="x:String" Name="GetRegistryValue_Value_1" />
+        <Variable x:TypeArguments="x:String" Name="GetRegistryValue_ResultString_1" />
+        <Variable x:TypeArguments="x:Double" Name="GetRegistryValue_Result_1" />
+        <Variable x:TypeArguments="x:String" Name="GetRegistryValue_Value_2" />
+        <Variable x:TypeArguments="x:String" Name="GetRegistryValue_ResultString_2" />
+        <Variable x:TypeArguments="x:Double" Name="GetRegistryValue_Result_2" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result_3" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_3" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result_4" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_4" />
+        <Variable x:TypeArguments="x:Double" Name="IfElse_Result_5" />
+        <Variable x:TypeArguments="x:String" Name="IfElse_ResultString_5" />
+        <Variable x:TypeArguments="x:String" Default="Unknown" Name="RestrictDriverInstallationToAdministrators" />
+        <Variable x:TypeArguments="x:String" Default="Unknown" Name="NoWarningNoElevationOnUpdate" />
+        <Variable x:TypeArguments="x:String" Default="Unknown" Name="NoWarningNoElevationOnInstall" />
+        <Variable x:TypeArguments="x:Double" Default="0" Name="Sentinel" />
+      </p:PolicySequence.Variables>
+    </p:PolicySequence>
+  </Activity>
+</Policy>

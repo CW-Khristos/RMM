@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><Policy ID="ec6f4269-8d59-4c82-bdbd-de0be2762b71" Name="CyberCNS Dployment" Description="RGVwbG95cyBDeWJlckNOUyBQcm9iZSAvIEFnZW50DQpSZXF1aXJlcyA0IFBhcmFtZXRlcnMgOg0KJGlfY29tcGFueUlEIC0gQ29tcGFueSBJRCBLZXkKJGlfY2xpZW50SUQgLSBDbGllbnQgSUQgS2V5CiRpX3NlY3JldCAtIENsaWVudCBTZWNyZXQgS2V5CiRpX2luc3RhbGxUeXBlIC0gUHJvYmUgLyBMaWdodHdlaWdodCAvIFNjYW4=" Version="2.10.0.19" RemoteCategory="0" ExecutionType="Local" MinimumPSVersionRequired="0.0.0">
+  <Object ID="{12a729e8-4014-4cc3-af6f-79126c5d6c3f}" Type="{B6FA6D8B-EEAA-47A6-8463-7F9A4F5BBB6E}" Data="&lt;xml&gt;&lt;Parameters&gt;&lt;Parameter ParameterName=&quot;i_companyID&quot; Label=&quot;Company ID&quot; ParameterType=&quot;string&quot; Value=&quot;&quot; /&gt;&lt;Parameter ParameterName=&quot;i_clientID&quot; Label=&quot;Client ID&quot; ParameterType=&quot;string&quot; Value=&quot;&quot; /&gt;&lt;Parameter ParameterName=&quot;i_secret&quot; Label=&quot;Secret Key&quot; ParameterType=&quot;string&quot; Value=&quot;&quot; /&gt;&lt;Parameter ParameterName=&quot;i_installType&quot; Label=&quot;Install Type&quot; ParameterType=&quot;string&quot; Value=&quot;Lightweight&quot; /&gt;&lt;/Parameters&gt;&lt;OutputParameters&gt;&lt;Parameter ParameterName=&quot;psoutput&quot; Label=&quot;Output&quot; ParameterType=&quot;string&quot; Value=&quot;Run PowerShell Script.Output&quot; /&gt;&lt;/OutputParameters&gt;&lt;/xml&gt;" />
+  <LinkManager xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/PolicyExecutor">
+    <hashset xmlns:d2p1="http://schemas.datacontract.org/2004/07/System">
+      <d2p1:TupleOfstringstringstringstring>
+        <d2p1:m_Item1>6db07ef6-5ab3-4831-bbdd-df4956e10f87.o_output</d2p1:m_Item1>
+        <d2p1:m_Item2>OutputObject</d2p1:m_Item2>
+        <d2p1:m_Item3></d2p1:m_Item3>
+        <d2p1:m_Item4>psoutput</d2p1:m_Item4>
+      </d2p1:TupleOfstringstringstringstring>
+    </hashset>
+  </LinkManager>
+  <Diagnostics OriginalVersion="2.18.3.1" />
+  <Activity mc:Ignorable="sap sads" x:Class="Policy Builder" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:p="clr-namespace:PolicyExecutor;assembly=PolicyExecutionEngine" xmlns:sads="http://schemas.microsoft.com/netfx/2010/xaml/activities/debugger" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:Members>
+      <x:Property Name="PolicyGUID" Type="InArgument(x:String)" />
+    </x:Members>
+    <sap:VirtualizedContainerService.HintSize>490,571</sap:VirtualizedContainerService.HintSize>
+    <mva:VisualBasic.Settings>Assembly references and imported namespaces serialized as XML namespaces</mva:VisualBasic.Settings>
+    <p:PolicySequence DisplayName="Policy Builder" sap:VirtualizedContainerService.HintSize="490,571" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
+      <p:PolicySequence.Activities>
+        <p:RunPowerShellScript AssemblyName="PolicyExecutionEngine, Version=2.18.3.1, Culture=neutral, PublicKeyToken=null" DisplayName="Run PowerShell Script" sap:VirtualizedContainerService.HintSize="454,348" Moniker="6db07ef6-5ab3-4831-bbdd-df4956e10f87" OutPut_64="[RunPowerShellScript_OutPut_64]" Result="[RunPowerShellScript_Result]" ResultString="[RunPowerShellScript_ResultString]" Results_x64="[RunPowerShellScript_Results_x64]" RunAsCurrentLoggedOnUser="False" ScriptExecutionMethod="ExecuteDebug" TypeName="RunPowerShellScript" genArgEvent="cf0662ef-c29c-4a42-88a7-e8983f4ef223" m_bTextLinkChange="False" script="IwBSAEUARwBJAE8ATgAgAC0ALQAtAC0ALQAgAEYAVQBOAEMAVABJAE8ATgBTACAALQAtAC0ALQANAAoAZgB1AG4AYwB0AGkAbwBuACAARwBlAHQALQBQAHIAbwBjAGUAcwBzAE8AdQB0AHAAdQB0ACAAewANAAoAIAAgAFAAYQByAGEAbQAgACgADQAKACAAIAAgACAAWwBQAGEAcgBhAG0AZQB0AGUAcgAoAE0AYQBuAGQAYQB0AG8AcgB5AD0AJAB0AHIAdQBlACkAXQAkAEYAaQBsAGUATgBhAG0AZQAsAA0ACgAgACAAIAAgACQAQQByAGcAcwANAAoAIAAgACkADQAKAA0ACgAgACAAJABwAHIAbwBjAGUAcwBzACAAPQAgAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEQAaQBhAGcAbgBvAHMAdABpAGMAcwAuAFAAcgBvAGMAZQBzAHMADQAKACAAIAAkAHAAcgBvAGMAZQBzAHMALgBTAHQAYQByAHQASQBuAGYAbwAuAFcAaQBuAGQAbwB3AFMAdAB5AGwAZQAgAD0AIAAiAEgAaQBkAGQAZQBuACIADQAKACAAIAAkAHAAcgBvAGMAZQBzAHMALgBTAHQAYQByAHQASQBuAGYAbwAuAEMAcgBlAGEAdABlAE4AbwBXAGkAbgBkAG8AdwAgAD0AIAAkAHQAcgB1AGUADQAKACAAIAAkAHAAcgBvAGMAZQBzAHMALgBTAHQAYQByAHQASQBuAGYAbwAuAFUAcwBlAFMAaABlAGwAbABFAHgAZQBjAHUAdABlACAAPQAgACQAZgBhAGwAcwBlAA0ACgAgACAAJABwAHIAbwBjAGUAcwBzAC4AUwB0AGEAcgB0AEkAbgBmAG8ALgBSAGUAZABpAHIAZQBjAHQAUwB0AGEAbgBkAGEAcgBkAE8AdQB0AHAAdQB0ACAAPQAgACQAdAByAHUAZQANAAoAIAAgACQAcAByAG8AYwBlAHMAcwAuAFMAdABhAHIAdABJAG4AZgBvAC4AUgBlAGQAaQByAGUAYwB0AFMAdABhAG4AZABhAHIAZABFAHIAcgBvAHIAIAA9ACAAJAB0AHIAdQBlAA0ACgAgACAAJABwAHIAbwBjAGUAcwBzAC4AUwB0AGEAcgB0AEkAbgBmAG8ALgBGAGkAbABlAE4AYQBtAGUAIAA9ACAAJABGAGkAbABlAE4AYQBtAGUADQAKACAAIABpAGYAKAAkAEEAcgBnAHMAKQAgAHsAJABwAHIAbwBjAGUAcwBzAC4AUwB0AGEAcgB0AEkAbgBmAG8ALgBBAHIAZwB1AG0AZQBuAHQAcwAgAD0AIAAkAEEAcgBnAHMAfQANAAoAIAAgACQAbwB1AHQAIAA9ACAAJABwAHIAbwBjAGUAcwBzAC4AUwB0AGEAcgB0ACgAKQANAAoADQAKACAAIAAkAFMAdABhAG4AZABhAHIAZABFAHIAcgBvAHIAIAA9ACAAJABwAHIAbwBjAGUAcwBzAC4AUwB0AGEAbgBkAGEAcgBkAEUAcgByAG8AcgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQANAAoAIAAgACQAUwB0AGEAbgBkAGEAcgBkAE8AdQB0AHAAdQB0ACAAPQAgACQAcAByAG8AYwBlAHMAcwAuAFMAdABhAG4AZABhAHIAZABPAHUAdABwAHUAdAAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQANAAoADQAKACAAIAAkAG8AdQB0AHAAdQB0ACAAPQAgAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABQAFMATwBiAGoAZQBjAHQADQAKACAAIAAkAG8AdQB0AHAAdQB0ACAAfAAgAEEAZABkAC0ATQBlAG0AYgBlAHIAIAAtAHQAeQBwAGUAIABOAG8AdABlAFAAcgBvAHAAZQByAHQAeQAgAC0AbgBhAG0AZQAgAFMAdABhAG4AZABhAHIAZABPAHUAdABwAHUAdAAgAC0AVgBhAGwAdQBlACAAJABTAHQAYQBuAGQAYQByAGQATwB1AHQAcAB1AHQADQAKACAAIAAkAG8AdQB0AHAAdQB0ACAAfAAgAEEAZABkAC0ATQBlAG0AYgBlAHIAIAAtAHQAeQBwAGUAIABOAG8AdABlAFAAcgBvAHAAZQByAHQAeQAgAC0AbgBhAG0AZQAgAFMAdABhAG4AZABhAHIAZABFAHIAcgBvAHIAIAAtAFYAYQBsAHUAZQAgACQAUwB0AGEAbgBkAGEAcgBkAEUAcgByAG8AcgANAAoAIAAgAHIAZQB0AHUAcgBuACAAJABvAHUAdABwAHUAdAANAAoAfQAgACMAIwAgAEcAZQB0AC0AUAByAG8AYwBlAHMAcwBPAHUAdABwAHUAdAANAAoAIwBFAE4ARABSAEUARwBJAE8ATgAgAC0ALQAtAC0ALQAgAEYAVQBOAEMAVABJAE8ATgBTACAALQAtAC0ALQANAAoADQAKACMALQAtAC0ALQAtAC0ALQAtAC0ALQAtAC0ADQAKACMAQgBFAEcASQBOACAAUwBDAFIASQBQAFQADQAKACQAZABlAHMAdABpAG4AYQB0AGkAbwBuACAAPQAgACcAQwA6AFwASQBUAFwAYwB5AGIAZQByAGMAbgBzAGEAZwBlAG4AdAAuAGUAeABlACcADQAKACQAcwBvAHUAcgBjAGUAIAA9ACAAJwBoAHQAdABwAHMAOgAvAC8AYwB5AGIAZQByAGMAbgBzAGEAZwBlAG4AdAAuAHMAMwAuAGEAbQBhAHoAbwBuAGEAdwBzAC4AYwBvAG0ALwBjAHkAYgBlAHIAYwBuAHMAYQBnAGUAbgB0AC4AZQB4AGUAJwANAAoAIwBDAEgARQBDAEsAIAAnAFAARQBSAFMASQBTAFQARQBOAFQAJwAgAEYATwBMAEQARQBSAFMADQAKAGkAZgAgACgALQBuAG8AdAAgACgAdABlAHMAdAAtAHAAYQB0AGgAIAAtAHAAYQB0AGgAIAAiAEMAOgBcAHQAZQBtAHAAIgApACkAIAB7AA0ACgAgACAAbgBlAHcALQBpAHQAZQBtACAALQBwAGEAdABoACAAIgBDADoAXAB0AGUAbQBwACIAIAAtAGkAdABlAG0AdAB5AHAAZQAgAGQAaQByAGUAYwB0AG8AcgB5AA0ACgB9AA0ACgBpAGYAIAAoAC0AbgBvAHQAIAAoAHQAZQBzAHQALQBwAGEAdABoACAALQBwAGEAdABoACAAIgBDADoAXABJAFQAIgApACkAIAB7AA0ACgAgACAAbgBlAHcALQBpAHQAZQBtACAALQBwAGEAdABoACAAIgBDADoAXABJAFQAIgAgAC0AaQB0AGUAbQB0AHkAcABlACAAZABpAHIAZQBjAHQAbwByAHkADQAKAH0ADQAKAGkAZgAgACgALQBuAG8AdAAgACgAdABlAHMAdAAtAHAAYQB0AGgAIAAtAHAAYQB0AGgAIAAiAEMAOgBcAEkAVABcAFMAYwByAGkAcAB0AHMAIgApACkAIAB7AA0ACgAgACAAbgBlAHcALQBpAHQAZQBtACAALQBwAGEAdABoACAAIgBDADoAXABJAFQAXABTAGMAcgBpAHAAdABzACIAIAAtAGkAdABlAG0AdAB5AHAAZQAgAGQAaQByAGUAYwB0AG8AcgB5AA0ACgB9AA0ACgANAAoAcwB0AGEAcgB0AC0AYgBpAHQAcwB0AHIAYQBuAHMAZgBlAHIAIAAtAHMAbwB1AHIAYwBlACAAJABzAG8AdQByAGMAZQAgAC0AZABlAHMAdABpAG4AYQB0AGkAbwBuACAAJABkAGUAcwB0AGkAbgBhAHQAaQBvAG4ADQAKACMALgAvAGMAeQBiAGUAcgBjAG4AcwBhAGcAZQBuAHQALgBlAHgAZQAgAC0AYwAgACQAaQBfAGMAbwBtAHAAYQBuAHkASQBEACAALQBhACAAJABpAF8AYwBsAGkAZQBuAHQASQBEACAALQBzACAAJABpAF8AcwBlAGMAcgBlAHQAIAAtAGIAIABpAHAAbQBjAG8AbQBwAHUAdABlAHIAcwB2ADIALgBtAHkAYwB5AGIAZQByAGMAbgBzAC4AYwBvAG0AIAAtAGkAIAAkAGkAXwBpAG4AcwB0AGEAbABsAFQAeQBwAGUAIAAtAG0AIABTAGMAYQBuAA0ACgBpAGYAIAAoACQAaQBuAHMAdABhAGwAbABUAHkAcABlAC4AdABvAHUAcABwAGUAcgAoACkAIAAtAG4AZQAgACIAUwBDAEEATgAiACkAIAB7AA0ACgAgACAAJABvAHUAdABwAHUAdAAgAD0AIABHAGUAdAAtAFAAcgBvAGMAZQBzAHMATwB1AHQAcAB1AHQAIAAtAEYAaQBsAGUATgBhAG0AZQAgACQAZABlAHMAdABpAG4AYQB0AGkAbwBuACAALQBBAHIAZwBzACAAIgAtAGMAIAAkAGkAXwBjAG8AbQBwAGEAbgB5AEkARAAgAC0AYQAgACQAaQBfAGMAbABpAGUAbgB0AEkARAAgAC0AcwAgACQAaQBfAHMAZQBjAHIAZQB0ACAALQBiACAAaQBwAG0AYwBvAG0AcAB1AHQAZQByAHMAdgAyAC4AbQB5AGMAeQBiAGUAcgBjAG4AcwAuAGMAbwBtACAALQBpACAAJABpAF8AaQBuAHMAdABhAGwAbABUAHkAcABlACIADQAKAH0AIABlAGwAcwBlAGkAZgAgACgAJABpAG4AcwB0AGEAbABsAFQAeQBwAGUALgB0AG8AdQBwAHAAZQByACgAKQAgAC0AZQBxACAAIgBTAEMAQQBOACIAKQAgAHsADQAKACAAIAAkAG8AdQB0AHAAdQB0ACAAPQAgAEcAZQB0AC0AUAByAG8AYwBlAHMAcwBPAHUAdABwAHUAdAAgAC0ARgBpAGwAZQBOAGEAbQBlACAAJABkAGUAcwB0AGkAbgBhAHQAaQBvAG4AIAAtAEEAcgBnAHMAIAAiAC0AYwAgACQAaQBfAGMAbwBtAHAAYQBuAHkASQBEACAALQBhACAAJABpAF8AYwBsAGkAZQBuAHQASQBEACAALQBzACAAJABpAF8AcwBlAGMAcgBlAHQAIAAtAGIAIABpAHAAbQBjAG8AbQBwAHUAdABlAHIAcwB2ADIALgBtAHkAYwB5AGIAZQByAGMAbgBzAC4AYwBvAG0AIAAtAG0AIAAkAGkAXwBpAG4AcwB0AGEAbABsAFQAeQBwAGUAIgANAAoAfQANAAoAdwByAGkAdABlAC0AaABvAHMAdAAgACQAbwB1AHQAcAB1AHQADQAKACQAbwBfAG8AdQB0AHAAdQB0ACAAPQAgACQAbwB1AHQAcAB1AHQA">
+          <p:RunPowerShellScript.InArgs>
+            <p:InArg Item="{x:Null}" ItemProp="{x:Null}" x:Key="i_companyID" ArgType="string" DisplayArg="Input Parameters.Company ID" DisplayName="Company ID" Name="i_companyID" isRequired="False">
+              <p:InArg.Arg>
+                <InArgument x:TypeArguments="x:Object">[i_companyID]</InArgument>
+              </p:InArg.Arg>
+            </p:InArg>
+            <p:InArg Item="{x:Null}" ItemProp="{x:Null}" x:Key="i_clientID" ArgType="string" DisplayArg="Input Parameters.Client ID" DisplayName="Client ID" Name="i_clientID" isRequired="False">
+              <p:InArg.Arg>
+                <InArgument x:TypeArguments="x:Object">[i_clientID]</InArgument>
+              </p:InArg.Arg>
+            </p:InArg>
+            <p:InArg Item="{x:Null}" ItemProp="{x:Null}" x:Key="i_secret" ArgType="string" DisplayArg="Input Parameters.Secret Key" DisplayName="Secret Key" Name="i_secret" isRequired="False">
+              <p:InArg.Arg>
+                <InArgument x:TypeArguments="x:Object">[i_secret]</InArgument>
+              </p:InArg.Arg>
+            </p:InArg>
+            <p:InArg Item="{x:Null}" ItemProp="{x:Null}" x:Key="i_installType" ArgType="string" DisplayArg="Input Parameters.Install Type" DisplayName="Install Type" Name="i_installType" isRequired="False">
+              <p:InArg.Arg>
+                <InArgument x:TypeArguments="x:Object">[i_installType]</InArgument>
+              </p:InArg.Arg>
+            </p:InArg>
+          </p:RunPowerShellScript.InArgs>
+          <p:RunPowerShellScript.OutArgs>
+            <p:OutArg x:Key="o_output" ArgType="string" DisplayName="Output" Name="o_output">
+              <p:OutArg.Arg>
+                <OutArgument x:TypeArguments="x:String">[RunPowerShellScript_o_output]</OutArgument>
+              </p:OutArg.Arg>
+            </p:OutArg>
+          </p:RunPowerShellScript.OutArgs>
+        </p:RunPowerShellScript>
+      </p:PolicySequence.Activities>
+      <p:PolicySequence.Variables>
+        <Variable x:TypeArguments="x:String" Name="i_companyID" />
+        <Variable x:TypeArguments="x:String" Name="i_clientID" />
+        <Variable x:TypeArguments="x:String" Name="i_secret" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_OutPut_64" />
+        <Variable x:TypeArguments="x:Double" Name="RunPowerShellScript_Result" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_ResultString" />
+        <Variable x:TypeArguments="scg:IEnumerable(x:Object)" Name="RunPowerShellScript_Results_x64" />
+        <Variable x:TypeArguments="x:String" Default="Lightweight" Name="i_installType" />
+        <Variable x:TypeArguments="x:String" Name="RunPowerShellScript_o_output" />
+      </p:PolicySequence.Variables>
+    </p:PolicySequence>
+  </Activity>
+</Policy>
