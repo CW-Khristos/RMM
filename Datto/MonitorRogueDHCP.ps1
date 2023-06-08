@@ -7,7 +7,7 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-host "<-Start Diagnostic->"
     foreach ($Message in $Messages) { $Message }
     write-host "<-End Diagnostic->"
   } ## write-DRMMDiag
@@ -23,17 +23,17 @@
 #BEGIN SCRIPT
 $version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentVersion
 if ($Version -lt "6.3") {
-  write-DRRMAlert "Unsupported OS. Only Server 2012R2 and up are supported."
-  exit 1
+  write-host "Unsupported OS. Only Server 2012R2 and up are supported."
+  #exit 1
 }
 
 try {
-  $AllowedDHCPServer = Get-DhcpServerInDC -computername "$($env:computername)"
-  write-host "Local Server (In AD) :" $AllowedDHCPServer
+  $AllowedDHCPServer = Get-DhcpServerInDC
+  write-host "Local Server (In AD) : $($AllowedDHCPServer)"
 } catch {
-  $ipV4 = Test-Connection -ComputerName $env:computername -Count 1  | Select -ExpandProperty IPV4Address 
+  $ipV4 = Test-Connection -ComputerName "$($env:computername)" -Count 1  | Select -ExpandProperty IPV4Address 
   $AllowedDHCPServer = $ipV4.IPAddressToString
-  write-host "Local Server (Local IP) :" $AllowedDHCPServer
+  write-host "Local Server (Local IP) : $($AllowedDHCPServer)"
 }
 
 #Replace the Download URL to where you've uploaded the DHCPTest file yourself. We will only download this file once. 
@@ -42,7 +42,8 @@ $DownloadLocation = "$($Env:ProgramData)\DHCPTest"
 try {
   $TestDownloadLocation = Test-Path $DownloadLocation
   if (!$TestDownloadLocation) {new-item $DownloadLocation -ItemType Directory -force}
-  $TestDownloadLocationZip = Test-Path "$DownloadLocation\DHCPTest.exe"
+  $TestDownloadLocationZip = Test-Path "$($DownloadLocation)\DHCPTest.exe"
+  #IPM-Khristos
   if (!$TestDownloadLocationZip) {Invoke-WebRequest -UseBasicParsing -Uri $DownloadURL -OutFile "$($DownloadLocation)\DHCPTest.exe"}
 } catch {
   write-DRRMAlert "The download and extraction of DHCPTest failed. Error: $($_.Exception.Message)"
@@ -50,7 +51,7 @@ try {
 }
 $Tests = 0
 $FoundServers = do {
-  & "$DownloadLocation\DHCPTest.exe" --quiet --query --print-only 54 --wait --timeout 3
+  & "$($DownloadLocation)\DHCPTest.exe" --quiet --query --print-only 54 --wait --timeout 3
   $Tests ++
 } while ($Tests -lt 2)
 
@@ -75,9 +76,8 @@ write-host "`r`nDHCP SERVERS FOUND :"
 $ListedDHCPServers.values
 
 $DHCPHealth = foreach ($ListedServer in $ListedDHCPServers.keys) {
-  write-host "`r`nCHECK SERVER :" $ListedServer
-  write-host "`r`nALLOWED SERVER :"$AllowedDHCPServer
-  if ($AllowedDHCPServer -notmatch $ListedServer) {"Rogue DHCP Server found. IP of rogue server is $ListedServer"}
+  write-host "`r`nCHECK SERVER : $($ListedServer)"
+  if ($AllowedDHCPServer.IPAddress -notcontains $ListedServer.value) {"Rogue DHCP Server found. IP of rogue server is $($ListedServer)"}
 }
 
 if (!$DHCPHealth) { 
@@ -86,7 +86,7 @@ if (!$DHCPHealth) {
 } elseif ($DHCPHealth) { 
   write-DRRMAlert $DHCPHealth
   foreach ($ListedServer in $ListedDHCPServers.keys) {
-    if ($AllowedDHCPServer -notmatch $ListedServer) {write-DRMMDiag $ListedDHCPServers.values}
+    if ($AllowedDHCPServer.IPAddress -notcontains $ListedServer.value) {write-DRMMDiag $ListedDHCPServers.values}
   }
   exit 1
 }
