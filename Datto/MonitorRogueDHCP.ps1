@@ -85,6 +85,8 @@ $DHCPHealth = foreach ($ListedServer in $ListedDHCPServers.values) {
   if ($AllowedDHCPServer.IPAddress -notcontains $ListedServer) {
     $blnWARN = $true
     write-host "Rogue DHCP Server found. IP of rogue server is $($ListedServer)"
+  } elseif ($AllowedDHCPServer.IPAddress -contains $ListedServer) {
+    write-host "Authorized DHCP Server found. IP of DHCP server is $($ListedServer)"
   }
 }
 $DHCPHealth = $DHCPHealth | out-string
