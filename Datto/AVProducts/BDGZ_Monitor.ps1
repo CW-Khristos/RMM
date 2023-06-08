@@ -129,6 +129,7 @@ if (-not (test-path -path "C:\IT\Scripts")) {
 }
 #CLEANUP OLD VERSIONS OF 'EPS.RMM.EXE'
 get-childitem -path "C:\IT"  | where-object {$_.name -match "eps.rmm.exe"} | % {
+  write-host " - eps.rmm.exe file last downloaded : $($_.creationtime)"
   if ($_.creationtime -gt (get-date).adddays(-$env:i_epsInterval)) {
     $script:diag += " - NOT REMOVING EPS FILE`r`n`r`n"
     write-host " - NOT REMOVING EPS FILE`r`n"
