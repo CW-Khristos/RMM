@@ -124,11 +124,9 @@
         #DOWNLOAD LHM.ZIP FROM GITHUB
         if (-not (test-path -path "C:\IT\LHM.zip")) {
           try {
-            #IPM-Khristos
             start-bitstransfer -source $srcLHM -destination "C:\IT\LHM.zip" -erroraction stop
           } catch {
             try {
-              #IPM-Khristos
               $web = new-object system.net.webclient
               $web.downloadfile($srcLHM, "C:\IT\LHM.zip")
             } catch {
