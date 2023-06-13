@@ -3,16 +3,16 @@
 
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
-  Param (
-    [Parameter(Mandatory=$true)]$usrAction,
-    [Parameter(Mandatory=$true)]$rebootDay,
-    [Parameter(Mandatory=$true)]$rebootTime,
-    [Parameter(Mandatory=$true)]$rebootWindow,
-    [Parameter(Mandatory=$true)]$usrTimeoutUnits,
-    [Parameter(Mandatory=$true)]$usrTimeout,
-    [Parameter(Mandatory=$false)]$usrMessage,
-    [Parameter(Mandatory=$false)]$usrSuspendBitLocker
-  )
+  #Param (
+  #  [Parameter(Mandatory=$true)]$usrAction,
+  #  [Parameter(Mandatory=$true)]$rebootDay,
+  #  [Parameter(Mandatory=$true)]$rebootTime,
+  #  [Parameter(Mandatory=$true)]$rebootWindow,
+  #  [Parameter(Mandatory=$true)]$usrTimeoutUnits,
+  #  [Parameter(Mandatory=$true)]$usrTimeout,
+  #  [Parameter(Mandatory=$false)]$usrMessage,
+  #  [Parameter(Mandatory=$false)]$usrSuspendBitLocker
+  #)
   [int]$varTimeout=0
 
   function check-Reboot {
