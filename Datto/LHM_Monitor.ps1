@@ -14,7 +14,7 @@
   $script:varAlertMsg = ""
   $logPath = "C:\IT\Log\LHM_Monitor"
   $strLineSeparator = "----------------------------------"
-  $srcLHM = "https://github.com/CW-Khristos/RMM/raw/dev/Datto/LHM/LHM.zip"
+  $srcLHM = "https://github.com/CW-Khristos/scripts/raw/master/LHM/LHM.zip"
   $cfgDefault = "C:\IT\LHM\LibreHardwareMonitor.config"
   $lhmConfig = "`r`n<?xml version=`"1.0`" encoding=`"utf-8`"?>`r`n`t<configuration>`r`n"
   $lhmConfig += "`t`t<appSettings>`r`n`t`t`t<add key=`"startMinMenuItem`" value=`"true`" />`r`n"
