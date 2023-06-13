@@ -7,10 +7,10 @@
     Querys Drive SMART Attributes using SMARTCTL from https://www.smartmontools.org/
  
 .NOTES
-    Version         : 0.1.0 (25 May 2023)
+    Version         : 0.1.1 (13 June 2023)
     Creation Date   : 25 May 2023
     Purpose/Change  : Querys Drive SMART Attributes using SMARTCTL
-    File Name       : SMART_Statusv3.ps1 
+    File Name       : SMART_Statusv2.ps1 
     Author          : Christopher Bledsoe, Tier II Tech - IPM Computers
     Email           : cbledsoe@ipmcomputers.com
     Requires        : PowerShell Version 2.0+ installed
@@ -41,7 +41,7 @@
   $exePath              = "$($env:strPath)"
   $smartEXE             = "smartctl.73.exe"
   $dbEXE                = "update-smart-drivedb.exe"
-  $logPath              = "C:\IT\Log\SMART_Statusv3"
+  $logPath              = "C:\IT\Log\SMART_Statusv2"
   $strLineSeparator     = "--------------------"
   $srcSMART             = "https://github.com/CW-Khristos/scripts/raw/master/SMART/smartctl.73.exe"
   $srcDB                = "https://github.com/CW-Khristos/scripts/raw/master/SMART/update-smart-drivedb.exe"
@@ -405,28 +405,28 @@
     switch ($intSTG) {
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv3 - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv3 - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv3 - ($($strModule)) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv3 - ($($strModule)) :" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - ($($strModule)) :" -foregroundcolor red
         write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv3 - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv3 - $($strModule) :" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :" -foregroundcolor yellow
         write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv3 - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv3 - $($strModule) :" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :" -foregroundcolor yellow
         write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
@@ -916,19 +916,19 @@ if (-not $script:blnBREAK) {
     $result = "$($env:strTask) : $($alert) : Execution Completed with Warnings : $($finish)"
   }
   $enddiag += " - $($result)`r`n$($strLineSeparator)`r`n`t - $($alert)`r`n$($strLineSeparator)`r`n"
-  logERR 3 "SMART_Statusv3" "$($enddiag)"
+  logERR 3 "SMART_Statusv2" "$($enddiag)"
   #WRITE TO LOGFILE
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "SMART_Statusv3 : $($result)"
+  write-DRMMAlert "SMART_Statusv2 : $($result)"
   write-DRMMDiag "$($script:diag)"
   exit 0
 } elseif ($script:blnBREAK) {
   $result = "$($env:strTask) : Execution Failed : $($finish)"
   $enddiag = " - $($result)`r`n$($strLineSeparator)`r`n"
-  logERR 4 "SMART_Statusv3" "$($enddiag)"
+  logERR 4 "SMART_Statusv2" "$($enddiag)"
   #WRITE TO LOGFILE
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "SMART_Statusv3 : $($result) : Diagnostics - $($logPath)"
+  write-DRMMAlert "SMART_Statusv2 : $($result) : Diagnostics - $($logPath)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 }
