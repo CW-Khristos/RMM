@@ -61,19 +61,28 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 
 # open / connect to the registry / read the subkeys
 try {
-  $hkeySubkeys = get-childitem -path "$($RegPath)" -recurse
-  write-host "$($strLineSeparator)`r`nCHECKING $($subKey) REGISTRY KEY VALUES`r`n$($strLineSeparator)"
-  $script:diag += "`r`n$($strLineSeparator)`r`nCHECKING $($subKey) REGISTRY KEY VALUES`r`n$($strLineSeparator)`r`n"
-
   #QUERY FOR 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE
-  write-host "`t$($strLineSeparator)`r`n`tCHECKING 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE"
-  $script:diag += "`t$($strLineSeparator)`r`n`tCHECKING 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE`r`n"
-  $RpcAuthnLevelPrivacy = get-itemproperty -path ("HKU:\\$($subKey)\$($AuthPath)") -name "RpcAuthnLevelPrivacy" -erroraction silentlycontinue
-  if ($RpcAuthnLevelPrivacy) {
-    write-host "`t`tRpcAuthnLevelPrivacy : $($RpcAuthnLevelPrivacy.RpcAuthnLevelPrivacy)"
-    $script:diag += "`t`tRpcAuthnLevelPrivacy : $($RpcAuthnLevelPrivacy.RpcAuthnLevelPrivacy)"
-    if ($RpcAuthnLevelPrivacy.RpcAuthnLevelPrivacy -eq 0) {$script:blnWARN = $true; write-host "`t`tTHIS MEANS PRINTNIGHTMARE PROTECTIONS ARE DISABLED!"; $script:diag += "`r`n`t`tTHIS MEANS PRINTNIGHTMARE PROTECTIONS ARE DISABLED!"}
-  } elseif (-not $RpcAuthnLevelPrivacy) {write-host "`t`tRpcAuthnLevelPrivacy : NOT PRESENT"; $script:diag += "`t`tRpcAuthnLevelPrivacy : NOT PRESENT"}
+  $hkeyVals = get-itemproperty -path "$($RegPath)"
+  write-host "$($strLineSeparator)`r`n`tCHECKING 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE"
+  $script:diag += "$($strLineSeparator)`r`n`tCHECKING 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE`r`n"
+  try {
+      if ([string]$hkeyVals.RpcAuthnLevelPrivacyEnabled) {
+        write-host "`t`tRpcAuthnLevelPrivacy : $($hkeyVals.RpcAuthnLevelPrivacyEnabled)"
+        $script:diag += "`t`tRpcAuthnLevelPrivacy : $($hkeyVals.RpcAuthnLevelPrivacyEnabled)"
+        if ($hkeyVals.RpcAuthnLevelPrivacyEnabled -eq 0) {
+          $script:blnWARN = $true
+          write-host "`t`tTHIS MEANS PRINTNIGHTMARE PROTECTIONS ARE DISABLED!"
+          $script:diag += "`r`n`t`tTHIS MEANS PRINTNIGHTMARE PROTECTIONS ARE DISABLED!`r`n"
+        }
+      } elseif (-not [string]$hkeyVals.RpcAuthnLevelPrivacyEnabled) {
+        write-host "`t`tRpcAuthnLevelPrivacy : NOT PRESENT"
+        $script:diag += "`t`tRpcAuthnLevelPrivacy : NOT PRESENT`r`n"
+      }
+  } catch {  
+    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    write-host "`t`tERROR : $($err)"
+    $script:diag += "`t`tERROR : $($err)"
+  }
   write-host "`t$($strLineSeparator)"
   $script:diag += "`r`n`t$($strLineSeparator)"
 } catch {
