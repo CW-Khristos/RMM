@@ -218,6 +218,7 @@ if ($company) {
     } catch {
       $script:diag += "`r`nError Updating Password : $($script:pwdName) O365 Admin`r`n$($strLineSeparator)`r`n"
       Write-Host "Error Updating Password : $($script:pwdName) O365 Admin`r`n$($strLineSeparator)"
+      exit 1
     }
   } else {
     try {
@@ -229,11 +230,14 @@ if ($company) {
     } catch {
       $script:diag += "`r`nError Creating Password : $($script:pwdName) O365 Admin`r`n$($strLineSeparator)`r`n"
       Write-Host "Error Creating Password : $($script:pwdName) O365 Admin`r`n$($strLineSeparator)"
+      exit 1
     }
   }
 } else {
   $script:diag += "`r`n$($script:strCompany) was not found in Hudu"
   Write-Host "$($script:strCompany) was not found in Hudu"
+  exit 1
 }
+exit 0
 #END SCRIPT
 #------------
