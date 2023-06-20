@@ -5,7 +5,7 @@
   #)
   #VERSION FOR SCRIPT UPDATE
   $strSCR           = "Backup_Schedules"
-  $strVER           = [version]"0.1.0"
+  $strVER           = [version]"0.1.1"
   $strREPO          = "RMM"
   $strBRCH          = "dev"
   $strDIR           = "Datto"
@@ -75,6 +75,7 @@ $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #QUERY BACKUP SCHEDULES
 try {
+  $scheduleset = $null
   $schedule = .\clienttool.exe control.schedule.list
   $schedule = $schedule | where {$_ -like "* yes *"} | out-string
   $array = $schedule.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
@@ -82,22 +83,14 @@ try {
   $script:diag += "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)`r`n"
   foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
   write-host "$($strLineSeparator)"
-  $script:diag += "`r`n$($strLineSeparator)"
-  $array = $schedule.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-  write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
-  foreach ($item in $array) {write-host "`t$($item)"; $script:diag += "`t$($item)`r`n"}
-  if ($array.count -lt 11) {
-    $scheduleset = "$($array[2])-$($array[4]) : $($array[7])-$($array[5]) - $($array[6])"
-  } elseif ($array.count -ge 11) {
-    while ($i -lt (($array.count / 10) - 1)) {
-      $i += 1
-      if ($i -eq 0) {
-        $scheduleset = "$($array[2])-$($array[4]) : $($array[7])-$($array[5]) - $($array[6]) | "
-      } elseif ($i -gt 0) {
-        $scheduleset += "`r`n$($array[(($i * 10) + 2)])-$($array[(($i * 10) + 4)]) : $($array[(($i * 10) + 7)])-$($array[(($i * 10) + 5)]) - $($array[(($i * 10) + 6)]) | "
-      }
-    }
+  $script:diag += "`r`n$($strLineSeparator)`r`n"
+  #$chunk = $schedule.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+  #write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
+  #$script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
+  #foreach ($item in $chunk) {write-host "`t$($item)"; $script:diag += "`t$($item)`r`n"}
+  foreach ($line in $array) {
+    $chunk = $line.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+    $scheduleset += "$($chunk[2])-$($chunk[4]) : $($chunk[7])-$($chunk[5]) - $($chunk[6]) | `r`n"
   }
   $scheduleset = $scheduleset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
   $scheduleset = $scheduleset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
@@ -124,11 +117,15 @@ try {
   foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
   write-host "$($strLineSeparator)"
   $script:diag += "`r`n$($strLineSeparator)"
-  $array = $archive.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-  write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
-  foreach ($item in $array) {write-host "`t$($item)"; $script:diag += "`t$($item)`r`n"}
-  $archiveset = "$($array[2]) - $($array[4]) - Datasources : $($array[5]) - Archive Time : $($array[6]) - Archive Months : $($array[7]) - Archive Days : $($array[8])"
+  #$chunk = $archive.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+  #write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
+  #$script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
+  #foreach ($item in $chunk) {write-host "`t$($item)"; $script:diag += "`t$($item)`r`n"}
+  foreach ($line in $array) {
+    $chunk = $line.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+    $scheduleset += "$($chunk[2]) - $($chunk[4]) - Datasources : $($chunk[5]) - Archive Time : $($chunk[6]) - Archive Months : $($chunk[7]) - Archive Days : $($chunk[8]) | `r`n"
+  }
+  $archiveset = "$($chunk[2]) - $($chunk[4]) - Datasources : $($chunk[5]) - Archive Time : $($chunk[6]) - Archive Months : $($chunk[7]) - Archive Days : $($chunk[8])"
   $archiveset = $archiveset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
   $archiveset = $archiveset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
   $array = $archiveset.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
