@@ -39,7 +39,7 @@
     $Minutes = $sw.Elapsed.Minutes
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
-    $ScriptStopTime = "$((get-date).ToString('yyyy-MM-dd hh:mm:ss'))"
+    $ScriptStopTime = (get-date).ToString('yyyy-MM-dd hh:mm:ss')
     write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
@@ -116,7 +116,12 @@ $AllSessions = $SessionsList | out-string
 $FailedBackups = $Backups | where {(($null -ne $_.state) -and 
   ((($_.state -eq "Failed") -or ($_.state -eq "CompletedWithErrors")) -or 
   (($_.state -eq "InProcess" -and $_.start -lt $Date))))} | out-string
+$UncertainBackups = $Backups | where {(($null -ne $_.state) -and 
+  ((($_.state -ne "Failed") -and ($_.state -ne "CompletedWithErrors") -and 
+  ($_.state -ne "Completed") -and ($_.state -ne "InProcess")) -or 
+  (($_.state -eq "InProcess" -and $_.start -lt $Date))))} | out-string
 logERR 3 "MSPBackup_Status" "Failed:`r`n$($FailedBackups)"
+logERR 3 "MSPBackup_Status" "UnCertain:`r`n$($UncertainBackups)"
 logERR 3 "MSPBackup_Status" "Sessions:`r`n$($AllSessions)"
 if (-not $SessionsList) {
   logERR 4 "MSPBackup_Status" "No Backups in past 24 Hours"
@@ -124,16 +129,20 @@ if (-not $SessionsList) {
   $script:blnWARN = $true
   logERR 4 "MSPBackup_Status" "Failed Backups Detected"
 }
+if ($UncertainBackups) {
+  $script:blnWARN = $true
+  logERR 4 "MSPBackup_Status" "UnCertain Backups Detected"
+}
 #Stop script execution time calculation
 StopClock
 $finish = "$((get-date).ToString('yyyy-MM-dd hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
-    write-DRMMAlert "MSPBackup_Status : Healthy. No Failed Backups : $($finish)"
+    write-DRMMAlert "MSPBackup_Status : Healthy. No Issues Found : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   } elseif ($script:blnWARN) {
-    write-DRMMAlert "MSPBackup_Status : Failed Backups Found. Please Check Diagnostics : $($finish)"
+    write-DRMMAlert "MSPBackup_Status : Issues Found. Please Check Diagnostics : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   }
