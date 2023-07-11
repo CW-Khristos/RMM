@@ -327,8 +327,8 @@
       $running = $false
     }
     #REMOVE FILES
-    write-host "$($strLineSeparator)`r`nRemoving LHM Files`r`n$($strLineSeparator)"
-    $script:diag += "$($strLineSeparator)`r`nRemoving LHM Files`r`n$($strLineSeparator)`r`n"
+    write-host "$($strLineSeparator)`r`n`tRemoving LHM Files`r`n$($strLineSeparator)"
+    $script:diag += "$($strLineSeparator)`r`n`tRemoving LHM Files`r`n$($strLineSeparator)`r`n"
     try {
       remove-item -path "C:\IT\LHM" -recurse -force -erroraction continue
       remove-item -path "C:\IT\LHM.zip" -force -erroraction silentlycontinue
