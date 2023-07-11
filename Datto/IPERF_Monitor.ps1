@@ -265,19 +265,19 @@
       $running = $false
     }
     #REMOVE FILES
-    $remdiag = "Removing IPERF Files`r`n$($strLineSeparator)"
+    $remdiag = "Removing IPERF Files`r`n$($strLineSeparator)`r`n"
     try {
       remove-item -path "C:\IT\IPERF" -recurse -force -erroraction stop
-      $remdiag += "Files Successfully Removed"
-      logERR 4 "run-Remove" "$($remdiag)`r`n$($strLineSeparator)"
+      $remdiag += "Files Successfully Removed`r`n$($strLineSeparator)"
+      logERR 4 "run-Remove" "$($remdiag)"
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
-        $remdiag += "NOT PRESENT : C:\IT\IPERF"
+        $remdiag += "NOT PRESENT : C:\IT\IPERF`r`n$($strLineSeparator)"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
         $err = "ERROR : `r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        $remdiag += "COULD NOT REMOVE : C:\IT\IPERF`r`n$($err)"
+        $remdiag += "COULD NOT REMOVE : C:\IT\IPERF`r`n$($err)`r`n$($strLineSeparator)"
       }
-      logERR 4 "run-Remove" "$($remdiag)`r`n$($strLineSeparator)"
+      logERR 4 "run-Remove" "$($remdiag)"
     }
   }
 #endregion ----- FUNCTIONS ----
