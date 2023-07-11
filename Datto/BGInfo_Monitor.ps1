@@ -171,6 +171,7 @@ namespace Win32{
               } elseif (($null -ne $strDIR) -and ($strDIR -ne "")) {
                 $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/$($strSCR)_$($objSCR.innertext).ps1"
               }
+              #IPM-Khristos
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
               $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n`r`n"
@@ -318,6 +319,7 @@ namespace Win32{
     dir-Check
     # install the executable somewhere we can bank on its presence
     try {
+      move-item default.bgi "C:\IT\BGInfo" -force -erroraction stop
       move-item bginfo4.exe "C:\IT\BGInfo" -force -erroraction stop
       move-item bginfo8.exe "C:\IT\BGInfo" -force -erroraction stop
     } catch {
@@ -458,10 +460,10 @@ namespace Win32{
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
         write-host "NOT PRESENT : C:\IT\BGInfo"
-        $script:diag += "NOT PRESENT : C:\IT\BGInfo"
+        $script:diag += "NOT PRESENT : C:\IT\BGInfo`r`n"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
         write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       }
     }
     try {
@@ -469,10 +471,10 @@ namespace Win32{
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
         write-host "NOT PRESENT : $($newLink)"
-        $script:diag += "NOT PRESENT : $($newLink)"
+        $script:diag += "NOT PRESENT : $($newLink)`r`n"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
         write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       }
     }
     try {
@@ -480,10 +482,10 @@ namespace Win32{
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
         write-host "NOT PRESENT : $($allLink)"
-        $script:diag += "NOT PRESENT : $($allLink)"
+        $script:diag += "NOT PRESENT : $($allLink)`r`n"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
         write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       }
     }
     #SET DEFAULT WALLPAPER
@@ -491,7 +493,7 @@ namespace Win32{
       Set-Wallpaper("$($wallpaper)") -erroraction stop
     } catch {
       write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
     }
   }
 #endregion ----- FUNCTIONS ----
