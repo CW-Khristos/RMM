@@ -8,17 +8,21 @@
 # Modifications : Christopher Bledsoe - cbledsoe@ipmcomputers.com
 
 #region ----- DECLARATIONS ----
-  $script:diag = $null
-  $script:blnWARN = $false
-  $script:blnBREAK = $false
-  $script:varAlertMsg = ""
-  $logPath = "C:\IT\Log\LHM_Monitor"
-  $strLineSeparator = "----------------------------------"
-  $srcLHM = "https://github.com/CW-Khristos/scripts/raw/master/LHM/LHM.zip"
-  $cfgDefault = "C:\IT\LHM\LibreHardwareMonitor.config"
-  $lhmConfig = "`r`n<?xml version=`"1.0`" encoding=`"utf-8`"?>`r`n`t<configuration>`r`n"
-  $lhmConfig += "`t`t<appSettings>`r`n`t`t`t<add key=`"startMinMenuItem`" value=`"true`" />`r`n"
-  $lhmConfig += "`t`t</appSettings>`r`n`t</configuration>"
+  $script:diag        = $null
+  $script:blnWARN     = $false
+  $script:blnBREAK    = $false
+  $script:varAlertMsg = $null
+  $strOpt             = $env:strTask
+  $strScale           = $env:usrScale
+  $intThreshold       = $env:usrThreshold
+  $blnNullAlert       = $env:usrAlertOnNull
+  $logPath            = "C:\IT\Log\LHM_Monitor"
+  $cfgDefault         = "C:\IT\LHM\LibreHardwareMonitor.config"
+  $strLineSeparator   = "----------------------------------"
+  $srcLHM             = "https://github.com/CW-Khristos/scripts/raw/master/LHM/LHM.zip"
+  $lhmConfig          = "`r`n<?xml version=`"1.0`" encoding=`"utf-8`"?>`r`n`t<configuration>`r`n"
+  $lhmConfig          += "`t`t<appSettings>`r`n`t`t`t<add key=`"startMinMenuItem`" value=`"true`" />`r`n"
+  $lhmConfig          += "`t`t</appSettings>`r`n`t</configuration>"
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
@@ -124,13 +128,15 @@
         #DOWNLOAD LHM.ZIP FROM GITHUB
         if (-not (test-path -path "C:\IT\LHM.zip")) {
           try {
+            $depdiag = "DOWNLOADING LHM`r`n$($strLineSeparator)"
+            logERR 3 "run-Deploy" "$($depdiag)"
             start-bitstransfer -source $srcLHM -destination "C:\IT\LHM.zip" -erroraction stop
           } catch {
             try {
               $web = new-object system.net.webclient
               $web.downloadfile($srcLHM, "C:\IT\LHM.zip")
             } catch {
-              $depdiag = "FAILED TO DOWNLOAD LHM"
+              $depdiag = "FAILED TO DOWNLOAD LHM`r`n$($strLineSeparator)"
               logERR 2 "run-Deploy" "$($depdiag)"
             }
           }
@@ -140,32 +146,32 @@
           $zip = $shell.Namespace("C:\IT\LHM.zip")
           $items = $zip.items()
           $shell.Namespace("C:\IT\LHM").CopyHere($items, 1556)
-          write-host " - LHM EXTRACTED"
-          $script:diag += " - LHM EXTRACTED`r`n"
+          $depdiag = " - LHM EXTRACTED`r`n$($strLineSeparator)"
+          logERR 3 "run-Deploy" "$($depdiag)"
           start-sleep -seconds 2
           remove-item -path "C:\IT\LHM.zip" -force -erroraction continue
         }
       } catch {
-        $depdiag = "FAILED TO EXTRACT LHM"
+        $depdiag = "FAILED TO EXTRACT LHM`r`n$($strLineSeparator)"
         logERR 2 "run-Deploy" "$($depdiag)"
       }
       if (-not $script:blnBREAK) {
         #pre-assemble a settings file to start minimised
         try {
           set-content "$($cfgDefault)" -value "$($lhmConfig)" -force
-          write-host " - LHM CONFIG SET"
-          $script:diag += " - LHM CONFIG SET`r`n"
+          $depdiag = " - LHM CONFIG SET`r`n$($strLineSeparator)"
+          logERR 3 "run-Deploy" "$($depdiag)"
         } catch {
           $depdiag = "FAILED TO CONFIGURE LHM`r`n$($strLineSeparator)"
           logERR 3 "run-Deploy" "$($depdiag)"
         }
         # inform the user
         $depdiag = "DEPLOY LHM COMPLETED - LHM has been deployed`r`n"
-        $depdiag += "LHM Location : 'C:\IT\LHM'`r`n$($strLineSeparator)"
+        $depdiag += "`tLHM Location : 'C:\IT\LHM'`r`n$($strLineSeparator)"
         logERR 3 "run-Deploy" "$($depdiag)"
       }
     } elseif ($running) {
-      $depdiag = "- LHM is already running and could not be stopped to deploy files`r`n$($strLineSeparator)"
+      $depdiag = " - LHM is already running and could not be stopped to deploy files`r`n$($strLineSeparator)"
       logERR 2 "run-Deploy" "$($depdiag)"
     }
   }
@@ -194,12 +200,12 @@
         set-content "$($cfgCompare)" -value "$($lhmConfig)" -force
         #COMPARE COMPONENT ATTACHED 'DEFAULT.BGI' FILE AS 'COMPARE.BGI' TO 'DEFAULT.BGI' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cfgDefault) -DifferenceObject $(Get-Content $cfgCompare)) {
-          write-host "`tFiles are different - Replacing LHM Config`r`n$($strLineSeparator)`r`n"
-          $script:diag += "`r`n`tFiles are different - Replacing LHM Config`r`n$($strLineSeparator)`r`n"
+          $mondiag = "Files are different - Replacing LHM Config`r`n$($strLineSeparator)`r`n"
+          logERR 3 "run-Monitor" "$($mondiag)"
           set-content "$($cfgDefault)" -value "$($lhmConfig)" -force
         } else {
-          write-host "`tFiles are same - Continuing`r`n$($strLineSeparator)`r`n"
-          $script:diag += "`r`n`tFiles are same - Continuing`r`n$($strLineSeparator)`r`n"
+          $mondiag = "Files are same - Continuing`r`n$($strLineSeparator)`r`n"
+          logERR 3 "run-Monitor" "$($mondiag)"
         }
       }
       #CHECK IF LHM IS ALREADY RUNNING
@@ -239,26 +245,28 @@
         #check to see if we actually got any results; throw if configured to do so
         if ($arrSensors.count -eq 0) {
           $mondiag = "ERROR! No data reported from LibreHardwareMonitor`r`n$($strLineSeparator)"
-          if ($env:usrAlertOnNull -match 'true') {
+          if ($blnNullAlert -match 'true') {
+            $mondiag = "Alert on Null : False`r`n`t$($mondiag)`r`n$($strLineSeparator)"
             logERR 2 "run-Monitor" "$($mondiag)"
-          } else {
+          } elseif ($blnNullAlert -match 'false') {
+            $mondiag = "Alert on Null : False`r`n`t$($mondiag)`r`n$($strLineSeparator)"
             logERR 3 "run-Monitor" "$($mondiag)"
           }
         }
 
         #if our threshold figure has decimals, throw it
-        if ($env:usrThreshold -notmatch '^[0-9]*$') {
+        if ($intThreshold -notmatch '^[0-9]*$') {
           $mondiag = "ERROR! Threshold figure is not an integer`r`n"
           $mondiag += "No spaces, measurements, decimal points etc. Please reconfigure`r`n$($strLineSeparator)"
           logERR 2 "run-Monitor" "$($mondiag)"
         }
         if (-not $script:blnBREAK) {
           #if we've been given figures in fahrenheit, convert them to celsius
-          if ($env:usrScale -eq 'F') {
-            $varThreshold = $env:usrThreshold - 32
+          if ($strScale -eq 'F') {
+            $varThreshold = $intThreshold - 32
             $varThreshold = $varThreshold / 1.8
-          } else {
-            $varThreshold = $env:usrThreshold
+          } elseif ($strScale -eq 'C') {
+            $varThreshold = $intThreshold
           }
 
           #did the user opt to pick a sensor?
@@ -276,25 +284,23 @@
             $blnIdle = $false
           }
           #populate our alert message
-          $mondiag = $null
+          $mondiag = "No Sensors reporting over Threshold $($intThreshold)($($strScale))"
           foreach ($sensor in $arrSensors.getEnumerator()) {
             if ($blnIdle) {
               $evalThreshold = [math]::round(($varThreshold - 10))
               if ($sensor.value -gt $evalThreshold) {
-                $sensordiag = "Idle Temp Warning (Warn : $($evalThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
-                $mondiag += "$($sensordiag)"
-                $script:varAlertMsg += "$($sensordiag)"
-                write-host "`t$($sensordiag)"
-                $script:diag += "`r`n`t$($sensordiag)`r`n"
+                $mondiag = "Idle Temp Warning (Warn : $($evalThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
+                $script:varAlertMsg += "$($mondiag)"
+                write-host "`t$($mondiag)"
+                $script:diag += "`r`n`t$($mondiag)`r`n"
               }
             } elseif (-not $blnIdle) {
               $evalThreshold = [math]::round(($varThreshold))
               if ($sensor.value -gt $evalThreshold) {
-                $sensordiag = "Full-Load Temp Warning (Warn : $($evalThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
-                $mondiag += "$($sensordiag)"
-                $script:varAlertMsg += "$($sensordiag)"
-                write-host "`t$($sensordiag)"
-                $script:diag += "`r`n`t$($sensordiag)`r`n"
+                $mondiag = "Full-Load Temp Warning (Warn : $($evalThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
+                $script:varAlertMsg += "$($mondiag)"
+                write-host "`t$($mondiag)"
+                $script:diag += "`r`n`t$($mondiag)`r`n"
               }
             }
           }
@@ -327,9 +333,9 @@
       $running = $false
     }
     #REMOVE FILES
-    write-host "$($strLineSeparator)`r`n`tRemoving LHM Files`r`n$($strLineSeparator)"
-    $script:diag += "$($strLineSeparator)`r`n`tRemoving LHM Files`r`n$($strLineSeparator)`r`n"
     try {
+      $remdiag = "Removing LHM Files`r`n$($strLineSeparator)"
+      logERR 3 "run-Remove" "$($remdiag)"
       remove-item -path "C:\IT\LHM" -recurse -force -erroraction continue
       remove-item -path "C:\IT\LHM.zip" -force -erroraction silentlycontinue
     } catch {
@@ -352,7 +358,7 @@ $ScrptStartTime = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
-if ($env:strTask -eq "DEPLOY") {
+if ($strOpt.toupper() -eq "DEPLOY") {
   $taskdiag = "Deploying LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Deploy" "$($taskdiag)"
   try {
@@ -361,7 +367,7 @@ if ($env:strTask -eq "DEPLOY") {
   } catch {
     
   }
-} elseif ($env:strTask -eq "MONITOR") {
+} elseif ($strOpt.toupper() -eq "MONITOR") {
   $taskdiag = "Monitoring LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Monitor" "$($taskdiag)"
   try {
@@ -370,7 +376,7 @@ if ($env:strTask -eq "DEPLOY") {
   } catch {
     
   }
-} elseif ($env:strTask -eq "UPGRADE") {
+} elseif ($strOpt.toupper() -eq "UPGRADE") {
   $taskdiag = "Replacing LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Upgrade" "$($taskdiag)"
   try {
@@ -379,7 +385,7 @@ if ($env:strTask -eq "DEPLOY") {
   } catch {
     
   }
-} elseif ($env:strTask -eq "REMOVE") {
+} elseif ($strOpt.toupper() -eq "REMOVE") {
   $taskdiag = "Removing LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Remove" "$($taskdiag)"
   try {
@@ -406,7 +412,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "$($env:strTask) : $($script:varAlertMsg) : $($finish)"
+    write-DRMMAlert "$($strOpt) : $($script:varAlertMsg) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   } else {
@@ -414,7 +420,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "END" "$($enddiag)"
     #WRITE TO LOGFILE
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "$($env:strTask) : No nodes reporting over threshold : $($finish)"
+    write-DRMMAlert "$($strOpt) : No nodes reporting over threshold : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   }
@@ -423,7 +429,7 @@ if (-not $script:blnBREAK) {
   $enddiag += "Execution Failed : $($finish)`r`n$($strLineSeparator)"
   logERR 4 "END" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "$($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
+  write-DRMMAlert "$($strOpt) Failure : Diagnostics - $($logPath) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 }
