@@ -268,8 +268,8 @@
     $remdiag = "Removing IPERF Files`r`n$($strLineSeparator)`r`n"
     try {
       remove-item -path "C:\IT\IPERF" -recurse -force -erroraction stop
-      $remdiag += "Files Successfully Removed`r`n$($strLineSeparator)"
-      logERR 4 "run-Remove" "$($remdiag)"
+      $remdiag += "`tFiles Successfully Removed`r`n`t$($strLineSeparator)"
+      logERR 3 "run-Remove" "$($remdiag)"
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
         $remdiag += "NOT PRESENT : C:\IT\IPERF`r`n$($strLineSeparator)"
