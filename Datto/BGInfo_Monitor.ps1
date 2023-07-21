@@ -171,7 +171,6 @@ namespace Win32{
               } elseif (($null -ne $strDIR) -and ($strDIR -ne "")) {
                 $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/$($strSCR)_$($objSCR.innertext).ps1"
               }
-              #IPM-Khristos
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
               $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n`r`n"
