@@ -10,30 +10,31 @@
 
 #region ----- DECLARATIONS ----
   #VERSION FOR SCRIPT UPDATE
-  $strSCR = "BGInfo_Monitor"
-  $strVER = [version]"0.1.0"
-  $strREPO = "RMM"
-  $strBRCH = "dev"
-  $strDIR = "Datto/BGInfo"
-  $script:diag = $null
-  $script:blnWARN = $false
-  $script:blnBREAK = $false
-  $logPath = "C:\IT\Log\BG_Info"
-  $strLineSeparator = "----------------------------------"
-  $bgFiles = @(
+  $strSCR           = "BGInfo_Monitor"
+  $strVER           = [version]"0.1.0"
+  $strREPO          = "RMM"
+  $strBRCH          = "dev"
+  $strDIR           = "Datto/BGInfo"
+  $bgFiles          = @(
     "Bginfo4.exe",
     "Bginfo8.exe",
     "default.bgi"
   )
-  $bgKeys = @(
+  $bgKeys           = @(
     "HKCU:\Software\Winternals\BGInfo",
     "HKLM:\Software\Winternals\BGInfo"
   )
-  $cfgDefault = "C:\IT\BGInfo\default.bgi"
-  $cmdScript = "C:\IT\Scripts\BGILaunch.cmd"
-  $prevScript = "$($ProgramData)\Microsoft\Windows\Start Menu\Programs\StartUp\BGILaunch.cmd"
-  $newLink = "$($ProgramData)\Microsoft\Windows\Start Menu\Programs\StartUp\BGInfo - Shortcut.lnk"
-  $allLink = "$($ALLUSERSPROFILE)\Microsoft\Windows\Start Menu\Programs\StartUp\BGInfo - Shortcut.lnk"
+  $script:diag      = $null
+  $script:blnWARN   = $false
+  $script:blnBREAK  = $false
+  $strOPT           = $env:strTask
+  $logPath          = "C:\IT\Log\BG_Info"
+  $strLineSeparator = "----------------------------------"
+  $cfgDefault       = "C:\IT\BGInfo\default.bgi"
+  $cmdScript        = "C:\IT\Scripts\BGILaunch.cmd"
+  $prevScript       = "$($ProgramData)\Microsoft\Windows\Start Menu\Programs\StartUp\BGILaunch.cmd"
+  $newLink          = "$($ProgramData)\Microsoft\Windows\Start Menu\Programs\StartUp\BGInfo - Shortcut.lnk"
+  $allLink          = "$($ALLUSERSPROFILE)\Microsoft\Windows\Start Menu\Programs\StartUp\BGInfo - Shortcut.lnk"
   #Set Wallpaper Code
   $wallpaper = "C:\Windows\Web\Wallpaper\Windows\img0.jpg"
   $wpCode = @' 
@@ -208,18 +209,12 @@ namespace Win32{
       $web = new-object system.net.webclient
       $dlFile = $web.downloadfile($strURL, "C:\IT\BGInfo\$($file)")
     } catch {
-      $dldiag = "Web.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-host "Web.DownloadFile() - Could not download $($strURL)" -foregroundcolor red
-      write-host "$($dldiag)"
-      $script:diag += "$($dldiag)"
-      logERR 3 "download-Files" "$($dldiag)"
       try {
+        $dldiag = "Web.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+        logERR 3 "download-Files" "$($dldiag)"
         start-bitstransfer -source $strURL -destination "C:\IT\BGInfo\$($file)" -erroraction stop
       } catch {
         $dldiag = "BITS.Transfer() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-        write-host "BITS.Transfer() - Could not download $($strURL)" -foregroundcolor red
-        write-host "$($dldiag)"
-        $script:diag += "$($dldiag)"
         logERR 2 "download-Files" "$($dldiag)"
       }
     }
@@ -316,17 +311,21 @@ namespace Win32{
   function run-Deploy () {
     #CHECK 'PERSISTENT' FOLDERS
     dir-Check
+    $timestanp = "$((Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))"
     # install the executable somewhere we can bank on its presence
     try {
       move-item default.bgi "C:\IT\BGInfo" -force -erroraction stop
       move-item bginfo4.exe "C:\IT\BGInfo" -force -erroraction stop
       move-item bginfo8.exe "C:\IT\BGInfo" -force -erroraction stop
+      $mondiag = "BGInfo Files Copied from Component"
+      logERR 3 "run-Deploy" "$($mondiag)"
     } catch {
+      $mondiag = "Failed to Copy BGInfo Files from Component`r`n`tDownloading from GitHub"
+      logERR 3 "run-Deploy" "$($mondiag)"
       foreach ($file in $bgFiles) {download-Files $file}
     }
     # check for BGIs
     if (!(test-path *.bgi)) {
-      $timestanp = "$((Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))"
       $mondiag = "- ERROR: There needs to be at least one .bgi file for the Component to work`r`n"
       $mondiag += "  Execution cannot continue. Exiting`r`n"
       $mondiag += "`r`n`r`nExecution Failed : $($timestanp)"
@@ -365,9 +364,9 @@ namespace Win32{
         write-Script "$($scrCompare)" $false
         #COMPARE STRATUP SCRIPT FILE AS 'COMPARE.CMD' TO 'BGILAUNCH.CMD' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cmdScript) -DifferenceObject $(Get-Content $scrCompare)) {
-          "CMD Files are different"
+          "`tCMD Files are different"
         } else {
-          "CMD Files are same"
+          "`tCMD Files are same"
         }
       }
       #CHECK BGINFO CONFIGURATION FILE 'DEFAULT.BGI'
@@ -381,28 +380,30 @@ namespace Win32{
           $web = new-object system.net.webclient
           $dlFile = $web.downloadfile($cfgOriginal, $cfgCompare)
         } catch {
-          $dldiag = "Web.DownloadFile() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-          write-host "Web.DownloadFile() - Could not download $($cfgOriginal)" -foregroundcolor red
-          write-host "$($dldiag)"
-          $script:diag += "$($dldiag)"
-          logERR 3 "run-Monitor" "$($dldiag)"
           try {
+            $dldiag = "Web.DownloadFile() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+            logERR 3 "run-Monitor" "$($dldiag)"
             start-bitstransfer -source $cfgOriginal -destination $cfgCompare -erroraction stop
           } catch {
             $dldiag = "BITS.Transfer() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-            write-host "BITS.Transfer() - Could not download $($cfgOriginal)" -foregroundcolor red
-            write-host "$($dldiag)"
-            $script:diag += "$($dldiag)"
             logERR 3 "run-Monitor" "$($dldiag)"
           }
         }
         # BELOW DOESN'T WORK FOR NON-SCRIPT TYPE COMPONENTS
-        #move-item default.bgi "$($cfgCompare)" -force
+        try {
+          move-item default.bgi "$($cfgCompare)" -force -erroraction stop
+          $mondiag = "BGInfo Files Copied from Component"
+          logERR 3 "run-Deploy" "$($mondiag)"
+        } catch {
+          $mondiag = "Failed to Copy BGInfo Files from Component`r`n`tDownloading from GitHub"
+          logERR 3 "run-Deploy" "$($mondiag)"
+          foreach ($file in $bgFiles) {download-Files $file}
+        }
         #COMPARE COMPONENT ATTACHED 'DEFAULT.BGI' FILE AS 'COMPARE.BGI' TO 'DEFAULT.BGI' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cfgDefault) -DifferenceObject $(Get-Content $cfgCompare)) {
-          "BGI Files are different"
+          "`tBGI Files are different"
         } else {
-          "BGI Files are same"
+          "`tBGI Files are same"
         }
       }
       #CHECK IF BGINFO IS ALREADY RUNNING
@@ -505,37 +506,33 @@ $ScrptStartTime = (get-date).ToString('yyyy-MM-dd hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
-if ($env:strTask -eq "DEPLOY") {
-  write-host "$($strLineSeparator)`r`nInstall and configure BGInfo Files and Startup`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nInstall and configure BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
+if ($strOPT -eq "DEPLOY") {
   try {
+    logERR 3 "BGInfo_Monitor" "Install and configure BGInfo Files and Startup"
     run-Deploy -erroraction stop
     
   } catch {
     
   }
-} elseif ($env:strTask -eq "MONITOR") {
-  write-host "$($strLineSeparator)`r`nMonitoring BGInfo Files and Startup`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nMonitoring BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
+} elseif ($strOPT -eq "MONITOR") {
   try {
+    logERR 3 "BGInfo_Monitor" "Monitoring BGInfo Files and Startup"
     run-Monitor -erroraction stop
     
   } catch {
     
   }
-} elseif ($env:strTask -eq "UPGRADE") {
-  write-host "$($strLineSeparator)`r`nReplacing BGInfo Files and Startup`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nReplacing BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
+} elseif ($strOPT -eq "UPGRADE") {
   try {
+    logERR 3 "BGInfo_Monitor" "Replacing BGInfo Files and Startup"
     run-Upgrade -erroraction stop
     
   } catch {
     
   }
-} elseif ($env:strTask -eq "REMOVE") {
-  write-host "$($strLineSeparator)`r`nRemoving BGInfo Files and Startup`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nRemoving BGInfo Files and Startup`r`n$($strLineSeparator)`r`n"
+} elseif ($strOPT -eq "REMOVE") {
   try {
+    logERR 3 "BGInfo_Monitor" "Removing BGInfo Files and Startup"
     run-Remove -erroraction stop
     
   } catch {
@@ -554,7 +551,7 @@ if (-not $script:blnBREAK) {
     $enddiag = "Execution Successful : $($finish)"
     logERR 3 "BG_Info" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "BG_Info : $($env:strTask) Successful : Diagnostics - $($logPath) : $($finish)"
+    write-DRMMAlert "BG_Info : $($strOPT) Successful : Diagnostics - $($logPath) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   } elseif ($script:blnWARN) {
@@ -562,7 +559,7 @@ if (-not $script:blnBREAK) {
     $enddiag = "Execution Completed with Warnings : $($finish)"
     logERR 3 "BG_Info" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "BG_Info : $($env:strTask) Warning : Diagnostics - $($logPath) : $($finish)"
+    write-DRMMAlert "BG_Info : $($strOPT) Warning : Diagnostics - $($logPath) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   }
@@ -571,7 +568,7 @@ if (-not $script:blnBREAK) {
   $enddiag = "Execution Failed : $($finish)"
   logERR 4 "BG_Info" "$($enddiag)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "BG_Info : $($env:strTask) Failure : Diagnostics - $($logPath) : $($finish)"
+  write-DRMMAlert "BG_Info : $($strOPT) Failure : Diagnostics - $($logPath) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
