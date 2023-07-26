@@ -325,17 +325,17 @@ namespace Win32{
       foreach ($file in $bgFiles) {download-Files $file}
     }
     # check for BGIs
-    if (!(test-path *.bgi)) {
+    if (!(test-path "C:\IT\BGInfo\*.bgi")) {
       $mondiag = "- ERROR: There needs to be at least one .bgi file for the Component to work`r`n"
       $mondiag += "  Execution cannot continue. Exiting`r`n"
       $mondiag += "`r`n`r`nExecution Failed : $($timestanp)"
       logERR 2 "run-Deploy" "$($mondiag)"
     } else {
-      if (test-path *.bgi -exclude default.bgi) {
-        $varArgs=(ls *.bgi -Exclude default.bgi | Select-Object -First 1).Name
-        $varArgs=`'$varArgs`'
+      if (test-path "C:\IT\BGInfo\*.bgi" -exclude default.bgi) {
+        $varArgs = (ls "C:\IT\BGInfo\*.bgi" -Exclude default.bgi | Select-Object -First 1).Name
+        $varArgs = "$($varArgs)"
       } else {
-        $varArgs='default.bgi'
+        $varArgs = 'default.bgi'
       }
       move-item $varArgs "C:\IT\BGInfo" -force
     }
