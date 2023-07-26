@@ -87,29 +87,29 @@ namespace Win32{
     switch ($intSTG) {
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - ($($strModule)) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -210,12 +210,14 @@ namespace Win32{
       $dlFile = $web.downloadfile($strURL, "C:\IT\BGInfo\$($file)")
     } catch {
       try {
-        $dldiag = "Web.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-        logERR 3 "download-Files" "$($dldiag)"
+        $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $dldiag = "Web.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($err)"
+        logERR 3 "download-Files" "$($dldiag)`r`n$($strLineSeparator)"
         start-bitstransfer -source $strURL -destination "C:\IT\BGInfo\$($file)" -erroraction stop
       } catch {
-        $dldiag = "BITS.Transfer() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-        logERR 2 "download-Files" "$($dldiag)"
+        $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $dldiag = "BITS.Transfer() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($err)"
+        logERR 2 "download-Files" "$($dldiag)`r`n$($strLineSeparator)"
       }
     }
   }
@@ -318,10 +320,10 @@ namespace Win32{
       move-item bginfo4.exe "C:\IT\BGInfo" -force -erroraction stop
       move-item bginfo8.exe "C:\IT\BGInfo" -force -erroraction stop
       $mondiag = "BGInfo Files Copied from Component"
-      logERR 3 "run-Deploy" "$($mondiag)"
+      logERR 3 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
     } catch {
       $mondiag = "Failed to Copy BGInfo Files from Component`r`n`tDownloading from GitHub"
-      logERR 3 "run-Deploy" "$($mondiag)"
+      logERR 3 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
       foreach ($file in $bgFiles) {download-Files $file}
     }
     # check for BGIs
@@ -329,7 +331,7 @@ namespace Win32{
       $mondiag = "- ERROR: There needs to be at least one .bgi file for the Component to work`r`n"
       $mondiag += "  Execution cannot continue. Exiting`r`n"
       $mondiag += "`r`n`r`nExecution Failed : $($timestanp)"
-      logERR 2 "run-Deploy" "$($mondiag)"
+      logERR 2 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
     } else {
       if (test-path "C:\IT\BGInfo\*.bgi" -exclude default.bgi) {
         $varArgs = (ls "C:\IT\BGInfo\*.bgi" -Exclude default.bgi | Select-Object -First 1).Name
@@ -381,22 +383,24 @@ namespace Win32{
           $dlFile = $web.downloadfile($cfgOriginal, $cfgCompare)
         } catch {
           try {
-            $dldiag = "Web.DownloadFile() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-            logERR 3 "run-Monitor" "$($dldiag)"
+            $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+            $dldiag = "Web.DownloadFile() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($err)"
+            logERR 3 "run-Monitor" "$($dldiag)`r`n$($strLineSeparator)"
             start-bitstransfer -source $cfgOriginal -destination $cfgCompare -erroraction stop
           } catch {
-            $dldiag = "BITS.Transfer() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-            logERR 3 "run-Monitor" "$($dldiag)"
+            $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+            $dldiag = "BITS.Transfer() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($err)"
+            logERR 3 "run-Monitor" "$($dldiag)`r`n$($strLineSeparator)"
           }
         }
         # BELOW DOESN'T WORK FOR NON-SCRIPT TYPE COMPONENTS
         try {
           move-item default.bgi "$($cfgCompare)" -force -erroraction stop
           $mondiag = "BGInfo Files Copied from Component"
-          logERR 3 "run-Deploy" "$($mondiag)"
+          logERR 3 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
         } catch {
           $mondiag = "Failed to Copy BGInfo Files from Component`r`n`tDownloading from GitHub"
-          logERR 3 "run-Deploy" "$($mondiag)"
+          logERR 3 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
           foreach ($file in $bgFiles) {download-Files $file}
         }
         #COMPARE COMPONENT ATTACHED 'DEFAULT.BGI' FILE AS 'COMPARE.BGI' TO 'DEFAULT.BGI' FILE IN PATH
@@ -508,7 +512,7 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 dir-Check
 if ($strOPT -eq "DEPLOY") {
   try {
-    logERR 3 "BGInfo_Monitor" "Install and configure BGInfo Files and Startup"
+    logERR 3 "$($strOPT)" "Install and configure BGInfo Files and Startup`r`n$($strLineSeparator)"
     run-Deploy -erroraction stop
     
   } catch {
@@ -516,7 +520,7 @@ if ($strOPT -eq "DEPLOY") {
   }
 } elseif ($strOPT -eq "MONITOR") {
   try {
-    logERR 3 "BGInfo_Monitor" "Monitoring BGInfo Files and Startup"
+    logERR 3 "$($strOPT)" "Monitoring BGInfo Files and Startup`r`n$($strLineSeparator)"
     run-Monitor -erroraction stop
     
   } catch {
@@ -524,7 +528,7 @@ if ($strOPT -eq "DEPLOY") {
   }
 } elseif ($strOPT -eq "UPGRADE") {
   try {
-    logERR 3 "BGInfo_Monitor" "Replacing BGInfo Files and Startup"
+    logERR 3 "$($strOPT)" "Replacing BGInfo Files and Startup`r`n$($strLineSeparator)"
     run-Upgrade -erroraction stop
     
   } catch {
@@ -532,7 +536,7 @@ if ($strOPT -eq "DEPLOY") {
   }
 } elseif ($strOPT -eq "REMOVE") {
   try {
-    logERR 3 "BGInfo_Monitor" "Removing BGInfo Files and Startup"
+    logERR 3 "$($strOPT)" "Removing BGInfo Files and Startup`r`n$($strLineSeparator)"
     run-Remove -erroraction stop
     
   } catch {
