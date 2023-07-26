@@ -3,16 +3,17 @@
 
 #region ----- DECLARATIONS ----
   #VERSION FOR SCRIPT UPDATE
-  $strSCR = "IPERF_Monitor"
-  $strVER = [version]"0.1.0"
-  $strREPO = "RMM"
-  $strBRCH = "dev"
-  $strDIR = "Datto/IPERF"
-  $script:diag = $null
-  $script:blnWARN = $false
-  $script:blnBREAK = $false
-  $logPath = "C:\IT\Log\IPERF_Monitor"
-  $strLineSeparator = "----------------------------------"
+  $strSCR             = "IPERF_Monitor"
+  $strVER             = [version]"0.1.0"
+  $strREPO            = "RMM"
+  $strBRCH            = "dev"
+  $strDIR             = "Datto/IPERF"
+  $script:diag        = $null
+  $script:blnWARN     = $false
+  $script:blnBREAK    = $false
+  $strOPT             = $env:strTask
+  $logPath            = "C:\IT\Log\IPERF_Monitor"
+  $strLineSeparator   = "----------------------------------"
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
@@ -53,9 +54,9 @@
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - IPERF_Monitor - ($($strModule)) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n`tEND SCRIPT`r`n$($strLineSeparator)"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n`tEND SCRIPT`r`n$($strLineSeparator)`r`n"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - IPERF_Monitor - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n`tEND SCRIPT`r`n$($strLineSeparator)" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n`tEND SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
@@ -153,16 +154,18 @@
     $strURL = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/$($file)"
     try {
       $dldiag = "Downloading File : '$($strURL)'"
+      logERR 3 "download-Files" "$($dldiag)`r`n$($strLineSeparator)"
       $web = new-object system.net.webclient
       $dlFile = $web.downloadfile("$($strURL)", "$($dest)\$($file)")
-      logERR 3 "download-Files" "$($dldiag)`r`n$($strLineSeparator)"
     } catch {
-      $dldiag += "`r`nWeb.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       try {
-        start-bitstransfer -source "$($strURL)" -destination "$($dest)\$($file)" -erroraction stop
+        $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $dldiag = "Web.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($err)"
         logERR 3 "download-Files" "$($dldiag)`r`n$($strLineSeparator)"
+        start-bitstransfer -source "$($strURL)" -destination "$($dest)\$($file)" -erroraction stop
       } catch {
-        $dldiag += "`r`nBITS.Transfer() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $dldiag = "`r`nBITS.Transfer() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($err)"
         logERR 2 "download-Files" "$($dldiag)`r`n$($strLineSeparator)"
       }
     }
@@ -196,19 +199,19 @@
       move-item cygwin1.dll "C:\IT\IPERF" -force -erroraction stop
       move-item iperf3.exe "C:\IT\IPERF" -force -erroraction stop
       # inform the user
-      $deploydiag = "`r`n`t - IPERF has been deployed and can be used in location : 'C:\IT\IPERF'"
+      $deploydiag += "`r`n`t - IPERF has been deployed and can be used in location : 'C:\IT\IPERF'"
       logERR 3 "run-Deploy" "$($deploydiag)`r`n$($strLineSeparator)"
     } catch {
       try {
         $deploydiag += "`r`n`t - No Component Attached Files. Downloading from GitHub"
-        logERR 3 "run-Deploy" "$($deploydiag)"
+        logERR 3 "run-Deploy" "$($deploydiag)`r`n$($strLineSeparator)"
         download-Files "cygwin1.dll" "C:\IT\IPERF"
         download-Files "iperf3.exe" "C:\IT\IPERF"
         # inform the user
         $deploydiag = " - IPERF has been deployed and can be used in location : 'C:\IT\IPERF'"
         logERR 3 "run-Deploy" "$($deploydiag)`r`n$($strLineSeparator)"
       } catch {
-        $deploydiag += "`r`n`tCould Not Download Files`r`n"
+        $deploydiag = "Could Not Download Files"
         logERR 2 "run-Deploy" "$($deploydiag)`r`n$($strLineSeparator)"
       }
     }
@@ -223,21 +226,21 @@
       #CHECK EXECUTABLE AND DLL
       $result = test-path -path "C:\IT\IPERF\iperf3.exe"
       if (-not $result) {               #FILE DOES NOT EXIST, DEPLOY EXECUTABLE
-        $err = "File Not Found : 'C:\IT\IPERF\iperf3.exe' : Re-Acquiring`r`n$($strLineSeparator)"
-        logERR 3 "run-Monitor" "$($err)"
+        $err = "File Not Found : 'C:\IT\IPERF\iperf3.exe' : Re-Acquiring"
+        logERR 3 "run-Monitor" "$($err)`r`n$($strLineSeparator)"
         run-Deploy
       } elseif ($result) {              #FILE EXISTS
-        $err = "File : 'C:\IT\IPERF\iperf3.exe' : Present`r`n$($strLineSeparator)"
-        logERR 3 "run-Monitor" "$($err)"
+        $err = "File : 'C:\IT\IPERF\iperf3.exe' : Present"
+        logERR 3 "run-Monitor" "$($err)`r`n$($strLineSeparator)"
       }
       $result = test-path -path "C:\IT\IPERF\cygwin1.dll"
       if (-not $result) {               #FILE EXISTS
-        $err = "File Not Found : 'C:\IT\IPERF\cygwin1.dll' : Re-Acquiring`r`n$($strLineSeparator)"
-        logERR 3 "run-Monitor" "$($err)"
+        $err = "File Not Found : 'C:\IT\IPERF\cygwin1.dll' : Re-Acquiring"
+        logERR 3 "run-Monitor" "$($err)`r`n$($strLineSeparator)"
         run-Deploy
       } elseif ($result) {              #FILE EXISTS
-        $err = "File : 'C:\IT\IPERF\cygwin1.dll' : Present`r`n$($strLineSeparator)"
-        logERR 3 "run-Monitor" "$($err)"
+        $err = "File : 'C:\IT\IPERF\cygwin1.dll' : Present"
+        logERR 3 "run-Monitor" "$($err)`r`n$($strLineSeparator)"
       }
     }
   }
@@ -265,17 +268,17 @@
       $running = $false
     }
     #REMOVE FILES
-    $remdiag = "Removing IPERF Files`r`n$($strLineSeparator)`r`n"
     try {
+      $remdiag = "Removing IPERF Files`r`n$($strLineSeparator)"
       remove-item -path "C:\IT\IPERF" -recurse -force -erroraction stop
-      $remdiag += "`tFiles Successfully Removed`r`n`t$($strLineSeparator)"
+      $remdiag += "`r`n`tFiles Successfully Removed`r`n$($strLineSeparator)"
       logERR 3 "run-Remove" "$($remdiag)"
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
-        $remdiag += "NOT PRESENT : C:\IT\IPERF`r`n$($strLineSeparator)"
+        $remdiag += "`r`n`tNOT PRESENT : C:\IT\IPERF`r`n$($strLineSeparator)"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
-        $err = "ERROR : `r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        $remdiag += "COULD NOT REMOVE : C:\IT\IPERF`r`n$($err)`r`n$($strLineSeparator)"
+        $err = "`r`nERROR : `r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        $remdiag += "`r`n`tCOULD NOT REMOVE : C:\IT\IPERF`r`n$($err)`r`n$($strLineSeparator)"
       }
       logERR 4 "run-Remove" "$($remdiag)"
     }
@@ -290,33 +293,33 @@ $ScrptStartTime = (get-date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
-if ($env:strTask -eq "DEPLOY") {
-  logERR 3 "$($env:strTask)" "Deploying IPERF Files`r`n$($strLineSeparator)"
+if ($strOPT -eq "DEPLOY") {
   try {
+    logERR 3 "$($strOPT)" "Deploying IPERF Files`r`n$($strLineSeparator)"
     run-Deploy -erroraction stop
     
   } catch {
     
   }
-} elseif ($env:strTask -eq "MONITOR") {
-  logERR 3 "$($env:strTask)" "Monitoring IPERF Files`r`n$($strLineSeparator)"
+} elseif ($strOPT -eq "MONITOR") {
   try {
+    logERR 3 "$($strOPT)" "Monitoring IPERF Files`r`n$($strLineSeparator)"
     run-Monitor -erroraction stop
     
   } catch {
     
   }
-} elseif ($env:strTask -eq "UPGRADE") {
-  logERR 3 "$($env:strTask)" "Replacing IPERF Files`r`n$($strLineSeparator)"
+} elseif ($strOPT -eq "UPGRADE") {
   try {
+    logERR 3 "$($strOPT)" "Replacing IPERF Files`r`n$($strLineSeparator)"
     run-Upgrade -erroraction stop
     
   } catch {
     
   }
-} elseif ($env:strTask -eq "REMOVE") {
-  logERR 3 "$($env:strTask)" "Removing IPERF Files`r`n$($strLineSeparator)"
+} elseif ($strOPT -eq "REMOVE") {
   try {
+    logERR 3 "$($strOPT)" "Removing IPERF Files`r`n$($strLineSeparator)"
     run-Remove -erroraction stop
     
   } catch {
@@ -332,27 +335,27 @@ $finish = "$((Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     #WRITE TO LOGFILE
-    $enddiag = "$($env:strTask) : Success : $($finish)`r`n$($strLineSeparator)"
-    logERR 3 "$($env:strTask)" "$($enddiag)"
+    $enddiag = "$($strOPT) : Success : $($finish)"
+    logERR 3 "$($strOPT)" "$($enddiag)`r`n$($strLineSeparator)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "$($env:strTask) : Successful : Diagnostics - $($logPath) : $($finish)"
+    write-DRMMAlert "$($strOPT) : Successful : Diagnostics - $($logPath) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 0
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
-    $enddiag = "$($env:strTask) : Warning : $($finish)`r`n$($strLineSeparator)"
-    logERR 3 "$($env:strTask)" "$($enddiag)"
+    $enddiag = "$($strOPT) : Warning : $($finish)"
+    logERR 3 "$($strOPT)" "$($enddiag)`r`n$($strLineSeparator)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "$($env:strTask) : Warning : Diagnostics - $($logPath) : $($finish)"
+    write-DRMMAlert "$($strOPT) : Warning : Diagnostics - $($logPath) : $($finish)"
     write-DRMMDiag "$($script:diag)"
     exit 1
   }
 } elseif ($script:blnBREAK) {
   #WRITE TO LOGFILE
-  $enddiag = "$($env:strTask) : Failed : $($finish)`r`n$($strLineSeparator)"
-  logERR 4 "$($env:strTask)" "$($enddiag)"
+  $enddiag = "$($strOPT) : Failed : $($finish)"
+  logERR 4 "$($strOPT)" "$($enddiag)`r`n$($strLineSeparator)"
   "$($script:diag)" | add-content $logPath -force
-  write-DRMMAlert "$($env:strTask) : Failure : Diagnostics - $($logPath) : $($finish)"
+  write-DRMMAlert "$($strOPT) : Failure : Diagnostics - $($logPath) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
