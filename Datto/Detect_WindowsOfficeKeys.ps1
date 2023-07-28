@@ -8,7 +8,7 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
 # --------------#>  ## About
 
 #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
-#UNCOMMENT BELOW PARAM() AND RENAME '$env:i_PAV' TO '$i_PAV' TO UTILIZE IN CLI
+#UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
 #Param(
 #  [Parameter(Mandatory=$true)]$windowsUDF,
 #  [Parameter(Mandatory=$true)]$officeUDF
@@ -243,7 +243,7 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
       }
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 3 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)"
+      logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)"
       return $null
     }
   }
@@ -287,8 +287,8 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
             $intProductCount += 1
           }
         } catch {
-          #$err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-          #logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n$($err)"
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+          logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n$($err)"
         }
       }
     } catch {
