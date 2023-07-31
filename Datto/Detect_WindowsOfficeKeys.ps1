@@ -212,16 +212,16 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     try {
       logERR 3 "QueryWindowsKeys" "Querying Windows Keys"
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId" 52)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; break}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return;}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId4" 808)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; break}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return;}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId" 52)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; break}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return;}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId4" 808)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; break}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return;}
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       logERR 3 "QueryWindowsKeys" "Failed to Query Windows Keys`r`n$($err)"
