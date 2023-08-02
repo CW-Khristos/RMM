@@ -377,31 +377,24 @@ namespace Win32{
         run-Deploy
       } elseif ($result) {              #FILE EXISTS
         $cfgCompare = "C:\IT\BGInfo\compare.bgi"
-        $cfgOriginal = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/default.bgi"
-        try {
-          $web = new-object system.net.webclient
-          $dlFile = $web.downloadfile($cfgOriginal, $cfgCompare)
-        } catch {
+        $result = test-path -path "$($cfgCompare)"
+        if (-not $result) {
           try {
-            $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-            $dldiag = "Web.DownloadFile() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($err)"
-            logERR 3 "run-Monitor" "$($dldiag)`r`n$($strLineSeparator)"
-            start-bitstransfer -source $cfgOriginal -destination $cfgCompare -erroraction stop
+            $cfgOriginal = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/default.bgi"
+            $web = new-object system.net.webclient
+            $dlFile = $web.downloadfile($cfgOriginal, $cfgCompare)
           } catch {
-            $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-            $dldiag = "BITS.Transfer() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($err)"
-            logERR 3 "run-Monitor" "$($dldiag)`r`n$($strLineSeparator)"
+            try {
+              $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+              $dldiag = "Web.DownloadFile() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($err)"
+              logERR 3 "run-Monitor" "$($dldiag)`r`n$($strLineSeparator)"
+              start-bitstransfer -source $cfgOriginal -destination $cfgCompare -erroraction stop
+            } catch {
+              $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+              $dldiag = "BITS.Transfer() - Could not download $($cfgOriginal)`r`n$($strLineSeparator)`r`n$($err)"
+              logERR 3 "run-Monitor" "$($dldiag)`r`n$($strLineSeparator)"
+            }
           }
-        }
-        # BELOW DOESN'T WORK FOR NON-SCRIPT TYPE COMPONENTS
-        try {
-          move-item default.bgi "$($cfgCompare)" -force -erroraction stop
-          $mondiag = "BGInfo Files Copied from Component"
-          logERR 3 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
-        } catch {
-          $mondiag = "Failed to Copy BGInfo Files from Component`r`n`tDownloading from GitHub"
-          logERR 3 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
-          foreach ($file in $bgFiles) {download-Files $file}
         }
         #COMPARE COMPONENT ATTACHED 'DEFAULT.BGI' FILE AS 'COMPARE.BGI' TO 'DEFAULT.BGI' FILE IN PATH
         if (Compare-Object -ReferenceObject $(Get-Content $cfgDefault) -DifferenceObject $(Get-Content $cfgCompare)) {
