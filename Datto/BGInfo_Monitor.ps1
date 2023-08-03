@@ -319,19 +319,19 @@ namespace Win32{
       move-item default.bgi "C:\IT\BGInfo" -force -erroraction stop
       move-item bginfo4.exe "C:\IT\BGInfo" -force -erroraction stop
       move-item bginfo8.exe "C:\IT\BGInfo" -force -erroraction stop
-      $mondiag = "BGInfo Files Copied from Component"
-      logERR 3 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
+      $depdiag = "BGInfo Files Copied from Component"
+      logERR 3 "run-Deploy" "$($depdiag)`r`n$($strLineSeparator)"
     } catch {
-      $mondiag = "Failed to Copy BGInfo Files from Component`r`n`tDownloading from GitHub"
-      logERR 3 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
+      $depdiag = "Failed to Copy BGInfo Files from Component`r`n`tDownloading from GitHub"
+      logERR 3 "run-Deploy" "$($depdiag)`r`n$($strLineSeparator)"
       foreach ($file in $bgFiles) {download-Files $file}
     }
     # check for BGIs
     if (!(test-path "C:\IT\BGInfo\*.bgi")) {
-      $mondiag = "- ERROR: There needs to be at least one .bgi file for the Component to work`r`n"
-      $mondiag += "  Execution cannot continue. Exiting`r`n"
-      $mondiag += "`r`n`r`nExecution Failed : $($timestanp)"
-      logERR 2 "run-Deploy" "$($mondiag)`r`n$($strLineSeparator)"
+      $depdiag = "- ERROR: There needs to be at least one .bgi file for the Component to work`r`n"
+      $depdiag += "  Execution cannot continue. Exiting`r`n"
+      $depdiag += "`r`n`r`nExecution Failed : $($timestanp)"
+      logERR 2 "run-Deploy" "$($depdiag)`r`n$($strLineSeparator)"
     } else {
       if (test-path "C:\IT\BGInfo\*.bgi" -exclude default.bgi) {
         $varArgs = (ls "C:\IT\BGInfo\*.bgi" -Exclude default.bgi | Select-Object -First 1).Name
