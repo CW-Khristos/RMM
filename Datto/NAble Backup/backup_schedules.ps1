@@ -35,21 +35,35 @@
     write-host "<-End Result->"
   } ## write-DRMMAlert
 
-  function logERR($intSTG, $strErr) {
+  function logERR($intSTG, $strModule, $strErr) {
     $script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
-      1 {                                                                             #'ERRRET'=1 - ERROR DELETING FILE / FOLDER
-        $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Backup_Schedules - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Backup_Schedules - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
+      1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+        $script:blnBREAK = $true
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
-      2 {                                                                             #'ERRRET'=2 - NOT ENOUGH ARGUMENTS, END SCRIPT
-        $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Backup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Backup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
+      2 {                                                         #'ERRRET'=2 - END SCRIPT
+        $script:blnBREAK = $true
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - ($($strModule)) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - ($($strModule)) :" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
-      default {                                                                       #'ERRRET'=3+
-        write-host "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Backup_Schedules - $($strErr)`r`n$($strLineSeparator)`r`n"
-        $script:diag += "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Backup_Schedules - $($strErr)`r`n$($strLineSeparator)`r`n`r`n"
+      3 {                                                         #'ERRRET'=3
+        $script:blnWARN = $false
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+      }
+      default {                                                   #'ERRRET'=4+
+        $script:blnBREAK = $false
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -76,11 +90,10 @@
 #BEGIN SCRIPT
 $i = -1
 clear-host
-write-host "Cached Archive Hash (UDF20) : $($hashArchives)"
-$script:diag += "Cached Archive Hash (UDF20) : $($hashArchives)`r`n"
-write-host "Cached Schedule Hash (UDF18) : $($hashSchedules)`r`n"
-$script:diag += "Cached Schedule Hash (UDF18) : $($hashSchedules)`r`n`r`n"
 cd "C:\Program Files\Backup Manager"
+$beginmsg = "Cached Archive Hash (UDF20) : $($hashArchives)`r`n"
+$beginmsg += "`tCached Schedule Hash (UDF18) : $($hashSchedules)"
+logERR 3 "BEGIN" "$($beginmsg)`r`n$($strLineSeparator)"
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
@@ -90,15 +103,9 @@ try {
   $schedule = .\clienttool.exe control.schedule.list
   $schedule = $schedule | where {$_ -like "* yes *"} | out-string
   $array = $schedule.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
-  write-host "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nSCHEDULE :`r`n$($strLineSeparator)`r`n"
-  foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
-  write-host "$($strLineSeparator)"
-  $script:diag += "`r`n$($strLineSeparator)`r`n"
-  #$chunk = $schedule.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-  #write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
-  #$script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
-  #foreach ($item in $chunk) {write-host "`t$($item)"; $script:diag += "`t$($item)`r`n"}
+  foreach ($line in $array) {$scheduleset += "`r`n`t$($line)"}
+  logERR 3 "SCHEDULE" "SCHEDULE :`r`n`t$($strLineSeparator)$($scheduleset)`r`n$($strLineSeparator)"
+  $scheduleset = $null
   foreach ($line in $array) {
     $chunk = $line.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
     $scheduleset += "$($chunk[2])-$($chunk[4]) : $($chunk[7])-$($chunk[5]) - $($chunk[6]) | `r`n"
@@ -106,20 +113,14 @@ try {
   $scheduleset = $scheduleset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
   $scheduleset = $scheduleset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
   $array = $scheduleset.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
-  write-host "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nFINAL SCHEDULE :`r`n$($strLineSeparator)`r`n"
-  foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
-  write-host "$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`n"
-  if (($null -eq $curSchedules) -or ($curSchedules -eq "") -or (-not $curSchedules)) {
-    new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($udfSchedules)" -value "$($scheduleset)" -force
-  }
+  $scheduleset = $null
+  foreach ($line in $array) {$scheduleset += "`r`n`t$($line)"}
+  logERR 3 "SCHEDULE" "FINAL SCHEDULE :`r`n`t$($strLineSeparator)$($scheduleset)`r`n$($strLineSeparator)"
   #COMPUTE SCHEDULE HASH
   $utf8 = new-object -TypeName System.Text.UTF8Encoding
   $md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
   $hash = [System.BitConverter]::ToString($md5.ComputeHash($utf8.GetBytes($scheduleset)))
-  write-host "$($strLineSeparator)`r`nCOMPUTED SCHEDULE HASH :`r`n$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nCOMPUTED SCHEDULE HASH :`r`n$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)`r`n"
+  logERR 3 "SCHEDULE" "COMPUTED SCHEDULE HASH :`r`n`t$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
   #COMPARE SCHEDULE HASH
   if ($hashSchedules) {
     if (Compare-Object -ReferenceObject $hashSchedules -DifferenceObject $hash) {
@@ -127,31 +128,35 @@ try {
     } else {
       $scheduleMsg = "| Schedule Hashes are same |"
     }
-    write-host "`t$($scheduleMsg)`r`n$($strLineSeparator)`r`nPREV SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($curSchedules)`r`n$($strLineSeparator)"
-    $script:diag += "`t$($scheduleMsg)`r`n$($strLineSeparator)`r`nPREV SCHEDULE :`r`n$($strLineSeparator)`r`n`t$($curSchedules)`r`n$($strLineSeparator)`r`n"
   } elseif (-not $hashSchedules) {
     new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom18" -value "$($hash)" -force
+  }
+  if ($curSchedules) {
+    logERR 3 "SCHEDULE" "PREV SCHEDULE :`r`n`t$($strLineSeparator)`r`n`t$($curSchedules.replace('`r`n', '`r`n`t'))`r`n$($strLineSeparator)"
+    if ($scheduleset.trim() -match $curSchedules.trim()) {
+      $scheduleMsg += "| Schedule Strings are same |"
+      logERR 3 "SCHEDULE" "$($scheduleMsg)`r`n$($strLineSeparator)"
+    } elseif ($scheduleset.trim() -notmatch $curSchedules.trim()) {
+      $scheduleMsg += "| Schedule Strings are different |"
+      logERR 4 "SCHEDULE" "$($scheduleMsg)`r`n$($strLineSeparator)"
+    }
+  } elseif ((-not $curSchedules) -or ($null -eq $curSchedules) -or ($curSchedules -eq "")) {
+    new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($udfSchedules)" -value "$($scheduleset.trim())" -force
   }
 } catch {
   $script:blnWARN = $true
   $err = "$($_.scriptstacktrace)`r`n$($_.Exception)`r`n$($_)`r`n"
-  write-host "ERROR ENCOUNTERED`r`n$($err)"
-  $script:diag += "`r`nERROR ENCOUNTERED`r`n$($err)`r`n"
+  logERR 4 "SCHEDULE" "ERROR ENCOUNTERED :`r`n$($err)`r`n$($strLineSeparator)"
 }
 #QUERY ARCHIVE SCHEDULES
 try {
+  $archiveset = $null
   $archive = .\clienttool.exe control.archiving.list
   $archive = $archive | where {$_ -like "* yes *"} | out-string
   $array = $archive.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
-  write-host "$($strLineSeparator)`r`nARCHIVE :`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nARCHIVE :`r`n$($strLineSeparator)`r`n"
-  foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
-  write-host "$($strLineSeparator)"
-  $script:diag += "`r`n$($strLineSeparator)`r`n"
-  #$chunk = $archive.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-  #write-host "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)"
-  #$script:diag += "$($strLineSeparator)`r`nARRAY SPLIT :`r`n$($strLineSeparator)`r`n"
-  #foreach ($item in $chunk) {write-host "`t$($item)"; $script:diag += "`t$($item)`r`n"}
+  foreach ($line in $array) {$archiveset += "`r`n`t$($line)"}
+  logERR 3 "ARCHIVE" "ARCHIVE :`r`n`t$($strLineSeparator)$($archiveset)`r`n$($strLineSeparator)"
+  $archiveset = $null
   foreach ($line in $array) {
     $chunk = $line.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
     $archiveset += "$($chunk[2]) - $($chunk[4]) - Datasources : $($chunk[5]) - Archive Time : $($chunk[6]) - Archive Months : $($chunk[7]) - Archive Days : $($chunk[8]) | `r`n"
@@ -160,20 +165,14 @@ try {
   $archiveset = $archiveset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
   $archiveset = $archiveset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
   $array = $archiveset.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
-  write-host "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nFINAL ARCHIVE :`r`n$($strLineSeparator)`r`n"
-  foreach ($line in $array) {write-host "`t$($line)"; $script:diag += "`t$($line)`r`n"}
-  write-host "$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`n"
-  if (($null -eq $curArchives) -or ($curArchives -eq "") -or (-not $curArchives)) {
-    new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($udfArchives)" -value "$($archiveset)" -force
-  }
+  $archiveset = $null
+  foreach ($line in $array) {$archiveset += "`r`n`t$($line)"}
+  logERR 3 "ARCHIVE" "FINAL ARCHIVE :`r`n`t$($strLineSeparator)$($archiveset)`r`n$($strLineSeparator)"
   #COMPUTE ARCHIVE HASH
   $utf8 = new-object -TypeName System.Text.UTF8Encoding
   $md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
   $hash = [System.BitConverter]::ToString($md5.ComputeHash($utf8.GetBytes($archiveset)))
-  write-host "$($strLineSeparator)`r`nCOMPUTED ARCHIVE HASH :`r`n$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nCOMPUTED ARCHIVE HASH :`r`n$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)`r`n"
+  logERR 3 "ARCHIVE" "COMPUTED ARCHIVE HASH :`r`n`t$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
   #COMPARE ARCHIVE HASH
   if ($hashArchives) {
     if (Compare-Object -ReferenceObject $hashArchives -DifferenceObject $hash) {
@@ -181,25 +180,36 @@ try {
     } else {
       $archiveMsg = "| Archive Hashes are same |"
     }
-    write-host "`t$($archiveMsg)`r`n$($strLineSeparator)`r`nPREV ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($curArchives)`r`n$($strLineSeparator)"
-    $script:diag += "`t$($archiveMsg)`r`n$($strLineSeparator)`r`nPREV ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($curArchives)`r`n$($strLineSeparator)`r`n"
   } elseif (-not $hashArchives) {
     new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom20" -value "$($hash)" -force
+  }
+  if ($curArchives) {
+    logERR 3 "ARCHIVE" "PREV ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($curArchives.replace('`r`n', '`r`n`t'))`r`n$($strLineSeparator)"
+    if ($archiveset.trim() -match $curArchives.trim()) {
+      $archiveMsg += "| Archive Strings are same |"
+      logERR 3 "ARCHIVE" "$($archiveMsg)`r`n$($strLineSeparator)"
+    } elseif ($archiveset.trim() -notmatch $curArchives.trim()) {
+      $archiveMsg += "| Archive Strings are different |"
+      logERR 4 "ARCHIVE" "$($archiveMsg)`r`n$($strLineSeparator)"
+    }
+  } elseif ((-not $curArchives) -or ($null -eq $curArchives) -or ($curArchives -eq "")) {
+    new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($udfArchives)" -value "$($archiveset.trim())" -force
   }
 } catch {
   $script:blnWARN = $true
   $err = "$($_.scriptstacktrace)`r`n$($_.Exception)`r`n$($_)`r`n"
-  write-host "ERROR ENCOUNTERED`r`n$($err)"
-  $script:diag += "`r`nERROR ENCOUNTERED`r`n$($err)`r`n"
+  logERR 4 "ARCHIVE" "ERROR ENCOUNTERED :`r`n$($err)`r`n$($strLineSeparator)"
 }
 #Stop script execution time calculation
 StopClock
 #DATTO OUTPUT
+$result = $null
 $finish = "$((Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))"
-if (($scheduleMsg -match "Hashes are same") -and ($archiveMsg -match "Hashes are same")) {
-  $hashMsg = "All Hashes Match"
-} elseif (($scheduleMsg -match "Hashes are different") -or ($archiveMsg -match "Hashes are different")) {
-  $hashMsg = "Detected Hash Change"
+if ((($scheduleMsg -notmatch "are different") -and ($scheduleMsg -match "are same")) -and 
+  (($archiveMsg -notmatch "are different") -and ($archiveMsg -match "are same"))) {
+    $hashMsg = "No Changes Detected"
+} elseif (($scheduleMsg -match "are different") -or ($archiveMsg -match "are different")) {
+  $hashMsg = "Detected Changes"
   $script:blnWARN = $true
 }
 if ($script:blnWARN) {
