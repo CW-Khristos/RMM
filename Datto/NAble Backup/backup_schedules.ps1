@@ -13,6 +13,8 @@
   $script:blnWARN   = $false
   $script:blnBREAK  = $false
   $hashMsg          = $null
+  $curHashAll       = $env:UDF_16
+  $udfSelection     = $env:udfSelection
   $curArchives      = $env:UDF_19
   $hashArchives     = $env:UDF_20
   $udfArchives      = $env:udfArchives
@@ -200,24 +202,122 @@ try {
   $err = "$($_.scriptstacktrace)`r`n$($_.Exception)`r`n$($_)`r`n"
   logERR 4 "ARCHIVE" "ERROR ENCOUNTERED :`r`n$($err)`r`n$($strLineSeparator)"
 }
+
+$allHash = $null
+#QUERY SELECTIONS
+$selections = .\clienttool.exe -machine-readable control.selection.list -delimiter "," | out-file "C:\IT\selections.csv"
+$selections = import-csv -path "C:\IT\selections.csv"
+#remove-item "C:\IT\selections.csv" -force
+#COMPUTE ARCHIVE HASH
+$hash = $null
+$utf8 = new-object -TypeName System.Text.UTF8Encoding
+$md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
+$hash = [System.BitConverter]::ToString($md5.ComputeHash($utf8.GetBytes($selections)))
+logERR 3 "SELECTIONS" "COMPUTED SELECTIONS HASH :`r`n`t$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
+write-output "`tSelections = See 'C:\IT\selections.csv'"
+$allHash += $hash
+#QUERY FILTERS
+$filters = .\clienttool.exe -machine-readable control.filter.list | out-file "C:\IT\filters.csv"
+$filters = import-csv -path "C:\IT\filters.csv" -Header value
+#remove-item "C:\IT\filters.csv" -force
+#COMPUTE FILTERS HASH
+$hash = $null
+$filters = $filters.value.replace("\\","\") -join " | "
+$utf8 = new-object -TypeName System.Text.UTF8Encoding
+$md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
+$hash = [System.BitConverter]::ToString($md5.ComputeHash($utf8.GetBytes($filters)))
+logERR 3 "FILTERS" "COMPUTED FILTERS HASH :`r`n`t$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
+Write-output "`tFilters = $($filters)"
+$allHash += $hash
+#QUERY INCLUSIONS
+$inclusions = $selections | where-object {(($_.type -eq "Inclusive") -and ($_.DSRC -eq "FileSystem")) }
+if ($inclusions) {
+  if ($inclusions[0].path -ne "") {
+    $inclusionBase = "FileSystem"
+  } else {
+    $inclusionBase = $null
+  }
+  $inclusions = $inclusions.path.replace("\","\\") -join " | "
+} else {
+  $inclusionBase = $null
+  $inclusions = "-"
+}
+#COMPUTE INCLUSIONS HASH
+$hash = $null
+$inclusions = $inclusions.replace("\\","\")
+$utf8 = new-object -TypeName System.Text.UTF8Encoding
+$md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
+$hash = [System.BitConverter]::ToString($md5.ComputeHash($utf8.GetBytes($inclusions)))
+logERR 3 "INCLUSIONS" "COMPUTED INCLUSIONS HASH :`r`n`t$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
+Write-output "`tInclusions = $($inclusionBase) - $($inclusions)"
+$allHash += $hash
+#QUERY EXCLUSIONS
+$exclusions = $selections | where-object {(($_.type -eq "Exclusive") -and ($_.DSRC -eq "FileSystem")) }
+if ($exclusions) {
+  if ($inclusions[0].path -ne "") {
+    $exclusionBase = "FileSystem"
+  } else {
+    $exclusionBase = $null
+  }
+  $exclusions = $exclusions.path.replace("\","\\") -join " | "
+} else {
+  if (($inclusions) -and ($inclusions[0].path -ne "")) {
+    $exclusionBase = "FileSystem"
+    $exclusions = $null
+  } else {
+    $exclusionBase = $null
+    $exclusions = "-"
+  }
+}
+#COMPUTE EXCLUSIONS HASH
+$hash = $null
+$exclusions = $exclusions.replace("\\","\")
+$utf8 = new-object -TypeName System.Text.UTF8Encoding
+$md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
+$hash = [System.BitConverter]::ToString($md5.ComputeHash($utf8.GetBytes($exclusions)))
+logERR 3 "EXCLUSIONS" "COMPUTED EXCLUSIONS HASH :`r`n`t$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
+Write-output "`tExclusions = $($exclusionBase) - $($exclusions)"
+$allHash += $hash
+#COMPUTE ALL HASHES TOGETHER
+$hash = $null
+$utf8 = new-object -TypeName System.Text.UTF8Encoding
+$md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
+$hash = [System.BitConverter]::ToString($md5.ComputeHash($utf8.GetBytes($allHash)))
+logERR 3 "HASH-ALL" "COMPUTED HASH-ALL :`r`n`t$($strLineSeparator)`r`n`t$($hash)`r`n$($strLineSeparator)"
+if ($curHashAll) {
+  logERR 3 "HASH-ALL" "PREV SELECTIONS HASH :`r`n$($strLineSeparator)`r`n`t$($curHashAll)`r`n$($strLineSeparator)"
+  if ($curHashAll.trim() -match $hash.trim()) {
+    $hashMsg += "| Selection / Filters / Inclusions / Exclusions Hashes are same |"
+    logERR 3 "HASH-ALL" "$($hashMsg)`r`n$($strLineSeparator)"
+  } elseif ($curHashAll.trim() -notmatch $hash.trim()) {
+    $hashMsg += "| Selection / Filters / Inclusions / Exclusions Hashes are different |"
+    logERR 4 "HASH-ALL" "$($hashMsg)`r`n$($strLineSeparator)"
+  }
+} elseif ((-not $curHashAll) -or ($null -eq $curHashAll) -or ($curHashAll -eq "")) {
+  new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($udfSelection)" -value "$($hash.trim())" -force
+}
+
 #Stop script execution time calculation
 StopClock
 #DATTO OUTPUT
 $result = $null
 $finish = "$((Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))"
 if ((($scheduleMsg -notmatch "are different") -and ($scheduleMsg -match "are same")) -and 
-  (($archiveMsg -notmatch "are different") -and ($archiveMsg -match "are same"))) {
+  (($archiveMsg -notmatch "are different") -and ($archiveMsg -match "are same")) -and 
+  (($hashMsg -notmatch "are different") -and ($hashMsg -match "are same"))) {
     $hashMsg = "No Changes Detected"
-} elseif (($scheduleMsg -match "are different") -or ($archiveMsg -match "are different")) {
-  $hashMsg = "Detected Changes"
-  $script:blnWARN = $true
+} elseif (($scheduleMsg -match "are different") -or 
+  ($archiveMsg -match "are different") -or 
+  ($hashMsg -match "are different")) {
+    $warnMsg = "Detected Changes"
+    $script:blnWARN = $true
 }
 if ($script:blnWARN) {
-  write-DRMMAlert "Backup_Schedules : Warning : $($hashMsg) : See Diagnostics : $($finish)"
+  write-DRMMAlert "Backup_Schedules : Warning : $($warnMsg) : See Diagnostics : $($finish)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRMMAlert "Backup_Schedules : Healthy : $($hashMsg) : $($finish)"
+  write-DRMMAlert "Backup_Schedules : Healthy : $($warnMsg) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
