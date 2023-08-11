@@ -4,24 +4,50 @@
   #Param (
   #)
   #VERSION FOR SCRIPT UPDATE
-  $strSCR           = "Backup_Schedules"
-  $strVER           = [version]"0.1.1"
-  $strREPO          = "RMM"
-  $strBRCH          = "dev"
-  $strDIR           = "Datto"
-  $script:diag      = $null
-  $script:blnWARN   = $false
-  $script:blnBREAK  = $false
-  $hashMsg          = $null
-  $curHashAll       = $env:UDF_16
-  $udfSelection     = $env:udfSelection
-  $curArchives      = $env:UDF_19
-  $hashArchives     = $env:UDF_20
-  $udfArchives      = $env:udfArchives
-  $curSchedules     = $env:UDF_17
-  $hashSchedules    = $env:UDF_18
-  $udfSchedules     = $env:udfSchedules
-  $strLineSeparator = "---------"
+  $strSCR             = "Backup_Schedules"
+  $strVER             = [version]"0.1.2"
+  $strREPO            = "RMM"
+  $strBRCH            = "dev"
+  $strDIR             = "Datto"
+  $script:diag        = $null
+  $script:blnWARN     = $false
+  $script:blnBREAK    = $false
+  $strLineSeparator   = "---------"
+  $hashMsg            = $null
+  $curHashAll         = $env:UDF_16
+  $udfSelection       = $env:udfSelection
+  $curSchedules       = $env:UDF_17
+  $hashSchedules      = $env:UDF_18
+  $udfSchedules       = $env:udfSchedules
+  $curArchives        = $env:UDF_19
+  $hashArchives       = $env:UDF_20
+  $udfArchives        = $env:udfArchives
+  $curThrottle        = $env:UDF_21
+  $udfThrottle        = $env:udfThrottle
+  $Script:blnBMAuth   = $false
+  $AllDevices         = $false
+  $AllPartners        = $false
+  $urlJSON            = 'https://api.backup.management/jsonapi'
+  $logPath            = "C:\IT\Log\MSPBackup_Throttle_$($strVER).log"
+  #MXB PATH
+  $mxbPath            = ${env:ProgramData} + "\MXB\Backup Manager"
+  $Script:True_path   = "C:\ProgramData\MXB\"
+  $Script:APIcredfile = join-path -Path $True_Path -ChildPath "$env:computername API_Credentials.Secure.txt"
+  $Script:APIcredpath = Split-path -path $APIcredfile
+  #TLS
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+  [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
+  #SANITIZE DRMM VARIABLES
+  $script:PartnerName = $env:BackupRoot
+  $Script:cred0 = $script:PartnerName
+  if (($null -ne $env:BackupUser) -and ($env:BackupUser -ne "")) {
+    $script:BackupUser = $env:BackupUser
+    $Script:cred1 = $script:BackupUser
+  }
+  if (($null -ne $env:BackupPass) -and ($env:BackupPass -ne "")) {
+    $script:BackupPWD = $env:BackupPass
+    $Script:cred2 = $script:BackupPWD
+  }
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
@@ -36,6 +62,34 @@
     write-host "Alert=$($message)"
     write-host "<-End Result->"
   } ## write-DRMMAlert
+
+  function Convert-UnixTimeToDateTime ($inputUnixTime) {
+    if ($inputUnixTime -gt 0 ) {
+      $epoch = Get-Date -Date "1970-01-01 00:00:00Z"
+      $epoch = $epoch.ToUniversalTime()
+      $epoch = $epoch.AddSeconds($inputUnixTime)
+      return $epoch
+    } else {
+      return ""
+    }
+  }  ## Convert epoch time to date time
+
+  function StopClock {
+    #Stop script execution time calculation
+    $script:sw.Stop()
+    $Days = $sw.Elapsed.Days
+    $Hours = $sw.Elapsed.Hours
+    $Minutes = $sw.Elapsed.Minutes
+    $Seconds = $sw.Elapsed.Seconds
+    $Milliseconds = $sw.Elapsed.Milliseconds
+    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
+    $mill = [string]($total / 1000)
+    $mill = $mill.split(".")[1]
+    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+  }
 
   function logERR($intSTG, $strModule, $strErr) {
     $script:blnWARN = $true
@@ -56,49 +110,217 @@
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :" -foregroundcolor yellow
         write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :"
-        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n"
         write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :" -foregroundcolor yellow
         write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
 
-  function StopClock {
-    #Stop script execution time calculation
-    $script:sw.Stop()
-    $Days = $sw.Elapsed.Days
-    $Hours = $sw.Elapsed.Hours
-    $Minutes = $sw.Elapsed.Minutes
-    $Seconds = $sw.Elapsed.Seconds
-    $Milliseconds = $sw.Elapsed.Milliseconds
-    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
-    $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
-    $mill = [string]($total / 1000)
-    $mill = $mill.split(".")[1]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
-    $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+#region ----- Authentication ----
+  function Send-APICredentialsCookie {
+    #Get-APICredentials  ## Read API Credential File before Authentication
+    $url = $urlJSON
+    $data = @{}
+    $data.jsonrpc = '2.0'
+    $data.id = '2'
+    $data.method = 'Login'
+    $data.params = @{}
+    $data.params.partner = $Script:cred0
+    $data.params.username = $Script:cred1
+    $data.params.password = $Script:cred2
+
+    $webrequest = Invoke-WebRequest -Method POST `
+      -ContentType 'application/json' `
+      -Body (ConvertTo-Json $data) `
+      -Uri $url `
+      -SessionVariable Script:websession `
+      -UseBasicParsing
+      $Script:cookies = $websession.Cookies.GetCookies($url)
+      $Script:websession = $websession
+      $Script:Authenticate = $webrequest | convertfrom-json
+    #Debug Write-Host "Cookie : $($Script:cookies[0].name) = $($cookies[0].value)"
+    $webrequest
+
+    if ($authenticate.visa) {
+      $Script:blnBMAuth = $true
+      write-host "`tBM Auth : $($Script:blnBMAuth)"
+      $Script:visa = $authenticate.visa
+    } else {
+      $Script:blnBMAuth = $false
+      write-host "`tBM Auth : $($Script:blnBMAuth)"
+      $authMsg = "Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials`r`n`t$($Script:strLineSeparator)"
+      $authMsg += "`r`n`tPlease Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n`t$($Script:strLineSeparator)"
+      logERR 4 "Send-APICredentialsCookie" "$($authMsg)`r`n$($Script:strLineSeparator)"
+      #Set-APICredentials  ## Create API Credential File if Authentication Fails
+    }
+  }  ## Use Backup.Management credentials to Authenticate
+#endregion ----- Authentication ----
+
+#region ----- Backup.Management JSON Calls ----
+  function CallJSON ($url,$object) {
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($object)
+    $web = [System.Net.WebRequest]::Create($url)
+    $web.Method = "POST"
+    $web.ContentLength = $bytes.Length
+    $web.ContentType = "application/json"
+    $stream = $web.GetRequestStream()
+    $stream.Write($bytes,0,$bytes.Length)
+    $stream.close()
+    $reader = New-Object System.IO.Streamreader -ArgumentList $web.GetResponse().GetResponseStream()
+    return $reader.ReadToEnd()| ConvertFrom-Json
+    $reader.Close()
   }
+
+  function Send-GetPartnerInfo ($PartnerName) {                
+    $url = $urlJSON
+    $data = @{}
+    $data.jsonrpc = '2.0'
+    $data.id = '2'
+    $data.visa = $Script:visa
+    $data.method = 'GetPartnerInfo'
+    $data.params = @{}
+    $data.params.name = [String]$PartnerName
+
+    $webrequest = Invoke-WebRequest -Method POST `
+      -ContentType 'application/json' `
+      -Body (ConvertTo-Json $data -depth 5) `
+      -Uri $url `
+      -SessionVariable Script:websession `
+      -UseBasicParsing
+      $Script:cookies = $websession.Cookies.GetCookies($url)
+      $Script:websession = $websession
+      $Script:Partner = $webrequest | convertfrom-json
+
+    $RestrictedPartnerLevel = @("Root","Sub-root","Distributor")
+    <#---# POWERSHELL 2.0 #---#>
+    if ($RestrictedPartnerLevel -notcontains $Partner.result.result.Level) {
+    #---#>
+    <#---# POWERSHELL 3.0+ #--->
+    if ($Partner.result.result.Level -notin $RestrictedPartnerLevel) {
+    #---#>
+      [String]$Script:Uid = $Partner.result.result.Uid
+      [int]$Script:PartnerId = [int]$Partner.result.result.Id
+      [String]$script:Level = $Partner.result.result.Level
+      [String]$Script:PartnerName = $Partner.result.result.Name
+      logERR 3 "Send-GetPartnerInfo" "$($PartnerName) - $($partnerId) - $($Uid)`r`n$($Script:strLineSeparator)"
+    } else {
+      logERR 3 "Send-GetPartnerInfo" "Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($Script:strLineSeparator)"
+    }
+
+    if ($partner.error) {
+      Write-Host "  $($partner.error.message)"
+      $script:diag += "  $($partner.error.message)`r`n"
+    }
+  } ## Send-GetPartnerInfo API Call
+
+  function Send-GetDevices {
+    $url = $urlJSON
+    $method = 'POST'
+    $data = @{}
+    $data.jsonrpc = '2.0'
+    $data.id = '2'
+    $data.visa = $Script:visa
+    $data.method = 'EnumerateAccountStatistics'
+    $data.params = @{}
+    $data.params.query = @{}
+    $data.params.query.PartnerId = [int]$PartnerId
+    $data.params.query.Filter = $Filter1
+    $data.params.query.Columns = @("AU","AR","AN","MN","AL","LN","OP","OI","OS","PD","AP","PF","PN","CD","TS","TL","T3","US","AA843","AA77","AA2048","AA2531")
+    $data.params.query.OrderBy = "CD DESC"
+    $data.params.query.StartRecordNumber = 0
+    $data.params.query.RecordsCount = 2000
+    $data.params.query.Totals = @("COUNT(AT==1)","SUM(T3)","SUM(US)")
+    $jsondata = (ConvertTo-Json $data -depth 6)
+
+    $params = @{
+      Uri         = $url
+      Method      = $method
+      Headers     = @{ 'Authorization' = "Bearer $($Script:visa)" }
+      Body        = ([System.Text.Encoding]::UTF8.GetBytes($jsondata))
+      ContentType = 'application/json; charset=utf-8'
+    }
+
+    $Script:DeviceDetail = @()
+    $Script:DeviceResponse = Invoke-RestMethod @params
+    ForEach ( $DeviceResult in $DeviceResponse.result.result ) {
+      $Script:DeviceDetail += New-Object -TypeName PSObject -Property @{
+        AccountID      = [Int]$DeviceResult.AccountId;
+        PartnerID      = [string]$DeviceResult.PartnerId;
+        DeviceName     = $DeviceResult.Settings.AN -join '' ;
+        ComputerName   = $DeviceResult.Settings.MN -join '' ;
+        DeviceAlias    = $DeviceResult.Settings.AL -join '' ;
+        PartnerName    = $DeviceResult.Settings.AR -join '' ;
+        Reference      = $DeviceResult.Settings.PF -join '' ;
+        Creation       = Convert-UnixTimeToDateTime ($DeviceResult.Settings.CD -join '') ;
+        TimeStamp      = Convert-UnixTimeToDateTime ($DeviceResult.Settings.TS -join '') ;
+        LastSuccess    = Convert-UnixTimeToDateTime ($DeviceResult.Settings.TL -join '') ;
+        SelectedGB     = (($DeviceResult.Settings.T3 -join '') /1GB) ;
+        UsedGB         = (($DeviceResult.Settings.US -join '') /1GB) ;
+        DataSources    = $DeviceResult.Settings.AP -join '' ;
+        Account        = $DeviceResult.Settings.AU -join '' ;
+        Location       = $DeviceResult.Settings.LN -join '' ;
+        Notes          = $DeviceResult.Settings.AA843 -join '' ;
+        GUIPassword    = $DeviceResult.Settings.AA2048 -join '' ;
+        IPMGUIPwd      = $DeviceResult.Settings.AA2531 -join '' ;
+        TempInfo       = $DeviceResult.Settings.AA77 -join '' ;
+        Product        = $DeviceResult.Settings.PN -join '' ;
+        ProductID      = $DeviceResult.Settings.PD -join '' ;
+        Profile        = $DeviceResult.Settings.OP -join '' ;
+        OS             = $DeviceResult.Settings.OS -join '' ;
+        ProfileID      = $DeviceResult.Settings.OI -join ''
+      }
+    }
+  } ## Send-GetDevices API Call
+
+  function AuditDeviceBandwidth($DeviceId) {
+    $url2 = "https://backup.management/web/accounts/properties/api/audit?accounts.SelectedAccount.Id=$deviceId&accounts.SelectedAccount.StorageNode.Audit.Shift=0&accounts.SelectedAccount.StorageNode.Audit.Count=1&accounts.SelectedAccount.StorageNode.Audit.Filter=Bandwidth"
+    $method = 'GET'
+    $params = @{
+      Uri         = $url2
+      Method      = $method
+      Headers     = @{ 'Authorization' = "Bearer $Script:visa" }
+      WebSession  = $websession
+      ContentType = 'application/json; charset=utf-8'
+    }   
+
+    $Script:AuditResponse = Invoke-RestMethod @params 
+    $response = [string]$AuditResponse -replace("[][]","") -replace("[{}]","") -creplace("ESCAPE","") -replace('    ','') -replace("`n`n`n","") -replace(",`n,","") -replace("rows: ","") -split("`n")
+    $response = $response -replace (": "," = ") | ConvertFrom-StringData -ErrorAction SilentlyContinue 
+    $response = $response.details -replace ('"','') -replace (' = ',' ') -replace ('enable true start ','') -replace (' stop ','-') -replace ('upload ','') -replace (' download ','/') -replace ('unlimited ','') -replace ('unlimitedDays ','') -replace ('Saturday','SA') -replace ('Sunday','SU')           
+    $response = $response -replace ('limitBandWidth=1','') -replace (' turnOffAt=','Off/') -replace ('turnOnAt=','On/') -replace ('maxUploadSpeed=','') -replace ('-1=','UNLIM') -replace (' kbit/s maxDownloadSpeed=','/') -replace('unlimitedDays=0000000','') -replace('pluginsToCancel=','') -replace('dataThroughputUnits=1','') -replace('dataThroughputUnits=2','')
+
+    if ($response -like "*False*") { $response = "" } 
+    if ($response -like "*limitBandWidth=0*") { $response = "" }
+    $output = "DeviceId : $($DeviceId) - Bandwidth Throttle : $($response)"
+    return $output
+  }
+#endregion ----- Backup.Management JSON Calls ----
 #endregion ----- FUNCTIONS ----
 
 #------------
 #BEGIN SCRIPT
 $i = -1
 clear-host
+$filter1 = $null
+$Script:DeviceDetail = @()
+#Start script execution time calculation
+$ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+$script:sw = [Diagnostics.Stopwatch]::StartNew()
+remove-item -Path $Script:APIcredfile -force
+write-host "$($Script:strLineSeparator)`r`n"
+$script:diag += "$($Script:strLineSeparator)`r`n`r`n"
 cd "C:\Program Files\Backup Manager"
 $beginmsg = "Cached Archive Hash (UDF20) : $($hashArchives)`r`n"
 $beginmsg += "`tCached Schedule Hash (UDF18) : $($hashSchedules)"
 logERR 3 "BEGIN" "$($beginmsg)`r`n$($strLineSeparator)"
-#Start script execution time calculation
-$ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
-$script:sw = [Diagnostics.Stopwatch]::StartNew()
 #QUERY BACKUP SCHEDULES
 try {
   $scheduleset = $null
@@ -203,8 +425,8 @@ try {
   logERR 4 "ARCHIVE" "ERROR ENCOUNTERED :`r`n$($err)`r`n$($strLineSeparator)"
 }
 
-$allHash = $null
 #QUERY SELECTIONS
+$allHash = $null
 $selections = .\clienttool.exe -machine-readable control.selection.list -delimiter "," | out-file "C:\IT\selections.csv"
 $selections = import-csv -path "C:\IT\selections.csv"
 #remove-item "C:\IT\selections.csv" -force
@@ -297,6 +519,78 @@ if ($curHashAll) {
   new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($udfSelection)" -value "$($hash.trim())" -force
 }
 
+#QUERY THROTTLING
+try {
+  #OBTAIN PARTNER AND BACKUP ACCOUNT ID
+  [xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
+  $xmlBackupID = $statusXML.Statistics.Account
+  $xmlPartnerID = $statusXML.Statistics.PartnerName
+  #AUTH TO BACKUP.MANAGEMENT API
+  Send-APICredentialsCookie
+  if ($Script:blnBMAuth) {
+    $filter1 = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup
+    if ((-not $AllPartners) -and (($null -eq $script:i_BackupName) -or ($script:i_BackupName -eq ""))) {
+      write-host "`r`n$($Script:strLineSeparator)`r`n`tXML Partner: $($xmlPartnerID)"
+      $script:diag += "`r`n$($Script:strLineSeparator)`r`n`tXML Partner: $($xmlPartnerID)"
+      Send-GetPartnerInfo $xmlPartnerID
+    } elseif ((-not $AllPartners) -and (($null -ne $script:i_BackupName) -and ($script:i_BackupName -ne ""))) {
+      write-host "`r`n$($Script:strLineSeparator)`r`n`tPassed Partner: $($script:i_BackupName)"
+      $script:diag += "`r`n$($Script:strLineSeparator)`r`n`tPassed Partner: $($script:i_BackupName)"
+      Send-GetPartnerInfo $script:i_BackupName
+    }
+    if ($AllPartners) {
+      Send-GetDevices "External IPM"
+    } elseif (-not $AllPartners) {
+      Send-GetDevices $xmlPartnerID
+    }
+
+    if ($AllDevices) {
+      $script:SelectedDevices = $DeviceDetail | 
+        select-object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
+      write-host "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
+      $script:diag += "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
+    } elseif (-not $AllDevices) {
+      #$script:SelectedDevices = $DeviceDetail | 
+      #  Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
+      #  Out-GridView -title "Current Partner | $partnername" -OutputMode Multiple
+      if (($null -ne $xmlBackupID) -and ($xmlBackupID -ne "")) {
+        $script:SelectedDevices = $DeviceDetail | 
+          select-object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
+            where-object {$_.DeviceName -eq $xmlBackupID}
+        write-host "$($Script:strLineSeparator)`r`n`t$($SelectedDevices.AccountId.count) Devices Selected`r`n$($Script:strLineSeparator)"
+        $script:diag += "$($Script:strLineSeparator)`r`n`t$($SelectedDevices.AccountId.count) Devices Selected`r`n$($Script:strLineSeparator)`r`n"
+      }
+    }    
+
+    if ($null -eq $SelectedDevices) {
+      # Cancel was pressed
+      # Run cancel script
+      write-host "$($Script:strLineSeparator)`r`n  No Devices Selected`r`n$($Script:strLineSeparator)"
+      $script:diag += "$($Script:strLineSeparator)`r`n  No Devices Selected`r`n$($Script:strLineSeparator)`r`n"
+      break
+    } else {
+      $throttle = "$($SelectedDevices.DeviceName) in $($SelectedDevices.PartnerName) - "
+      $throttle += AuditDeviceBandwidth($SelectedDevices.AccountId)
+      logERR 3 "THROTTLE" "$($throttle)`r`n$($strLineSeparator)"
+      if ($curThrottle) {
+        logERR 3 "THROTTLE" "PREV THROTTLE :`r`n$($strLineSeparator)`r`n`t$($throttle)`r`n$($strLineSeparator)"
+        if ($curThrottle.trim() -match $throttle.trim()) {
+          $throttleMsg += "| Throttle Settings are same |"
+          logERR 3 "THROTTLE" "$($throttleMsg)`r`n$($strLineSeparator)"
+        } elseif ($curThrottle.trim() -notmatch $throttle.trim()) {
+          $throttleMsg += "| Throttle Settings are different |"
+          logERR 4 "THROTTLE" "$($throttleMsg)`r`n$($strLineSeparator)"
+        }
+      } elseif ((-not $curThrottle) -or ($null -eq $curThrottle) -or ($curThrottle -eq "")) {
+        new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom$($udfThrottle)" -value "$($throttle.trim())" -force
+      }
+    }
+  }
+} catch {
+  $script:blnWARN = $true
+  $err = "$($_.scriptstacktrace)`r`n$($_.Exception)`r`n$($_)`r`n"
+  logERR 4 "THROTTLE" "ERROR ENCOUNTERED :`r`n$($err)`r`n$($strLineSeparator)"
+}
 #Stop script execution time calculation
 StopClock
 #DATTO OUTPUT
@@ -304,11 +598,13 @@ $result = $null
 $finish = "$((Get-Date).ToString('yyyy-MM-dd hh:mm:ss'))"
 if ((($scheduleMsg -notmatch "are different") -and ($scheduleMsg -match "are same")) -and 
   (($archiveMsg -notmatch "are different") -and ($archiveMsg -match "are same")) -and 
-  (($hashMsg -notmatch "are different") -and ($hashMsg -match "are same"))) {
-    $hashMsg = "No Changes Detected"
+  (($hashMsg -notmatch "are different") -and ($hashMsg -match "are same")) -and 
+  (($throttleMsg -notmatch "are different") -and ($throttleMsg -match "are same"))) {
+    $warnMsg = "No Changes Detected"
 } elseif (($scheduleMsg -match "are different") -or 
   ($archiveMsg -match "are different") -or 
-  ($hashMsg -match "are different")) {
+  ($hashMsg -match "are different") -or 
+  ($throttleMsg -match "are different")) {
     $warnMsg = "Detected Changes"
     $script:blnWARN = $true
 }
