@@ -4,7 +4,7 @@
   #Param (
   #)
   #VERSION FOR SCRIPT UPDATE
-  $strSCR             = "Backup_Schedules"
+  $strSCR             = "MSPMSPBackup_Schedules"
   $strVER             = [version]"0.1.2"
   $strREPO            = "RMM"
   $strBRCH            = "dev"
@@ -28,7 +28,7 @@
   $AllDevices         = $false
   $AllPartners        = $false
   $urlJSON            = 'https://api.backup.management/jsonapi'
-  $logPath            = "C:\IT\Log\MSPBackup_Throttle_$($strVER).log"
+  $logPath            = "C:\IT\Log\MSPMSPBackup_Schedules_$($strVER).log"
   #MXB PATH
   $mxbPath            = ${env:ProgramData} + "\MXB\Backup Manager"
   $Script:True_path   = "C:\ProgramData\MXB\"
@@ -97,28 +97,28 @@
     switch ($intSTG) {
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - ($($strModule)) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - ($($strModule)) :" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - ($($strModule)) :" -foregroundcolor red
         write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :" -foregroundcolor yellow
         write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Backup_Schedules - $($strModule) :" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :" -foregroundcolor yellow
         write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
@@ -609,11 +609,11 @@ if ((($scheduleMsg -notmatch "are different") -and ($scheduleMsg -match "are sam
     $script:blnWARN = $true
 }
 if ($script:blnWARN) {
-  write-DRMMAlert "Backup_Schedules : Warning : $($warnMsg) : See Diagnostics : $($finish)"
+  write-DRMMAlert "MSPBackup_Schedules : Warning : $($warnMsg) : See Diagnostics : $($finish)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRMMAlert "Backup_Schedules : Healthy : $($warnMsg) : $($finish)"
+  write-DRMMAlert "MSPBackup_Schedules : Healthy : $($warnMsg) : $($finish)"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }

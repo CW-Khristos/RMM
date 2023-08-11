@@ -9,14 +9,14 @@
   $strBRCH          = "dev"
   $strDIR           = "Datto\NAble%20Backup"
   $strVER           = [version]"0.1.0"
-  $strSCR           = "Monitor_MSPBackup"
+  $strSCR           = "MSPBackup_Monitor"
   $strOperation     = "Monitor" #"$($env:strTask)"
   $strDevice        = "$($env:computername)"
   $strUID           = "$($env:strUID)"
   $strInstallPwd    = "$($env:strInstallPwd)"
   $strEncryptKey    = "$($env:strEncryptKey)"
   $strPassphrase    = "$($env:strPassphrase)"
-  $logPath          = "C:\IT\Log\Monitor_MSPBackup"
+  $logPath          = "C:\IT\Log\MSPBackup_Monitor"
   $strLineSeparator = "----------------------------------"
   #https://cdn.cloudbackup.management/maxdownloads/mxb-windows-x86_x64.exe
   #mxb-windows-x86_x64.exe -silent -user "support_win_jab67v" -password "Secureh0982b2bxgt" -passphrase "914hahdgf-0000-example"
@@ -80,28 +80,28 @@
     switch ($intSTG) {
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Monitor_MSPBackup - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Monitor_MSPBackup - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n" -foregroundcolor red
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Monitor_MSPBackup - ($($strModule)) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Monitor - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n`tEND SCRIPT`r`n$($strLineSeparator)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Monitor_MSPBackup - ($($strModule)) :" -foregroundcolor red
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Monitor - ($($strModule)) :" -foregroundcolor red
         write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n`tEND SCRIPT`r`n$($strLineSeparator)" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Monitor_MSPBackup - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Monitor_MSPBackup - $($strModule) :" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Monitor - $($strModule) :" -foregroundcolor yellow
         write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
-        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Monitor_MSPBackup - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Monitor_MSPBackup - $($strModule) :" -foregroundcolor yellow
+        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Monitor - $($strModule) :" -foregroundcolor yellow
         write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
