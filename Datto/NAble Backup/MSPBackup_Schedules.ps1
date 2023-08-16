@@ -134,7 +134,7 @@
       -ContentType 'application/json' `
       -Body (ConvertTo-Json $data) `
       -Uri $url `
-      -SessionVariable $script:websession `
+      -SessionVariable script:websession `
       -UseBasicParsing
       $script:cookies = $websession.Cookies.GetCookies($url)
       $script:websession = $websession
