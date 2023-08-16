@@ -136,9 +136,9 @@
       -Uri $url `
       -SessionVariable script:websession `
       -UseBasicParsing
-      $script:cookies = $websession.Cookies.GetCookies($url)
-      $script:websession = $websession
-      $script:Authenticate = $webrequest | convertfrom-json
+    $script:cookies = $websession.Cookies.GetCookies($url)
+    $script:websession = $websession
+    $script:Authenticate = $webrequest | convertfrom-json
     #Debug write-host "Cookie : $($script:cookies[0].name) = $($cookies[0].value)"
     $webrequest
 
