@@ -16,7 +16,7 @@
     write-host "<-End Diagnostic->"
   }
 
-  function write-DRMMAlert ($message) {
+  function write-DRRMAlert ($message) {
     write-host "<-Start Result->"
     write-host "Alert=$($message)"
     write-host "<-End Result->"
@@ -53,7 +53,7 @@ if ($version -lt "6.3") {
   #exit 1
 }
 #GRAB ACCOUNT CHANGES IN PAST 24 HOURS
-$LastDay = (Get-Date).addhours(-1 * $env:varHours)
+$LastDay = (Get-Date).addhours(-24)
 $AdminGroup = Get-LocalGroupMember -SID "S-1-5-32-544"
 write-host "$($strLineSeparator)`r`nCollecting Admin Accounts....`r`n$($strLineSeparator)"
 $script:diag += "`r`n$($strLineSeparator)`r`nCollecting Admin Accounts....`r`n$($strLineSeparator)`r`n"
@@ -82,7 +82,7 @@ if (-not $script:blnWARN) {
   $script:diag += "$($strLineSeparator)`r`n"
   #Stop script execution time calculation
   StopClock
-  write-DRMMAlert "Healthy"
+  write-DRRMAlert "Healthy"
   write-DRMMDiag "$($script:diag)"
   exit 0
 } elseif ($script:blnWARN) {
@@ -94,7 +94,7 @@ if (-not $script:blnWARN) {
   $script:diag += "$($strLineSeparator)`r`n"
   #Stop script execution time calculation
   StopClock
-  write-DRMMAlert "Unhealthy. Please check diagnostics"
+  write-DRRMAlert "Unhealthy. Please check diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 }
