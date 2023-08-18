@@ -350,10 +350,10 @@ try {
   }
   if ($curSchedules) {
     logERR 3 "SCHEDULE" "PREV SCHEDULE :`r`n`t$($strLineSeparator)`r`n`t$($curSchedules.replace('`r`n', '`r`n`t'))`r`n$($strLineSeparator)"
-    if ($scheduleset.trim() -match $curSchedules.trim()) {
+    if ($scheduleset.trim() -contains $curSchedules.trim()) {
       $scheduleMsg += "| Schedule Strings are same |"
       logERR 3 "SCHEDULE" "$($scheduleMsg)`r`n$($strLineSeparator)"
-    } elseif ($scheduleset.trim() -notmatch $curSchedules.trim()) {
+    } elseif ($scheduleset.trim() -notcontains $curSchedules.trim()) {
       $scheduleMsg += "| Schedule Strings are different |"
       logERR 4 "SCHEDULE" "$($scheduleMsg)`r`n$($strLineSeparator)"
     }
@@ -402,10 +402,10 @@ try {
   }
   if ($curArchives) {
     logERR 3 "ARCHIVE" "PREV ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($curArchives.replace('`r`n', '`r`n`t'))`r`n$($strLineSeparator)"
-    if ($archiveset.trim() -match $curArchives.trim()) {
+    if ($archiveset.trim() -contains $curArchives.trim()) {
       $archiveMsg += "| Archive Strings are same |"
       logERR 3 "ARCHIVE" "$($archiveMsg)`r`n$($strLineSeparator)"
-    } elseif ($archiveset.trim() -notmatch $curArchives.trim()) {
+    } elseif ($archiveset.trim() -notcontains $curArchives.trim()) {
       $archiveMsg += "| Archive Strings are different |"
       logERR 4 "ARCHIVE" "$($archiveMsg)`r`n$($strLineSeparator)"
     }
@@ -582,7 +582,11 @@ try {
 } catch {
   $script:blnWARN = $true
   $err = "$($_.scriptstacktrace)`r`n$($_.Exception)`r`n$($_)`r`n"
-  logERR 4 "THROTTLE" "ERROR ENCOUNTERED :`r`n$($err)`r`n$($strLineSeparator)"
+  if ($_.exception -match "CommandNotFoundException") {
+    logERR 3 "THROTTLE" "ERROR ENCOUNTERED :`r`n$($err)`r`n`t$($strLineSeparator)`r`n`tSystem doesn't support IWR - Likely Win7/8/2K8 OS`r`n$($strLineSeparator)"
+  } elseif ($_.exception -notmatch "CommandNotFoundException") {
+    logERR 4 "THROTTLE" "ERROR ENCOUNTERED :`r`n$($err)`r`n$($strLineSeparator)"
+  }
 }
 #Stop script execution time calculation
 StopClock
