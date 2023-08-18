@@ -349,11 +349,12 @@ try {
     new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom18" -value "$($hash)" -force
   }
   if ($curSchedules) {
-    logERR 3 "SCHEDULE" "PREV SCHEDULE :`r`n`t$($strLineSeparator)`r`n`t$($curSchedules.replace('`r`n', '`r`n`t'))`r`n$($strLineSeparator)"
-    if ($scheduleset.trim() -contains $curSchedules.trim()) {
+    $curSchedules = $curSchedules.replace(" | ", " | `r`n`t")
+    logERR 3 "SCHEDULE" "PREV SCHEDULE :`r`n`t$($strLineSeparator)`r`n`t$($curSchedules)`r`n$($strLineSeparator)"
+    if (($scheduleset.trim()).contains($curSchedules.trim())) {
       $scheduleMsg += "| Schedule Strings are same |"
       logERR 3 "SCHEDULE" "$($scheduleMsg)`r`n$($strLineSeparator)"
-    } elseif ($scheduleset.trim() -notcontains $curSchedules.trim()) {
+    } elseif (-not ($scheduleset.trim()).contains($curSchedules.trim())) {
       $scheduleMsg += "| Schedule Strings are different |"
       logERR 4 "SCHEDULE" "$($scheduleMsg)`r`n$($strLineSeparator)"
     }
@@ -401,11 +402,12 @@ try {
     new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom20" -value "$($hash)" -force
   }
   if ($curArchives) {
-    logERR 3 "ARCHIVE" "PREV ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($curArchives.replace('`r`n', '`r`n`t'))`r`n$($strLineSeparator)"
-    if ($archiveset.trim() -contains $curArchives.trim()) {
+    $curArchives = $curArchives.replace(" | ", " | `r`n`t")
+    logERR 3 "ARCHIVE" "PREV ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($curArchives)`r`n$($strLineSeparator)"
+    if (($archiveset.trim()).contains($curArchives.trim())) {
       $archiveMsg += "| Archive Strings are same |"
       logERR 3 "ARCHIVE" "$($archiveMsg)`r`n$($strLineSeparator)"
-    } elseif ($archiveset.trim() -notcontains $curArchives.trim()) {
+    } elseif (-not ($archiveset.trim()).contains($curArchives.trim())) {
       $archiveMsg += "| Archive Strings are different |"
       logERR 4 "ARCHIVE" "$($archiveMsg)`r`n$($strLineSeparator)"
     }
