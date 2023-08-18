@@ -65,22 +65,25 @@
   #  [Parameter(Mandatory=$true)] $i_UDFpassword
   #)
   #VERSION FOR SCRIPT UPDATE
-  $strSCR = "MSPBackup_SetGUI"
-  $strVER = [version]"0.1.0"
-  $strREPO = "RMM"
-  $strBRCH = "dev"
-  $strDIR = "Datto\NAble Backup"
-  $script:diag = $null
-  $script:blnWARN = $false
-  $Script:strLineSeparator = "  ---------"
-  $logPath = "C:\IT\Log\MSPBackup_SetGUI_$($strVER).log"
-  $urlJSON = 'https://api.backup.management/jsonapi'
-  $mxbPath = ${env:ProgramData} + "\MXB\Backup Manager"
-  $CurrentDate = Get-Date -format "yyy-MM-dd_hh-mm-ss"
+  $strSCR                 = "MSPBackup_SetGUI"
+  $strVER                 = [version]"0.1.1"
+  $strREPO                = "RMM"
+  $strBRCH                = "dev"
+  $strDIR                 = "Datto\NAble Backup"
+  $script:diag            = $null
+  $script:blnWARN         = $false
+  $script:blnBMAuth       = $false
+  $ErrorActionPreference  = 'Continue'
+  $strLineSeparator       = "  ---------"
+  $logPath                = "C:\IT\Log\MSPBackup_SetGUI_$($strVER).log"
+  $urlJSON                = 'https://api.backup.management/jsonapi'
+  $mxbPath                = ${env:ProgramData} + "\MXB\Backup Manager"
+  $CurrentDate            = Get-Date -format "yyy-MM-dd_hh-mm-ss"
   #MXB PATH
-  $Script:True_path = "C:\ProgramData\MXB\"
-  $Script:APIcredfile = join-path -Path $True_Path -ChildPath "$env:computername API_Credentials.Secure.txt"
-  $Script:APIcredpath = Split-path -path $APIcredfile
+  $script:True_path       = "C:\ProgramData\MXB\"
+  $script:APIcredfile     = join-path -Path $True_Path -ChildPath "$env:computername API_Credentials.Secure.txt"
+  $script:APIcredpath     = Split-path -path $APIcredfile
+  
   # ALL PARTNERS / ALL DEVICES BOOLEANS
   if ($env:i_AllDevices -eq "false") {
     $AllDevices = $false
@@ -92,45 +95,41 @@
   } elseif ($env:i_AllPartners -eq "true") {
     $AllPartners = $true
   }
-  clear-host
-  $ErrorActionPreference = 'Continue'
   #SANITIZE DRMM VARIABLES
-  if (($null -eq $script:i_BackupUser) -or ($script:i_BackupUser -eq "")) {
-    $script:i_BackupUser = $env:BackupUser
-  }
-  if (($null -eq $script:i_BackupPWD) -or ($script:i_BackupPWD -eq "")) {
-    $script:i_BackupPWD = $env:BackupPass
-  }
-  Write-Host "  Bulk Set GUI Password `n"
+  if (($null -eq $script:PartnerName) -or ($script:PartnerName -eq "")) {$script:PartnerName = $env:BackupRoot}
+  if (($null -eq $script:i_BackupUser) -or ($script:i_BackupUser -eq "")) {$script:i_BackupUser = $env:BackupUser}
+  if (($null -eq $script:i_BackupPWD) -or ($script:i_BackupPWD -eq "")) {$script:i_BackupPWD = $env:BackupPass}
+  clear-host
+  write-host "  Bulk Set GUI Password `n"
   $script:diag += "  Bulk Set GUI Password `r`n`r`n"
-  #$Syntax = Get-Command $PSCommandPath -Syntax ; Write-Host "Script Parameter Syntax:`n`n  $Syntax"
-  Write-Host "  Current Parameters:"
+  #$Syntax = Get-Command $PSCommandPath -Syntax ; write-host "Script Parameter Syntax:`n`n  $Syntax"
+  write-host "  Current Parameters:"
   $script:diag += "  Current Parameters:`r`n"
-  Write-Host "  -AllPartners     = $($AllPartners)"
+  write-host "  -AllPartners     = $($AllPartners)"
   $script:diag += "  -AllPartners     = $($AllPartners)`r`n"
-  Write-Host "  -AllDevices      = $($AllDevices)"
+  write-host "  -AllDevices      = $($AllDevices)"
   $script:diag += "  -AllDevices      = $($AllDevices)`r`n"
-  Write-Host "  -SetGUIPassword  = $($SetGUIPassword)"
+  write-host "  -SetGUIPassword  = $($SetGUIPassword)"
   $script:diag += "  -SetGUIPassword  = $($SetGUIPassword)`r`n"
-  Write-Host "  -RestoreOnly     = $($RestoreOnly)"
+  write-host "  -RestoreOnly     = $($RestoreOnly)"
   $script:diag += "  -RestoreOnly     = $($RestoreOnly)`r`n"
-  Write-Host "  -i_BackupCMD = $($env:i_BackupCMD)"
+  write-host "  -i_BackupCMD = $($env:i_BackupCMD)"
   $script:diag += "  -i_BackupCMD = $($env:i_BackupCMD)`r`n"
-  Write-Host "  -i_GUILength = $($env:i_GUILength)"
+  write-host "  -i_GUILength = $($env:i_GUILength)"
   $script:diag += "  -i_GUILength = $($env:i_GUILength)`r`n"
-  Write-Host "  -i_GUIpassword = $($env:i_GUIpassword)"
+  write-host "  -i_GUIpassword = $($env:i_GUIpassword)"
   $script:diag += "  -i_GUIpassword = $($env:i_GUIpassword)`r`n"
-  Write-Host "  -i_PartnerName = $($env:i_PartnerName)"
-  $script:diag += "  -i_PartnerName = $($env:i_PartnerName)`r`n"
-  Write-Host "  -i_BackupName = $($env:i_BackupName)"
+  write-host "  -i_PartnerName = $($env:i_PartnerName)"
+  $script:diag += "  -i_PartnerName = $($script:PartnerName)`r`n"
+  write-host "  -i_BackupName = $($env:i_BackupName)"
   $script:diag += "  -i_BackupName = $($env:i_BackupName)`r`n"
-  Write-Host "  -i_BackupUser = $($script:i_BackupUser)"
+  write-host "  -i_BackupUser = $($script:i_BackupUser)"
   $script:diag += "  -i_BackupUser = {ENCRYPTED}`r`n"
-  Write-Host "  -i_BackupPWD = {ENCRYPTED}"
+  write-host "  -i_BackupPWD = {ENCRYPTED}"
   $script:diag += "  -i_BackupPWD = {ENCRYPTED}`r`n"
-  Write-Host "  -i_UDFpassword = $($env:i_UDFpassword)"
+  write-host "  -i_UDFpassword = $($env:i_UDFpassword)"
   $script:diag += "  -i_UDFpassword = $($env:i_UDFpassword)`r`n"
-  Write-Host "  -i_UDFaccount = $($env:i_UDFaccount)"
+  write-host "  -i_UDFaccount = $($env:i_UDFaccount)"
   $script:diag += "  -i_UDFaccount = $($env:i_UDFaccount)`r`n"
   
   #$scriptpath = $MyInvocation.MyCommand.Path
@@ -140,9 +139,7 @@
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
 
   # GENERATE RANDOMIZED PASSWORD UP TO LEN($env:i_GUILength)
-  if (($env:i_GUILength -eq 0) -or ($env:i_GUILength -lt 8)) {
-    $env:i_GUILength = 8
-  }
+  if (($env:i_GUILength -eq 0) -or ($env:i_GUILength -lt 8)) {$env:i_GUILength = 8}
   if (($env:i_GUIpassword -eq $null) -or ($env:i_GUIpassword -eq "") -or ($env:i_GUIpassword -eq "NULL")) {
     $password = -join ((33..33) + (35..38) + (42..42) + (50..57) + (63..72) + (74..75) + (77..78) + (80..90) + (97..104) + (106..107) + (109..110) + (112..122) | 
       Get-Random -Count $env:i_GUILength | ForEach-Object {[char]$_})
@@ -151,9 +148,7 @@
   }
   $SecurePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
   # SET PASSWORD WIPE
-  if ($env:i_BackupCMD -eq "WipeGUIPassword") {
-    $WipeGUIPassword = $True
-  }
+  if ($env:i_BackupCMD -eq "WipeGUIPassword") {$WipeGUIPassword = $True}
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
@@ -169,7 +164,7 @@
     write-host "<-End Result->"
   } ## write-DRMMAlert
 
-  Function Convert-UnixTimeToDateTime ($inputUnixTime) {
+  function Convert-UnixTimeToDateTime ($inputUnixTime) {
     if ($inputUnixTime -gt 0 ) {
       $epoch = Get-Date -Date "1970-01-01 00:00:00Z"
       $epoch = $epoch.ToUniversalTime()
@@ -181,116 +176,42 @@
   }  ## Convert epoch time to date time
 
 #region ----- Authentication ----
-  Function Set-APICredentials {
-    Write-Host "$($Script:strLineSeparator)`r`n  Setting Backup API Credentials"
-    $script:diag += "$($Script:strLineSeparator)`r`n  Setting Backup API Credentials`r`n"
-    ## CHECK FOR EXISTING API FILE
-    if (Test-Path $APIcredpath) {
-      Write-Host "$($Script:strLineSeparator)`r`n  Backup API Credential Path Present"
-      $script:diag += "$($Script:strLineSeparator)`r`n  Backup API Credential Path Present`r`n"
-    } else {
-      New-Item -ItemType Directory -Path $APIcredpath
-    }
-    ## SET PARTNER NAME
-    if (($null -eq $env:i_PartnerName) -or ($env:i_PartnerName -eq "")) {
-      Write-Host "  Enter Exact, Case Sensitive Partner Name for N-able Backup.Management API i.e. 'Acme, Inc (bob@acme.net)'"
-      $script:diag +=  "  Enter Exact, Case Sensitive Partner Name for N-able Backup.Management API i.e. 'Acme, Inc (bob@acme.net)'`r`n"
-      DO{$Script:PartnerName = Read-Host "  Enter Login Partner Name"}
-      WHILE ($PartnerName.length -eq 0)
-    } elseif (($null -ne $env:i_PartnerName) -and ($env:i_PartnerName -ne "")) {
-      $PartnerName = $env:i_PartnerName
-    }
-    ## SET BACKUP CREDENTIALS
-    $BackupCred = New-Object -TypeName PSObject
-    $BackupCred | Add-Member -MemberType NoteProperty -Name PartnerName -Value "$($PartnerName)"
-    if ((($null -eq $script:i_BackupUser) -or ($script:i_BackupUser -eq "")) -or 
-      (($null -eq $script:i_BackupPWD) -or ($script:i_BackupPWD -eq ""))) {           ## NO CREDENTIALS PASSED
-        $BackupCred = Get-Credential -UserName "" -Message 'Enter Login Email and Password for N-able Backup.Management API'
-    } elseif ((($null -ne $script:i_BackupUser) -and ($script:i_BackupUser -ne "")) -and 
-      (($null -ne $script:i_BackupPWD) -and ($script:i_BackupPWD -ne ""))) {          ## CREDENTIALS PASSED
-        $BackupCred | Add-Member -MemberType NoteProperty -Name UserName -Value "$($script:i_BackupUser)"
-        $BackupCred | Add-Member -MemberType NoteProperty -Name Password -Value "$($script:i_BackupPWD)"
-    }
-    ## WRITE API FILE
-    $PartnerName | out-file $APIcredfile
-    $BackupCred.UserName | Out-file -append $APIcredfile
-    $BackupCred.Password | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-file -append $APIcredfile
-    Start-Sleep -milliseconds 300
-    #Send-APICredentialsCookie  ## Attempt API Authentication
-  }  ## Set API credentials if not present
-
-  Function Get-APICredentials {
-    if (($ClearCredentials) -and (Test-Path $APIcredfile)) {                    ## CLEAR API CREDENTIALS
-      Remove-Item -Path $Script:APIcredfile
-      $ClearCredentials = $Null
-      Write-Host "$($Script:strLineSeparator)`r`n  Backup API Credential File Cleared"
-      $script:diag += "$($Script:strLineSeparator)`r`n  Backup API Credential File Cleared`r`n"
-      Send-APICredentialsCookie  ## Retry Authentication
-    } else {                                                                    ## RETRIEVE API CREDENTIALS
-      Write-Host "$($Script:strLineSeparator)`r`n  Getting Backup API Credentials"
-      $script:diag += "$($Script:strLineSeparator)`r`n  Getting Backup API Credentials`r`n"
-  
-      if (Test-Path $APIcredfile) {                                             ## API FILE EXISTS
-        Write-Host "$($Script:strLineSeparator)`r`n  Backup API Credential File Present"
-        $script:diag += "$($Script:strLineSeparator)`r`n  Backup API Credential File Present`r`n"
-        $APIcredentials = get-content $APIcredfile
-        
-        $Script:cred0 = [string]$APIcredentials[0] 
-        $Script:cred1 = [string]$APIcredentials[1]
-        $Script:cred2 = $APIcredentials[2] | Convertto-SecureString 
-        $Script:cred2 = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($Script:cred2))
-
-        Write-Host "$($Script:strLineSeparator)`r`n  Stored Backup API Partner  = $($Script:cred0)"
-        $script:diag += "$($Script:strLineSeparator)`r`n  Stored Backup API Partner  = $($Script:cred0)`r`n"
-        Write-Host "  Stored Backup API User     = $($Script:cred1)"
-        $script:diag += "  Stored Backup API User     = {ENCRYPTED}`r`n"
-        Write-Host "  Stored Backup API Password = {ENCRYPTED}"
-        $script:diag += "  Stored Backup API Password = {ENCRYPTED}`r`n"
-      } else {                                                                  ## API FILE DOES NOT EXIST
-        Write-Host "$($Script:strLineSeparator)`r`n  Backup API Credential File Not Present"
-        $script:diag += "$($Script:strLineSeparator)`r`n  Backup API Credential File Not Present`r`n"
-        Set-APICredentials  ## Create API Credential File if Not Found
-      }
-    }
-  }  ## Get API credentials if present
-
-  Function Send-APICredentialsCookie {
-    Get-APICredentials  ## Read API Credential File before Authentication
+  function Send-APICredentialsCookie {
     $url = $urlJSON
     $data = @{}
     $data.jsonrpc = '2.0'
     $data.id = '2'
     $data.method = 'Login'
     $data.params = @{}
-    $data.params.partner = $Script:cred0
-    $data.params.username = $Script:cred1
-    $data.params.password = $Script:cred2
+    $data.params.partner = $script:PartnerName
+    $data.params.username = $script:i_BackupUser
+    $data.params.password = $script:i_BackupPWD
 
     $webrequest = Invoke-WebRequest -Method POST `
       -ContentType 'application/json' `
       -Body (ConvertTo-Json $data) `
       -Uri $url `
-      -SessionVariable Script:websession `
+      -SessionVariable script:websession `
       -UseBasicParsing
-      $Script:cookies = $websession.Cookies.GetCookies($url)
-      $Script:websession = $websession
-      $Script:Authenticate = $webrequest | convertfrom-json
-    #Debug Write-Host "$($Script:cookies[0].name) = $($cookies[0].value)"
+    $script:cookies = $websession.Cookies.GetCookies($url)
+    $script:websession = $websession
+    $script:Authenticate = $webrequest | convertfrom-json
+    #Debug write-host "$($script:cookies[0].name) = $($cookies[0].value)"
 
     if ($authenticate.visa) {
-      $Script:visa = $authenticate.visa
+      $script:blnBMAuth = $true
+      $script:visa = $authenticate.visa
     } else {
-      Write-Host "  $($Script:strLineSeparator)`r`n  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials"
-      $script:diag += "  $($Script:strLineSeparator)`r`n  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials`r`n"
-      Write-Host "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n   $($Script:strLineSeparator)"
-      $script:diag += "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n   $($Script:strLineSeparator)`r`n"
-      Set-APICredentials  ## Create API Credential File if Authentication Fails
+      write-host "  $($strLineSeparator)`r`n  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials"
+      $script:diag += "  $($strLineSeparator)`r`n  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials`r`n"
+      write-host "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n   $($strLineSeparator)"
+      $script:diag += "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n   $($strLineSeparator)`r`n"
     }
   }  ## Use Backup.Management credentials to Authenticate
 #endregion ----- Authentication ----
 
 #region ----- Backup.Management JSON Calls ----
-  Function CallJSON ($url,$object) {
+  function CallJSON ($url,$object) {
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($object)
     $web = [System.Net.WebRequest]::Create($url)
     $web.Method = "POST"
@@ -304,12 +225,12 @@
     $reader.Close()
   }
 
-  Function Send-GetPartnerInfo ($PartnerName) {                
+  function Send-GetPartnerInfo ($PartnerName) {                
     $url = $urlJSON
     $data = @{}
     $data.jsonrpc = '2.0'
     $data.id = '2'
-    $data.visa = $Script:visa
+    $data.visa = $script:visa
     $data.method = 'GetPartnerInfo'
     $data.params = @{}
     $data.params.name = [String]$PartnerName
@@ -318,11 +239,11 @@
       -ContentType 'application/json' `
       -Body (ConvertTo-Json $data -depth 5) `
       -Uri $url `
-      -SessionVariable Script:websession `
+      -SessionVariable script:websession `
       -UseBasicParsing
-      #$Script:cookies = $websession.Cookies.GetCookies($url)
-      $Script:websession = $websession
-      $Script:Partner = $webrequest | convertfrom-json
+    #$script:cookies = $websession.Cookies.GetCookies($url)
+    $script:websession = $websession
+    $script:Partner = $webrequest | convertfrom-json
 
     $RestrictedPartnerLevel = @("Root","Sub-root","Distributor")
     <#---# POWERSHELL 2.0 #---#>
@@ -331,33 +252,33 @@
     <#---# POWERSHELL 3.0+ #--->
     if ($Partner.result.result.Level -notin $RestrictedPartnerLevel) {
     #---#>
-      [String]$Script:Uid = $Partner.result.result.Uid
-      [int]$Script:PartnerId = [int]$Partner.result.result.Id
+      [String]$script:Uid = $Partner.result.result.Uid
+      [int]$script:PartnerId = [int]$Partner.result.result.Id
       [String]$script:Level = $Partner.result.result.Level
-      [String]$Script:PartnerName = $Partner.result.result.Name
-      Write-Host "$($Script:strLineSeparator)`r`n  $($PartnerName) - $($partnerId) - $($Uid)`r`n$($Script:strLineSeparator)"
-      $script:diag += "$($Script:strLineSeparator)`r`n  $($PartnerName) - $($partnerId) - $($Uid)`r`n$($Script:strLineSeparator)`r`n"
+      [String]$script:PartnerName = $Partner.result.result.Name
+      write-host "$($strLineSeparator)`r`n  $($PartnerName) - $($partnerId) - $($Uid)`r`n$($strLineSeparator)"
+      $script:diag += "$($strLineSeparator)`r`n  $($PartnerName) - $($partnerId) - $($Uid)`r`n$($strLineSeparator)`r`n"
     } else {
-      Write-Host "$($Script:strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($Script:strLineSeparator)"
-      $script:diag += "$($Script:strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($Script:strLineSeparator)`r`n"
-      #$Script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
-      #Send-GetPartnerInfo $Script:partnername
+      write-host "$($strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($strLineSeparator)"
+      $script:diag += "$($strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($strLineSeparator)`r`n"
+      #$script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
+      #Send-GetPartnerInfo $script:partnername
     }
 
     if ($partner.error) {
-      Write-Host "  $($partner.error.message)"
+      write-host "  $($partner.error.message)"
       $script:diag += "  $($partner.error.message)`r`n"
-      #$Script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
-      #Send-GetPartnerInfo $Script:partnername
+      #$script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
+      #Send-GetPartnerInfo $script:partnername
     }
   } ## Send-GetPartnerInfo API Call
 
-  Function Send-EnumeratePartners {
+  function Send-EnumeratePartners {
     # ----- Get Partners via EnumeratePartners -----
     # (Create the JSON object to call the EnumeratePartners function)
     $objEnumeratePartners = (New-Object PSObject | 
       Add-Member -PassThru NoteProperty jsonrpc '2.0' |
-      Add-Member -PassThru NoteProperty visa $Script:visa |
+      Add-Member -PassThru NoteProperty visa $script:visa |
       Add-Member -PassThru NoteProperty method 'EnumeratePartners' |
       Add-Member -PassThru NoteProperty params @{
         parentPartnerId = $PartnerId 
@@ -367,10 +288,10 @@
       Add-Member -PassThru NoteProperty id '1') | ConvertTo-Json -Depth 5
     
     # (Call the JSON Web Request Function to get the EnumeratePartners Object)
-    [array]$Script:EnumeratePartnersSession = CallJSON $urlJSON $objEnumeratePartners
-    $Script:visa = $EnumeratePartnersSession.visa
-    Write-Host "$($Script:strLineSeparator)`r`n  Using Visa: $($Script:visa)`r`n$($Script:strLineSeparator)"
-    $script:diag += "$($Script:strLineSeparator)`r`n  Using Visa: $($Script:visa)`r`n$($Script:strLineSeparator)`r`n"
+    [array]$script:EnumeratePartnersSession = CallJSON $urlJSON $objEnumeratePartners
+    $script:visa = $EnumeratePartnersSession.visa
+    write-host "$($strLineSeparator)`r`n  Using Visa: $($script:visa)`r`n$($strLineSeparator)"
+    $script:diag += "$($strLineSeparator)`r`n  Using Visa: $($script:visa)`r`n$($strLineSeparator)`r`n"
     # (Added Delay in case command takes a bit to respond)
     Start-Sleep -Milliseconds 100
     # (Get Result Status of EnumerateAccountProfiles)
@@ -379,47 +300,47 @@
     
     # (Check for Errors with EnumeratePartners - Check if ErrorCode has a value)
     if ($EnumeratePartnersSessionErrorCode) {
-      Write-Host "$($Script:strLineSeparator)`r`n  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)"
-      $script:diag += "$($Script:strLineSeparator)`r`n  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)`r`n"
-      Write-Host "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)`r`n$($Script:strLineSeparator)`r`n  Exiting Script"
-      $script:diag += "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)`r`n$($Script:strLineSeparator)`r`n  Exiting Script`r`n"
-      # (Exit Script if there is a problem)
-      #Break Script
+      write-host "$($strLineSeparator)`r`n  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)"
+      $script:diag += "$($strLineSeparator)`r`n  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)`r`n"
+      write-host "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)`r`n$($strLineSeparator)`r`n  Exiting script"
+      $script:diag += "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)`r`n$($strLineSeparator)`r`n  Exiting script`r`n"
+      # (Exit script if there is a problem)
+      #Break script
     } else {
       # (No error)
-      $Script:EnumeratePartnersSessionResults = $EnumeratePartnersSession.result.result | 
+      $script:EnumeratePartnersSessionResults = $EnumeratePartnersSession.result.result | 
       select-object Name,@{l='Id';e={($_.Id).tostring()}},Level,ExternalCode,ParentId,LocationId,* -ExcludeProperty Company -ErrorAction Ignore
-      $Script:EnumeratePartnersSessionResults | ForEach-Object {
+      $script:EnumeratePartnersSessionResults | ForEach-Object {
         $_.CreationTime = [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($_.CreationTime))
       }
-      $Script:EnumeratePartnersSessionResults | ForEach-Object {
+      $script:EnumeratePartnersSessionResults | ForEach-Object {
         if ($_.TrialExpirationTime  -ne "0") {
           $_.TrialExpirationTime = [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($_.TrialExpirationTime))
         }
       }
-      $Script:EnumeratePartnersSessionResults | ForEach-Object {
+      $script:EnumeratePartnersSessionResults | ForEach-Object {
         if ($_.TrialRegistrationTime -ne "0") {
           $_.TrialRegistrationTime = [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($_.TrialRegistrationTime))
         }
       }
-      $Script:SelectedPartners = $EnumeratePartnersSessionResults | Select-object * | 
+      $script:SelectedPartners = $EnumeratePartnersSessionResults | Select-object * | 
         Where-object {$_.name -notlike "001???????????????- Recycle Bin"} | Where-object {$_.Externalcode -notlike '`[??????????`]* - ????????-????-????-????-????????????'}
-      $Script:SelectedPartner = $Script:SelectedPartners += @( [pscustomobject]@{Name=$PartnerName;Id=[string]$PartnerId;Level='<ParentPartner>'} ) 
+      $script:SelectedPartner = $script:SelectedPartners += @( [pscustomobject]@{Name=$PartnerName;Id=[string]$PartnerId;Level='<ParentPartner>'} ) 
       
       if ($AllPartners) {
-        $script:Selection = $Script:SelectedPartners | 
+        $script:Selection = $script:SelectedPartners | 
           Select-object id,Name,Level,CreationTime,State,TrialRegistrationTime,TrialExpirationTime,Uid | sort-object Level,name
-        Write-Host "$($Script:strLineSeparator)`r`n  All Partners Selected"
-        $script:diag += "$($Script:strLineSeparator)`r`n  All Partners Selected`r`n"
+        write-host "$($strLineSeparator)`r`n  All Partners Selected"
+        $script:diag += "$($strLineSeparator)`r`n  All Partners Selected`r`n"
       } else {
-        $script:Selection = $Script:SelectedPartners |  
+        $script:Selection = $script:SelectedPartners |  
           Select-object id,Name,Level,CreationTime,State,TrialRegistrationTime,TrialExpirationTime,Uid | sort-object Level,name | 
             out-gridview -Title "Current Partner | $($partnername)" -OutputMode Single
         if (($null -eq $Selection) -or ($Selection -eq "")) {
           # Cancel was pressed
           # Run cancel script
-          Write-Host "$($Script:strLineSeparator)`r`n  No Partners Selected"
-          $script:diag += "$($Script:strLineSeparator)`r`n  No Partners Selected`r`n"
+          write-host "$($strLineSeparator)`r`n  No Partners Selected"
+          $script:diag += "$($strLineSeparator)`r`n  No Partners Selected`r`n"
           Break
         } else {
             # OK was pressed, $Selection contains what was chosen
@@ -431,13 +352,13 @@
     }
   }  ## Send-EnumeratePartners API Call
 
-  Function Send-GetDevices {
+  function Send-GetDevices {
     $url = $urlJSON
     $method = 'POST'
     $data = @{}
     $data.jsonrpc = '2.0'
     $data.id = '2'
-    $data.visa = $Script:visa
+    $data.visa = $script:visa
     $data.method = 'EnumerateAccountStatistics'
     $data.params = @{}
     $data.params.query = @{}
@@ -453,15 +374,15 @@
     $params = @{
       Uri         = $url
       Method      = $method
-      Headers     = @{ 'Authorization' = "Bearer $($Script:visa)" }
+      Headers     = @{ 'Authorization' = "Bearer $($script:visa)" }
       Body        = ([System.Text.Encoding]::UTF8.GetBytes($jsondata))
       ContentType = 'application/json; charset=utf-8'
     }
 
-    $Script:DeviceDetail = @()
-    $Script:DeviceResponse = Invoke-RestMethod @params
+    $script:DeviceDetail = @()
+    $script:DeviceResponse = Invoke-RestMethod @params
     ForEach ( $DeviceResult in $DeviceResponse.result.result ) {
-      $Script:DeviceDetail += New-Object -TypeName PSObject -Property @{
+      $script:DeviceDetail += New-Object -TypeName PSObject -Property @{
         AccountID      = [Int]$DeviceResult.AccountId;
         PartnerID      = [string]$DeviceResult.PartnerId;
         DeviceName     = $DeviceResult.Settings.AN -join '' ;
@@ -490,7 +411,7 @@
     }
   } ## Send-GetDevices API Call
 
-  Function Send-RemoteCommand { 
+  function Send-RemoteCommand { 
     if ($SecurePassword.length -ge 1) {
       $UnsecureGUIPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword))
     }
@@ -501,12 +422,12 @@
     }
     if ($env:i_BackupCMD -eq "WipeGUIPassword") {
       $UnsecureGUIPassword = ""
-      Write-Host -NoNewline "Wiping GUI Password"
+      write-host -NoNewline "Wiping GUI Password"
     }
 
     $url = "https://backup.management/jsonrpcv1"
     $method = 'POST'
-    $Script:data = @{}
+    $script:data = @{}
     $data.jsonrpc = '2.0'
     $data.id = 'jsonrpc'
     $data.method = 'SendRemoteCommands'
@@ -516,32 +437,32 @@
     $data.params.ids = @([System.Int32[]]$selecteddevice.accountid)
     $jsondata = (ConvertTo-Json $data -depth 6)
     #$jsondata  ## Debug
-    Write-Host "`n##Sending Remote Command##`n$($data.params.command)`n$($CommandParameters)" ## Output sent Remote Command
+    write-host "`n##Sending Remote Command##`n$($data.params.command)`n$($CommandParameters)" ## Output sent Remote Command
     $script:diag += "`r`n##Sending Remote Command##`r`n$($data.params.command)`r`n$($CommandParameters)`r`n"
 
     $params = @{
       Uri         = $url
       Method      = $method
-      Headers     = @{ 'Authorization' = "Bearer $($Script:visa)" }
+      Headers     = @{ 'Authorization' = "Bearer $($script:visa)" }
       Body        = ([System.Text.Encoding]::UTF8.GetBytes($jsondata))
       ContentType = 'application/json; charset=utf-8'
     }
 
-    $Script:sendResult = Invoke-RestMethod @params
-    #$Script:sendResult.result.result | Select-Object Id,@{Name="Status"; Expression={$_.Result.code}},@{Name="Message"; Expression={$_.Result.Message}} | Format-Table
-    Write-Host " $($Script:sendResult.result.result.id) $($Script:sendResult.result.result.result.code)"
-    $script:diag += " $($Script:sendResult.result.result.id) $($Script:sendResult.result.result.result.code)`r`n"
+    $script:sendResult = Invoke-RestMethod @params
+    #$script:sendResult.result.result | Select-Object Id,@{Name="Status"; Expression={$_.Result.code}},@{Name="Message"; Expression={$_.Result.Message}} | Format-Table
+    write-host " $($script:sendResult.result.result.id) $($script:sendResult.result.result.result.code)"
+    $script:diag += " $($script:sendResult.result.result.id) $($script:sendResult.result.result.result.code)`r`n"
   } ## Send-RemoteCommand API Call
 
-  Function UpdateCustomColumn ($DeviceId,$ColumnId,$Message) {
+  function UpdateCustomColumn ($DeviceId,$ColumnId,$Message) {
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $headers.Add("Authorization","Bearer $($Script:visa)")
+    $headers.Add("Authorization","Bearer $($script:visa)")
     $headers.Add("Content-Type","application/json")
   
     $body = "{
       `n    `"jsonrpc`":`"2.0`",
       `n    `"id`":`"jsonrpc`",
-      `n    `"visa`":`"$($Script:visa)`",
+      `n    `"visa`":`"$($script:visa)`",
       `n    `"method`":`"UpdateAccountCustomColumnValues`",
       `n    `"params`":{
       `n      `"accountId`": $($DeviceId),
@@ -551,12 +472,12 @@
       `n"
 
     try {
-      $Script:updateCC = Invoke-RestMethod $urlJSON -Method 'POST' -Headers $headers -Body $body
-      Write-Host "$($Script:strLineSeparator)`r`n  UpdateCC : SUCCESS"
-      $script:diag += "$($Script:strLineSeparator)`r`n  UpdateCC : SUCCESS`r`n"
+      $script:updateCC = Invoke-RestMethod $urlJSON -Method 'POST' -Headers $headers -Body $body
+      write-host "$($strLineSeparator)`r`n  UpdateCC : SUCCESS"
+      $script:diag += "$($strLineSeparator)`r`n  UpdateCC : SUCCESS`r`n"
     } catch {
-      Write-Host "$($Script:strLineSeparator)`r`n  UpdateCC : FAILURE"
-      $script:diag += "$($Script:strLineSeparator)`r`n  UpdateCC : FAILURE`r`n"
+      write-host "$($strLineSeparator)`r`n  UpdateCC : FAILURE"
+      $script:diag += "$($strLineSeparator)`r`n  UpdateCC : FAILURE`r`n"
     }
   } ## UpdateCustomColumn API Call
 #endregion ----- Backup.Management JSON Calls ----
@@ -565,87 +486,91 @@
 #------------
 #BEGIN SCRIPT
 try {
-  Set-APICredentials
   Send-APICredentialsCookie
-  Write-Host "$($Script:strLineSeparator)`r`n"
-  $script:diag += "$($Script:strLineSeparator)`r`n`r`n"
-  # OBTAIN PARTNER AND BACKUP ACCOUNT ID
-  [xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
-  $xmlBackupID = $statusXML.Statistics.Account
-  $xmlPartnerID = $statusXML.Statistics.PartnerName
-  #Send-GetPartnerInfo $Script:cred0
-  #Send-EnumeratePartners
-  if ((-not $AllPartners) -and (($null -eq $env:i_BackupName) -or ($env:i_BackupName -eq ""))) {
-    write-host "  XML Partner: $($xmlPartnerID)"
-    $script:diag += "  XML Partner: $($xmlPartnerID)`r`n"
-    Send-GetPartnerInfo $xmlPartnerID
-  } elseif ((-not $AllPartners) -and (($null -ne $env:i_BackupName) -and ($env:i_BackupName -ne ""))) {
-    write-host "  Passed Partner: $($env:i_BackupName)"
-    $script:diag += "  Passed Partner: $($env:i_BackupName)`r`n"
-    Send-GetPartnerInfo $env:i_BackupName
-  }
-  $filter1 = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup.
-  if ($AllPartners) {
-    Send-GetDevices "External IPM"
-  } elseif (-not $AllPartners) {
-    Send-GetDevices $xmlPartnerID
-  }
+  if (-not $script:blnBMAuth) {
+    write-host "  $($strLineSeparator)`r`n  Authentication Failed: Script Will Not Continue`r`n$($strLineSeparator)"
+    $script:diag += "  $($strLineSeparator)`r`n  Authentication Failed: Script Will Not Continue`r`n$($strLineSeparator)`r`n"
+  } elseif ($script:blnBMAuth) {
+    write-host "$($strLineSeparator)`r`n"
+    $script:diag += "$($strLineSeparator)`r`n`r`n"
+    # OBTAIN PARTNER AND BACKUP ACCOUNT ID
+    [xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
+    $xmlBackupID = $statusXML.Statistics.Account
+    $xmlPartnerID = $statusXML.Statistics.PartnerName
+    #Send-GetPartnerInfo $script:cred0
+    #Send-EnumeratePartners
+    if ((-not $AllPartners) -and (($null -eq $env:i_BackupName) -or ($env:i_BackupName -eq ""))) {
+      write-host "  XML Partner: $($xmlPartnerID)"
+      $script:diag += "  XML Partner: $($xmlPartnerID)`r`n"
+      Send-GetPartnerInfo $xmlPartnerID
+    } elseif ((-not $AllPartners) -and (($null -ne $env:i_BackupName) -and ($env:i_BackupName -ne ""))) {
+      write-host "  Passed Partner: $($env:i_BackupName)"
+      $script:diag += "  Passed Partner: $($env:i_BackupName)`r`n"
+      Send-GetPartnerInfo $env:i_BackupName
+    }
+    $filter1 = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup.
+    if ($AllPartners) {
+      Send-GetDevices "External IPM"
+    } elseif (-not $AllPartners) {
+      Send-GetDevices $xmlPartnerID
+    }
 
-  if ($AllDevices) {
-    $script:SelectedDevices = $DeviceDetail | 
-      Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
-    Write-Host "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
-    $script:diag += "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
-  } elseif (-not $AllDevices) {
-    #$script:SelectedDevices = $DeviceDetail | 
-    #  Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
-    #  Out-GridView -title "Current Partner | $partnername" -OutputMode Multiple
-    if (($null -ne $xmlBackupID) -and ($xmlBackupID -ne "")) {
+    if ($AllDevices) {
       $script:SelectedDevices = $DeviceDetail | 
-        Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
-          Where-object {$_.DeviceName -eq $xmlBackupID}
-      Write-Host "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
-      $script:diag += "$($Script:strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
-    }
-  }    
+        Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
+      write-host "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
+      $script:diag += "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
+    } elseif (-not $AllDevices) {
+      #$script:SelectedDevices = $DeviceDetail | 
+      #  Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
+      #  Out-GridView -title "Current Partner | $partnername" -OutputMode Multiple
+      if (($null -ne $xmlBackupID) -and ($xmlBackupID -ne "")) {
+        $script:SelectedDevices = $DeviceDetail | 
+          Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
+            Where-object {$_.DeviceName -eq $xmlBackupID}
+        write-host "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
+        $script:diag += "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
+      }
+    }    
 
-  if ($null -eq $SelectedDevices) {
-    # Cancel was pressed
-    # Run cancel script
-    Write-Host "$($Script:strLineSeparator)`r`n  No Devices Selected"
-    $script:diag += "$($Script:strLineSeparator)`r`n  No Devices Selected`r`n"
-    Break
-  } else {
-    # OK was pressed, $Selection contains what was chosen
-    # Run OK script
-    $script:SelectedDevices | 
-      Select-Object PartnerId,PartnerName,Reference,@{Name="AccountID"; Expression={[int]$_.AccountId}},DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp | 
-        Sort-object AccountId | Format-Table
+    if ($null -eq $SelectedDevices) {
+      # Cancel was pressed
+      # Run cancel script
+      write-host "$($strLineSeparator)`r`n  No Devices Selected"
+      $script:diag += "$($strLineSeparator)`r`n  No Devices Selected`r`n"
+      Break
+    } else {
+      # OK was pressed, $Selection contains what was chosen
+      # Run OK script
+      $script:SelectedDevices | 
+        Select-Object PartnerId,PartnerName,Reference,@{Name="AccountID"; Expression={[int]$_.AccountId}},DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp | 
+          Sort-object AccountId | Format-Table
 
-    if ($env:i_BackupCMD -eq "-SetGUIPassword") {
-      #$SecurePassword = Read-Host "  Enter Backup Manager GUI Password to be applied to $($SelectedDevices.AccountId.count) Devices" -AsSecureString
-      Write-Host "$($Script:strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient."
-      $script:diag += "$($Script:strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient.`r`n"
-    }
+      if ($env:i_BackupCMD -eq "-SetGUIPassword") {
+        #$SecurePassword = Read-Host "  Enter Backup Manager GUI Password to be applied to $($SelectedDevices.AccountId.count) Devices" -AsSecureString
+        write-host "$($strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient."
+        $script:diag += "$($strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient.`r`n"
+      }
 
-    foreach ($selecteddevice in $SelectedDevices) {
-      $device = $selecteddevice.DeviceName
-      # UPDATE CUSOTM COLUMN 'GUI PW'
-      Write-Host "$($Script:strLineSeparator)`r`n  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)"
-      $script:diag += "$($Script:strLineSeparator)`r`n  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)`r`n"
-      UpdateCustomColumn $selecteddevice.AccountID 2531 $password
-      Start-Sleep -Milliseconds 500
-      # SEND REMOTE COMMAND
-      Write-Host "$($Script:strLineSeparator)`r`n  Updating GUI PW for $($device)"
-      $script:diag += "$($Script:strLineSeparator)`r`n  Updating GUI PW for $($device)`r`n"
-      Send-RemoteCommand
-      Start-Sleep -Milliseconds 500
+      foreach ($selecteddevice in $SelectedDevices) {
+        $device = $selecteddevice.DeviceName
+        # UPDATE CUSOTM COLUMN 'GUI PW'
+        write-host "$($strLineSeparator)`r`n  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)"
+        $script:diag += "$($strLineSeparator)`r`n  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)`r`n"
+        UpdateCustomColumn $selecteddevice.AccountID 2531 $password
+        Start-Sleep -Milliseconds 500
+        # SEND REMOTE COMMAND
+        write-host "$($strLineSeparator)`r`n  Updating GUI PW for $($device)"
+        $script:diag += "$($strLineSeparator)`r`n  Updating GUI PW for $($device)`r`n"
+        Send-RemoteCommand
+        Start-Sleep -Milliseconds 500
+      }
+      # SET UDF
+      $Customfield = "Custom$($env:i_UDFpassword)"
+      New-ItemProperty "HKLM:\SOFTWARE\CentraStage" -Name "$($Customfield)" -PropertyType string -value "$($password)" -Force
+      $Customfield = "Custom$($env:i_UDFaccount)"
+      New-ItemProperty "HKLM:\SOFTWARE\CentraStage" -Name "$($Customfield)" -PropertyType string -value "$($xmlBackupID)" -Force
     }
-    # SET UDF
-    $Customfield = "Custom$($env:i_UDFpassword)"
-    New-ItemProperty "HKLM:\SOFTWARE\CentraStage" -Name "$($Customfield)" -PropertyType string -value "$($password)" -Force
-    $Customfield = "Custom$($env:i_UDFaccount)"
-    New-ItemProperty "HKLM:\SOFTWARE\CentraStage" -Name "$($Customfield)" -PropertyType string -value "$($xmlBackupID)" -Force
   }
 } catch {
   $script:blnWARN = $true
