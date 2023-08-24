@@ -320,19 +320,19 @@ try {
   $schedule = .\clienttool.exe control.schedule.list
   $schedule = $schedule | where {$_ -like "* yes *"} | out-string
   $array = $schedule.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
-  foreach ($line in $array) {$scheduleset += "`r`n`t$($line)"}
+  foreach ($line in $array) {$scheduleset += "`r`n`t$($line.trim())"}
   logERR 3 "SCHEDULE" "SCHEDULE :`r`n`t$($strLineSeparator)$($scheduleset)`r`n$($strLineSeparator)"
   $scheduleset = $null
   foreach ($line in $array) {
-    $chunk = $line.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-    $scheduleset += "$($chunk[2])-$($chunk[4]) : $($chunk[7])-$($chunk[5]) - $($chunk[6]) | `r`n"
+    $chunk = ($line.trim()).split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+    $scheduleset += "$($chunk[2])-$($chunk[4]) : $($chunk[7])-$($chunk[5]) - $($chunk[6]) | "
   }
   $scheduleset = $scheduleset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
   $scheduleset = $scheduleset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
-  $array = $scheduleset.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
-  $scheduleset = $null
-  foreach ($line in $array) {$scheduleset += "`r`n`t$($line)"}
-  logERR 3 "SCHEDULE" "FINAL SCHEDULE :`r`n`t$($strLineSeparator)$($scheduleset)`r`n$($strLineSeparator)"
+  $array = $scheduleset.split('|', [StringSplitOptions]::RemoveEmptyEntries)
+  $scheduleout = $null
+  foreach ($line in $array) {if ($line -ne " ") {$scheduleout += "`r`n`t$($line.trim()) | "}}
+  logERR 3 "SCHEDULE" "FINAL SCHEDULE :`r`n`t$($strLineSeparator)$($scheduleout)`r`n$($strLineSeparator)"
   #COMPUTE SCHEDULE HASH
   $utf8 = new-object -TypeName System.Text.UTF8Encoding
   $md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
@@ -349,8 +349,8 @@ try {
     new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom18" -value "$($hash)" -force
   }
   if ($curSchedules) {
-    $curSchedules = $curSchedules.replace(" | ", " | `r`n`t")
-    logERR 3 "SCHEDULE" "PREV SCHEDULE :`r`n`t$($strLineSeparator)`r`n`t$($curSchedules)`r`n$($strLineSeparator)"
+    $curScheduleout = $curSchedules.replace(' | ', " | `r`n`t")
+    logERR 3 "SCHEDULE" "PREV SCHEDULE :`r`n`t$($strLineSeparator)`r`n`t$($curScheduleout)`r`n$($strLineSeparator)"
     if (($scheduleset.trim()).contains($curSchedules.trim())) {
       $scheduleMsg += "| Schedule Strings are same |"
       logERR 3 "SCHEDULE" "$($scheduleMsg)`r`n$($strLineSeparator)"
@@ -372,20 +372,20 @@ try {
   $archive = .\clienttool.exe control.archiving.list
   $archive = $archive | where {$_ -like "* yes *"} | out-string
   $array = $archive.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
-  foreach ($line in $array) {$archiveset += "`r`n`t$($line)"}
+  foreach ($line in $array) {$archiveset += "`r`n`t$($line.trim())"}
   logERR 3 "ARCHIVE" "ARCHIVE :`r`n`t$($strLineSeparator)$($archiveset)`r`n$($strLineSeparator)"
   $archiveset = $null
   foreach ($line in $array) {
-    $chunk = $line.split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-    $archiveset += "$($chunk[2]) - $($chunk[4]) - Datasources : $($chunk[5]) - Archive Time : $($chunk[6]) - Archive Months : $($chunk[7]) - Archive Days : $($chunk[8]) | `r`n"
+    $chunk = ($line.trim()).split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+    $archiveset += "$($chunk[2]) - $($chunk[4]) - Datasources : $($chunk[5]) - Archive Time : $($chunk[6]) - Archive Months : $($chunk[7]) - Archive Days : $($chunk[8]) | "
   }
   $archiveset = "$($chunk[2]) - $($chunk[4]) - Datasources : $($chunk[5]) - Archive Time : $($chunk[6]) - Archive Months : $($chunk[7]) - Archive Days : $($chunk[8])"
   $archiveset = $archiveset.replace("FileSystem","FS").replace("NetworkShares","NS").replace("SystemState","SS").replace("Exchange","EXCH").replace("VMWare","VM").replace("HyperV","HV")
   $archiveset = $archiveset.replace("Monday","M").replace("Tuesday","T").replace("Wednesday","W").replace("Thursday","Th").replace("Friday","F").replace("Saturday","Sa").replace("Sunday","S")
-  $array = $archiveset.split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
-  $archiveset = $null
-  foreach ($line in $array) {$archiveset += "`r`n`t$($line)"}
-  logERR 3 "ARCHIVE" "FINAL ARCHIVE :`r`n`t$($strLineSeparator)$($archiveset)`r`n$($strLineSeparator)"
+  $array = $archiveset.split('|', [StringSplitOptions]::RemoveEmptyEntries)
+  $archiveout = $null
+  foreach ($line in $array) {$archiveout += "`r`n`t$($line.trim()) | "}
+  logERR 3 "ARCHIVE" "FINAL ARCHIVE :`r`n`t$($strLineSeparator)$($archiveout)`r`n$($strLineSeparator)"
   #COMPUTE ARCHIVE HASH
   $utf8 = new-object -TypeName System.Text.UTF8Encoding
   $md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
@@ -402,8 +402,8 @@ try {
     new-itemproperty -path "HKLM:\Software\Centrastage" -name "Custom20" -value "$($hash)" -force
   }
   if ($curArchives) {
-    $curArchives = $curArchives.replace(" | ", " | `r`n`t")
-    logERR 3 "ARCHIVE" "PREV ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($curArchives)`r`n$($strLineSeparator)"
+    $curArchivesout = $curArchives.replace(' | ', " | `r`n`t")
+    logERR 3 "ARCHIVE" "PREV ARCHIVE :`r`n$($strLineSeparator)`r`n`t$($curArchivesout)`r`n$($strLineSeparator)"
     if (($archiveset.trim()).contains($curArchives.trim())) {
       $archiveMsg += "| Archive Strings are same |"
       logERR 3 "ARCHIVE" "$($archiveMsg)`r`n$($strLineSeparator)"
