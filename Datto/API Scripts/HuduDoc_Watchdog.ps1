@@ -213,15 +213,15 @@ To Do:
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
 #region ----- MISC FUNCTIONS ----
@@ -243,27 +243,27 @@ To Do:
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       {3,4} {                                                     #'ERRRET'=3 & 4
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=5+
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -293,13 +293,13 @@ To Do:
     $avgHudu = [math]::Round(($script:huduCalls / $Minutes))
     #DISPLAY API THRESHOLDS
     $psa = PSA-GetThreshold $script:psaHeaders
-    write-host "`r`n$($strLineSeparator)`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
-    write-host "Backup.Management API : $($script:bmCalls) - Backupify Calls : $($script:buCalls)"
-    write-host "DNS Calls : $($script:dnsCalls)"
-    write-host "$($strLineSeparator)`r`nAPI Limits :$($strLineSeparator)"
-    write-host "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold)"
-    write-host "API Limits - Hudu API (per Minute) : $($avgHudu) / 300`r`n$($strLineSeparator)"
-    write-host "Total Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "`r`n$($strLineSeparator)`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
+    write-output "Backup.Management API : $($script:bmCalls) - Backupify Calls : $($script:buCalls)"
+    write-output "DNS Calls : $($script:dnsCalls)"
+    write-output "$($strLineSeparator)`r`nAPI Limits :$($strLineSeparator)"
+    write-output "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold)"
+    write-output "API Limits - Hudu API (per Minute) : $($avgHudu) / 300`r`n$($strLineSeparator)"
+    write-output "Total Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`n$($strLineSeparator)`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
     $script:diag += "`r`nBackup.Management API : $($script:bmCalls) - Backupify Calls : $($script:buCalls)"
     $script:diag += "`r`nDNS Calls : $($script:dnsCalls)"
@@ -308,13 +308,13 @@ To Do:
     $script:diag += "`r`nAPI Limits - Hudu API (per Minute) : $($avgHudu) / 300`r`n$($strLineSeparator)"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     if ($Minutes -eq 0) {
-      write-host "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
+      write-output "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
       $script:diag += "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)`r`n"
     } elseif ($Minutes -gt 0) {
       $amin = [string]($asecs / 60)
       $amin = $amin.split(".")[0]
       $amin = $amin.SubString(0,[math]::min(2,$amin.length))
-      write-host "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
+      write-output "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
       $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)`r`n"
     }
   }
@@ -423,8 +423,8 @@ To Do:
           CompanyClass    = $company.classification
           CompanyCategory = $company.companyCategoryID
         }
-        #write-host "$($company.companyName) : $($company.companyType)"
-        #write-host "Type Map : $(script:typeMap[[int]$company.companyType])"
+        #write-output "$($company.companyName) : $($company.companyType)"
+        #write-output "Type Map : $(script:typeMap[[int]$company.companyType])"
       }
     } catch {
       $psadiag = $null
@@ -461,11 +461,11 @@ To Do:
     $Script:websession = $websession
     $Script:Authenticate = $webrequest | convertfrom-json
     <#-- DEBUG
-    write-host "$($strLineSeparator)`r`n$($strLineSeparator)"
-    write-host "$($Script:cookies[0].name) = $($cookies[0].value)"
-    write-host $strLineSeparator
-    write-host $Script:Authenticate
-    write-host "$($strLineSeparator)`r`n$($strLineSeparator)"
+    write-output "$($strLineSeparator)`r`n$($strLineSeparator)"
+    write-output "$($Script:cookies[0].name) = $($cookies[0].value)"
+    write-output $strLineSeparator
+    write-output $Script:Authenticate
+    write-output "$($strLineSeparator)`r`n$($strLineSeparator)"
     --#>
     if ($authenticate.visa) {
       $script:blnBM = $true
@@ -889,8 +889,8 @@ To Do:
         $body = $body.replace("<tr>",'<tr style="width: 100%;">')
         $body = $body.replace("<td>",'<td style="resize: both;overflow: auto;margin: 25px;"><div style="resize: both; overflow: auto;margin: 5px;">')
         $body = $body.replace("</td>",'</td></div>')
-        #write-host "$($body)"
-        #write-host $i_Note
+        #write-output "$($body)"
+        #write-output $i_Note
         try {
           $script:huduCalls += 1
           $Huduresult = Set-HuduMagicDash -title "Backup - $($i_Note)" -company_name "$($i_Company)" -message "$($MagicMessage)" -icon "fas fa-chart-pie" -content "$($body)" -shade "$($shade)" -ea stop
@@ -976,7 +976,7 @@ To Do:
         try {
           $script:huduCalls += 1
           $Huduresult = Set-HuduMagicDash -title "Backup - $($i_Note)" -company_name "$($i_Company)" -message "No Backups Found" -icon "fas fa-chart-pie" -shade "grey" -ea stop
-          write-host "`r`n$($strLineSeparator)`r`n`tNo Devices Selected`r`n$($strLineSeparator)`r`n"
+          write-output "`r`n$($strLineSeparator)`r`n`tNo Devices Selected`r`n$($strLineSeparator)`r`n"
           $bmdiag = "Backup Magic Dash Set`r`n$($strLineSeparator)"
           logERR 4 "Set-BackupDash" "$($bmdiag)"
         } catch {
@@ -998,8 +998,8 @@ To Do:
         $body = "$($head)$($dash.content)"
       }
       try {
-        #write-host "$($body)"
-        #write-host $i_Note
+        #write-output "$($body)"
+        #write-output $i_Note
         $script:huduCalls += 1
         $Huduresult = Set-HuduMagicDash -title "Backup - $($i_Note)" -company_name "$($i_Company)" -message "Failed to login to Backup.Management" -icon "fas fa-chart-pie" -content "$($body)" -shade "$($shade)" -ea stop
         $bmdiag = "FAILED TO LOGIN TO BACKUP.MANAGEMENT - $($(get-date))`r`n$($strLineSeparator)"
@@ -1076,7 +1076,7 @@ if (Get-Module -ListAvailable -Name AutotaskAPI) {
   }
 }
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
-write-host "$($strLineSeparator)`r`nInitializing"
+write-output "$($strLineSeparator)`r`nInitializing"
 $script:diag += "`r`n$($strLineSeparator)`r`nInitializing`r`n"
 #Attempt Hudu Authentication; Fail Script if this fails
 if (-not $script:blnBREAK) {
@@ -1094,7 +1094,7 @@ if (-not $script:blnBREAK) {
     $hududiag = "Asset Layouts :`r`n$($strLineSeparator)"
     logERR 4 "Hudu Retrieval" "$($hududiag)"
     $huduLayouts = foreach ($huduLayout in $Layouts) {$script:huduCalls += 1; Get-HuduAssetLayouts -name "$($huduLayout)"}
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
     #Retrieve all Hudu Customer Management Assets Only Once
     $script:huduCalls += 1
@@ -1102,7 +1102,7 @@ if (-not $script:blnBREAK) {
     logERR 4 "Hudu Retrieval" "$($hududiag)"
     $ManagementLayout = $huduLayouts | where {$_.name -eq "$($ManagementLayoutName)"}
     $ManagementAssets = Get-HuduAssets -AssetLayoutId $ManagementLayout.id | Sort-Object -Property company_name
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
     #Retrieve all Hudu DNS Entries Assets Only Once
     $script:huduCalls += 1
@@ -1110,7 +1110,7 @@ if (-not $script:blnBREAK) {
     logERR 4 "Hudu Retrieval" "$($hududiag)"
     $DNSLayout = $huduLayouts | where {$_.name -match "$($DNSHistoryLayoutName)"}
     $DNSAssets = Get-HuduAssets -assetlayoutid $DNSLayout.id | Sort-Object -Property company_name
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   } catch {
     $script:blnBREAK = $true
@@ -1134,23 +1134,23 @@ if (-not $script:blnBREAK) {
     logERR 3 "Autotask Retrieval" "CLASS MAP :`r`n$($strLineSeparator)"
     PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
     $script:classMap
-    write-host "$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)"
+    write-output "$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)"
     $script:diag += "`r`n$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)`r`n"
     logERR 3 "Autotask Retrieval" "CATEGORY MAP :`r`n$($strLineSeparator)"
     PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
     $script:categoryMap
-    write-host "$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)"
+    write-output "$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)"
     $script:diag += "`r`n$($strLineSeparator)`r`nDone`r`n$($strLineSeparator)`r`n"
     #Get Companies, Tickets, and Resources
     logERR 3 "Autotask Retrieval" "COMPANIES :`r`n$($strLineSeparator)"
     PSA-GetCompanies $script:psaHeaders
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
     $script:psaCalls += 1
     logERR 3 "Autotask Retrieval" "TICKETS :`r`n$($strLineSeparator)"
     $tickets = Get-AutotaskAPIResource -Resource Tickets -SearchQuery "$($TicketFilter)"
     #$tickets = PSA-FilterQuery $script:psaHeaders "GET" "Tickets" $TicketFilter
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
     #Get Ticket Fields
     logERR 3 "Autotask Retrieval" "TICKET FIELDS :`r`n$($strLineSeparator)"
@@ -1158,21 +1158,21 @@ if (-not $script:blnBREAK) {
     #Get Statuses
     $statusValues = Get-ATFieldHash -name "status" -fieldsIn $ticketFields
     if (!$ExcludeStatus) {
-      write-host "ExcludeStatus not set please exclude your closed statuses at least from below in the format of '[1,5,7,9]'"
+      write-output "ExcludeStatus not set please exclude your closed statuses at least from below in the format of '[1,5,7,9]'"
       $script:diag += "`r`nExcludeStatus not set please exclude your closed statuses at least from below in the format of '[1,5,7,9]'"
       $statusValues | ft
     }
     #Get Ticket types
     $typeValues = Get-ATFieldHash -name "ticketType" -fieldsIn $ticketFields
     if (!$ExcludeType) {
-      write-host "ExcludeType not set please exclude types from below in the format of '[1,5,7,9]"
+      write-output "ExcludeType not set please exclude types from below in the format of '[1,5,7,9]"
       $script:diag += "`r`nExcludeType not set please exclude types from below in the format of '[1,5,7,9]"
       $typeValues | ft
     }
     #Get Queue Types
     $queueValues = Get-ATFieldHash -name "queueID" -fieldsIn $ticketFields
     if (!$ExcludeType) {
-      write-host "ExcludeQueue not set please exclude types from below in the format of '[1,5,7,9]"
+      write-output "ExcludeQueue not set please exclude types from below in the format of '[1,5,7,9]"
       $script:diag += "`r`nExcludeQueue not set please exclude types from below in the format of '[1,5,7,9]"
       $queueValues | ft
     }
@@ -1188,12 +1188,12 @@ if (-not $script:blnBREAK) {
     $subissueValues = Get-ATFieldHash -name "subIssueType" -fieldsIn $ticketFields
     #Get Categories
     $catValues = Get-ATFieldHash -name "ticketCategory" -fieldsIn $ticketFields
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
     #$resourceValues
     logERR 3 "Autotask Retrieval" "RESOURCES :`r`n$($strLineSeparator)"
     $resources = PSA-FilterQuery $script:psaHeaders "GET" "Resources" $psaGenFilter
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
     #Grab All Assets for All Companies in a Single Call
     $configitems = $null
@@ -1201,7 +1201,7 @@ if (-not $script:blnBREAK) {
     logERR 3 "Autotask Retrieval" "PSA ASSETS :`r`n$($strLineSeparator)"
     $psaAssetFilter = "{`"Filter`":[{`"field`":`"IsActive`",`"op`":`"eq`",`"value`":true}]}"
     $configitems = Get-AutotaskAPIResource -Resource ConfigurationItems -SearchQuery "$($psaAssetFilter)"
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
     #Get PSA Asset Fields
     logERR 3 "Autotask Retrieval" "ASSET FIELDS :`r`n$($strLineSeparator)"
@@ -1210,7 +1210,7 @@ if (-not $script:blnBREAK) {
     $assetMakes = Get-ATFieldHash -name "rmmDeviceAuditManufacturerID" -fieldsIn $assetFields
     #Get PSA Asset Model Data Map
     $assetModels = Get-ATFieldHash -name "rmmDeviceAuditModelID" -fieldsIn $assetFields
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   } catch {
     $script:blnBREAK = $true
@@ -1238,7 +1238,7 @@ if (-not $script:blnBREAK) {
     $authdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
     logERR 5 "Backups Retrieval" "$($bmdiag)"
   }
-  write-host "Initializing Done`r`n$($strLineSeparator)"
+  write-output "Initializing Done`r`n$($strLineSeparator)"
   $script:diag += "`r`nInitializing Done`r`n$($strLineSeparator)`r`n"
   #region######################## Autotask  Section ###########################
   # https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
@@ -1266,7 +1266,7 @@ if (-not $script:blnBREAK) {
         $skipCoTickets = 0
         $failCoTickets = 0
         #endregion
-        write-host "`r`n$($strLineSeparator)`r`nProcessing $($company.CompanyName)`r`n$($strLineSeparator)" -foregroundcolor green
+        write-output "`r`n$($strLineSeparator)`r`nProcessing $($company.CompanyName)`r`n$($strLineSeparator)" -foregroundcolor green
         $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($company.CompanyName)`r`n$($strLineSeparator)`r`n"
         #Find Company in Hudu
         $script:huduCalls += 1
@@ -1281,7 +1281,7 @@ if (-not $script:blnBREAK) {
             $procPSAtickets += 1
             #Retrieve Assigned Resource for Tickets
             $tech = $resources.items | where {$_.id -eq $ticket.assignedResourceID} | select firstName, lastName
-            #write-host "TEST RESOURCE : $($tech.firstName) $($tech.lastName)"
+            #write-output "TEST RESOURCE : $($tech.firstName) $($tech.lastName)"
             [PSCustomObject]@{
               'Ticket-Number'   =	"<a target=`"_blank`" href=`"$($AutotaskRoot)$($AutotaskExe)$($ticket.ticketNumber)`">$($ticket.ticketNumber)</a>"
               'Created'         =	$ticket.createdate
@@ -1302,7 +1302,7 @@ if (-not $script:blnBREAK) {
           $shade = "success"
           $reportDate = get-date
           $MagicMessage = "$(@($outTickets).count) Open Tickets"
-          write-host "Customer Tickets :`r`nCollected $(@($outTickets).count) Tickets`r`n$($strLineSeparator)"
+          write-output "Customer Tickets :`r`nCollected $(@($outTickets).count) Tickets`r`n$($strLineSeparator)"
           $script:diag += "Customer Tickets :`r`nCollected $(@($outTickets).count) Tickets`r`n$($strLineSeparator)"
           $overdue = @($outTickets | where {[Datetime](Get-Date -Date $_.Due) -lt [Datetime]$reportDate}).count
           #Update 'Tile' Shade based on Overdue Tickets
@@ -1401,7 +1401,7 @@ if (-not $script:blnBREAK) {
                   'rmmDevMAC'   = $psaAsset.rmmDeviceAuditMacAddress
                 }
         }
-        write-host "$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
+        write-output "$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
         $script:diag += "`r`n$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
         if (@($custAssets).count -gt 0) {
           $test = [System.Net.WebUtility]::HtmlDecode(($custAssets | 
@@ -1424,10 +1424,10 @@ if (-not $script:blnBREAK) {
                   12  {'Unknown'}
                   15  {'Network - NAS/SAN'}
                 }
-                write-host "$($strLineSeparator)`r`nProcessing $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
-                write-host "Type : $($psaAsset.rmmTypeID)`r`nName : $($psaAsset.refTitle)"
-                write-host "Make : $($psaAsset.make)`r`nModel : $($psaAsset.model)`r`nModel ID : $($psaAsset.rmmModelID)"
-                write-host "S/N : $($psaAsset.serial)`r`nMAC : $($psaAsset.rmmDevMAC)`r`nDevice IP : $($psaAsset.rmmDevIP)"
+                write-output "$($strLineSeparator)`r`nProcessing $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
+                write-output "Type : $($psaAsset.rmmTypeID)`r`nName : $($psaAsset.refTitle)"
+                write-output "Make : $($psaAsset.make)`r`nModel : $($psaAsset.model)`r`nModel ID : $($psaAsset.rmmModelID)"
+                write-output "S/N : $($psaAsset.serial)`r`nMAC : $($psaAsset.rmmDevMAC)`r`nDevice IP : $($psaAsset.rmmDevIP)"
                 $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
                 $script:diag += "`r`nType : $($psaAsset.rmmTypeID)`r`nName : $($psaAsset.refTitle)"
                 $script:diag += "`r`nMake : $($psaAsset.make)`r`nModel : $($psaAsset.model)`r`nModel ID : $($psaAsset.rmmModelID)"
@@ -1437,7 +1437,7 @@ if (-not $script:blnBREAK) {
                     start-sleep -milliseconds 10
                     #Attempt to find Asset Layout and PSA Asset in Hudu
                     $script:huduCalls += 1 #2
-                    write-host "Accessing $($psaAsset.refTitle) Hudu Asset in $($huduCompany.name)($($huduCompany.id))"
+                    write-output "Accessing $($psaAsset.refTitle) Hudu Asset in $($huduCompany.name)($($huduCompany.id))"
                     $AssetLayout = $huduLayouts | where {$_.name -match "$($type)"} #Get-HuduAssetLayouts -name "$($type)"
                     $Asset = Get-HuduAssets -name "$($psaAsset.refTitle)" -companyid $huduCompany.id -assetlayoutid $AssetLayout.id
                     if (($Asset | measure-object).count -ne 1) {
@@ -1448,7 +1448,7 @@ if (-not $script:blnBREAK) {
                         if (($Asset | measure-object).count -ne 1) {
                           $psadiag = "No / multiple layout(s) found with Name : $($psaAsset.refTitle) - Serial : $($psaAsset.serial)`r`n$($strLineSeparator)"
                           logERR 3 "Update PSA Asset" "$($psadiag)"
-                          write-host "Skipped`r`n$($strLineSeparator)" -foregroundcolor yellow
+                          write-output "Skipped`r`n$($strLineSeparator)" -foregroundcolor yellow
                           $script:diag += "`r`nSkipped`r`n$($strLineSeparator)"
                           $skipPSAassets += 1
                           $skipCoAssets += 1
@@ -1509,7 +1509,7 @@ if (-not $script:blnBREAK) {
                       #$AssetFields | out-string
                       try {
                         $script:huduCalls += 1
-                        write-host "$($AssetFields | out-string)$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)`r`n"
+                        write-output "$($AssetFields | out-string)$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)`r`n"
                         $script:diag += "`r`n$($AssetFields | out-string)$($strLineSeparator)`r`nUpdating $($type) Asset $($Asset.name)`r`n$($strLineSeparator)"
                         $Asset = Set-HuduAsset -asset_id $Asset.id -name "$($psaAsset.refTitle)" -company_id $huduCompany.id -assetlayoutid $AssetLayout.id -fields $AssetFields
                         $procPSAassets += 1
@@ -1538,7 +1538,7 @@ if (-not $script:blnBREAK) {
         logERR 3 "Autotask Processing" "$($psadiag)"
         $procCompany += 1
     } else {
-      write-host "$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)" -foregroundcolor yellow
+      write-output "$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)" -foregroundcolor yellow
       $script:diag += "`r`n$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)"
       #$psadiag = "Skipped`r`n$($strLineSeparator)"
       #logERR 3 "Autotask Processing" "$($psadiag)"
@@ -1546,7 +1546,7 @@ if (-not $script:blnBREAK) {
       start-sleep -milliseconds 250
     }
   }
-  write-host "Done`r`n$($strLineSeparator)"
+  write-output "Done`r`n$($strLineSeparator)"
   $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   #endregion
   #Create Global Overdue Ticket Report
@@ -1587,7 +1587,7 @@ if (-not $script:blnBREAK) {
   } else {
     # Loop through all Hudu Customer Management Assets
     foreach ($Asset in $ManagementAssets) {
-      write-host "`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
+      write-output "`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
       $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($Asset.company_name) Managed Services`r`n$($strLineSeparator)"
       # Return relevant Asset Fields
       $Fields = foreach ($field in $FieldTiles) {
@@ -1606,13 +1606,13 @@ if (-not $script:blnBREAK) {
         }
       }
       foreach ($Service in $Fields.ServiceName | select-object -unique) {
-        write-host "`r`n$($strLineSeparator)`r`nFields :`r`n$($strLineSeparator)"
+        write-output "`r`n$($strLineSeparator)`r`nFields :`r`n$($strLineSeparator)"
         $EnabledField = $Fields | Where-Object {$_.ServiceName -eq $Service -and $_.ServiceAction -eq 'ENABLED'}
-        write-host "$($strLineSeparator)`r`nEnabledField :`r`n$($EnabledField)"
+        write-output "$($strLineSeparator)`r`nEnabledField :`r`n$($EnabledField)"
         $NoteField = $Fields | Where-Object {$_.ServiceName -eq $Service -and $_.ServiceAction -eq 'NOTE'}
-        write-host "NoteField :`r`n$($NoteField)"
+        write-output "NoteField :`r`n$($NoteField)"
         $URLField = $Fields | Where-Object {$_.ServiceName -eq $Service -and $_.ServiceAction -eq 'URL'}
-        write-host "URLField :`r`n$($URLField)`r`n$($strLineSeparator)"
+        write-output "URLField :`r`n$($URLField)`r`n$($strLineSeparator)"
         if ($EnabledField) {
           logERR 3 "Customer Management" "Enabled Field found`r`n$($strLineSeparator)"
         } else {
@@ -1643,7 +1643,7 @@ if (-not $script:blnBREAK) {
         if ($Service -ne "Backup") {
           $script:huduCalls += 1
           Set-HuduMagicDash @Param
-          write-host "$($strLineSeparator)"
+          write-output "$($strLineSeparator)"
           logERR 3 "Customer Management" "$($Service) Magic Dash Set`r`n$($strLineSeparator)"
         } elseif ($Service -eq "Backup") {
           switch ($EnabledField.value) {
@@ -1658,7 +1658,7 @@ if (-not $script:blnBREAK) {
   $cmdiag += "Total Backups : $($totBackups)`r`n"
   $cmdiag += "`t- Processed : $($procBackups) - Skipped : $($skipBackups) - Failed : $($failBackups)`r`n$($strLineSeparator)"
   logERR 3 "Customer Management" "$($cmdiag)"
-  write-host "Done`r`n$($strLineSeparator)"
+  write-output "Done`r`n$($strLineSeparator)"
   $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   #endregion
   #region######################## DNS History Section ###########################
@@ -1703,7 +1703,7 @@ if (-not $script:blnBREAK) {
     $script:websites = Get-HuduWebsites | where -filter {$_.disable_dns -eq $false} | Sort-Object -Property company_name
     foreach ($website in $script:websites) {
       $dnsname = ([System.Uri]$website.name).authority
-      write-host "$($strLineSeparator)`r`nResolving $($dnsname) for $($website.company_name)"
+      write-output "$($strLineSeparator)`r`nResolving $($dnsname) for $($website.company_name)"
       $script:diag += "`r`n$($strLineSeparator)`r`nResolving $($dnsname) for $($website.company_name)"
       try {
         $script:dnsCalls += 5
@@ -1731,14 +1731,14 @@ if (-not $script:blnBREAK) {
       $AssetName = "$($dnsname)"
       $companyid = $website.company_id
       $script:diag += "`r`n$($strLineSeparator)`r`n$($dnsname) lookup successful"
-      write-host "$($strLineSeparator)`r`n$($dnsname) lookup successful" -foregroundcolor green
+      write-output "$($strLineSeparator)`r`n$($dnsname) lookup successful" -foregroundcolor green
       #Check if there is already an asset
       $Asset = $DNSAssets | where {$_.name -eq "$($AssetName)"}    #Get-HuduAssets -name "$($AssetName)" -companyid $companyid -assetlayoutid $DNSLayout.id
       #If the Asset does not exist, we edit the body to be in the form of a new asset, if not, we just upload.
       if (!$Asset) {
         try {
           $script:huduCalls += 1
-          write-host "$($strLineSeparator)`r`nCreating new DNS Asset`r`n$($strLineSeparator)"
+          write-output "$($strLineSeparator)`r`nCreating new DNS Asset`r`n$($strLineSeparator)"
           $script:diag += "`r`n$($strLineSeparator)`r`nCreating new DNS Asset`r`n$($strLineSeparator)"
           $Asset = New-HuduAsset -name "$($AssetName)" -company_id $companyid -asset_layout_id $DNSLayout.id -fields $AssetFields
         } catch {
@@ -1761,7 +1761,7 @@ if (-not $script:blnBREAK) {
         #>
         try {
           $script:huduCalls += 1
-          write-host "$($strLineSeparator)`r`nUpdating DNS Asset - ID : $($Asset.id)`r`n$($strLineSeparator)"
+          write-output "$($strLineSeparator)`r`nUpdating DNS Asset - ID : $($Asset.id)`r`n$($strLineSeparator)"
           $script:diag += "`r`n$($strLineSeparator)`r`nUpdating DNS Asset - ID : $($Asset.id)`r`n$($strLineSeparator)"
           $Asset = Set-HuduAsset -asset_id $Asset.id -name "$($AssetName)" -company_id $companyid -asset_layout_id $DNSLayout.id -fields $AssetFields
         } catch {
@@ -1772,7 +1772,7 @@ if (-not $script:blnBREAK) {
       }
     }
   }
-  write-host "Done`r`n$($strLineSeparator)"
+  write-output "Done`r`n$($strLineSeparator)"
   $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   #endregion
   #DATTO OUTPUT

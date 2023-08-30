@@ -96,7 +96,7 @@ Function getDeviceID
 		$deviceList = $script:nws.deviceGet($script:ncentralUserName, $script:ncentralPassword, $keyPairs)
         
         #How many issues were found:
-        #Write-Host $rc.count "issues found" `r`n
+        #write-output $rc.count "issues found" `r`n
         
         #Array to hold the filtered data
         [System.Collections.ArrayList]$collection = New-Object System.Collections.ArrayList($null)
@@ -246,7 +246,7 @@ Function CheckLSVsync {
 	
 	#Get Data for LocalSpeedVaultSynchronizationStatus
 	$script:LSVSync = $StatusReport.Statistics.LocalSpeedVaultSynchronizationStatus
-	Write-Host "ready"
+	write-output "ready"
     #Report results
 	If($LSVSync -match ".*(f|F)ailed.*") {
       $script:LSVSyncMessage = "error, $script:LSVSync"
@@ -401,8 +401,8 @@ Try{
 }
 Catch{
     $runTimeException = 1
-    Write-Host "EXCEPTION - script halting"
+    write-output "EXCEPTION - script halting"
 }
 Finally{
-    Write-Host "End Check"
+    write-output "End Check"
 }

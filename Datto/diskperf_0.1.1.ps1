@@ -34,15 +34,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($Message in $Messages) {$Message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function Pop-Warnings {
@@ -81,9 +81,9 @@
       }
     } catch {
       $warndiag = "Disk Performance : Error populating warnings for $($disk)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-host "Disk Performance : Error populating warnings for $($disk)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-host $_.scriptstacktrace
-      write-host $_
+      write-output "Disk Performance : Error populating warnings for $($disk)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+      write-output $_.scriptstacktrace
+      write-output $_
       $script:diag += "$($warndiag)"
       $warndiag = $null
     }
@@ -171,7 +171,7 @@ try {
 $idisks = 0
 foreach ($disk in $ldisks) {
   $idisks += 1
-  write-host "`r`nPOLLING DISK : $($disk.name)`r`n" -foregroundcolor yellow
+  write-output "`r`nPOLLING DISK : $($disk.name)`r`n" -foregroundcolor yellow
   $dque = $disk.CurrentDiskQueueLength
   $diskdiag += ("Current Disk Queue : $($dque)`r`n").toupper()
   $daque = $disk.AvgDiskQueueLength
@@ -221,17 +221,17 @@ foreach ($disk in $ldisks) {
   $diskdiag += ("Avg. Disk Bytes/Transfer (KB) : $($dabt)`r`n").toupper()
   #CHECK DRIVE PERFORMANCE VALUES
   chkPERF $disk
-  write-host $diskdiag
-  write-host " - DRIVE REPORT : $($disk.name)" -ForegroundColor yellow
+  write-output $diskdiag
+  write-output " - DRIVE REPORT : $($disk.name)" -ForegroundColor yellow
   $diskdiag += " - DRIVE REPORT $($disk.name):`r`n"
   if (-not $script:diskWARN) {
-    write-host "  - All Drive Performance values passed checks" -ForegroundColor green
+    write-output "  - All Drive Performance values passed checks" -ForegroundColor green
     $diskdiag += "  - All Drive Performance values passed checks`r`n"
   } elseif ($script:diskWARN) {
-    write-host "  - The following Drive Performance values did not pass :" -ForegroundColor red
+    write-output "  - The following Drive Performance values did not pass :" -ForegroundColor red
     $diskdiag += "  - The following Drive Performance values did not pass :`r`n"
     foreach ($warn in $script:disks[$disk.name]) {
-      write-host "$($warn)" -ForegroundColor red
+      write-output "$($warn)" -ForegroundColor red
       $diskdiag += "$($warn)"
     }
     $script:diskWARN = $false
@@ -255,7 +255,7 @@ $mill = $mill.SubString(0,[math]::min(3,$mill.length))
 $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
 $script:diag += "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call`r`n"
 #DATTO OUTPUT
-write-host  "DATTO OUTPUT :"
+write-output  "DATTO OUTPUT :"
 if ($script:blnWARN) {
   write-DRRMAlert "Warning : $($script:disks.count) Disk(s) Exceeded Performance Thresholds"
   write-DRMMDiag "$($script:diag)"
@@ -267,6 +267,6 @@ if ($script:blnWARN) {
   $script:diag = $null
   exit 0
 }
-write-host $script:diag
+write-output $script:diag
 #END SCRIPT
 #------------

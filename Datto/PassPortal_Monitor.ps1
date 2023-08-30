@@ -13,15 +13,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function StopClock {
@@ -38,7 +38,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
@@ -69,36 +69,36 @@ if (-not (test-path -path "C:\IT\Scripts")) {
 $script:diag += "`r`n--------------------------------------`r`n"
 $script:diag += "POLLING PASSPORTAL SERVICE`r`n"
 $script:diag += "--------------------------------------`r`n"
-write-host "--------------------------------------" -foregroundcolor yellow
-write-host "POLLING PASSPORTAL SERVICE" -foregroundcolor yellow
-write-host "--------------------------------------" -foregroundcolor yellow
+write-output "--------------------------------------" -foregroundcolor yellow
+write-output "POLLING PASSPORTAL SERVICE" -foregroundcolor yellow
+write-output "--------------------------------------" -foregroundcolor yellow
 try {
   $script:svcPP = get-service -name passportal -erroraction stop
   $script:diag += "$($script:svcPP.name) - $($script:svcPP.status)`r`n"
   if ($script:svcPP.status -eq "Running") {
-    write-host $script:svcPP -foregroundcolor green
+    write-output $script:svcPP -foregroundcolor green
   } elseif ($script:svcPP.status -ne "Running") {
     $script:blnWARN = $true
-    write-host $script:svcPP -foregroundcolor red
+    write-output $script:svcPP -foregroundcolor red
   }
 } catch {
   $script:blnWARN = $true
   $script:diag += "Passportal Service Not Found!`r`n"
   $script:diag += "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-  write-host "Passportal Service Not Found!" -foregroundcolor red
-  write-host $_.Exception
-  write-host $_.scriptstacktrace
-  write-host $_
+  write-output "Passportal Service Not Found!" -foregroundcolor red
+  write-output $_.Exception
+  write-output $_.scriptstacktrace
+  write-output $_
 }
 $script:diag += "--------------------------------------`r`n"
-write-host "--------------------------------------" -foregroundcolor yellow
+write-output "--------------------------------------" -foregroundcolor yellow
 #CHECK PASSPORTAL LOGS
 $script:diag += "`r`n--------------------------------------`r`n"
 $script:diag += "PARSING PASSPORTAL LOGS`r`n"
 $script:diag += "--------------------------------------`r`n"
-write-host "--------------------------------------" -foregroundcolor yellow
-write-host "PARSING PASSPORTAL LOGS" -foregroundcolor yellow
-write-host "--------------------------------------" -foregroundcolor yellow
+write-output "--------------------------------------" -foregroundcolor yellow
+write-output "PARSING PASSPORTAL LOGS" -foregroundcolor yellow
+write-output "--------------------------------------" -foregroundcolor yellow
 try {
   foreach ($line in get-content "C:\Program Files\N-able\Passportal Agent\Logs\pserv.log" -erroraction stop) {
     if ($line -match "ERROR - ") {
@@ -106,20 +106,20 @@ try {
         $script:blnWARN = $true
       }
       $script:diag += "$($line)`r`n"
-      write-host "$($line)" -foregroundcolor red
+      write-output "$($line)" -foregroundcolor red
     }
   }
 } catch {
   $script:blnWARN = $true
   $script:diag += "Passportal 'pserv' Logfile Not Found!`r`n"
   $script:diag += "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-  write-host "Passportal 'pserv' Logfile Not Found!" -foregroundcolor red
-  write-host $_.Exception
-  write-host $_.scriptstacktrace
-  write-host $_
+  write-output "Passportal 'pserv' Logfile Not Found!" -foregroundcolor red
+  write-output $_.Exception
+  write-output $_.scriptstacktrace
+  write-output $_
 }
 $script:diag += "--------------------------------------`r`n"
-write-host "--------------------------------------" -foregroundcolor yellow
+write-output "--------------------------------------" -foregroundcolor yellow
 #DATTO OUTPUT
 StopClock
 if ($script:blnWARN) {

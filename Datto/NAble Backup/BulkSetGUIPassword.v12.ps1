@@ -100,36 +100,36 @@
   if (($null -eq $script:i_BackupUser) -or ($script:i_BackupUser -eq "")) {$script:i_BackupUser = $env:BackupUser}
   if (($null -eq $script:i_BackupPWD) -or ($script:i_BackupPWD -eq "")) {$script:i_BackupPWD = $env:BackupPass}
   clear-host
-  write-host "  Bulk Set GUI Password `n"
+  write-output "  Bulk Set GUI Password `n"
   $script:diag += "  Bulk Set GUI Password `r`n`r`n"
-  #$Syntax = Get-Command $PSCommandPath -Syntax ; write-host "Script Parameter Syntax:`n`n  $Syntax"
-  write-host "  Current Parameters:"
+  #$Syntax = Get-Command $PSCommandPath -Syntax ; write-output "Script Parameter Syntax:`n`n  $Syntax"
+  write-output "  Current Parameters:"
   $script:diag += "  Current Parameters:`r`n"
-  write-host "  -AllPartners     = $($AllPartners)"
+  write-output "  -AllPartners     = $($AllPartners)"
   $script:diag += "  -AllPartners     = $($AllPartners)`r`n"
-  write-host "  -AllDevices      = $($AllDevices)"
+  write-output "  -AllDevices      = $($AllDevices)"
   $script:diag += "  -AllDevices      = $($AllDevices)`r`n"
-  write-host "  -SetGUIPassword  = $($SetGUIPassword)"
+  write-output "  -SetGUIPassword  = $($SetGUIPassword)"
   $script:diag += "  -SetGUIPassword  = $($SetGUIPassword)`r`n"
-  write-host "  -RestoreOnly     = $($RestoreOnly)"
+  write-output "  -RestoreOnly     = $($RestoreOnly)"
   $script:diag += "  -RestoreOnly     = $($RestoreOnly)`r`n"
-  write-host "  -i_BackupCMD = $($env:i_BackupCMD)"
+  write-output "  -i_BackupCMD = $($env:i_BackupCMD)"
   $script:diag += "  -i_BackupCMD = $($env:i_BackupCMD)`r`n"
-  write-host "  -i_GUILength = $($env:i_GUILength)"
+  write-output "  -i_GUILength = $($env:i_GUILength)"
   $script:diag += "  -i_GUILength = $($env:i_GUILength)`r`n"
-  write-host "  -i_GUIpassword = $($env:i_GUIpassword)"
+  write-output "  -i_GUIpassword = $($env:i_GUIpassword)"
   $script:diag += "  -i_GUIpassword = $($env:i_GUIpassword)`r`n"
-  write-host "  -i_PartnerName = $($env:i_PartnerName)"
+  write-output "  -i_PartnerName = $($env:i_PartnerName)"
   $script:diag += "  -i_PartnerName = $($script:PartnerName)`r`n"
-  write-host "  -i_BackupName = $($env:i_BackupName)"
+  write-output "  -i_BackupName = $($env:i_BackupName)"
   $script:diag += "  -i_BackupName = $($env:i_BackupName)`r`n"
-  write-host "  -i_BackupUser = $($script:i_BackupUser)"
+  write-output "  -i_BackupUser = $($script:i_BackupUser)"
   $script:diag += "  -i_BackupUser = {ENCRYPTED}`r`n"
-  write-host "  -i_BackupPWD = {ENCRYPTED}"
+  write-output "  -i_BackupPWD = {ENCRYPTED}"
   $script:diag += "  -i_BackupPWD = {ENCRYPTED}`r`n"
-  write-host "  -i_UDFpassword = $($env:i_UDFpassword)"
+  write-output "  -i_UDFpassword = $($env:i_UDFpassword)"
   $script:diag += "  -i_UDFpassword = $($env:i_UDFpassword)`r`n"
-  write-host "  -i_UDFaccount = $($env:i_UDFaccount)"
+  write-output "  -i_UDFaccount = $($env:i_UDFaccount)"
   $script:diag += "  -i_UDFaccount = $($env:i_UDFaccount)`r`n"
   
   #$scriptpath = $MyInvocation.MyCommand.Path
@@ -153,15 +153,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function Convert-UnixTimeToDateTime ($inputUnixTime) {
@@ -196,15 +196,15 @@
     $script:cookies = $websession.Cookies.GetCookies($url)
     $script:websession = $websession
     $script:Authenticate = $webrequest | convertfrom-json
-    #Debug write-host "$($script:cookies[0].name) = $($cookies[0].value)"
+    #Debug write-output "$($script:cookies[0].name) = $($cookies[0].value)"
 
     if ($authenticate.visa) {
       $script:blnBMAuth = $true
       $script:visa = $authenticate.visa
     } else {
-      write-host "  $($strLineSeparator)`r`n  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials"
+      write-output "  $($strLineSeparator)`r`n  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials"
       $script:diag += "  $($strLineSeparator)`r`n  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials`r`n"
-      write-host "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n   $($strLineSeparator)"
+      write-output "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n   $($strLineSeparator)"
       $script:diag += "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n   $($strLineSeparator)`r`n"
     }
   }  ## Use Backup.Management credentials to Authenticate
@@ -256,17 +256,17 @@
       [int]$script:PartnerId = [int]$Partner.result.result.Id
       [String]$script:Level = $Partner.result.result.Level
       [String]$script:PartnerName = $Partner.result.result.Name
-      write-host "$($strLineSeparator)`r`n  $($PartnerName) - $($partnerId) - $($Uid)`r`n$($strLineSeparator)"
+      write-output "$($strLineSeparator)`r`n  $($PartnerName) - $($partnerId) - $($Uid)`r`n$($strLineSeparator)"
       $script:diag += "$($strLineSeparator)`r`n  $($PartnerName) - $($partnerId) - $($Uid)`r`n$($strLineSeparator)`r`n"
     } else {
-      write-host "$($strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($strLineSeparator)"
+      write-output "$($strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($strLineSeparator)"
       $script:diag += "$($strLineSeparator)`r`n  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($strLineSeparator)`r`n"
       #$script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
       #Send-GetPartnerInfo $script:partnername
     }
 
     if ($partner.error) {
-      write-host "  $($partner.error.message)"
+      write-output "  $($partner.error.message)"
       $script:diag += "  $($partner.error.message)`r`n"
       #$script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
       #Send-GetPartnerInfo $script:partnername
@@ -290,7 +290,7 @@
     # (Call the JSON Web Request Function to get the EnumeratePartners Object)
     [array]$script:EnumeratePartnersSession = CallJSON $urlJSON $objEnumeratePartners
     $script:visa = $EnumeratePartnersSession.visa
-    write-host "$($strLineSeparator)`r`n  Using Visa: $($script:visa)`r`n$($strLineSeparator)"
+    write-output "$($strLineSeparator)`r`n  Using Visa: $($script:visa)`r`n$($strLineSeparator)"
     $script:diag += "$($strLineSeparator)`r`n  Using Visa: $($script:visa)`r`n$($strLineSeparator)`r`n"
     # (Added Delay in case command takes a bit to respond)
     Start-Sleep -Milliseconds 100
@@ -300,9 +300,9 @@
     
     # (Check for Errors with EnumeratePartners - Check if ErrorCode has a value)
     if ($EnumeratePartnersSessionErrorCode) {
-      write-host "$($strLineSeparator)`r`n  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)"
+      write-output "$($strLineSeparator)`r`n  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)"
       $script:diag += "$($strLineSeparator)`r`n  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)`r`n"
-      write-host "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)`r`n$($strLineSeparator)`r`n  Exiting script"
+      write-output "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)`r`n$($strLineSeparator)`r`n  Exiting script"
       $script:diag += "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)`r`n$($strLineSeparator)`r`n  Exiting script`r`n"
       # (Exit script if there is a problem)
       #Break script
@@ -330,7 +330,7 @@
       if ($AllPartners) {
         $script:Selection = $script:SelectedPartners | 
           Select-object id,Name,Level,CreationTime,State,TrialRegistrationTime,TrialExpirationTime,Uid | sort-object Level,name
-        write-host "$($strLineSeparator)`r`n  All Partners Selected"
+        write-output "$($strLineSeparator)`r`n  All Partners Selected"
         $script:diag += "$($strLineSeparator)`r`n  All Partners Selected`r`n"
       } else {
         $script:Selection = $script:SelectedPartners |  
@@ -339,7 +339,7 @@
         if (($null -eq $Selection) -or ($Selection -eq "")) {
           # Cancel was pressed
           # Run cancel script
-          write-host "$($strLineSeparator)`r`n  No Partners Selected"
+          write-output "$($strLineSeparator)`r`n  No Partners Selected"
           $script:diag += "$($strLineSeparator)`r`n  No Partners Selected`r`n"
           Break
         } else {
@@ -422,7 +422,7 @@
     }
     if ($env:i_BackupCMD -eq "WipeGUIPassword") {
       $UnsecureGUIPassword = ""
-      write-host -NoNewline "Wiping GUI Password"
+      write-output -NoNewline "Wiping GUI Password"
     }
 
     $url = "https://backup.management/jsonrpcv1"
@@ -437,7 +437,7 @@
     $data.params.ids = @([System.Int32[]]$selecteddevice.accountid)
     $jsondata = (ConvertTo-Json $data -depth 6)
     #$jsondata  ## Debug
-    write-host "`n##Sending Remote Command##`n$($data.params.command)`n$($CommandParameters)" ## Output sent Remote Command
+    write-output "`n##Sending Remote Command##`n$($data.params.command)`n$($CommandParameters)" ## Output sent Remote Command
     $script:diag += "`r`n##Sending Remote Command##`r`n$($data.params.command)`r`n$($CommandParameters)`r`n"
 
     $params = @{
@@ -450,7 +450,7 @@
 
     $script:sendResult = Invoke-RestMethod @params
     #$script:sendResult.result.result | Select-Object Id,@{Name="Status"; Expression={$_.Result.code}},@{Name="Message"; Expression={$_.Result.Message}} | Format-Table
-    write-host " $($script:sendResult.result.result.id) $($script:sendResult.result.result.result.code)"
+    write-output " $($script:sendResult.result.result.id) $($script:sendResult.result.result.result.code)"
     $script:diag += " $($script:sendResult.result.result.id) $($script:sendResult.result.result.result.code)`r`n"
   } ## Send-RemoteCommand API Call
 
@@ -473,10 +473,10 @@
 
     try {
       $script:updateCC = Invoke-RestMethod $urlJSON -Method 'POST' -Headers $headers -Body $body
-      write-host "$($strLineSeparator)`r`n  UpdateCC : SUCCESS"
+      write-output "$($strLineSeparator)`r`n  UpdateCC : SUCCESS"
       $script:diag += "$($strLineSeparator)`r`n  UpdateCC : SUCCESS`r`n"
     } catch {
-      write-host "$($strLineSeparator)`r`n  UpdateCC : FAILURE"
+      write-output "$($strLineSeparator)`r`n  UpdateCC : FAILURE"
       $script:diag += "$($strLineSeparator)`r`n  UpdateCC : FAILURE`r`n"
     }
   } ## UpdateCustomColumn API Call
@@ -488,10 +488,10 @@
 try {
   Send-APICredentialsCookie
   if (-not $script:blnBMAuth) {
-    write-host "  $($strLineSeparator)`r`n  Authentication Failed: Script Will Not Continue`r`n$($strLineSeparator)"
+    write-output "  $($strLineSeparator)`r`n  Authentication Failed: Script Will Not Continue`r`n$($strLineSeparator)"
     $script:diag += "  $($strLineSeparator)`r`n  Authentication Failed: Script Will Not Continue`r`n$($strLineSeparator)`r`n"
   } elseif ($script:blnBMAuth) {
-    write-host "$($strLineSeparator)`r`n"
+    write-output "$($strLineSeparator)`r`n"
     $script:diag += "$($strLineSeparator)`r`n`r`n"
     # OBTAIN PARTNER AND BACKUP ACCOUNT ID
     [xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
@@ -500,11 +500,11 @@ try {
     #Send-GetPartnerInfo $script:cred0
     #Send-EnumeratePartners
     if ((-not $AllPartners) -and (($null -eq $env:i_BackupName) -or ($env:i_BackupName -eq ""))) {
-      write-host "  XML Partner: $($xmlPartnerID)"
+      write-output "  XML Partner: $($xmlPartnerID)"
       $script:diag += "  XML Partner: $($xmlPartnerID)`r`n"
       Send-GetPartnerInfo $xmlPartnerID
     } elseif ((-not $AllPartners) -and (($null -ne $env:i_BackupName) -and ($env:i_BackupName -ne ""))) {
-      write-host "  Passed Partner: $($env:i_BackupName)"
+      write-output "  Passed Partner: $($env:i_BackupName)"
       $script:diag += "  Passed Partner: $($env:i_BackupName)`r`n"
       Send-GetPartnerInfo $env:i_BackupName
     }
@@ -518,7 +518,7 @@ try {
     if ($AllDevices) {
       $script:SelectedDevices = $DeviceDetail | 
         Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
-      write-host "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
+      write-output "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
       $script:diag += "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
     } elseif (-not $AllDevices) {
       #$script:SelectedDevices = $DeviceDetail | 
@@ -528,7 +528,7 @@ try {
         $script:SelectedDevices = $DeviceDetail | 
           Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
             Where-object {$_.DeviceName -eq $xmlBackupID}
-        write-host "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
+        write-output "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
         $script:diag += "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
       }
     }    
@@ -536,7 +536,7 @@ try {
     if ($null -eq $SelectedDevices) {
       # Cancel was pressed
       # Run cancel script
-      write-host "$($strLineSeparator)`r`n  No Devices Selected"
+      write-output "$($strLineSeparator)`r`n  No Devices Selected"
       $script:diag += "$($strLineSeparator)`r`n  No Devices Selected`r`n"
       Break
     } else {
@@ -548,19 +548,19 @@ try {
 
       if ($env:i_BackupCMD -eq "-SetGUIPassword") {
         #$SecurePassword = Read-Host "  Enter Backup Manager GUI Password to be applied to $($SelectedDevices.AccountId.count) Devices" -AsSecureString
-        write-host "$($strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient."
+        write-output "$($strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient."
         $script:diag += "$($strLineSeparator)`r`n  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient.`r`n"
       }
 
       foreach ($selecteddevice in $SelectedDevices) {
         $device = $selecteddevice.DeviceName
         # UPDATE CUSOTM COLUMN 'GUI PW'
-        write-host "$($strLineSeparator)`r`n  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)"
+        write-output "$($strLineSeparator)`r`n  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)"
         $script:diag += "$($strLineSeparator)`r`n  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)`r`n"
         UpdateCustomColumn $selecteddevice.AccountID 2531 $password
         Start-Sleep -Milliseconds 500
         # SEND REMOTE COMMAND
-        write-host "$($strLineSeparator)`r`n  Updating GUI PW for $($device)"
+        write-output "$($strLineSeparator)`r`n  Updating GUI PW for $($device)"
         $script:diag += "$($strLineSeparator)`r`n  Updating GUI PW for $($device)`r`n"
         Send-RemoteCommand
         Start-Sleep -Milliseconds 500
@@ -574,7 +574,7 @@ try {
   }
 } catch {
   $script:blnWARN = $true
-  write-host "ERROR :`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+  write-output "ERROR :`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
   $script:diag += "`r`nERROR :`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
 }
 #CLEAR LOGFILE

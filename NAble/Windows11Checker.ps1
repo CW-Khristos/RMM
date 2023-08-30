@@ -10,15 +10,15 @@ $Models = foreach ($url in $urls) {
       $web.DownloadString($url) | Where-Object Content -match "(?s)<table>.+</table>" -erroraction stop
       $matches[0] -replace "</td>\r?\n", "," -replace "<tr>\r?\n|<td>|,</tr>" -split "\r?\n" -match "," -replace "[^a-zA-Z0-9,\-\s]", "" | ConvertFrom-Csv -Header Manufacturer, Brand, Model
     } catch {
-      write-host "$($Error[0])"
+      write-output "$($Error[0])"
     }
   }
 }
-write-host $Models
+write-output $Models
 if ($Models) {
-  write-host "Using URL CPU List..."
+  write-output "Using URL CPU List..."
 } elseif (!$Models) {
-  write-host "Using Static CPU List..."
+  write-output "Using Static CPU List..."
   $Models = @"
     Intel®,Atom®,x6200FE
     Intel®,Atom®,x6211E
@@ -840,7 +840,7 @@ if ($MemoryGB -ge 4){
 }
 
 #Check storage
-#write-host "`nChecking available storage..."
+#write-output "`nChecking available storage..."
 $drive=Get-CimInstance -Class CIM_LogicalDisk | Select-Object * | Where-Object DriveType -EQ '3' | where-object DeviceID -eq $env:systemdrive
 if ($drive.size -ge 64000000000){
   $DriveCap = "Pass"
@@ -891,10 +891,10 @@ $Results = [PSCustomObject]@{
 }
 
 if ($results.psobject.properties.value -contains "Fail") {
-  write-host "This device is not compatible with Windows 11"
+  write-output "This device is not compatible with Windows 11"
   $Results | Format-List
 } else {
-  write-host "This device is compatible with Windows 11"
+  write-output "This device is compatible with Windows 11"
   $Results | format-list
 }
 

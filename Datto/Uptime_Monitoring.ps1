@@ -57,15 +57,15 @@ $((get-WMiObject -computername $($env:computername) -Class win32_operatingSystem
   Function EpochTime {[int][double]::Parse((Get-Date -UFormat %s))}
   
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message, $valUDF) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
     #write a UDF
     if ($env:usrUDF -gt 0) {
       #please don't edit this bit. think of platform load. -sgl
@@ -96,7 +96,7 @@ $((get-WMiObject -computername $($env:computername) -Class win32_operatingSystem
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #endregion ----- FUNCTIONS ----
 

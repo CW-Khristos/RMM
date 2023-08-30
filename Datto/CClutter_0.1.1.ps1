@@ -130,15 +130,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function logERR($intSTG, $strErr) {
@@ -147,11 +147,11 @@
     switch ($intSTG) {
       1 {                                                                             #'ERRRET'=1 - ERROR DELETING FILE / FOLDER
         $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - CCLUTTER - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - CCLUTTER - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
+        write-output "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - CCLUTTER - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
       }
       2 {                                                                             #'ERRRET'=2 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - CCLUTTER - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - CCLUTTER - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
+        write-output "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - CCLUTTER - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
       }
     }
   }
@@ -168,10 +168,10 @@
         #remove-item -path "$($strFIL)" -force -erroraction continue
         $output = C:\Windows\System32\cmd.exe "/C del `"$($strFIL)`""
         $script:diag += "`t`t - StdOut : $($output)`r`n"
-        write-host "`t`t - StdOut : $($output)"
+        write-output "`t`t - StdOut : $($output)"
         #SUCCESSFULLY DELETED FILE
         $script:diag += "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)`r`n`t`t$($strLineSeparator)`r`n"
-        write-host "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)`r`n`t`t$($strLineSeparator)"
+        write-output "`t`t - DELETED FILE : $($strFIL) : $($filSIZ)`r`n`t`t$($strLineSeparator)"
       } catch {
         #ERROR ENCOUNTERED DELETING FILE
         logERR 1 "ERROR DELETING : $($strFIL)`r`n$($strLineSeparator)`r`n`t - $($_.Exception)`r`n`t - $($_.scriptstacktrace)`r`n`t - $($_)"
@@ -184,15 +184,15 @@
         $strFOL = $subFOL.fullname
         #CLEAR CONTENTS OF FOLDER
         $script:diag += "`t`t - CLIEARING FOLDER : $($strFOL)`r`n"
-        write-host "`t`t - CLEARING FOLDER : $($strFOL)"
+        write-output "`t`t - CLEARING FOLDER : $($strFOL)"
         cFolder "$($strFOL)"
         #remove-item -path "$($strFOL)\" -recurse -force -erroraction continue
         $output = C:\Windows\System32\cmd.exe "/C rmdir /S /Q `"$($strFOL)`""
         $script:diag += "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)`r`n"
-        write-host "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)"
+        write-output "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)"
         #SUCCESSFULLY DELETED FOLDER
         $script:diag += "`t`t - REMOVED FOLDER : $($strFOL)`r`n"
-        write-host "`t`t - REMOVED FOLDER : $($strFOL)"
+        write-output "`t`t - REMOVED FOLDER : $($strFOL)"
       } catch {                                                                       #ENCOUNTERED ERROR TRYING TO DELETE FOLDER
         logERR 1 "ERROR DELETING : $($strFOL)`r`n$($strLineSeparator)`r`n`t - $($_.Exception)`r`n`t - $($_.scriptstacktrace)`r`n`t - $($_)"
       }
@@ -213,7 +213,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
   function chkAU {
@@ -224,7 +224,7 @@
     $xmldiag = $null
     #RETRIEVE VERSION XML FROM GITHUB
     $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
-    write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
+    write-output "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
     $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/Datto/version.xml"
     try {
       $verXML = New-Object System.Xml.XmlDocument
@@ -232,14 +232,14 @@
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "XML.Load() - Could not open $($srcVER)`r`n$($err)`r`n"
-      write-host "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
+      write-output "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
       try {
         $web = new-object system.net.webclient
         [xml]$verXML = $web.DownloadString($srcVER)
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         $xmldiag += "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)`r`n"
-        write-host "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
+        write-output "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
         try {
           start-bitstransfer -erroraction stop -source $srcVER -destination "C:\IT\Scripts\version.xml"
           [xml]$verXML = "C:\IT\Scripts\version.xml"
@@ -247,23 +247,23 @@
           $blnXML = $false
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
           $xmldiag += "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n"
-          write-host "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
+          write-output "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
         }
       }
     }
     #READ VERSION XML DATA INTO NESTED HASHTABLE FOR LATER USE
     try {
       if (-not $blnXML) {
-        write-host $blnXML
+        write-output $blnXML
       } elseif ($blnXML) {
         foreach ($objSCR in $verXML.SCRIPTS.ChildNodes) {
           if ($objSCR.name -match $strSCR) {
             #CHECK LATEST VERSION
             $xmldiag += "`r`n`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)`r`n"
-            write-host "`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)"
+            write-output "`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)"
             if ([version]$objSCR.innertext -gt $strVER) {
               $xmldiag += "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
-              write-host "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              write-output "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               #REMOVE PREVIOUS COPIES OF SCRIPT
               if (test-path -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1") {
                 remove-item -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1" -force -erroraction stop
@@ -277,17 +277,17 @@
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
               $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n`r`n"
-              write-host "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              write-output "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               $output = C:\Windows\System32\cmd.exe "/C powershell -executionpolicy bypass -file `"C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1`" -blnLOG `$$($blnLOG)"
               foreach ($line in $output) {$stdout += "$($line)`r`n"}
               $xmldiag += "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)`r`n"
-              write-host "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)"
+              write-output "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)"
               $xmldiag += "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
-              write-host "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
+              write-output "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
               $script:blnBREAK = $true
             } elseif ([version]$objSCR.innertext -le $strVER) {
               $xmldiag += "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
-              write-host "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
+              write-output "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
             }
             break
           }
@@ -299,7 +299,7 @@
       $script:blnBREAK = $false
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "CClutter : Error reading Version XML : $($srcVER)`r`n$($err)`r`n"
-      write-host "CClutter : Error reading Version XML : $($srcVER)`r`n$($err)"
+      write-output "CClutter : Error reading Version XML : $($srcVER)`r`n$($err)"
       $script:diag += "$($xmldiag)"
       $xmldiag = $null
     }
@@ -320,7 +320,7 @@ if (($null -ne $env:clrFOL) -and ($env:clrFOL -ne "")) {
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 $script:diag += "$($strLineSeparator)`r`n$($ScrptStartTime) - EXECUTING CCLUTTER`r`n$($strLineSeparator)`r`n"
-write-host "$($strLineSeparator)`r`n$($ScrptStartTime) - EXECUTING CCLUTTER`r`n$($strLineSeparator)"
+write-output "$($strLineSeparator)`r`n$($ScrptStartTime) - EXECUTING CCLUTTER`r`n$($strLineSeparator)"
 #CHECK FOR UPDATE
 chkAU $strVER $strREPO $strBRCH $strDIR $strSCR
 if (-not $script:blnBREAK) {
@@ -343,16 +343,16 @@ if (-not $script:blnBREAK) {
   }
   #USE ICACLS TO 'RESET' PERMISSIONS ON C:\WINDOWS\TEMP
   $script:diag += "`t$($strLineSeparator)`r`n`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\WINDOWS\TEMP'`r`n"
-  write-host "`t$($strLineSeparator)`r`n`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\WINDOWS\TEMP'"
+  write-output "`t$($strLineSeparator)`r`n`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\WINDOWS\TEMP'"
   $output = C:\Windows\System32\cmd.exe "/C icacls C:\Windows\Temp /grant administrators:f"
   $script:diag += "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)`r`n"
-  write-host "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)"
+  write-output "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)"
   #USE ICACLS TO 'RESET' PERMISSIONS ON C:\PROGRAMDATA\SENTINEL\LOGS
   $script:diag += "`t$($strLineSeparator)`r`n`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\PROGRAMDATA\SENTINEL\LOGS'`r`n"
-  write-host "`t$($strLineSeparator)`r`n`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\PROGRAMDATA\SENTINEL\LOGS'"
+  write-output "`t$($strLineSeparator)`r`n`t - ATTEMPTING TO RESET PERMISSIONS ON 'C:\PROGRAMDATA\SENTINEL\LOGS'"
   $output = C:\Windows\System32\cmd.exe "/C icacls C:\ProgramData\Sentinel\logs /grant administrators:f"
   $script:diag += "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)`r`n"
-  write-host "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)"
+  write-output "`t`t - StdOut : $($output)`r`n`t`t$($strLineSeparator)"
   #ENUMERATE THROUGH FOLDER COLLECTION
   foreach ($tgtFOL in $arrFOL) {
     if (($null -ne $tgtFOL) -and ($tgtFOL -ne "")) {                                #ENSURE $TGTFOL IS NOT EMPTY
@@ -360,7 +360,7 @@ if (-not $script:blnBREAK) {
         #CLEAR NORMAL FOLDERS
         if ($tgtFOL -ne "$($strWFOL)\SoftwareDistribution") {
           $script:diag += "`t$($strLineSeparator)`r`n`t - CLEARING : $($tgtFOL)`r`n"
-          write-host "`t$($strLineSeparator)`r`n`t - CLEARING : $($tgtFOL)"
+          write-output "`t$($strLineSeparator)`r`n`t - CLEARING : $($tgtFOL)"
           #CLEAR CONTENTS OF FOLDER
           cFolder "$($tgtFOL)"
         #CLEARING WINDOWS UPDATES
@@ -368,51 +368,51 @@ if (-not $script:blnBREAK) {
           #CHECK FOR 'PENDING.XML IF CLEARING SOFTWAREDISTRIBUTION
           if (test-path -path "$($strWFOL)\WinSxS\pending.xml") {
             $script:diag += "`t$($strLineSeparator)`r`n`t - 'PENDING.XML' FOUND : SKIPPING : $($tgtFOL)`r`n`t$($strLineSeparator)`r`n"
-            write-host "`t$($strLineSeparator)`r`n`t - 'PENDING.XML' FOUND : SKIPPING : $($tgtFOL)`r`n`t$($strLineSeparator)"
+            write-output "`t$($strLineSeparator)`r`n`t - 'PENDING.XML' FOUND : SKIPPING : $($tgtFOL)`r`n`t$($strLineSeparator)"
           } elseif (-not (test-path -path "$($strWFOL)\WinSxS\pending.xml")) {
             $script:diag += "`t$($strLineSeparator)`r`n`t - 'PENDING.XML' NOT FOUND : CLEARING : $($tgtFOL)`r`n"
-            write-host "`t$($strLineSeparator)`r`n`t - 'PENDING.XML' NOT FOUND : CLEARING : $($tgtFOL)"
+            write-output "`t$($strLineSeparator)`r`n`t - 'PENDING.XML' NOT FOUND : CLEARING : $($tgtFOL)"
             #STOP WINDOWS UPDATE SERVICE TO CLEAR WINDOWS UPDATE FOLDER
             $script:diag += "`t$($strLineSeparator)`r`n`t - STOPPING 'WUAUSERV' SERVICE TO CLEAR 'SOFTWAREDISTRIBUTION'`r`n"
-            write-host "`t$($strLineSeparator)`r`n`t - STOPPING 'WUAUSERV' SERVICE TO CLEAR 'SOFTWAREDISTRIBUTION'"
+            write-output "`t$($strLineSeparator)`r`n`t - STOPPING 'WUAUSERV' SERVICE TO CLEAR 'SOFTWAREDISTRIBUTION'"
             $output = C:\Windows\System32\cmd.exe "/C net stop wuauserv /y"
             $script:diag += "`t`t - StdOut : $($output)`r`n"
-            write-host "`t`t - StdOut : $($output)"
+            write-output "`t`t - StdOut : $($output)"
             #CLEAR CONTENTS OF FOLDER
             cFolder "$($tgtFOL)"
             #RESTART WINDOWS UPDATE SERVICE
             $script:diag += "`t$($strLineSeparator)`r`n`t - RESTARTING 'WUAUSERV' SERVICE`r`n"
-            write-host "`t$($strLineSeparator)`r`n`t - RESTARTING 'WUAUSERV' SERVICE"
+            write-output "`t$($strLineSeparator)`r`n`t - RESTARTING 'WUAUSERV' SERVICE"
             $output = C:\Windows\System32\cmd.exe "/C net start wuauserv"
             $script:diag += "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)`r`n"
-            write-host "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)"
+            write-output "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)"
           }
         }
       } else {                                                                      #NON-EXISTENT FOLDER
         $script:diag += "`t$($strLineSeparator)`r`n`t - NON-EXISTENT : $($tgtFOL)`r`n"
-        write-host "`t$($strLineSeparator)`r`n`t - NON-EXISTENT : $($tgtFOL)"
+        write-output "`t$($strLineSeparator)`r`n`t - NON-EXISTENT : $($tgtFOL)"
       }
     }
   }
   #FINAL CLEANUP OF NCENTRAL PROGRAM LOGS
   $script:diag += "`t$($strLineSeparator)`r`n`t - FINAL CLEANUP : `r`n"
-  write-host "`t$($strLineSeparator)`r`n`t - FINAL CLEANUP : "
+  write-output "`t$($strLineSeparator)`r`n`t - FINAL CLEANUP : "
   $script:diag += "`t$($strLineSeparator)`r`n`t - LOOKING FOR '*.BDINSTALL.BIN' FILES`r`n"
-  write-host "`t$($strLineSeparator)`r`n`t - LOOKING FOR '*.BDINSTALL.BIN' FILES"
+  write-output "`t$($strLineSeparator)`r`n`t - LOOKING FOR '*.BDINSTALL.BIN' FILES"
   $output = C:\Windows\System32\cmd.exe "/C DIR `"C:\ProgramData\*.bdinstall.bin`""
   $script:diag += "`t`t - StdOut : $($output)`r`n"
-  write-host "`t`t - StdOut : $($output)"
+  write-output "`t`t - StdOut : $($output)"
   $script:diag += "`t - REMOVING '*.BDINSTALL.BIN' FILES`r`n"
-  write-host "`t - REMOVING '*.BDINSTALL.BIN' FILES"
+  write-output "`t - REMOVING '*.BDINSTALL.BIN' FILES"
   $output = C:\Windows\System32\cmd.exe "/C DEL `"C:\ProgramData\*.bdinstall.bin`""
   $script:diag += "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)`r`n"
-  write-host "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)"
+  write-output "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)"
   #REMOVE NCENTRAL REMNANTS
   foreach ($tgtFOL in $arrSW) {
     if (test-path -path "$($tgtFOL)") {
         try {
           $script:diag += "`t$($strLineSeparator)`r`n`t - CLEARING : $($tgtFOL)`r`n"
-          write-host "`t$($strLineSeparator)`r`n`t - CLEARING : $($tgtFOL)"
+          write-output "`t$($strLineSeparator)`r`n`t - CLEARING : $($tgtFOL)"
           #CLEAR CONTENTS OF FOLDER
           cFolder "$($tgtFOL)"
         } catch {
@@ -420,11 +420,11 @@ if (-not $script:blnBREAK) {
         }
         try {
           $script:diag += "`t$($strLineSeparator)`r`n`t - REMOVING : $($tgtFOL)`r`n"
-          write-host "`t$($strLineSeparator)`r`n`t - REMOVING : $($tgtFOL)"
+          write-output "`t$($strLineSeparator)`r`n`t - REMOVING : $($tgtFOL)"
           #remove-item -path "$($tgtFOL)\" -recurse -force -erroraction stop
           $output = C:\Windows\System32\cmd.exe "/C rmdir `"$($tgtFOL)`" /S /Q"
           $script:diag += "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)`r`n"
-          write-host "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)"
+          write-output "`t`t - StdOut : $($output)`r`n`t$($strLineSeparator)"
         } catch {
           logERR 1 "ERROR DELETING : $($tgtFOL)`r`n$($strLineSeparator)`r`n`t - $($_.Exception)`r`n`t - $($_.scriptstacktrace)`r`n`t - $($_)"
         }
@@ -434,17 +434,17 @@ if (-not $script:blnBREAK) {
   if (($null -ne $clrFOL) -and ($clrFOL -ne "")) {
     if (test-path -path "$($clrFOL)" ) {                                            #ENSURE FOLDER EXISTS BEFORE CLEARING
       $script:diag += "`t$($strLineSeparator)`r`n`t - CLEARING : $($clrFOL)`r`n"
-      write-host "`t$($strLineSeparator)`r`n`t - CLEARING : $($clrFOL)"
+      write-output "`t$($strLineSeparator)`r`n`t - CLEARING : $($clrFOL)"
       #CLEAR CONTENTS OF FOLDER
       cFolder "$($clrFOL)"
     } else {                                                                        #NON-EXISTENT FOLDER
       $script:diag += "`t$($strLineSeparator)`r`n`t - NON-EXISTENT : $($clrFOL)`r`n"
-      write-host "`t$($strLineSeparator)`r`n`t - NON-EXISTENT : $($clrFOL)"
+      write-output "`t$($strLineSeparator)`r`n`t - NON-EXISTENT : $($clrFOL)"
     }
   }
 }
 $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)`r`n"
-write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)"
+write-output "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - CCLUTTER COMPLETE - $($script:lngSIZ)MB CLEARED`r`n$($strLineSeparator)"
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE

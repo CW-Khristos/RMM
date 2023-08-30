@@ -41,7 +41,7 @@
 
   function mapSMART($varID,$varVAL) {
     $varID = $varID.toupper().trim() -replace  "_", " "
-    #write-host " - " $script:arrDRV[$script:i].drvID "     " $varID "     " $varVAL -ForegroundColor green
+    #write-output " - " $script:arrDRV[$script:i].drvID "     " $varID "     " $varVAL -ForegroundColor green
     #MAP SMART ATTRIBUTES BASED ON DRIVE TYPE
     switch ($script:arrDRV[$script:i].drvTYP) {
       #NVME DRIVES
@@ -356,18 +356,18 @@ if (-not (test-path -path "C:\IT")) {
 if (-not (test-path -path "C:\IT\Scripts")) {
   new-item -path "C:\IT\Scripts" -itemtype directory
 }
-write-host -ForegroundColor red " - UPDATING SMARTCTL"
+write-output -ForegroundColor red " - UPDATING SMARTCTL"
 #CLEANUP OLD VERSIONS OF 'SMARTCTL.EXE'
 get-childitem -path "C:\IT"  | where-object {$_.name -match "smartctl"} | % {
   if ($_.name.split(".").length -le 2){
-    write-host "     DELETE : " $_.name
+    write-output "     DELETE : " $_.name
     remove-item $_.fullname
   } elseif ($_.name.split(".").length -ge 3){
     if ($_.name.split(".")[1] -lt $smartEXE.split(".")[1]){
-      write-host "     DELETE : " $_.name
+      write-output "     DELETE : " $_.name
       remove-item $_.fullname
     } else {
-      write-host "     KEEP : " $_.name
+      write-output "     KEEP : " $_.name
     }
   }
 }
@@ -390,11 +390,11 @@ if (-not (test-path -path $dbEXE -pathtype leaf)) {
   }
 }
 #UPDATE SMARTCTL DRIVEDB.H
-write-host -ForegroundColor red " - UPDATING SMARTCTL DRIVE DATABASE"
+write-output -ForegroundColor red " - UPDATING SMARTCTL DRIVE DATABASE"
 $output = Get-ProcessOutput -FileName $dbEXE -Args "/S"
-#write-host -ForegroundColor green $output
+#write-output -ForegroundColor green $output
 #POPULATE DRIVES
-write-host -ForegroundColor red " - ENUMERATING CONNECTED DRIVES"
+write-output -ForegroundColor red " - ENUMERATING CONNECTED DRIVES"
 
 #QUERY SMARTCTL FOR DRIVES
 $output = Get-ProcessOutput -FileName $smartEXE -Args "--scan-open"
@@ -451,7 +451,7 @@ foreach ($line in $lines) {
 foreach ($objDRV in $arrDRV) {
   $script:i = ($script:i + 1)
   if ($objDRV.drvID -eq $i_drive) {
-    write-host " - QUERYING DRIVE : $($objDRV.drvID)" -ForegroundColor red
+    write-output " - QUERYING DRIVE : $($objDRV.drvID)" -ForegroundColor red
     $script:selecteddrive = $script:arrDRV | select-object * | where-object {$_.drvID -eq $objDRV.drvID}
     #GET BASIC SMART HEALTH
     $output = Get-ProcessOutput -FileName $smartEXE -Args "-H $($objDRV.drvID)"
@@ -463,7 +463,7 @@ foreach ($objDRV in $arrDRV) {
           #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
           $chunks = $line.split(":", [StringSplitOptions]::RemoveEmptyEntries)
           $script:arrDRV[$script:i].fail = $chunks[1].trim()
-          #write-host -ForegroundColor green $objDRV.drvID "     " $chunks[1].trim()
+          #write-output -ForegroundColor green $objDRV.drvID "     " $chunks[1].trim()
         }
       }
     }
@@ -484,12 +484,12 @@ foreach ($objDRV in $arrDRV) {
                   #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
                   $chunks = $line.split(":", [StringSplitOptions]::RemoveEmptyEntries)
                   $chunks1 = $chunks[($chunks.length -1)].split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-                  #write-host -ForegroundColor green $chunks[0].trim() "     " $chunks1[0].trim()
+                  #write-output -ForegroundColor green $chunks[0].trim() "     " $chunks1[0].trim()
                   mapSMART $chunks[0].trim() $chunks1[0].trim()
                 } elseif ($line -notlike "*Celsius*") {                                               #"CELSIUS" NOT IN RAW VALUE
                   #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
                   $chunks = $line.split(":", [StringSplitOptions]::RemoveEmptyEntries)
-                  #write-host -ForegroundColor green $chunks[0].trim() "     " $chunks[($chunks.length - 1)].trim()
+                  #write-output -ForegroundColor green $chunks[0].trim() "     " $chunks[($chunks.length - 1)].trim()
                   mapSMART $chunks[0].trim() $chunks[($chunks.length - 1)].replace("%", "").trim()
                 }
               }
@@ -498,7 +498,7 @@ foreach ($objDRV in $arrDRV) {
                   #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
                   $chunks = $line.split("(", [StringSplitOptions]::RemoveEmptyEntries)
                   $chunks = $chunks[0].split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-                  #write-host -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 1)].trim()
+                  #write-output -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 1)].trim()
                   mapSMART $chunks[1].trim() $chunks[($chunks.length - 1)].trim()
                 } elseif ($line -notlike "*(*)*") {                                                   #"()" NOT IN RAW VALUE
                   #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
@@ -511,11 +511,11 @@ foreach ($objDRV in $arrDRV) {
                     ($line -like "*Used_Rsvd_Blk*") -or ($line -like "*Used_Reserved*") -or `
                     ($line -like "*Unused_Rsvd_Blk*") -or ($line -like "*Unused_Reserved*") -or `
                     ($line -like "*Available_Reservd_Space*") -or ($line -like "*Media_Wearout*")) {
-                      #write-host -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 7)].trim()
+                      #write-output -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 7)].trim()
                       mapSMART $chunks[1].trim() $chunks[($chunks.length - 7)].trim()
                   #RETURN 'RAW' VALUES
                   } else {
-                    #write-host -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 1)].trim()
+                    #write-output -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 1)].trim()
                     mapSMART $chunks[1].trim() $chunks[($chunks.length - 1)].trim()
                   }
                 }
@@ -530,7 +530,7 @@ foreach ($objDRV in $arrDRV) {
     }
     #CHECK SMART ATTRIBUTE VALUES
     chkSMART $script:arrDRV[$script:i]
-    write-host " - SMART REPORT :" -ForegroundColor yellow
+    write-output " - SMART REPORT :" -ForegroundColor yellow
     $allout = " - SMART REPORT DRIVE : $($script:arrDRV[$script:i].drvID)`r`n"
     if ($script:arrWARN.count -eq 0) {
       $allout += "  - All SMART Attributes passed checks`r`n"
@@ -586,9 +586,9 @@ foreach ($objDRV in $arrDRV) {
     $allout += "  - Error Info Log Entries (NVMe) : $($script:arrDRV[$script:i].nvmeerr)`r`n"
     $allout += "  - Warning Comp. Temp Time (NVMe) : $($script:arrDRV[$script:i].nvmewctemp)`r`n"
     $allout += "  - Critical Comp. Temp Time (NVMe) : $($script:arrDRV[$script:i].nvmecctemp)`r`n"
-    write-host $allout -foregroundcolor $ccode
+    write-output $allout -foregroundcolor $ccode
     #SYNCRO RMM OUTPUT
-    write-host "SYNCRO OUTPUT :"
+    write-output "SYNCRO OUTPUT :"
     if ($script:blnWARN) {
       # This logs an activity feed item on an Assets's Activity feed
       Log-Activity -Message "SMART Health : $($script:arrDRV[$script:i].drvID) : Warning" -EventName "SMART Health : $($script:arrDRV[$script:i].drvID)"

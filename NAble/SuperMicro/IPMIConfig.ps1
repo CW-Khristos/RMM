@@ -142,7 +142,7 @@ switch ($i_Tool.toupper()) {
   "SUM" {                                                               #SUPERMICRO UPDATE MANAGER (SUM) CALLS
     if (test-path -path $sumEXE -pathtype leaf) {                       #DOWNLOAD SUM IF NEEDED
     } elseif (-not (test-path -path $sumEXE -pathtype leaf)) {
-      write-host " - DOWNLOAD SUPERMICRO UPDATE MANAGER (SUM)" -foregroundcolor red
+      write-output " - DOWNLOAD SUPERMICRO UPDATE MANAGER (SUM)" -foregroundcolor red
       try {
         start-bitstransfer -erroraction stop -source $srcSUM -destination $sumZIP
         expand-archive $sumZIP -destinationpath "C:\IT\SuperMicro\SUM"
@@ -161,55 +161,55 @@ switch ($i_Tool.toupper()) {
     }
     #SET IPMI / BMC USER PASSWORD
     if (($i_IPMIuser -eq $null) -or ($i_IPMIpwd -eq $null)) {
-      write-host "SUM - CANNOT SET IPMI / BMC USER PASSWORD WITHOUT IPMI / BMC LOGIN" -foregroundcolor red
+      write-output "SUM - CANNOT SET IPMI / BMC USER PASSWORD WITHOUT IPMI / BMC LOGIN" -foregroundcolor red
     } elseif (($i_IPMIuser -ne $null) -and ($i_IPMIpwd -ne $null)) {
-      write-host "SUM - SETTING IPMI / BMC USER PASSWORD" -foregroundcolor yellow
+      write-output "SUM - SETTING IPMI / BMC USER PASSWORD" -foregroundcolor yellow
       $pwdoutput = Get-ProcessOutput -FileName $sumEXE "-c SetBmcPassword -i $i_IPMIaddress -u $i_IPMIuser -p $i_IPMIpwd --user_id $i_UserID --new_password $i_NewPwd --confirm_password $i_NewPwd"
       #PARSE SUM OUTPUT LINE BY LINE
       $lines = $pwdoutput.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       foreach ($line in $lines) {
         if ($line -ne $null) {
-          write-host $line
+          write-output $line
         }
       }
     }
     #BACKUP BIOS CONFIGURATIONS
-    write-host "SUM - BACKUP BIOS CONFIGURATIONS" -foregroundcolor yellow
+    write-output "SUM - BACKUP BIOS CONFIGURATIONS" -foregroundcolor yellow
     $output = Get-ProcessOutput -FileName $sumEXE "-c GetCurrentBiosCfg --file $sumBAK\SUM_BIOS_BACKUP.config --overwrite"
     #PARSE SUM OUTPUT LINE BY LINE
     $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
     foreach ($line in $lines) {
       if ($line -ne $null) {
-        write-host $line
+        write-output $line
       }
     }
     #BACKUP IPMI / BMC CONFIGURATIONS
-    write-host "SUM - BACKUP IPMI / BMC CONFIGURATIONS" -foregroundcolor yellow
+    write-output "SUM - BACKUP IPMI / BMC CONFIGURATIONS" -foregroundcolor yellow
     $output = Get-ProcessOutput -FileName $sumEXE "-c GetBmcCfg --file $sumBAK\SUM_BMC_BACKUP.config --overwrite"
     #PARSE SUM OUTPUT LINE BY LINE
     $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
     foreach ($line in $lines) {
       if ($line -ne $null) {
-        write-host $line
+        write-output $line
       }
     }
     #BACKUP RAID CONFIGURATIONS
-    write-host "SUM - BACKUP RAID CONFIGURATIONS" -foregroundcolor yellow
+    write-output "SUM - BACKUP RAID CONFIGURATIONS" -foregroundcolor yellow
     $output = Get-ProcessOutput -FileName $sumEXE "-c GetRaidCfg --file $sumBAK\SUM_RAID_BACKUP.xml --overwrite"
     #PARSE SUM OUTPUT LINE BY LINE
     $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
     foreach ($line in $lines) {
       if ($line -ne $null) {
-        write-host $line
+        write-output $line
       }
     }
   }
   "SMCIPMITOOL" {                                                       #SMCIPMITOOL CALLS
     if (($i_IPMIaddress -eq $null) -or ($i_IPMIuser -eq $null) -or ($i_IPMIpwd -eq $null)) {
-      write-host "SMCIPMITOOL - UNABLE TO PERFORM COMMANDS WITHOUT IPMI / BMC ADDRESS OR LOGIN" -foregroundcolor red
+      write-output "SMCIPMITOOL - UNABLE TO PERFORM COMMANDS WITHOUT IPMI / BMC ADDRESS OR LOGIN" -foregroundcolor red
     } elseif (($i_IPMIaddress -ne $null) -and ($i_IPMIuser -ne $null) -and ($i_IPMIpwd -ne $null)) {
       if (-not (test-path -path $smcipmiEXE -pathtype leaf)) {          #DOWNLOAD SMCIPMITOOL IF NEEDED
-        write-host " - DOWNLOADING SUPERMICRO SMCIPMITOOL" -foregroundcolor red
+        write-output " - DOWNLOADING SUPERMICRO SMCIPMITOOL" -foregroundcolor red
         try {
           start-bitstransfer -erroraction stop -source $srcSMCIPMI -destination $smcipmiZIP
           expand-archive $smcipmiZIP -destinationpath "C:\IT\SuperMicro\SMCIPMITool"
@@ -227,33 +227,33 @@ switch ($i_Tool.toupper()) {
         remove-item $smcipmiZIP -erroraction silentlycontinue
       }
       #SET IPMI / BMC USER PASSWORD
-      write-host "SMCIPMITOOL - SETTING IPMI / BMC USER PASSWORD" -foregroundcolor yellow
+      write-output "SMCIPMITOOL - SETTING IPMI / BMC USER PASSWORD" -foregroundcolor yellow
       $pwdoutput = Get-ProcessOutput -FileName $smcipmiEXE "$i_IPMIaddress $i_IPMIuser $i_IPMIpwd user setpwd $i_UserID $i_NewPwd"
       #PARSE SMCIPMITOOL OUTPUT LINE BY LINE
       $lines = $pwdoutput.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       foreach ($line in $lines) {
         if ($line -ne $null) {
-          write-host $line
+          write-output $line
         }
       }
       #BACKUP IPMI / BMC CONFIGURATIONS AS TEXT
-      write-host "SMCIPMITOOL - BACKUP IPMI / BMC CONFIGURATIONS AS TEXT" -foregroundcolor yellow
+      write-output "SMCIPMITOOL - BACKUP IPMI / BMC CONFIGURATIONS AS TEXT" -foregroundcolor yellow
       $output = Get-ProcessOutput -FileName $smcipmiEXE "$i_IPMIaddress $i_IPMIuser $i_IPMIpwd ipmi oem getcfg $smcipmiBAK\SMCIPMITOOL_BMC_BACKUP.config"
       #PARSE SMCIPMITOOL OUTPUT LINE BY LINE
       $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       foreach ($line in $lines) {
         if ($line -ne $null) {
-          write-host $line
+          write-output $line
         }
       }
       #BACKUP IPMI / BMC CONFIGURATIONS AS BINARY
-      write-host "SMCIPMITOOL - BACKUP IPMI / BMC CONFIGURATIONS AS BINARY" -foregroundcolor yellow
+      write-output "SMCIPMITOOL - BACKUP IPMI / BMC CONFIGURATIONS AS BINARY" -foregroundcolor yellow
       $output = Get-ProcessOutput -FileName $smcipmiEXE "$i_IPMIaddress $i_IPMIuser $i_IPMIpwd ipmi oem backupcfg $smcipmiBAK\SMCIPMITOOL_BMC_BACKUP.bin"
       #PARSE SMCIPMITOOL OUTPUT LINE BY LINE
       $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
       foreach ($line in $lines) {
         if ($line -ne $null) {
-          write-host $line
+          write-output $line
         }
       }
     }

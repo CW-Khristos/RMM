@@ -24,7 +24,7 @@ function Remove-HuduMagicDash {
 			$null = Invoke-HuduRequest -Method delete -Resource "/api/v1/magic_dash" -body $JSON
 	
 		} else {
-			Write-Host "ERROR: Please set title and company_name" -ForegroundColor Red
+			write-output "ERROR: Please set title and company_name" -ForegroundColor Red
 		}
 	
 	}

@@ -3,7 +3,7 @@
       [Parameter(Mandatory=$true)]$FileName,
       $Args
     )
-    write-host "RUNNING : $($FileName)"
+    write-output "RUNNING : $($FileName)"
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo.WindowStyle = "Hidden"
     $process.StartInfo.CreateNoWindow = $true
@@ -25,10 +25,10 @@
 
 #PASSPORTAL AGENT REMOVAL
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Passportal Agent"}
-write-host "PASSPORTAL AGENT:"
+write-output "PASSPORTAL AGENT:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  write-host "UNINSTALLING PASSPORTAL AGENT:"
+  write-output "UNINSTALLING PASSPORTAL AGENT:"
   if ($script:installed.UninstallString -like "*msiexec*") {
     $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
     $script:installed.UninstallString
@@ -47,7 +47,7 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
     $script:installed = (Get-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Passportal Agent"}
     $script:installed
     if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-      write-host "UNINSTALLING PASSPORTAL AGENT:"
+      write-output "UNINSTALLING PASSPORTAL AGENT:"
       if ($script:installed.UninstallString -like "*msiexec*") {
         $script:installed.UninstallString = "{$($script:installed.UninstallString.split("{")[1])"
         $output = Get-ProcessOutput -FileName "msiexec.exe" -Args "/X $($script:installed.UninstallString) /quiet /qn /norestart"
@@ -62,6 +62,6 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
       $script:reg = remove-item "HKLM:\Software\WOW6432Node\Passportal" -recurse -force -ea SilentlyContinue
       $script:reg
     } else {
-      write-host "Passportal Agent Not Installed`r`n"
+      write-output "Passportal Agent Not Installed`r`n"
     }
 }

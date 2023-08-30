@@ -75,15 +75,15 @@ $script:ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin"
 # Functions Section
 #---------------------------------------------------------------------------------------------------------------------------------------------
   function write-DRMMDiag ($messages) {
-    write-host  '<-Start Diagnostic->'
+    write-output  '<-Start Diagnostic->'
     foreach ($Message in $Messages) {$Message}
-    write-host '<-End Diagnostic->'
+    write-output '<-End Diagnostic->'
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host '<-Start Result->'
-    write-host "Alert=$($message)"
-    write-host '<-End Result->'
+    write-output '<-Start Result->'
+    write-output "Alert=$($message)"
+    write-output '<-End Result->'
   } ## write-DRRMAlert
   
   function Write-Log {
@@ -99,7 +99,7 @@ $script:ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin"
           [string]$Severity = 'Information'
       )
       $LogContent = (Get-Date -f g)+" " + $Severity +"  "+$Message
-      Add-Content -Path $logFile -Value $LogContent -PassThru | Write-Host
+      Add-Content -Path $logFile -Value $LogContent -PassThru | write-output
 
   } ## Write-Log
 
@@ -124,7 +124,7 @@ $script:ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin"
     if ($Members -ne $Null) {
       $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
     } else {
-      write-host "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'." -foregroundcolor Red
+      write-output "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'." -foregroundcolor Red
       $script:o_Notes += "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
     }
   } ## Get-PrivilegedGroupChanges
@@ -540,7 +540,7 @@ try {
     SchemaMaster = "."
     DomainNamingMaster = "."
   }
-  write-host "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'." -foregroundcolor Red
+  write-output "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'." -foregroundcolor Red
   $script:o_Notes += "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'."
 }
 $domaininfo = Get-ADDomain -Server $DCtoConnect
@@ -1119,7 +1119,7 @@ $script:o_Notes = $script:o_Notes + "`r`nNEW DOMAIN USERS : " + $UserCheck + "<b
 #NOTES
 Write-Log "Please find the report in C:\IT\Reports directory."
 $script:o_Notes += "`r`nPlease find the report in C:\IT\Reports directory."
-write-host $script:o_Notes -ForegroundColor Green
+write-output $script:o_Notes -ForegroundColor Green
 $script:o_Notes = $script:o_Notes.replace("`r`n", "<br>")
 #DATTO OUTPUT
 if ($script:blnWARN) {

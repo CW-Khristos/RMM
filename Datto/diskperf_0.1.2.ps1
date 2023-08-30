@@ -34,15 +34,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($Message in $Messages) {$Message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function StopClock {
@@ -61,8 +61,8 @@
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     $script:diag += "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
-    write-host "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "Avg. Execution Time - $([math]::round($average / 60)) Minutes : $([math]::round($average)) Seconds : $($mill) Milliseconds per Call`r`n"
   }
 
   function pop-Warnings {
@@ -101,9 +101,9 @@
       }
     } catch {
       $warndiag = "Disk Performance : Error populating warnings for $($disk)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-host "Disk Performance : Error populating warnings for $($disk)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-host $_.scriptstacktrace
-      write-host $_
+      write-output "Disk Performance : Error populating warnings for $($disk)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
+      write-output $_.scriptstacktrace
+      write-output $_
       $script:diag += "$($warndiag)"
       $warndiag = $null
     }
@@ -159,23 +159,23 @@
     $diskdiag += ("Avg. Disk Bytes/Transfer (KB) : $($dabt)`r`n").toupper()
     #CHECK DRIVE PERFORMANCE VALUES
     check-PERF $objPERF $objDISK
-    write-host "$($diskdiag)--------------------------------------"
-    write-host " - DRIVE REPORT : $($objPERF.name)" -ForegroundColor yellow
+    write-output "$($diskdiag)--------------------------------------"
+    write-output " - DRIVE REPORT : $($objPERF.name)" -ForegroundColor yellow
     $diskdiag += "--------------------------------------`r`n"
     $diskdiag += " - DRIVE REPORT $($objPERF.name):`r`n"
     if (-not $script:diskWARN) {
-      write-host "  - All Drive Performance values passed checks" -ForegroundColor green
+      write-output "  - All Drive Performance values passed checks" -ForegroundColor green
       $diskdiag += "  - All Drive Performance values passed checks`r`n"
     } elseif ($script:diskWARN) {
-      write-host "  - The following Drive Performance values did not pass :" -ForegroundColor red
+      write-output "  - The following Drive Performance values did not pass :" -ForegroundColor red
       $diskdiag += "  - The following Drive Performance values did not pass :`r`n"
       foreach ($warn in $script:disks[$objPERF.name]) {
-        write-host "$($warn)" -ForegroundColor red
+        write-output "$($warn)" -ForegroundColor red
         $diskdiag += "$($warn)"
       }
       $script:diskWARN = $false
     }
-    write-host "--------------------------------------"
+    write-output "--------------------------------------"
     $script:diag += "--------------------------------------`r`n$($diskdiag)"
     $script:diag += "--------------------------------------`r`n"
     $diskdiag = $null
@@ -282,11 +282,11 @@ try {
       $drives = "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='$($dpartition.DeviceID)'} WHERE AssocClass = Win32_LogicalDiskToPartition"
       Get-CimInstance -Query $drives -erroraction stop | ForEach-Object {
         $pdrive = $_
-        write-host "--------------------------------------`r`n"
-        write-host "POLLING DISK : $($ddisk.name)`r`n" -foregroundcolor yellow
-        write-host "--------------------------------------"
-        write-host "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)"
-        write-host "--------------------------------------"
+        write-output "--------------------------------------`r`n"
+        write-output "POLLING DISK : $($ddisk.name)`r`n" -foregroundcolor yellow
+        write-output "--------------------------------------"
+        write-output "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)"
+        write-output "--------------------------------------"
         $script:diag += "--------------------------------------`r`n`r`n"
         $script:diag += "POLLING DISK : $($ddisk.name)`r`n`r`n"
         $script:diag += "--------------------------------------`r`n"
@@ -310,11 +310,11 @@ try {
         $drives = "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='$($dpartition.DeviceID)'} WHERE AssocClass = Win32_LogicalDiskToPartition"
         Get-WmiObject -Query $drives -erroraction stop | ForEach-Object {
           $pdrive = $_
-          write-host "--------------------------------------"
-          write-host "POLLING DISK : $($ddisk.name)`r`n" -foregroundcolor yellow
-          write-host "--------------------------------------"
-          write-host "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)"
-          write-host "--------------------------------------"
+          write-output "--------------------------------------"
+          write-output "POLLING DISK : $($ddisk.name)`r`n" -foregroundcolor yellow
+          write-output "--------------------------------------"
+          write-output "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)"
+          write-output "--------------------------------------"
           $script:diag += "--------------------------------------`r`n`r`n"
           $script:diag += "POLLING DISK : $($ddisk.name)`r`n`r`n"
           $script:diag += "--------------------------------------`r`n"
@@ -331,9 +331,9 @@ try {
     $script:diag += "$($_.Exception)`r`n"
     $script:diag += "$($_.scriptstacktrace)`r`n"
     $script:diag += "$($_)`r`n"
-    write-host $_.Exception
-    write-host $_.scriptstacktrace
-    write-host $_
+    write-output $_.Exception
+    write-output $_.scriptstacktrace
+    write-output $_
     write-DRRMAlert "Warning : Monitoring Failure"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
@@ -343,7 +343,7 @@ try {
 #Stop script execution time calculation
 StopClock
 #DATTO OUTPUT
-write-host  "DATTO OUTPUT :"
+write-output  "DATTO OUTPUT :"
 if ($script:blnWARN) {
   write-DRRMAlert "Warning : $($script:disks.count) Disk(s) Exceeded Performance Thresholds"
   write-DRMMDiag "$($script:diag)"
@@ -355,6 +355,6 @@ if ($script:blnWARN) {
   $script:diag = $null
   exit 0
 }
-write-host $script:diag
+write-output $script:diag
 #END SCRIPT
 #------------

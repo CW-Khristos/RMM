@@ -20,15 +20,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function StopClock {
@@ -40,7 +40,7 @@
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
     $ScriptStopTime = (get-date).ToString('yyyy-MM-dd hh:mm:ss')
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
@@ -51,28 +51,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
     }
   }

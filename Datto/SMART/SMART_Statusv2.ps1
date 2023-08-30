@@ -51,15 +51,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function Get-ProcessOutput {
@@ -88,7 +88,7 @@
 
   function mapSMART($varID,$varVAL) {
     $varID = $varID.toupper().trim() -replace  "_", " "
-    #write-host " - " $script:arrDRV[$script:i].drvID "     " $varID "     " $varVAL -ForegroundColor green
+    #write-output " - " $script:arrDRV[$script:i].drvID "     " $varID "     " $varVAL -ForegroundColor green
     #MAP SMART ATTRIBUTES BASED ON DRIVE TYPE
     switch ($script:arrDRV[$script:i].drvTYP) {
       #NVME DRIVES
@@ -395,7 +395,7 @@
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
     $ScriptStopTime = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
@@ -406,28 +406,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - SMART_Statusv2 - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -667,7 +667,7 @@
                   #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
                   $chunks = $line.split(":", [StringSplitOptions]::RemoveEmptyEntries)
                   $script:arrDRV[$script:i].fail = $chunks[1].trim()
-                  #write-host -ForegroundColor green $objDRV.drvID "     " $chunks[1].trim()
+                  #write-output -ForegroundColor green $objDRV.drvID "     " $chunks[1].trim()
                 }
               }
             }
@@ -688,12 +688,12 @@
                           #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
                           $chunks = $line.split(":", [StringSplitOptions]::RemoveEmptyEntries)
                           $chunks1 = $chunks[($chunks.length -1)].split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-                          #write-host -ForegroundColor green $chunks[0].trim() "     " $chunks1[0].trim()
+                          #write-output -ForegroundColor green $chunks[0].trim() "     " $chunks1[0].trim()
                           mapSMART $chunks[0].trim() $chunks1[0].trim()
                         } elseif ($line -notlike "*Celsius*") {                                               #"CELSIUS" NOT IN RAW VALUE
                           #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
                           $chunks = $line.split(":", [StringSplitOptions]::RemoveEmptyEntries)
-                          #write-host -ForegroundColor green $chunks[0].trim() "     " $chunks[($chunks.length - 1)].trim()
+                          #write-output -ForegroundColor green $chunks[0].trim() "     " $chunks[($chunks.length - 1)].trim()
                           mapSMART $chunks[0].trim() $chunks[($chunks.length - 1)].replace("%", "").trim()
                         }
                       }
@@ -702,7 +702,7 @@
                           #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
                           $chunks = $line.split("(", [StringSplitOptions]::RemoveEmptyEntries)
                           $chunks = $chunks[0].split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-                          #write-host -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 1)].trim()
+                          #write-output -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 1)].trim()
                           mapSMART $chunks[1].trim() $chunks[($chunks.length - 1)].trim()
                         } elseif ($line -notlike "*(*)*") {                                                   #"()" NOT IN RAW VALUE
                           #SPLIT 'LINE' OUTPUT INTO EACH RESPECTIVE SECTION
@@ -715,11 +715,11 @@
                             ($line -like "*Used_Rsvd_Blk*") -or ($line -like "*Used_Reserved*") -or `
                             ($line -like "*Unused_Rsvd_Blk*") -or ($line -like "*Unused_Reserved*") -or `
                             ($line -like "*Available_Reservd_Space*") -or ($line -like "*Media_Wearout*")) {
-                              #write-host -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 7)].trim()
+                              #write-output -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 7)].trim()
                               mapSMART $chunks[1].trim() $chunks[($chunks.length - 7)].trim()
                           #RETURN 'RAW' VALUES
                           } else {
-                            #write-host -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 1)].trim()
+                            #write-output -ForegroundColor green $chunks[1].trim() "     " $chunks[($chunks.length - 1)].trim()
                             mapSMART $chunks[1].trim() $chunks[($chunks.length - 1)].trim()
                           }
                         }

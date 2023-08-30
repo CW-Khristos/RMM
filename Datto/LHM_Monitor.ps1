@@ -28,15 +28,15 @@
 #region ----- FUNCTIONS ----
 #================= FUNCTION COMPUNCTION =================#
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
   
   function StopClock {
@@ -48,7 +48,7 @@
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
     $ScriptStopTime = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     $script:diag += "`r`n`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
@@ -59,28 +59,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - LHM - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - LHM - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - LHM - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - LHM - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - LHM - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - LHM - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - LHM - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - LHM - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - LHM - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - LHM - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - LHM - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - LHM - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -291,7 +291,7 @@
               if ($sensor.value -gt $evalThreshold) {
                 $mondiag = "Idle Temp Warning (Warn : $($evalThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
                 $script:varAlertMsg += "$($mondiag)"
-                write-host "`t$($mondiag)"
+                write-output "`t$($mondiag)"
                 $script:diag += "`r`n`t$($mondiag)`r`n"
               }
             } elseif (-not $blnIdle) {
@@ -299,7 +299,7 @@
               if ($sensor.value -gt $evalThreshold) {
                 $mondiag = "Full-Load Temp Warning (Warn : $($evalThreshold)C): $($sensor.name) node @ $($sensor.value)C!"
                 $script:varAlertMsg += "$($mondiag)"
-                write-host "`t$($mondiag)"
+                write-output "`t$($mondiag)"
                 $script:diag += "`r`n`t$($mondiag)`r`n"
               }
             }

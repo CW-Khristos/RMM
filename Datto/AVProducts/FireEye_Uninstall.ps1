@@ -9,15 +9,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function Get-ProcessOutput {
@@ -58,7 +58,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
   function logERR ($intSTG, $strModule, $strErr) {
@@ -67,16 +67,16 @@
     switch ($intSTG) {
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnFAIL = $true
-        write-host "$($(get-date))`t - FireEye_Uninstall - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        write-output "$($(get-date))`t - FireEye_Uninstall - NO ARGUMENTS PASSED, END SCRIPT`r`n"
         $script:diag += "`r`n$($(get-date))`t - FireEye_Uninstall - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnFAIL = $true
-        write-host "$($(get-date))`t - FireEye_Uninstall - ($($strModule))`r`n$($strErr), END SCRIPT`r`n"
+        write-output "$($(get-date))`t - FireEye_Uninstall - ($($strModule))`r`n$($strErr), END SCRIPT`r`n"
         $script:diag += "`r`n$($(get-date))`t - FireEye_Uninstall - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
       }
       default {                                                   #'ERRRET'=3+
-        write-host "$($(get-date))`t - FireEye_Uninstall - $($strModule) : $($strErr)`r`n"
+        write-output "$($(get-date))`t - FireEye_Uninstall - $($strModule) : $($strErr)`r`n"
         $script:diag += "`r`n$($(get-date))`t - FireEye_Uninstall - $($strModule) : $($strErr)`r`n`r`n"
       }
     }
@@ -89,7 +89,7 @@
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - EXECUTING FireEye_Uninstall`r`n"
-write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - EXECUTING FireEye_Uninstall"
+write-output "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - EXECUTING FireEye_Uninstall"
 #REMOVE PREVIOUS LOGFILE
 if (test-path -path "$($logPath)") {
   remove-item -path "$($logPath)" -force
@@ -129,14 +129,14 @@ try {
 }
 if (-not ($script:blnFAIL)) {
   #RUN FIREEYE MSI TO UNINSTALL
-  write-host "`t`t - EXECUTING : 'msiexec.exe /x $($feDEST) /qn'"
+  write-output "`t`t - EXECUTING : 'msiexec.exe /x $($feDEST) /qn'"
   $script:diag += "`t`t - EXECUTING : 'msiexec.exe /x $($feDEST) /qn'`r`n"
   $output = Get-ProcessOutput -filename "msiexec.exe" -args "/x $($feDEST) /qn"
-  write-host "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
+  write-output "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
   $script:diag += "`t`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)`r`n"
 }
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - FireEye_Uninstall COMPLETE`r`n"
-write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - FireEye_Uninstall COMPLETE"
+write-output "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - FireEye_Uninstall COMPLETE"
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE

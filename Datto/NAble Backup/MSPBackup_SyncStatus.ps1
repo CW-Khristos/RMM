@@ -31,15 +31,15 @@ $script:blnWARN = $false
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
   
   Function Convert-FromUnixDate ($UnixDate) {
@@ -52,26 +52,26 @@ $script:blnWARN = $false
     $BackupServSync = $StatusReport.Statistics.BackupServerSynchronizationStatus
     #Report results
     if ($BackupServSync -eq "Failed") {
-      Write-Host "Remote Synchronization Failed"
+      write-output "Remote Synchronization Failed"
       $script:remote = "Remote Sync : Failed"
       $script:diag += "Remote Synchronization Failed`r`n"
       $script:blnWARN = $true
     } elseif ($BackupServSync -eq "Synchronized") {
-      Write-Host "Remote Synchronized"
+      write-output "Remote Synchronized"
       $script:remote = "Remote Sync : 100%"
       $script:diag += "Remote Synchronized`r`n"
     } elseif ($BackupServSync -like '*%') {
-      Write-Host "Remote Synchronization: $($BackupServSync)"
+      write-output "Remote Synchronization: $($BackupServSync)"
       $script:remote = "Remote Sync : $($BackupServSync)"
       $script:diag += "Remote Synchronization: $($BackupServSync)`r`n"
       $percentage = $BackupServSync.replace('%', "")
       if ([int]$percentage -lt [int]$env:syncThreshold) {
         $script:blnWARN = $true
-        write-host "`tWARNING : Remote Sync is below Threshold ($($env:syncThreshold))"
+        write-output "`tWARNING : Remote Sync is below Threshold ($($env:syncThreshold))"
         $script:diag += "`tWARNING : Remote Sync is below Threshold ($($env:syncThreshold))`r`n"
       }
     } else {
-      Write-Host "Remote Synchronization Data Invalid or Not Found"
+      write-output "Remote Synchronization Data Invalid or Not Found"
       $script:remote = "Remote Sync : Data Invalid or Not Found"
       $script:diag += "Remote Synchronization Data Invalid or Not Found`r`n"
       $script:blnWARN = $true
@@ -82,20 +82,20 @@ $script:blnWARN = $false
       $LSVSync = $StatusReport.Statistics.LocalSpeedVaultSynchronizationStatus
       #Report results
       if ($LSVSync -eq "Failed") {
-        Write-Host "LocalSpeedVault Synchronization Failed"
+        write-output "LocalSpeedVault Synchronization Failed"
         $script:lsv = "LSV Sync : Failed"
         $script:diag += "LocalSpeedVault Synchronization Failed`r`n"
         $script:blnWARN = $true
       } elseif ($LSVSync -eq "Synchronized") {
-        Write-Host "LocalSpeedVault Synchronized"
+        write-output "LocalSpeedVault Synchronized"
         $script:lsv = "LSV Sync : 100%"
         $script:diag += "LocalSpeedVault Synchronized`r`n"
       } elseif ($LSVSync -like '*%') {
-        Write-Host "LocalSpeedVault Synchronization: $($LSVSync)"
+        write-output "LocalSpeedVault Synchronization: $($LSVSync)"
         $script:lsv = "LSV Sync : $($LSVSync)"
         $script:diag += "LocalSpeedVault Synchronization: $($LSVSync)`r`n"
       } else {
-        Write-Host "LocalSpeedVault Synchronization Data Invalid or Not Found"
+        write-output "LocalSpeedVault Synchronization Data Invalid or Not Found"
         $script:lsv = "LSV Sync : Data Invalid or Not Found"
         $script:diag += "LocalSpeedVault Synchronization Data Invalid or Not Found`r`n"
         $script:blnWARN = $true
@@ -135,7 +135,7 @@ If ($test_MOB -eq $True -And $test_SA -eq $True) {
 	$true_path = $MOB_path
 #If none exist, report & fail check
 } else {
-	Write-Host "StatusReport.xml Not Found"
+	write-output "StatusReport.xml Not Found"
   $script:diag += "StatusReport.xml Not Found`r`n"
   $script:blnWARN = $true
 }
@@ -147,13 +147,13 @@ if ($true_path) {
 	$LSV_Enabled = $StatusReport.Statistics.LocalSpeedVaultEnabled
 	#If LocalSpeedVaultEnabled is 0, report not enabled
 	if ($LSV_Enabled -eq "0") {
-    Write-Host "LocalSpeedVault is not Enabled`r`n"
+    write-output "LocalSpeedVault is not Enabled`r`n"
     $script:diag += "LocalSpeedVault is not Enabled`r`n"
     $LSV_Enabled = "Disabled"
     $LSV_Location = "N/A"
 	#If LocalSpeedVaultEnabled is 1, report enabled
 	} elseIf ($LSV_Enabled -eq "1") {
-		Write-Host "LocalSpeedVault is Enabled"
+		write-output "LocalSpeedVault is Enabled"
     $script:diag += "LocalSpeedVault is Enabled`r`n"
     $LSV_Enabled = "Enabled"
     #Retrieve the LSV Location from ClientTool
@@ -173,23 +173,23 @@ if ($true_path) {
 	$ClientVersion = $StatusReport.Statistics.ClientVersion
 	$OsVersion = $StatusReport.Statistics.OsVersion
 	$IpAddress = $StatusReport.Statistics.IpAddress
-	Write-Host "TimeStamp: $($TimeStamp) Local Device Time"
+	write-output "TimeStamp: $($TimeStamp) Local Device Time"
   $script:diag += "`r`nTimeStamp: $($TimeStamp) Local Device Time`r`n"
-	Write-Host "PartnerName: $($PartnerName)"
+	write-output "PartnerName: $($PartnerName)"
   $script:diag += "PartnerName: $($PartnerName)`r`n"
-	Write-Host "Account: $($Account)"
+	write-output "Account: $($Account)"
   $script:diag += "Account: $($Account)`r`n"
-	Write-Host "MachineName: $($MachineName)"
+	write-output "MachineName: $($MachineName)"
   $script:diag += "MachineName: $($MachineName)`r`n"
-	Write-Host "ClientVersion: $($ClientVersion)"
+	write-output "ClientVersion: $($ClientVersion)"
   $script:diag += "ClientVersion: $($ClientVersion)`r`n"
-	Write-Host "OsVersion: $($OsVersion)"
+	write-output "OsVersion: $($OsVersion)"
   $script:diag += "OsVersion: $($OsVersion)`r`n"
-	Write-Host "IpAddress: $($IpAddress)"
+	write-output "IpAddress: $($IpAddress)"
   $script:diag += "IpAddress: $($IpAddress)`r`n"
 }
 #DATTO OUTPUT
-write-host 'DATTO OUTPUT :'
+write-output 'DATTO OUTPUT :'
 if ($script:blnWARN) {
   write-DRMMAlert "MSP Backup Sync : Warning - $($script:remote) - LSV : $($LSV_Enabled) - $($script:lsv) - LSV Location : $($LSV_Location)"
   write-DRMMDiag "$($script:diag)"

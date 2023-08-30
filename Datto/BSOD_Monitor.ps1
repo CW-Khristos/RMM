@@ -17,15 +17,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function Get-OSArch {                                                                             #Determine Bit Architecture & OS Type
@@ -47,7 +47,7 @@
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
     $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
@@ -58,28 +58,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -149,7 +149,7 @@
           $zip = $shell.Namespace("C:\IT\BlueScreenView.zip")
           $items = $zip.items()
           $shell.Namespace("$($exePath)").CopyHere($items, 1556)
-          write-host " - BLUESCREENVIEW EXTRACTED"
+          write-output " - BLUESCREENVIEW EXTRACTED"
           $script:diag += " - BLUESCREENVIEW EXTRACTED`r`n"
           start-sleep -seconds 2
           remove-item -path "C:\IT\BlueScreenView.zip" -force -erroraction continue
@@ -220,12 +220,12 @@
       $result = taskkill /IM "BlueScreenView" /F
       $remdiag = "Terminating BlueScreenView`r`n$($strLineSeparator)"
       logERR 3 "run-Remove" "$($remdiag)"
-      write-host "$($result)`r`n$($strLineSeparator)"
+      write-output "$($result)`r`n$($strLineSeparator)"
       $script:diag += "$($result)`r`n$($strLineSeparator)`r`n"
     } elseif (-not $process) {        #BLUESCREENVIEW NOT RUNNING
       $running = $false
     }
-    write-host "`tStatus : $($running)`r`n$($strLineSeparator)"
+    write-output "`tStatus : $($running)`r`n$($strLineSeparator)"
     $script:diag += "`r`n`tStatus : $($running)`r`n$($strLineSeparator)`r`n"
     #REMOVE FILES
     $remdiag = "Removing BlueScreenView Files`r`n$($strLineSeparator)"
@@ -234,11 +234,11 @@
       remove-item -path "$($exePath)" -recurse -force -erroraction continue
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
-        write-host "NOT PRESENT : $($_.fullname)`r`n$($strLineSeparator)"
+        write-output "NOT PRESENT : $($_.fullname)`r`n$($strLineSeparator)"
         $script:diag += "NOT PRESENT : $($_.fullname)`r`n$($strLineSeparator)`r`n"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
         $script:blnWARN = $true
-        write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+        write-output "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
         $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)`r`n"
       }
     }
@@ -256,16 +256,16 @@ Get-OSArch
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
 if ($env:strTask -eq "DEPLOY") {
-  write-host "$($strLineSeparator)`r`nDeploying BlueScreenView Files`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nDeploying BlueScreenView Files`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nDeploying BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
     run-Deploy -erroraction stop
     
   } catch {
-    write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+    write-output "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
   }
 } elseif ($env:strTask -eq "MONITOR") {
-  write-host "$($strLineSeparator)`r`nMonitoring BlueScreenView Files`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nMonitoring BlueScreenView Files`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nMonitoring BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
     run-Monitor -erroraction stop
@@ -274,7 +274,7 @@ if ($env:strTask -eq "DEPLOY") {
     
   }
 } elseif ($env:strTask -eq "UPGRADE") {
-  write-host "$($strLineSeparator)`r`nReplacing BlueScreenView Files`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nReplacing BlueScreenView Files`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nReplacing BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
     run-Upgrade -erroraction stop
@@ -283,7 +283,7 @@ if ($env:strTask -eq "DEPLOY") {
     
   }
 } elseif ($env:strTask -eq "REMOVE") {
-  write-host "$($strLineSeparator)`r`nRemoving BlueScreenView Files`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nRemoving BlueScreenView Files`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nRemoving BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
     run-Remove -erroraction stop

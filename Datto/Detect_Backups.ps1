@@ -46,49 +46,49 @@ foreach ($product in $software) {
     } elseif ($backupproduct -ne "None detected|") {
       $backupproduct += "$($product.replace('*', ''))|"
     }
-    write-host "$($product.replace('*', '')) is installed"
+    write-output "$($product.replace('*', '')) is installed"
   } elseif ($installed.displayname -notcontains $product) {
-    write-host "$($product.replace('*', '')) is NOT installed"
+    write-output "$($product.replace('*', '')) is NOT installed"
   }
 }
 
 #Check for Autotask Endpoint Backup
 if (Get-Service | where-object {$_.name -like 'Autotask_DA.VssHelper'}){
-  Write-host "Autotask Endpoint Backup is installed"
+  write-output "Autotask Endpoint Backup is installed"
   $backupproduct += "Autotask Endpoint Backup|"
 }
 
 #Check for Datto File Protection
 if (Get-Service | where-object {$_.name -like 'Datto_VA.VssHelper'}){
-  Write-host "Datto File Protection is installed"
+  write-output "Datto File Protection is installed"
   $backupproduct += "Datto File Protection|"
 }
     
 
 #Check for Backup Exec
 if (Get-Service | where-object {$_.name -like '*BackupExec*'}){
-  Write-host "BackupExec is installed"
+  write-output "BackupExec is installed"
   $backupproduct += "BackupExec - Conflict With BCDR|"
 }
 
 
 #Check for Acronis
 if (Get-Service | where-object {$_.name -like 'Acronis*'}){
-  Write-host "Acronis Backup and Recovery is installed"
+  write-output "Acronis Backup and Recovery is installed"
   $backupproduct += "Acronis - Conflict With Datto BCDR|"
 }
 
 #Check for Attix Backup
 if (Get-Service | where-object {$_.name -like 'Attix*'}){
-  Write-host "Attix Backup is installed"
+  write-output "Attix Backup is installed"
   $backupproduct += "Attix Backup|"
 }
 
 #Check for BackupAssist Backup
 if (Get-Service | where-object {$_.name -like 'BackupAssist*'}){
-  Write-host "BackupAssist is installed"
+  write-output "BackupAssist is installed"
   $backupproduct += "BackupAssist|"
 }
 
-Write-host "`r`nDetected backup Product: $($backupproduct)"
+write-output "`r`nDetected backup Product: $($backupproduct)"
 new-itemproperty -path "HKLM:\Software\Centrastage" -name $env:custom -value "$($backupproduct)" -force

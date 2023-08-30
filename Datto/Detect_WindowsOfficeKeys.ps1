@@ -33,15 +33,15 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
 
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function Get-ProcessOutput {
@@ -99,7 +99,7 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
     $ScriptStopTime = (get-date).ToString('yyyy-MM-dd hh:mm:ss')
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
@@ -111,28 +111,28 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($logTime) - WinKey - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($logTime) - WinKey - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
     }
   }
@@ -176,35 +176,35 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
       $intCur = 0
       while ($intX -gt -1) {
         $intCur = BitShift "Left" $intCur 8
-        #write-host "intCur (BSL) : $($intCur)"
+        #write-output "intCur (BSL) : $($intCur)"
         $intCur = $arrKey[$intX + $intKeyOffset] + $intCur
-        #write-host "intCur (arrKey[intX + intKeyOffset] + intCur) : $($intCur)"
+        #write-output "intCur (arrKey[intX + intKeyOffset] + intCur) : $($intCur)"
         $arrKey[$intX + $intKeyOffset] = [math]::Truncate($intCur / 24)
-        #write-host "arrKey[intX + intKeyOffset] : $($arrKey[$intX + $intKeyOffset])"
+        #write-output "arrKey[intX + intKeyOffset] : $($arrKey[$intX + $intKeyOffset])"
         $intCur = $intCur % 24
-        #write-host "intCur (Mod 24) : $($intCur)"
+        #write-output "intCur (Mod 24) : $($intCur)"
         $intX -= 1
       }
-      #write-host "intCur : $($intCur)"
+      #write-output "intCur : $($intCur)"
       $strKeyOutput = "$($strChars.substring($intCur, 1))$($strKeyOutput)"
-      #write-host "strKeyOutput : $($strKeyOutput)"
+      #write-output "strKeyOutput : $($strKeyOutput)"
       $intLast = $intCur
       $i -= 1
     }
 
     if ($intIsWin8 -eq 1) {
       <#
-      write-host "strKeyOutput : $($strKeyOutput)"
-      write-host "Length : $($strKeyOutput.length)"
-      write-host "intLast : $($intLast + 1)"
-      write-host "Chunk 1 (1, $($intLast)) : $($strKeyOutput.substring(1, $intLast))"
-      write-host "Chunk 2 ($($strKeyOutput.length - ($intLast + 1)), $($strKeyOutput.length)) : $($strKeyOutput.substring(($intLast + 1), $($strKeyOutput.length - ($intLast + 1))))"
+      write-output "strKeyOutput : $($strKeyOutput)"
+      write-output "Length : $($strKeyOutput.length)"
+      write-output "intLast : $($intLast + 1)"
+      write-output "Chunk 1 (1, $($intLast)) : $($strKeyOutput.substring(1, $intLast))"
+      write-output "Chunk 2 ($($strKeyOutput.length - ($intLast + 1)), $($strKeyOutput.length)) : $($strKeyOutput.substring(($intLast + 1), $($strKeyOutput.length - ($intLast + 1))))"
       #>
       $strKeyOutput = "$($strKeyOutput.substring(1, $intLast))N$($strKeyOutput.substring(($intLast + 1), $($strKeyOutput.length - ($intLast + 1))))"
     }
-    #write-host "strKeyOutput : $($strKeyOutput)"
+    #write-output "strKeyOutput : $($strKeyOutput)"
     $strKeyGUIDOutput = "$($strKeyOutput.substring(0, 5))-$($strKeyOutput.substring(5, 5))-$($strKeyOutput.substring(10, 5))-$($strKeyOutput.substring(15, 5))-$($strKeyOutput.substring(20, 5))"
-    #write-host "strKeyGUIDOutput : $($strKeyGUIDOutput)"
+    #write-output "strKeyGUIDOutput : $($strKeyGUIDOutput)"
     return $strKeyGUIDOutput
   }
 
@@ -233,10 +233,10 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     try {
       logERR 3 "CheckWindowsKey" "Checking Windows Key : $($strRegPath)"
       $binRegVal = get-itempropertyvalue -path "$($strRegPath)" -name "$($strRegValue)"
-      #write-host "Windows Key (Binary) : $($binRegVal)"
+      #write-output "Windows Key (Binary) : $($binRegVal)"
       $strWinKey = $(DecodeProductKey $binRegVal $intKeyOffset)
       if (($null -ne $strWinKey) -and ($strWinKey -ne "") -and ($strWinKey -ne "BBBBB-BBBBB-BBBBB-BBBBB-BBBBB")) {
-        #write-host "Windows Key : $($strWinKey)"
+        #write-output "Windows Key : $($strWinKey)"
         return $strWinKey
       } else {
         return $null

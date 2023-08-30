@@ -23,10 +23,10 @@
   } ## Get-ProcessOutput
   
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Windows Software Probe"}
-write-host "NABLE PROBE:"
+write-output "NABLE PROBE:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  write-host "UNINSTALLING NABLE PROBE:"
+  write-output "UNINSTALLING NABLE PROBE:"
   if ($script:installed.UninstallString -like "*msiexec*") {
     $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
     $script:installed.UninstallString
@@ -38,5 +38,5 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
 } else {
-  write-host "NAble Probe Not Installed`r`n"
+  write-output "NAble Probe Not Installed`r`n"
 }

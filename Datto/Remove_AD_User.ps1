@@ -5,15 +5,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($Message in $Messages) {$Message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function Get-ProcessOutput {
@@ -54,7 +54,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
@@ -66,11 +66,11 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 try {
   $cmdOutput = Get-ProcessOutput -FileName $cmdEXE -Args "net user $($env:strUser) /delete /domain"
   $script:diag += "$($cmdOutput)`r`n"
-  write-host "$($cmdOutput)"
+  write-output "$($cmdOutput)"
 } catch {
   $script:blnWARN = $true
   $script:diag += "ERROR DELETING USER : $($env:strUser)`r`n"
-  write-host "ERROR DELETING USER : $($env:strUser)"
+  write-output "ERROR DELETING USER : $($env:strUser)"
 }
 #Stop script execution time calculation
 StopClock

@@ -20,15 +20,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function logERR($intSTG, $strErr) {
@@ -37,14 +37,14 @@
     switch ($intSTG) {
       1 {                                                                             #'ERRRET'=1 - ERROR DELETING FILE / FOLDER
         $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
+        write-output "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
       }
       2 {                                                                             #'ERRRET'=2 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
+        write-output "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
       }
       default {                                                                       #'ERRRET'=3+
-        write-host "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - $($strErr)`r`n$($strLineSeparator)`r`n"
+        write-output "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - $($strErr)`r`n$($strLineSeparator)`r`n"
         $script:diag += "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - BIOS_Updates_Monitor - $($strErr)`r`n$($strLineSeparator)`r`n`r`n"
       }
     }
@@ -64,7 +64,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #endregion ----- FUNCTIONS ----
 
@@ -76,59 +76,59 @@ $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 try {
   #RETRIEVE SYSTEM RELEASE DATE
-  write-host "$($strLineSeparator)`r`nChecking System BIOS :`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nChecking System BIOS :`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nChecking System BIOS :`r`n$($strLineSeparator)`r`n"
-  write-host "`tReading : -path '$($sysRegKey)' -name 'SystemBiosDate'"
+  write-output "`tReading : -path '$($sysRegKey)' -name 'SystemBiosDate'"
   $script:diag += "`tReading : -path '$($sysRegKey)' -name 'SystemBiosDate'`r`n"
   $sysDate = get-itemproperty -path "$($sysRegKey)" -name "SystemBiosDate" -erroraction stop
 
   $biosVersion = $null
-  write-host "`tReading : -path '$($sysRegKey)' -name 'SystemBiosVersion'"
+  write-output "`tReading : -path '$($sysRegKey)' -name 'SystemBiosVersion'"
   $script:diag += "`tReading : -path '$($sysRegKey)' -name 'SystemBiosVersion'`r`n"
   $sysVersion = get-itemproperty -path "$($sysRegKey)" -name "SystemBiosVersion" -erroraction stop
   foreach ($line in $sysVersion.SystemBiosVersion) {$biosVersion += "`t$($line)`r`n"}
 
-  write-host "`t$($strLineSeparator)`r`n`tBIOS Release Date : $($sysDate.SystemBiosDate)"
+  write-output "`t$($strLineSeparator)`r`n`tBIOS Release Date : $($sysDate.SystemBiosDate)"
   $script:diag += "`t$($strLineSeparator)`r`n`tBIOS Release Date : $($sysDate.SystemBiosDate)`r`n"
-  write-host "`tBIOS Release Version : $($biosVersion)`r`n$($strLineSeparator)"
+  write-output "`tBIOS Release Version : $($biosVersion)`r`n$($strLineSeparator)"
   $script:diag += "`tBIOS Release Version : $($biosVersion)`r`n$($strLineSeparator)`r`n"
 
   #RETRIEVE BIOS RELEASE VERSION
-  write-host "$($strLineSeparator)`r`nChecking BIOS Release Version :`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nChecking BIOS Release Version :`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nChecking BIOS Release Version :`r`n$($strLineSeparator)`r`n"
-  write-host "`tReading : -path '$($biosRegKey)' -name 'BIOSVendor'"
+  write-output "`tReading : -path '$($biosRegKey)' -name 'BIOSVendor'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BIOSVendor'`r`n"
   $biosVendor = get-itemproperty -path "$($biosRegKey)" -name "BIOSVendor" -erroraction stop
 
-  write-host "`tReading : -path '$($biosRegKey)' -name 'BaseBoardManufacturer'"
+  write-output "`tReading : -path '$($biosRegKey)' -name 'BaseBoardManufacturer'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BaseBoardManufacturer'`r`n"
   $boardManufacturer = get-itemproperty -path "$($biosRegKey)" -name "BaseBoardManufacturer" -erroraction stop
 
-  write-host "`tReading : -path '$($biosRegKey)' -name 'BaseBoardProduct'"
+  write-output "`tReading : -path '$($biosRegKey)' -name 'BaseBoardProduct'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BaseBoardProduct'`r`n"
   $boardProduct = get-itemproperty -path "$($biosRegKey)" -name "BaseBoardProduct" -erroraction stop
 
-  write-host "`tReading : -path '$($biosRegKey)' -name 'BIOSReleaseDate'"
+  write-output "`tReading : -path '$($biosRegKey)' -name 'BIOSReleaseDate'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BIOSReleaseDate'`r`n"
   $biosDate = get-itemproperty -path "$($biosRegKey)" -name "BIOSReleaseDate" -erroraction stop
 
-  write-host "`tReading : -path '$($biosRegKey)' -name 'BIOSVersion'"
+  write-output "`tReading : -path '$($biosRegKey)' -name 'BIOSVersion'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BIOSVersion'`r`n"
   $biosVersion = get-itemproperty -path "$($biosRegKey)" -name "BIOSVersion" -erroraction stop
 
-  write-host "`t$($strLineSeparator)`r`n`tBIOS Vendor : $($biosVendor.BIOSVendor)"
+  write-output "`t$($strLineSeparator)`r`n`tBIOS Vendor : $($biosVendor.BIOSVendor)"
   $script:diag += "`t$($strLineSeparator)`r`n`tBIOS Vendor : $($biosVendor.BIOSVendor)`r`n"
-  write-host "`tBase Board Manufacturer : $($boardManufacturer.BaseBoardManufacturer)"
+  write-output "`tBase Board Manufacturer : $($boardManufacturer.BaseBoardManufacturer)"
   $script:diag += "`tBase Board Manufacturer : $($boardManufacturer.BaseBoardManufacturer)`r`n"
-  write-host "`tBase Board Product : $($boardProduct.BaseBoardProduct)"
+  write-output "`tBase Board Product : $($boardProduct.BaseBoardProduct)"
   $script:diag += "`tBase Board Product : $($boardProduct.BaseBoardProduct)`r`n"
-  write-host "`tBIOS Release Date : $($biosDate.BIOSReleaseDate)"
+  write-output "`tBIOS Release Date : $($biosDate.BIOSReleaseDate)"
   $script:diag += "`tBIOS Release Date : $($biosDate.BIOSReleaseDate)`r`n"
-  write-host "`tBIOS Release Version : $($biosVersion.BIOSVersion)`r`n$($strLineSeparator)"
+  write-output "`tBIOS Release Version : $($biosVersion.BIOSVersion)`r`n$($strLineSeparator)"
   $script:diag += "`tBIOS Release Version : $($biosVersion.BIOSVersion)`r`n$($strLineSeparator)`r`n"
   if ([DateTime]$biosDate.BIOSReleaseDate -le (get-date).AddYears(-$releaseThreshold)) {
     $script:blnWARN = $true
-    write-host "`r`nBIOS_Monitor : WARNING : BIOS Release Date Older than Threshold ($($releaseThreshold) Years)`r`n"
+    write-output "`r`nBIOS_Monitor : WARNING : BIOS Release Date Older than Threshold ($($releaseThreshold) Years)`r`n"
     $script:diag += "`r`nBIOS_Monitor : WARNING : BIOS Release Date Older than Threshold ($($releaseThreshold) Years)`r`n"
   }
 } catch {

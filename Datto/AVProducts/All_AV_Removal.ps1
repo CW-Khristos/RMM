@@ -35,15 +35,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function Get-ProcessOutput {
@@ -88,7 +88,7 @@
       $mill = 0
     }
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($mill) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($mill) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($mill) Milliseconds`r`n"
   }
 
   function logERR ($intSTG, $strModule, $strErr) {
@@ -97,16 +97,16 @@
     switch ($intSTG) {
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnFAIL = $true
-        write-host "$($(get-date))`t - All_AV_Removal - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        write-output "$($(get-date))`t - All_AV_Removal - NO ARGUMENTS PASSED, END SCRIPT`r`n"
         $script:diag += "`r`n$($(get-date))`t - All_AV_Removal - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnFAIL = $true
-        write-host "$($(get-date))`t - All_AV_Removal - ($($strModule))`r`n$($strErr), END SCRIPT`r`n"
+        write-output "$($(get-date))`t - All_AV_Removal - ($($strModule))`r`n$($strErr), END SCRIPT`r`n"
         $script:diag += "`r`n$($(get-date))`t - All_AV_Removal - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
       }
       default {                                                   #'ERRRET'=3+
-        write-host "$($(get-date))`t - All_AV_Removal - $($strModule) : $($strErr)`r`n"
+        write-output "$($(get-date))`t - All_AV_Removal - $($strModule) : $($strErr)`r`n"
         $script:diag += "`r`n$($(get-date))`t - All_AV_Removal - $($strModule) : $($strErr)`r`n`r`n"
       }
     }
@@ -119,9 +119,9 @@ clear-host
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
-write-host "$($strLineSeparator)"
-write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - EXECUTING All_AV_Removal"
-write-host "$($strLineSeparator)`r`n"
+write-output "$($strLineSeparator)"
+write-output "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - EXECUTING All_AV_Removal"
+write-output "$($strLineSeparator)`r`n"
 $script:diag += "$($strLineSeparator)`r`n"
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - EXECUTING All_AV_Removal`r`n"
 $script:diag += "$($strLineSeparator)`r`n`r`n"
@@ -156,8 +156,8 @@ $UninstallStrings = get-childitem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersi
 $UninstallStrings += get-childitem "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
 if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET AV WAS PASSED
   #REMOVAL VIA REGISTRY
-  write-host "BEGINNING REMOVAL VIA REGISTRY :"
-  write-host "$($strLineSeparator)"
+  write-output "BEGINNING REMOVAL VIA REGISTRY :"
+  write-output "$($strLineSeparator)"
   $script:diag += "BEGINNING REMOVAL VIA REGISTRY :`r`n"
   $script:diag += "$($strLineSeparator)`r`n"
   $avUninstall = $UninstallStrings | get-itemproperty | where {$_.displayname -like "*$($env:strAV)*"}
@@ -169,22 +169,22 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
       "SOPHOS" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS /L*v"}
     }
     foreach ($item in $avUninstall) {
-      write-host "`r`n$($strLineSeparator)`r`nFOUND $($item.displayname):`r`nDescription : $($item.comments)`r`n$($item.UninstallString)"
-      write-host "$($strLineSeparator)"
+      write-output "`r`n$($strLineSeparator)`r`nFOUND $($item.displayname):`r`nDescription : $($item.comments)`r`n$($item.UninstallString)"
+      write-output "$($strLineSeparator)"
       $script:diag += "`r`n$($strLineSeparator)`r`nFOUND $($item.displayname):`r`nDescription : $($item.comments)`r`n$($item.UninstallString)`r`n"
       $script:diag += "$($strLineSeparator)`r`n"
       #AV REMOVAL
       if ($blnUninstall) {
-        write-host "REMOVING $($item.displayname):"
-        write-host "$($strLineSeparator)"
+        write-output "REMOVING $($item.displayname):"
+        write-output "$($strLineSeparator)"
         $script:diag += "REMOVING $($item.displayname):`r`n"
         $script:diag += "$($strLineSeparator)`r`n"
         if ($item.UninstallString -like "*msiexec*") {                #MSI UNINSTALL
           try {
             $UninstallString = $item.UninstallString.split(" ")[1]
             $output = Get-ProcessOutput -FileName "msiexec.exe" -Args "$($UninstallString) /quiet /qn /norestart /log `"C:\IT\Log\$($item.displayname)_uninstall`""
-            write-host "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
-            write-host "$($strLineSeparator)"
+            write-output "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
+            write-output "$($strLineSeparator)"
             $script:diag += "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`"`r`n"
             $script:diag += "$($strLineSeparator)`r`n"
           } catch {
@@ -194,8 +194,8 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
         } elseif ($item.UninstallString -notlike "*msiexec*") {       #EXE UNINSTALL
           try {
             $output = Get-ProcessOutput -FileName "$($item.UninstallString)" -Args "$($strReboot) `"C:\IT\Log\$($item.displayname)_uninstall`""
-            write-host "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
-            write-host "$($strLineSeparator)"
+            write-output "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
+            write-output "$($strLineSeparator)"
             $script:diag += "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`"`r`n"
             $script:diag += "$($strLineSeparator)`r`n"
           } catch {
@@ -204,31 +204,31 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
           }
         }
         #PARSE OUTPUT
-        write-host "`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
+        write-output "`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
         $script:diag += "`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)`r`n"
       } elseif (-not ($blnUninstall)) {
-        write-host "REMOVAL DISABLED`r`n$($strLineSeparator)"
+        write-output "REMOVAL DISABLED`r`n$($strLineSeparator)"
         $script:diag += "REMOVAL DISABLED`r`n$($strLineSeparator)`r`n"
       }
     }
   } elseif (($null -eq $avUninstall) -or ($avUninstall -eq "")) {     #TARGET AV NOT FOUND
-    write-host "`r`n$($strLineSeparator)"
-    write-host "NO $($env:strAV.toupper()) INSTALLATION DETECTED"
-    write-host "$($strLineSeparator)"
+    write-output "`r`n$($strLineSeparator)"
+    write-output "NO $($env:strAV.toupper()) INSTALLATION DETECTED"
+    write-output "$($strLineSeparator)"
     $script:diag += "`r`n$($strLineSeparator)`r`n"
     $script:diag += "NO $($env:strAV.toupper()) INSTALLATION DETECTED`r`n"
     $script:diag += "$($strLineSeparator)`r`n"
   }
   #REMOVAL VIA AV TOOLS
-  write-host "BEGINNING REMOVAL VIA REMOVAL TOOLS :"
-  write-host "$($strLineSeparator)"
+  write-output "BEGINNING REMOVAL VIA REMOVAL TOOLS :"
+  write-output "$($strLineSeparator)"
   $script:diag += "BEGINNING REMOVAL VIA REMOVAL TOOLS :`r`n"
   $script:diag += "$($strLineSeparator)`r`n"
 } elseif (($null -eq $env:strAV) -or ($env:strAV -eq "")) {           #A TARGET AV WAS NOT PASSED
   foreach ($av in $script:arrAV) {
     #REMOVAL VIA REGISTRY
-    write-host "BEGINNING REMOVAL VIA REGISTRY :"
-    write-host "$($strLineSeparator)"
+    write-output "BEGINNING REMOVAL VIA REGISTRY :"
+    write-output "$($strLineSeparator)"
     $script:diag += "BEGINNING REMOVAL VIA REGISTRY :`r`n"
     $script:diag += "$($strLineSeparator)`r`n"
     $avUninstall = $UninstallStrings | get-itemproperty | where {$_.displayname -like "*$($av)*"}
@@ -240,22 +240,22 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
         "SOPHOS" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS /L*v"}
       }
       foreach ($item in $avUninstall) {
-        write-host "`r`n$($strLineSeparator)`r`nFOUND $($item.displayname):`r`nDescription : $($item.comments)`r`n$($item.UninstallString)"
-        write-host "$($strLineSeparator)"
+        write-output "`r`n$($strLineSeparator)`r`nFOUND $($item.displayname):`r`nDescription : $($item.comments)`r`n$($item.UninstallString)"
+        write-output "$($strLineSeparator)"
         $script:diag += "`r`n$($strLineSeparator)`r`nFOUND $($item.displayname):`r`nDescription : $($item.comments)`r`n$($item.UninstallString)`r`n"
         $script:diag += "$($strLineSeparator)`r`n"
         #AV REMOVAL
         if ($blnUninstall) {
-          write-host "REMOVING $($item.displayname):"
-          write-host "$($strLineSeparator)"
+          write-output "REMOVING $($item.displayname):"
+          write-output "$($strLineSeparator)"
           $script:diag += "REMOVING $($item.displayname):`r`n"
           $script:diag += "$($strLineSeparator)`r`n"
           if ($item.UninstallString -like "*msiexec*") {              #MSI UNINSTALL
             try {
               $UninstallString = $item.UninstallString.split(" ")[1]
               $output = Get-ProcessOutput -FileName "msiexec.exe" -Args "$($UninstallString) /quiet /qn /norestart /log `"C:\IT\Log\$($item.displayname)_uninstall`""
-              write-host "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
-              write-host "$($strLineSeparator)"
+              write-output "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
+              write-output "$($strLineSeparator)"
               $script:diag += "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`"`r`n"
               $script:diag += "$($strLineSeparator)`r`n"
             } catch {
@@ -265,8 +265,8 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
           } elseif ($item.UninstallString -notlike "*msiexec*") {     #EXE UNINSTALL
             try {
               $output = Get-ProcessOutput -FileName "$($item.UninstallString)" -Args "$($strReboot) `"C:\IT\Log\$($item.displayname)_uninstall`""
-              write-host "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
-              write-host "$($strLineSeparator)"
+              write-output "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
+              write-output "$($strLineSeparator)"
               $script:diag += "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`"`r`n"
               $script:diag += "$($strLineSeparator)`r`n"
             } catch {
@@ -275,24 +275,24 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
             }
           }
           #PARSE OUTPUT
-          write-host "`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
+          write-output "`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
           $script:diag += "`t`t - StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)`r`n"
         } elseif (-not ($blnUninstall)) {
-          write-host "REMOVAL DISABLED`r`n$($strLineSeparator)"
+          write-output "REMOVAL DISABLED`r`n$($strLineSeparator)"
           $script:diag += "REMOVAL DISABLED`r`n$($strLineSeparator)`r`n"
         }
       }
     } elseif (($null -eq $avUninstall) -or ($avUninstall -eq "")) {   #TARGET AV NOT FOUND
-      write-host "`r`n$($strLineSeparator)"
-      write-host "NO $($av.toupper()) INSTALLATION DETECTED"
-      write-host "$($strLineSeparator)"
+      write-output "`r`n$($strLineSeparator)"
+      write-output "NO $($av.toupper()) INSTALLATION DETECTED"
+      write-output "$($strLineSeparator)"
       $script:diag += "`r`n$($strLineSeparator)`r`n"
       $script:diag += "NO $($av.toupper()) INSTALLATION DETECTED`r`n"
       $script:diag += "$($strLineSeparator)`r`n"
     }
     #REMOVAL VIA AV TOOLS
-    write-host "BEGINNING REMOVAL VIA REMOVAL TOOLS :"
-    write-host "$($strLineSeparator)"
+    write-output "BEGINNING REMOVAL VIA REMOVAL TOOLS :"
+    write-output "$($strLineSeparator)"
     $script:diag += "BEGINNING REMOVAL VIA REMOVAL TOOLS :`r`n"
     $script:diag += "$($strLineSeparator)`r`n"
     #SET REMOVAL TOOL
@@ -337,9 +337,9 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
     }
   }
 }
-write-host "`r`n$($strLineSeparator)"
-write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - All_AV_Removal COMPLETE"
-write-host "$($strLineSeparator)"
+write-output "`r`n$($strLineSeparator)"
+write-output "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - All_AV_Removal COMPLETE"
+write-output "$($strLineSeparator)"
 $script:diag += "`r`n$($strLineSeparator)`r`n"
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - All_AV_Removal COMPLETE`r`n"
 $script:diag += "$($strLineSeparator)`r`n"

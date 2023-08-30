@@ -8,15 +8,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function Get-ProcessOutput {
@@ -50,17 +50,17 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnFAIL = $true
         $script:diag += "`r`n$($(get-date))`t - Deploy TechID_DomainService - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - Deploy TechID_DomainService - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        write-output "$($(get-date))`t - Deploy TechID_DomainService - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnFAIL = $true
         $script:diag += "`r`n$($(get-date))`t - Deploy TechID_DomainService - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - Deploy TechID_DomainService - ($($strModule))`r`n$($strErr), END SCRIPT`r`n"
+        write-output "$($(get-date))`t - Deploy TechID_DomainService - ($($strModule))`r`n$($strErr), END SCRIPT`r`n"
       }
       default {                                                   #'ERRRET'=3+
         $script:blnWARN = $true
         $script:diag += "`r`n$($(get-date))`t - Deploy TechID_DomainService - $($strModule) : $($strErr)`r`n`r`n"
-        write-host "$($(get-date))`t - Deploy TechID_DomainService - $($strModule) : $($strErr)`r`n"
+        write-output "$($(get-date))`t - Deploy TechID_DomainService - $($strModule) : $($strErr)`r`n"
       }
     }
   }
@@ -79,7 +79,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
@@ -111,15 +111,15 @@ if (($null -eq $env:strGUID) -or ($env:strGUID -eq "")) {
 if ($script:blnFAIL) {
   $script:blnWARN = $true
 } elseif (-not ($script:blnFAIL)) {
-  write-host "$($strLineSeparator)`r`nCHECKING FOR DomainService"
+  write-output "$($strLineSeparator)`r`nCHECKING FOR DomainService"
   $script:diag += "$($strLineSeparator)`r`nCHECKING FOR DomainService`r`n"
   $service = get-service -name "RuffianDomainService"
   if ($service) {
     try {
-      write-host "$($strLineSeparator)`r`nSTOPPING DomainService"
+      write-output "$($strLineSeparator)`r`nSTOPPING DomainService"
       $script:diag += "$($strLineSeparator)`r`nSTOPPING DomainService`r`n"
       stop-service -name "RuffianDomainService"
-      write-host "$($strLineSeparator)`r`nSTOPPED DomainService`r`nREMOVING FILES"
+      write-output "$($strLineSeparator)`r`nSTOPPED DomainService`r`nREMOVING FILES"
       $script:diag += "$($strLineSeparator)`r`nSTOPPED DomainService`r`nREMOVING FILES`r`n"
       get-childitem "$($env:strDeploy)" | remove-item -force -erroraction continue
     } catch {
@@ -127,7 +127,7 @@ if ($script:blnFAIL) {
       logERR 3 "INSTALL" $err
     }
   }
-  write-host "$($strLineSeparator)`r`nDEPLOYING DomainService"
+  write-output "$($strLineSeparator)`r`nDEPLOYING DomainService"
   $script:diag += "$($strLineSeparator)`r`nDEPLOYING DomainService`r`n"
   move-item DomainService_v3.164x64.zip "$($env:strDeploy)"
   $shell = New-Object -ComObject Shell.Application
@@ -135,49 +135,49 @@ if ($script:blnFAIL) {
   $items = $zip.items()
   $shell.Namespace("$($env:strDeploy)").CopyHere($items, 1556)
   $script:diag += "DomainService EXTRACTED TO '$($env:strDeploy)'`r`n$($strLineSeparator)`r`n"
-  write-host "DomainService EXTRACTED TO '$($env:strDeploy)'`r`n$($strLineSeparator)"
+  write-output "DomainService EXTRACTED TO '$($env:strDeploy)'`r`n$($strLineSeparator)"
   remove-item "$($env:strDeploy)\DomainService_v3.164x64.zip"
   $strEXE = "$($env:strDeploy)\DomainService.exe"
   #INSTALL
   try {
-    write-host "$($strLineSeparator)`r`nINSTALLING DomainService`r`n`tCMD : $($strEXE) install"
+    write-output "$($strLineSeparator)`r`nINSTALLING DomainService`r`n`tCMD : $($strEXE) install"
     $script:diag += "$($strLineSeparator)`r`nINSTALLING DomainService`r`n`tCMD : $($strEXE) install`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "install"
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 3 "INSTALL" $err
   }
   #SET GUID
   try {
-    write-host "$($strLineSeparator)`r`nSETTING CLIENT GUID`r`n`tCMD : $($strEXE) clientguid $($env:strGUID)"
+    write-output "$($strLineSeparator)`r`nSETTING CLIENT GUID`r`n`tCMD : $($strEXE) clientguid $($env:strGUID)"
     $script:diag += "$($strLineSeparator)`r`nSETTING CLIENT GUID`r`n`tCMD : $($strEXE) clientguid $($env:strGUID)`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "clientguid $($env:strGUID)"
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 4 "SET GUID" $err
   }
   #SET OU
   try {
-    write-host "$($strLineSeparator)`r`nSETTING TECH ACCOUNT OU`r`n`tCMD : $($strEXE) ou `"$($env:strOU)`""
+    write-output "$($strLineSeparator)`r`nSETTING TECH ACCOUNT OU`r`n`tCMD : $($strEXE) ou `"$($env:strOU)`""
     $script:diag += "$($strLineSeparator)`r`nSETTING TECH ACCOUNT OU`r`n`tCMD : $($strEXE) ou `"$($env:strOU)`"`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "ou `"$($env:strOU)`""
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 5 "SET OU" $err
   }
   #SET TECH NAME
   try {
-    write-host "$($strLineSeparator)`r`nSETTING TECH ACCOUNT NAME`r`n`tCMD : $($strEXE) username `"{firstinitial}{last}.IPM`""
+    write-output "$($strLineSeparator)`r`nSETTING TECH ACCOUNT NAME`r`n`tCMD : $($strEXE) username `"{firstinitial}{last}.IPM`""
     $script:diag += "$($strLineSeparator)`r`nSETTING TECH ACCOUNT NAME`r`n`tCMD : $($strEXE) username `"{firstinitial}{last}.IPM`"`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "username `"{firstinitial}{last}.IPM`""
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 6 "SET TECH NAME" $err
@@ -189,33 +189,33 @@ if ($script:blnFAIL) {
     } elseif (($null -eq $env:strDName) -or ($env:strDName -eq "")) {
       $displayname = "{firstinitial}{last}.IPM"
     }
-    write-host "$($strLineSeparator)`r`nSETTING DISPLAY NAME`r`n`tCMD : $($strEXE) displayname `"$($displayname)`""
+    write-output "$($strLineSeparator)`r`nSETTING DISPLAY NAME`r`n`tCMD : $($strEXE) displayname `"$($displayname)`""
     $script:diag += "$($strLineSeparator)`r`nSETTING DISPLAY NAME`r`n`tCMD : $($strEXE) displayname `"$($displayname)`"`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "displayname `"$($displayname)`""
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 7 "SET DISPLAY NAME" $err
   }
   #SET ACCOUNT DESCRIPTION
   try {
-    write-host "$($strLineSeparator)`r`nSETTING ACCOUNT DESCRIPTION`r`n`tCMD : $($strEXE) accountdescription `"IPM TechClient Admin`""
+    write-output "$($strLineSeparator)`r`nSETTING ACCOUNT DESCRIPTION`r`n`tCMD : $($strEXE) accountdescription `"IPM TechClient Admin`""
     $script:diag += "$($strLineSeparator)`r`nSETTING ACCOUNT DESCRIPTION`r`n`tCMD : $($strEXE) accountdescription `"IPM TechClient Admin`"`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "accountdescription `"IPM TechClient Admin`""
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 8 "SET ACCOUNT DESCRIPTION" $err
   }
   #SET HIDELOGONNAME
   try {
-    write-host "$($strLineSeparator)`r`nSETTING HIDE TECH LOGONS`r`n`tCMD : $($strEXE) hideonloginscreen"
+    write-output "$($strLineSeparator)`r`nSETTING HIDE TECH LOGONS`r`n`tCMD : $($strEXE) hideonloginscreen"
     $script:diag += "$($strLineSeparator)`r`nSETTING HIDE TECH LOGONS`r`n`tCMD : $($strEXE) hideonloginscreen`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "hideonloginscreen"
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 9 "SET HIDELOGONNAME" $err
@@ -227,11 +227,11 @@ if ($script:blnFAIL) {
     } elseif (($null -eq $env:strFName) -or ($env:strFName -eq "")) {
       $friendlyname = $env:CS_PROFILE_NAME
     }
-    write-host "$($strLineSeparator)`r`nSETTING FRIENDLY NAME`r`n`tCMD : $($strEXE) friendlyname `"$($friendlyname)`""
+    write-output "$($strLineSeparator)`r`nSETTING FRIENDLY NAME`r`n`tCMD : $($strEXE) friendlyname `"$($friendlyname)`""
     $script:diag += "$($strLineSeparator)`r`nSETTING FRIENDLY NAME`r`n`tCMD : $($strEXE) friendlyname `"$($friendlyname)`"`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "friendlyname `"$($friendlyname)`""
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 10 "SET FRIENDLY NAME" $err
@@ -243,22 +243,22 @@ if ($script:blnFAIL) {
     } elseif (($null -eq $env:strRName) -or ($env:strRName -eq "")) {
       $rmmname = $env:CS_PROFILE_NAME
     }
-    write-host "$($strLineSeparator)`r`nSETTING RMM NAME`r`n`tCMD : $($strEXE) rmmname `"$($rmmname)`""
+    write-output "$($strLineSeparator)`r`nSETTING RMM NAME`r`n`tCMD : $($strEXE) rmmname `"$($rmmname)`""
     $script:diag += "$($strLineSeparator)`r`nSETTING RMM NAME`r`n`tCMD : $($strEXE) rmmname `"$($rmmname)`"`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "rmmname `"$($rmmname)`""
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 11 "SET RMM NAME" $err
   }
   #START
   try {
-    write-host "$($strLineSeparator)`r`nSTARTING DomainService"
+    write-output "$($strLineSeparator)`r`nSTARTING DomainService"
     $script:diag += "$($strLineSeparator)`r`nSTARTING DomainService`r`n"
     $output = Get-ProcessOutput -filename "$($strEXE)" -args "start"
     $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
-    write-host "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
   } catch {
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
     logERR 12 "START" $err

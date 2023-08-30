@@ -48,18 +48,18 @@ Stop-Process -Name "WRSA" -Force
 
 # Remove Webroot SecureAnywhere registry keys
 ForEach ($RegKey in $RegKeys) {
-    Write-Host "Removing $RegKey"
+    write-output "Removing $RegKey"
     Remove-Item -Path $RegKey -Force -Recurse -ErrorAction SilentlyContinue
 }
 
 # Remove Webroot SecureAnywhere registry startup items
 ForEach ($RegStartupPath in $RegStartupPaths) {
-    Write-Host "Removing WRSVC from $RegStartupPath"
+    write-output "Removing WRSVC from $RegStartupPath"
     Remove-ItemProperty -Path $RegStartupPath -Name "WRSVC"
 }
 
 # Remove Webroot SecureAnywhere folders
 ForEach ($Folder in $Folders) {
-    Write-Host "Removing $Folder"
+    write-output "Removing $Folder"
     Remove-Item -Path "$Folder" -Force -Recurse -ErrorAction SilentlyContinue
 }

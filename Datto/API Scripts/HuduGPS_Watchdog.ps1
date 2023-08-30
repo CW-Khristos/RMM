@@ -28,15 +28,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function Get-ProcessOutput {
@@ -90,16 +90,16 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($(get-date))`t - HuduGPS_Watchdog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - HuduGPS_Watchdog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        write-output "$($(get-date))`t - HuduGPS_Watchdog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($(get-date))`t - HuduGPS_Watchdog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - HuduGPS_Watchdog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
+        write-output "$($(get-date))`t - HuduGPS_Watchdog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
       }
       default {                                                   #'ERRRET'=3+
         $script:diag += "`r`n$($(get-date))`t - HuduGPS_Watchdog - $($strModule) : $($strErr)"
-        write-host "$($(get-date))`t - HuduGPS_Watchdog - $($strModule) : $($strErr)"
+        write-output "$($(get-date))`t - HuduGPS_Watchdog - $($strModule) : $($strErr)"
       }
     }
   }
@@ -118,7 +118,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #endregion ----- FUNCTIONS ----
 
@@ -173,38 +173,38 @@ if (-not $script:blnBREAK) {
   #GET OS TYPE
   Get-OSArch
   #ENABLE LOCATION SERVICES AND SETTINGS
-  write-host "$($strLineSeparator)`r`nEnabling Location Services :`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nEnabling Location Services :`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nEnabling Location Services :`r`n$($strLineSeparator)`r`n"
   $out = get-processoutput -filename "C:\Windows\System32\sc.exe" -args "config lfsvc start=auto"
-  write-host "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
+  write-output "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
   $out = get-processoutput -filename "C:\Windows\System32\net.exe" -args "start lfsvc"
-  write-host "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
+  write-output "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
   $out = get-processoutput -filename "C:\Windows\System32\reg.exe" -args "add HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\AppPrivacy  /t REG_DWORD /v `"LetAppsAccessLocation`" /d 1 /f"
-  write-host "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
+  write-output "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
   $out = get-processoutput -filename "C:\Windows\System32\reg.exe" -args "add HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location /t REG_SZ /v `"Value`" /d `"Allow`" /f"
-  write-host "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
+  write-output "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
   $out = get-processoutput -filename "C:\Windows\System32\reg.exe" -args "add HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location\NonPackaged /t REG_SZ /v `"Value`" /d `"Allow`" /f"
-  write-host "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
+  write-output "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
   $out = get-processoutput -filename "C:\Windows\System32\reg.exe" -args "add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location /t REG_SZ /v `"Value`" /d `"Allow`" /f"
-  write-host "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
+  write-output "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
   $out = get-processoutput -filename "C:\Windows\System32\reg.exe" -args "add HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location\NonPackaged /t REG_SZ /v `"Value`" /d `"Allow`" /f"
-  write-host "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
+  write-output "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)"
   #Begin resolving current locaton
-  write-host "$($strLineSeparator)`r`nResolving Location :`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nResolving Location :`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nResolving Location :`r`n$($strLineSeparator)`r`n"
   Add-Type -AssemblyName System.Device #Required to access System.Device.Location namespace
   $GeoWatcher = New-Object System.Device.Location.GeoCoordinateWatcher #Create the required object
   $GeoWatcher.Start()
   while ($GeoWatcher.Status -ne "Ready") {
-    write-host "$($Geowatcher.Permission)"
+    write-output "$($Geowatcher.Permission)"
     $script:diag += "`r`n$($Geowatcher.Permission)`r`n"
-    #write-host "$($Geowatcher.Position)"
+    #write-output "$($Geowatcher.Position)"
     #$script:diag += "`r`n$($Geowatcher.Position)`r`n"
-    write-host "$($Geowatcher.Status)"
+    write-output "$($Geowatcher.Status)"
     $script:diag += "`r`n$($Geowatcher.Status)`r`n"
     sleep -Milliseconds 1000
   } #Wait for discovery
-  write-host "$($Geowatcher.Status)`r`n"
+  write-output "$($Geowatcher.Status)`r`n"
   $script:diag += "`r`n$($Geowatcher.Status)`r`n`r`n"
   $lat = [string]($GeoWatcher.Position.Location.Latitude)
   $long = [string]($GeoWatcher.Position.Location.Longitude)
@@ -218,16 +218,16 @@ if (-not $script:blnBREAK) {
   } elseif ([int]$long -lt 0) {
     $degLONG = "$($long.split(".")[0])°$($long.split(".")[1].substring(0,2))'$($long.split(".")[1].substring($long.split(".")[1].length - 2,2))`"W"
   }
-  write-host "$($strLineSeparator)`r`nRetrieved Location :`r`n$($strLineSeparator)"
+  write-output "$($strLineSeparator)`r`nRetrieved Location :`r`n$($strLineSeparator)"
   $script:diag += "$($strLineSeparator)`r`nRetrieved Location :`r`n$($strLineSeparator)`r`n"
   $gpsURL = "https://www.google.com/maps/search/?api=1&query=$($lat),$($long)"
-  write-host "LAT : $($lat) - LAT (DEG) : $($degLAT)"
+  write-output "LAT : $($lat) - LAT (DEG) : $($degLAT)"
   $script:diag += "`r`nLAT : $($lat) - LAT (DEG) : $($degLAT)`r`n"
-  write-host "LONG : $($long) - LONG (DEG) : $($degLONG)"
+  write-output "LONG : $($long) - LONG (DEG) : $($degLONG)"
   $script:diag += "`r`nLONG : $($long) - LONG (DEG) : $($degLONG)`r`n"
-  write-host "URL : $($gpsURL)"
+  write-output "URL : $($gpsURL)"
   $script:diag += "`r`nURL : $($gpsURL)`r`n"
-  write-host "$($env:CS_PROFILE_NAME)"
+  write-output "$($env:CS_PROFILE_NAME)"
   $script:diag += "$($env:CS_PROFILE_NAME)`r`n"
   #########
   #Set Hudu logon information
@@ -239,14 +239,14 @@ if (-not $script:blnBREAK) {
       "Workstation" {$script:producttype = "Workstation";break}
       {"DC","Server"} {$script:producttype = "Server";break}
     }
-    write-host "`r`n$($strLineSeparator)`r`nAccessing $($script:computername) Hudu Asset in $($huduCompany.name)($($huduCompany.id))"
+    write-output "`r`n$($strLineSeparator)`r`nAccessing $($script:computername) Hudu Asset in $($huduCompany.name)($($huduCompany.id))"
     $script:diag += "`r`n`r`n$($strLineSeparator)`r`nAccessing $($script:computername) Hudu Asset in $($huduCompany.name)($($huduCompany.id))`r`n"
     $AssetLayout = Get-HuduAssetLayouts -name "$($script:producttype)"
     $Asset = Get-HuduAssets -name "$($script:computername)" -companyid $huduCompany.id -assetlayoutid $AssetLayout.id
-    write-host "$($strLineSeparator)`r`n$($Asset)`r`n$($strLineSeparator)`r`n"
+    write-output "$($strLineSeparator)`r`n$($Asset)`r`n$($strLineSeparator)`r`n"
     $script:diag += "$($strLineSeparator)`r`n$($Asset)`r`n$($strLineSeparator)`r`n`r`n"
     if (($Asset | measure-object).count -ne 1) {
-      write-host "$($strLineSeparator)`r`n$(($Asset | measure-object).count) layout(s) found with name $($script:computername)"
+      write-output "$($strLineSeparator)`r`n$(($Asset | measure-object).count) layout(s) found with name $($script:computername)"
       $script:diag += "`r`n$($strLineSeparator)`r`n$(($Asset | measure-object).count) layout(s) found with name $($script:computername)"
     } else {
       if ($Asset) {
@@ -255,7 +255,7 @@ if (-not $script:blnBREAK) {
         }
         try {
           $script:huduCalls += 1
-          write-host "$($strLineSeparator)`r`nUpdating $($script:producttype) Asset - $($Asset.name)`r`n$($strLineSeparator)"
+          write-output "$($strLineSeparator)`r`nUpdating $($script:producttype) Asset - $($Asset.name)`r`n$($strLineSeparator)"
           $script:diag += "`r`n$($strLineSeparator)`r`nUpdating $($script:producttype) - Asset $($Asset.name)`r`n$($strLineSeparator)"
           $Asset = Set-HuduAsset -asset_id $Asset.id -name "$($Asset.name)" -company_id $huduCompany.id -assetlayoutid $AssetLayout.id -fields $AssetFields
         } catch {

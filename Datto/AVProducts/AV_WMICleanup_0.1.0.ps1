@@ -40,15 +40,15 @@ To Do:
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   }
 
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   }
 
   function logERR ($intSTG, $strModule, $strErr) {
@@ -58,16 +58,16 @@ To Do:
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnFAIL = $true
         $script:diag += "`r`n$($(get-date))`t - AV_WMICLEANUP - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - AV_WMICLEANUP - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        write-output "$($(get-date))`t - AV_WMICLEANUP - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnFAIL = $true
         $script:diag += "`r`n$($(get-date))`t - AV_WMICLEANUP - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - AV_WMICLEANUP - ($($strModule))`r`n$($strErr), END SCRIPT`r`n"
+        write-output "$($(get-date))`t - AV_WMICLEANUP - ($($strModule))`r`n$($strErr), END SCRIPT`r`n"
       }
       default {                                                   #'ERRRET'=3+
         $script:diag += "`r`n$($(get-date))`t - AV_WMICLEANUP - $($strModule) : $($strErr)`r`n`r`n"
-        write-host "$($(get-date))`t - AV_WMICLEANUP - $($strModule) : $($strErr)`r`n"
+        write-output "$($(get-date))`t - AV_WMICLEANUP - $($strModule) : $($strErr)`r`n"
       }
     }
   }
@@ -86,7 +86,7 @@ To Do:
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
@@ -109,8 +109,8 @@ if (-not (test-path -path "C:\IT\Log")) {
 if (-not (test-path -path "C:\IT\Scripts")) {
   new-item -path "C:\IT\Scripts" -itemtype directory
 }
-write-host "$($strLineSeparator)"
-write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - EXECUTING AV_WMICLEANUP"
+write-output "$($strLineSeparator)"
+write-output "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - EXECUTING AV_WMICLEANUP"
 $script:diag += "$($strLineSeparator)`r`n"
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))`t - EXECUTING AV_WMICLEANUP`r`n"
 if (($null -eq $env:strAVP) -or ($env:strAVP -eq "")) {
@@ -131,20 +131,20 @@ if (($null -eq $wmiCheck) -or ($wmiCheck -eq "")) {
   $avs = get-wmiobject -Namespace root/SecurityCenter -Query $avQuery
 }
 #ENUMERATE EACH AV INSTANCE
-write-host "$($strLineSeparator)"
-write-host "ENUMERATING AV INSTANCES"
-write-host "$($strLineSeparator)"
+write-output "$($strLineSeparator)"
+write-output "ENUMERATING AV INSTANCES"
+write-output "$($strLineSeparator)"
 $script:diag += "$($strLineSeparator)`r`n"
 $script:diag += "ENUMERATING AV INSTANCES`r`n"
 $script:diag += "$($strLineSeparator)`r`n"
 foreach ($av in $avs) {
   if (($null -eq $env:strAVP) -or ($env:strAVP -eq "")) {
     if (($av.displayName).toupper() -ne "WINDOWS DEFENDER") {
-      write-host "$(get-date)`t`t - FOUND TARGET : $($av.displayName)"
+      write-output "$(get-date)`t`t - FOUND TARGET : $($av.displayName)"
       $script:diag += "$(get-date)`t`t - FOUND TARGET : $($av.displayName)`r`n"
       try {
         $av | remove-wmiobject -erroraction stop
-        write-host "$($av.displayName) REMOVED SUCCESSFULLY"
+        write-output "$($av.displayName) REMOVED SUCCESSFULLY"
         $script:diag += "$($av.displayName) REMOVED SUCCESSFULLY`r`n"
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
@@ -154,11 +154,11 @@ foreach ($av in $avs) {
     }
   } elseif (($null -ne $env:strAVP) -and ($env:strAVP -ne "")) {
     if (($av.displayName).toupper() -eq $env:strAVP.toupper()) {
-      write-host "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)"
+      write-output "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)"
       $script:diag += "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)`r`n"
       try {
         $av | remove-wmiobject -erroraction stop
-        write-host "$($av.displayName) REMOVED SUCCESSFULLY"
+        write-output "$($av.displayName) REMOVED SUCCESSFULLY"
         $script:diag += "$($av.displayName) REMOVED SUCCESSFULLY`r`n"
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
@@ -169,20 +169,20 @@ foreach ($av in $avs) {
   }
 }
 #ENUMERATE EACH FW INSTANCE
-write-host "$($strLineSeparator)"
-write-host "ENUMERATING FW INSTANCES"
-write-host "$($strLineSeparator)"
+write-output "$($strLineSeparator)"
+write-output "ENUMERATING FW INSTANCES"
+write-output "$($strLineSeparator)"
 $script:diag += "$($strLineSeparator)`r`n"
 $script:diag += "ENUMERATING FW INSTANCES`r`n"
 $script:diag += "$($strLineSeparator)`r`n"
 foreach ($fw in $fws) {
   if (($null -eq $env:strAVP) -or ($env:strAVP -eq "")) {
     if (($fw.displayName).toupper() -ne "WINDOWS DEFENDER") {
-      write-host "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)"
+      write-output "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)"
       $script:diag += "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)`r`n"
       try {
         $fw | remove-wmiobject -erroraction stop
-        write-host "$($fw.displayName) REMOVED SUCCESSFULLY"
+        write-output "$($fw.displayName) REMOVED SUCCESSFULLY"
         $script:diag += "$($fw.displayName) REMOVED SUCCESSFULLY`r`n"
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
@@ -192,11 +192,11 @@ foreach ($fw in $fws) {
     }
   } elseif (($null -ne $env:strAVP) -and ($env:strAVP -ne "")) {
     if (($fw.displayName).toupper() -eq $env:strAVP.toupper()) {
-      write-host "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)"
+      write-output "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)"
       $script:diag += "$(get-date)`t`t - FOUND TARGET : $($fw.displayName)`r`n"
       try {
         $fw | remove-wmiobject -erroraction stop
-        write-host "$($fw.displayName) REMOVED SUCCESSFULLY"
+        write-output "$($fw.displayName) REMOVED SUCCESSFULLY"
         $script:diag += "$($fw.displayName) REMOVED SUCCESSFULLY`r`n"
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
@@ -208,12 +208,12 @@ foreach ($fw in $fws) {
 }
 #PROVIDE INFORMATIONAL OUTPUT IF NO INSTANCES FOUND
 if (-not $script:blnFND) {
-  write-host "$(get-date)`t - NO TARGET FOUND"
+  write-output "$(get-date)`t - NO TARGET FOUND"
   $script:diag += "$(get-date)`t - NO TARGET FOUND`r`n"
 }
-write-host "$($strLineSeparator)"
-write-host "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - AV_WMICLEANUP COMPLETE"
-write-host "$($strLineSeparator)"
+write-output "$($strLineSeparator)"
+write-output "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - AV_WMICLEANUP COMPLETE"
+write-output "$($strLineSeparator)"
 $script:diag += "$($strLineSeparator)`r`n"
 $script:diag += "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - AV_WMICLEANUP COMPLETE`r`n"
 $script:diag += "$($strLineSeparator)`r`n"

@@ -153,7 +153,7 @@ if ($Company) {
 					position = 10
 				}
 			)
-			Write-Host "Creating New Asset Layout $HuduAssetLayoutName"
+			write-output "Creating New Asset Layout $HuduAssetLayoutName"
 			$NewLayout = New-HuduAssetLayout -name $HuduAssetLayoutName -icon "fas fa-folder-open" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $false -include_photos $false -include_comments $false -include_files $false -fields $AssetLayoutFields
 			$Layout = Get-HuduAssetLayouts -name $HuduAssetLayoutName
 		}
@@ -190,7 +190,7 @@ if ($Company) {
         $script:diag += "`r`n$($_.Exception)"
         $script:diag += "`r`n$($_.scriptstacktrace)"
         $script:diag += "`r`n$($_)"
-        write-host "$($script:diag)`r`n"
+        write-output "$($script:diag)`r`n"
         exit 1
       }
       #$PermCSV = ($Permissions | ConvertTo-Csv -NoTypeInformation -Delimiter ",") -join [Environment]::NewLine
@@ -213,31 +213,31 @@ if ($Company) {
 		
       try {
         $AssetName = "$($ComputerName) - $($SMBShare.name)"
-        Write-host "Documenting to Hudu"  -ForegroundColor Green
+        write-output "Documenting to Hudu"  -ForegroundColor Green
         $Asset = Get-HuduAssets -name $AssetName -companyid $Company.id -assetlayoutid $Layout.id
         #If the Asset does not exist, we edit the body to be in the form of a new asset, if not, we just upload.
         if (!$Asset) {
           try {
-            Write-Host "Creating new Asset"
+            write-output "Creating new Asset"
             $Asset = New-HuduAsset -name $AssetName -company_id $Company.id -asset_layout_id $Layout.id -fields $AssetFields
           } catch {
             $script:diag += "`r`nFailed Creating new Asset"
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
             $script:diag += "`r`n$($_)"
-            write-host "$($script:diag)`r`n"
+            write-output "$($script:diag)`r`n"
             exit 1
           }
         } else {
           try {
-            Write-Host "Updating Asset"
+            write-output "Updating Asset"
             $Asset = Set-HuduAsset -asset_id $Asset.id -name $AssetName -company_id $Company.id -asset_layout_id $Layout.id -fields $AssetFields
           } catch {
             $script:diag += "`r`nFailed Updating Asset"
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
             $script:diag += "`r`n$($_)"
-            write-host "$($script:diag)`r`n"
+            write-output "$($script:diag)`r`n"
             exit 1
           }
         }
@@ -246,15 +246,15 @@ if ($Company) {
         $script:diag += "`r`n$($_.Exception)"
         $script:diag += "`r`n$($_.scriptstacktrace)"
         $script:diag += "`r`n$($_)"
-        write-host "$($script:diag)`r`n"
+        write-output "$($script:diag)`r`n"
         exit 1
       }
 		}
 	} else {
-		Write-Host "$($ComputerName) was not found in Hudu"
+		write-output "$($ComputerName) was not found in Hudu"
 	}
 } else {
-	Write-Host "$($CompanyName) was not found in Hudu"
+	write-output "$($CompanyName) was not found in Hudu"
 }
-write-host "Done."
+write-output "Done."
 exit 0

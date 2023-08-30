@@ -11,15 +11,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function Get-ProcessOutput {
@@ -60,7 +60,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
@@ -84,11 +84,11 @@ try {
   get-childitem -path "C:\IT"  | where-object {$_.name -match "BEST_uninstallTool"} | % {
     if ($_.creationtime -gt (get-date).adddays(-7)) {
       $script:diag += " - NOT REMOVING BEST_uninstallTool FILE`r`n`r`n"
-      write-host " - NOT REMOVING BEST_uninstallTool FILE`r`n"
+      write-output " - NOT REMOVING BEST_uninstallTool FILE`r`n"
       $script:blnDL = $false
     } elseif ($_.creationtime -le (get-date).adddays(-7)) {
       $script:diag += " - DELETE : $($_.name)`r`n`r`n"
-      write-host " - DELETE : $($_.name)`r`n"
+      write-output " - DELETE : $($_.name)`r`n"
       remove-item $_.fullname -force -erroraction silentlycontinue
       $script:blnDL = $true
     }
@@ -103,24 +103,24 @@ if ($script:blnDL) {
     try {
       #IPM-Khristos
       $script:diag += "BITS.Transfer() - Downloading latest version of BEST_uninstallTool.exe`r`n"
-      write-host "BITS.Transfer() - Downloading latest version of BEST_uninstallTool.exe" -foregroundcolor yellow
+      write-output "BITS.Transfer() - Downloading latest version of BEST_uninstallTool.exe" -foregroundcolor yellow
       start-bitstransfer -erroraction stop -source $script:bdSRC -destination $script:bdEXE
       (get-childitem -path $script:bdEXE).creationtime = (get-date)
     } catch {
       #IPM-Khristos
       $script:diag += "BITS.Transfer() - Could not download $($script:bdSRC)`r`n"
-      write-host "BITS.Transfer() - Could not download $($script:bdSRC)" -foregroundcolor red
+      write-output "BITS.Transfer() - Could not download $($script:bdSRC)" -foregroundcolor red
       try {
         #IPM-Khristos
         $script:diag += "Web.DownloadFile() - Downloading latest version of BEST_uninstallTool.exe`r`n"
-        write-host "Web.DownloadFile() - Downloading latest version of BEST_uninstallTool.exe" -foregroundcolor yellow
+        write-output "Web.DownloadFile() - Downloading latest version of BEST_uninstallTool.exe" -foregroundcolor yellow
         $web = new-object system.net.webclient
         $web.downloadfile($script:bdSRC, $script:bdEXE)
         (get-childitem -path $script:bdEXE).creationtime = (get-date)
       } catch {
         #IPM-Khristos
         $script:diag += "Web.DownloadFile() - Could not download $($script:bdSRC)`r`n"
-        write-host "Web.DownloadFile() - Could not download $($script:bdSRC)" -foregroundcolor red
+        write-output "Web.DownloadFile() - Could not download $($script:bdSRC)" -foregroundcolor red
         $script:diag += "$($_.Exception)`r`n"
         $script:diag += "$($_.scriptstacktrace)`r`n"
         $script:diag += "$($_)`r`n`r`n"
@@ -138,19 +138,19 @@ if ($script:blnFAIL) {
   #UTILIZE BD CLI REMOVAL TOOL TO UNINSTALL BITDEFENDER
   #
   $script:diag += " - RUNNING BDGZ UNINSTALL TOOL`r`n"
-  write-host " - RUNNING BDGZ UNINSTALL TOOL" -foregroundcolor yellow
+  write-output " - RUNNING BDGZ UNINSTALL TOOL" -foregroundcolor yellow
   $output = Get-ProcessOutput -FileName $script:bdEXE -Args "/bdparams /bruteForce /log"
   $results = [string]$output.standardoutput
   $errors = [string]$output.standarderror
   $status = "RESULTS :`r`nSTDOUT :`r`n$($results)`r`nSTDERR :`r`n$($errors)`r`n`r`n"
-  write-host "RESULTS :`r`nSTDOUT :`r`n$($results)`r`nSTDERR :`r`n$($errors)`r`n"
+  write-output "RESULTS :`r`nSTDOUT :`r`n$($results)`r`nSTDERR :`r`n$($errors)`r`n"
 }
 #DATTO OUTPUT
 $script:diag += "$($status)`r`n"
 if ($script:blnWARN) {
-  write-host "$($status)" -foregroundcolor red
+  write-output "$($status)" -foregroundcolor red
 } elseif (-not $script:blnWARN) {
-  write-host "$($status)" -foregroundcolor green
+  write-output "$($status)" -foregroundcolor green
 }
 #Stop script execution time calculation
 StopClock

@@ -23,15 +23,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function StopClock {
@@ -48,7 +48,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #endregion ----- FUNCTIONS ----
 
@@ -63,31 +63,31 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 try {
   #QUERY FOR 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE
   $hkeyVals = get-itemproperty -path "$($RegPath)"
-  write-host "$($strLineSeparator)`r`n`tCHECKING 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE"
+  write-output "$($strLineSeparator)`r`n`tCHECKING 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE"
   $script:diag += "$($strLineSeparator)`r`n`tCHECKING 'RpcAuthnLevelPrivacy' REGISTRY KEY VALUE`r`n"
   try {
       if ([string]$hkeyVals.RpcAuthnLevelPrivacyEnabled) {
-        write-host "`t`tRpcAuthnLevelPrivacy : $($hkeyVals.RpcAuthnLevelPrivacyEnabled)"
+        write-output "`t`tRpcAuthnLevelPrivacy : $($hkeyVals.RpcAuthnLevelPrivacyEnabled)"
         $script:diag += "`t`tRpcAuthnLevelPrivacy : $($hkeyVals.RpcAuthnLevelPrivacyEnabled)"
         if ($hkeyVals.RpcAuthnLevelPrivacyEnabled -eq 0) {
           $script:blnWARN = $true
-          write-host "`t`tTHIS MEANS PRINTNIGHTMARE PROTECTIONS ARE DISABLED!"
+          write-output "`t`tTHIS MEANS PRINTNIGHTMARE PROTECTIONS ARE DISABLED!"
           $script:diag += "`r`n`t`tTHIS MEANS PRINTNIGHTMARE PROTECTIONS ARE DISABLED!`r`n"
         }
       } elseif (-not [string]$hkeyVals.RpcAuthnLevelPrivacyEnabled) {
-        write-host "`t`tRpcAuthnLevelPrivacy : NOT PRESENT"
+        write-output "`t`tRpcAuthnLevelPrivacy : NOT PRESENT"
         $script:diag += "`t`tRpcAuthnLevelPrivacy : NOT PRESENT`r`n"
       }
   } catch {  
     $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-    write-host "`t`tERROR : $($err)"
+    write-output "`t`tERROR : $($err)"
     $script:diag += "`t`tERROR : $($err)"
   }
-  write-host "`t$($strLineSeparator)"
+  write-output "`t$($strLineSeparator)"
   $script:diag += "`r`n`t$($strLineSeparator)"
 } catch {
   $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-  write-host "`t`tERROR : $($err)"
+  write-output "`t`tERROR : $($err)"
   $script:diag += "`t`tERROR : $($err)"
 }
 

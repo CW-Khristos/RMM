@@ -3,7 +3,7 @@
       [Parameter(Mandatory=$true)]$FileName,
       $Args
     )
-    write-host "RUNNING : $($FileName)"
+    write-output "RUNNING : $($FileName)"
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo.WindowStyle = "Hidden"
     $process.StartInfo.CreateNoWindow = $true
@@ -25,10 +25,10 @@
   
 #ECOSYSTEM AGENT REMOVAL
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Ecosystem Agent"}
-write-host "ECOSYSTEM AGENT:"
+write-output "ECOSYSTEM AGENT:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  write-host "UNINSTALLING ECOSYSTEM AGENT:"
+  write-output "UNINSTALLING ECOSYSTEM AGENT:"
   if ($script:installed.UninstallString -like "*msiexec*") {
     $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
     $script:installed.UninstallString
@@ -40,14 +40,14 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
 } else {
-  write-host "Ecosystem Agent Not Installed`r`n"
+  write-output "Ecosystem Agent Not Installed`r`n"
 }
 #FILE CACHE SERVICE AGENT REMOVAL
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "File Cache Service Agent"}
-write-host "FILE CACHE SERVICE:"
+write-output "FILE CACHE SERVICE:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  write-host "UNINSTALLING FILE CACHE SERVICE:"
+  write-output "UNINSTALLING FILE CACHE SERVICE:"
   if ($script:installed.UninstallString -like "*msiexec*") {
     $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
     $script:installed.UninstallString
@@ -59,14 +59,14 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
 } else {
-  write-host "File Cache Service Agent Not Installed`r`n"
+  write-output "File Cache Service Agent Not Installed`r`n"
 }
 #PATCH MANAGEMENT SERVICE CONTROLLER REMOVAL 
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Patch Management Service Controller"}
-write-host "PATCH MANAGEMENT SERVICE:"
+write-output "PATCH MANAGEMENT SERVICE:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  write-host "UNINSTALLING PATCH MANAGEMENT SERVICE:"
+  write-output "UNINSTALLING PATCH MANAGEMENT SERVICE:"
   if ($script:installed.UninstallString -like "*msiexec*") {
     $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
     $script:installed.UninstallString
@@ -78,13 +78,13 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
 } else {
-  write-host "Patch Management Service Controller Not Installed`r`n"
+  write-output "Patch Management Service Controller Not Installed`r`n"
 }
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "PME Agent"}
-write-host "PME AGENT:"
+write-output "PME AGENT:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  write-host "UNINSTALLING PME AGENT:"
+  write-output "UNINSTALLING PME AGENT:"
   if ($script:installed.UninstallString -like "*msiexec*") {
     $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
     $script:installed.UninstallString
@@ -96,14 +96,14 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
 } else {
-  write-host "PME Agent Not Installed`r`n"
+  write-output "PME Agent Not Installed`r`n"
 }
 #REQUEST HANDLER AGENT REMOVAL
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Request Handler Agent"}
-write-host "REQUEST HANDLER AGENT:"
+write-output "REQUEST HANDLER AGENT:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  write-host "UNINSTALLING REQUEST HANDLER AGENT:"
+  write-output "UNINSTALLING REQUEST HANDLER AGENT:"
   if ($script:installed.UninstallString -like "*msiexec*") {
     $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
     $script:installed.UninstallString
@@ -115,14 +115,14 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
 } else {
-  write-host "Request Handler Agent Not Installed`r`n"
+  write-output "Request Handler Agent Not Installed`r`n"
 }
 #WINDOWS AGENT REMOVAL 
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Windows Agent"}
-write-host "NABLE AGENT:"
+write-output "NABLE AGENT:"
 $script:installed
 if (($null -ne $script:installed.UninstallString) -and ($script:installed.UninstallString -ne "")) {
-  write-host "UNINSTALLING NABLE AGENT:"
+  write-output "UNINSTALLING NABLE AGENT:"
   if ($script:installed.UninstallString -like "*msiexec*") {
     $script:installed.UninstallString = $script:installed.UninstallString.split(" ")[1]
     $script:installed.UninstallString
@@ -134,5 +134,5 @@ if (($null -ne $script:installed.UninstallString) -and ($script:installed.Uninst
   $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
   $lines
 } else {
-  write-host "NAble Agent Not Installed`r`n"
+  write-output "NAble Agent Not Installed`r`n"
 }

@@ -56,15 +56,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   }
 
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   }
 
   function Get-ProcessOutput {
@@ -105,7 +105,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
@@ -119,90 +119,90 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 if ((($null -eq $psQPInstallTokenID) -or ($psQPInstallTokenID -eq "") -or ($psQPInstallTokenID -eq "CHANGEME")) -or 
   (($null -eq $psQPAgentID) -or ($psQPAgentID -eq "") -or ($psQPAgentID -eq "CHANGEME"))) {
     $script:diag += "Invalid Input Values`r`n"
-    write-host "Invalid Input Values"
+    write-output "Invalid Input Values"
     $script:diag += "Variables in use for QuickPass Agent installation`r`n"
-    write-host "Variables in use for QuickPass Agent installation"
+    write-output "Variables in use for QuickPass Agent installation"
     $script:diag += "`t - Software Path: $($Setup)`r`n"
-    write-host "`t - Software Path: $($Setup)"
+    write-output "`t - Software Path: $($Setup)"
     $script:diag += "`t - Installation Token: $($psQPInstallTokenID)`r`n"
-    write-host "`t - Installation Token: $($psQPInstallTokenID)"
+    write-output "`t - Installation Token: $($psQPInstallTokenID)"
     $script:diag += "`t - Customer ID $($psQPAgentID)`r`n"
-    write-host "`t - Customer ID $($psQPAgentID)"
+    write-output "`t - Customer ID $($psQPAgentID)"
     $script:diag += "`t - Restart option Selected $($RestartOption)`r`n"
-    write-host "`t - Restart option Selected $($RestartOption)"
+    write-output "`t - Restart option Selected $($RestartOption)"
     $script:diag += "`t - MSA Creation Selected $($MSAOption)`r`n"
-    write-host "`t - MSA Creation Selected $($MSAOption)"
+    write-output "`t - MSA Creation Selected $($MSAOption)"
     $script:diag += "Not Proceeding with QuickPass Install`r`n"
-    write-host "Not Proceeding with QuickPass Install"
+    write-output "Not Proceeding with QuickPass Install"
     StopClock
     exit 1
 } elseif ((($null -ne $psQPInstallTokenID) -and ($psQPInstallTokenID -ne "") -and ($psQPInstallTokenID -ne "CHANGEME")) -and 
   (($null -ne $psQPAgentID) -and ($psQPAgentID -ne "") -and ($psQPAgentID -ne "CHANGEME"))) {
     $script:diag += "Validated Input Values`r`nProceeding with QuickPass Install`r`n"
-    write-host "Validated Input Values`r`nProceeding with QuickPass Install"
+    write-output "Validated Input Values`r`nProceeding with QuickPass Install"
     #Test if download destination folder exists, create folder if required
     if (test-path $Path) {
-      write-host "Destination folder exists"
+      write-output "Destination folder exists"
     } else {
       #Create Directory to download quickpass installer into
-      write-host "Creating folder $($Path)"
+      write-output "Creating folder $($Path)"
       md $Path
     }
 
     #Begin download of Quickpass Agent
     $script:diag += "Beginning download of the QuickPass agent`r`n"
-    write-host "Beginning download of the QuickPass agent" -foregroundcolor yellow
+    write-output "Beginning download of the QuickPass agent" -foregroundcolor yellow
     try {
       $script:diag += "`t - Web.DownloadFile() - Downloading: $($DownloadURL)`r`n"
-      write-host "`t - Web.DownloadFile() - Downloading: $($DownloadURL)" -foregroundcolor yellow
+      write-output "`t - Web.DownloadFile() - Downloading: $($DownloadURL)" -foregroundcolor yellow
       $web = new-object system.net.webclient
       $web.DownloadFile($DownloadURL, $Setup)
     } catch {
       $script:diag += "`t - Web.DownloadFile() - Could not download $($DownloadURL)`r`n"
-      write-host "`t - Web.DownloadFile() - Could not download $($DownloadURL)" -foregroundcolor red
-      write-host $_.Exception
-      write-host $_.scriptstacktrace
-      write-host $_
+      write-output "`t - Web.DownloadFile() - Could not download $($DownloadURL)" -foregroundcolor red
+      write-output $_.Exception
+      write-output $_.scriptstacktrace
+      write-output $_
       try {
         $script:diag += "`t - BITS.Transfer() - Downloading: $($DownloadURL)`r`n"
-        write-host "`t - BITS.Transfer() - Downloading: $($DownloadURL)" -foregroundcolor yellow
+        write-output "`t - BITS.Transfer() - Downloading: $($DownloadURL)" -foregroundcolor yellow
         start-bitstransfer -source $DownloadURL -destination $Setup -erroraction stop
       } catch {
         $script:diag += "`t - BITS.Transfer() - Could not download $($DownloadURL)`r`n"
-        write-host "`t - BITS.Transfer() - Could not download $($DownloadURL)" -foregroundcolor red
-        write-host $_.Exception
-        write-host $_.scriptstacktrace
-        write-host $_
+        write-output "`t - BITS.Transfer() - Could not download $($DownloadURL)" -foregroundcolor red
+        write-output $_.Exception
+        write-output $_.scriptstacktrace
+        write-output $_
       }
     }
     $script:diag += "Variables in use for QuickPass Agent installation`r`n"
-    write-host "Variables in use for QuickPass Agent installation"
+    write-output "Variables in use for QuickPass Agent installation"
     $script:diag += "`t - Software Path: $($Setup)`r`n"
-    write-host "`t - Software Path: $($Setup)"
+    write-output "`t - Software Path: $($Setup)"
     $script:diag += "`t - Installation Token: $($psQPInstallTokenID)`r`n"
-    write-host "`t - Installation Token: $($psQPInstallTokenID)"
+    write-output "`t - Installation Token: $($psQPInstallTokenID)"
     $script:diag += "`t - Customer ID $($psQPAgentID)`r`n"
-    write-host "`t - Customer ID $($psQPAgentID)"
+    write-output "`t - Customer ID $($psQPAgentID)"
     $script:diag += "`t - Restart option Selected $($RestartOption)`r`n"
-    write-host "`t - Restart option Selected $($RestartOption)"
+    write-output "`t - Restart option Selected $($RestartOption)"
     $script:diag += "`t - MSA Creation Selected $($MSAOption)`r`n"
-    write-host "`t - MSA Creation Selected $($MSAOption)"
+    write-output "`t - MSA Creation Selected $($MSAOption)"
     $script:diag += "Beginning installation of QuickPass`r`n"
-    write-host "Beginning installation of QuickPass"
+    write-output "Beginning installation of QuickPass"
 
     try {
       #Start-Process "$Setup" -ArgumentList "/quiet $RestartOption INSTALLTOKEN=$QPInstallTokenIDBLQt CUSTOMERID=$QPAgentIDDBlQt REGION=$Region $MSAOption" -ErrorAction Stop
       $output = Get-ProcessOutput -filename "$($Setup)" -args "/quiet $($RestartOption) INSTALLTOKEN=$($QPInstallTokenIDBLQt) CUSTOMERID=$($QPAgentIDDBlQt) REGION=$($Region) $($MSAOption)" -erroraction stop
       $script:diag += "StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)`r`n"
-      write-host "StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
+      write-output "StdOut : $($output.standardoutput) - StdErr : $($output.standarderror)"
       StopClock
     } catch {
       $ErrorMessage = $_.Exception.Message
       $script:diag += "Install error was: $($ErrorMessage)`r`n"
-      write-host "Install error was: $($ErrorMessage)"
+      write-output "Install error was: $($ErrorMessage)"
       StopClock
       exit 1
     }
     $script:diag += "QuickPass Agent should have been installed successfully`r`n"
-    write-host "QuickPass Agent should have been installed successfully"
+    write-output "QuickPass Agent should have been installed successfully"
 }

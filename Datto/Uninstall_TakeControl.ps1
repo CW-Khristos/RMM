@@ -39,28 +39,28 @@ $strPF86          = "${env:ProgramFiles(x86)}"
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($errTime) - Uninstall_TakeControl - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Uninstall_TakeControl - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - Uninstall_TakeControl - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($errTime) - Uninstall_TakeControl - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Uninstall_TakeControl - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - Uninstall_TakeControl - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($errTime) - Uninstall_TakeControl - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Uninstall_TakeControl - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - Uninstall_TakeControl - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($errTime) - Uninstall_TakeControl - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Uninstall_TakeControl - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - Uninstall_TakeControl - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -71,7 +71,7 @@ $out = Get-ProcessOutput -filename "C:\Windows\System32\sc.exe" -args "stop BASu
 logERR 3 "Services" "STDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)`r`n$($strLineSeparator)"
 $out = Get-ProcessOutput -filename "C:\Windows\System32\sc.exe" -args "stop BASupportExpressStandaloneService"
 logERR 3 "Services" "STDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)`r`n$($strLineSeparator)"
-write-host "Done`r`n$($strLineSeparator)"
+write-output "Done`r`n$($strLineSeparator)"
 $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
 #KILL SERVICE PROCESSES
 logERR 3 "Processes" " - STOPPING TAKE CONTROL PROCESSES`r`n$($strLineSeparator)"
@@ -87,7 +87,7 @@ $out = Get-ProcessOutput -filename "C:\Windows\System32\taskkill.exe" -args "/F 
 logERR 3 "Processes" "STDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)`r`n$($strLineSeparator)"
 $out = Get-ProcessOutput -filename "C:\Windows\System32\taskkill.exe" -args "/F /IM NCentralRDViewer.exe /T"
 logERR 3 "Processes" "STDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)`r`n$($strLineSeparator)"
-write-host "Done`r`n$($strLineSeparator)"
+write-output "Done`r`n$($strLineSeparator)"
 $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
 #UNINSTALL GetSupportService
 logERR 3 "Uninstall" " - CHECKING INSTALL DIRECTORIES`r`n$($strLineSeparator)"
@@ -119,14 +119,14 @@ if (test-path -path "$($strPF86)\BeAnywhere Support Express\GetSupportService" -
     }
   }
 }
-write-host "Done`r`n$($strLineSeparator)"
+write-output "Done`r`n$($strLineSeparator)"
 $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
 #REMOVE DIRECTORIES
 start-sleep 10
 logERR 3 "Cleanup" " - REMOVING TAKE CONTROL DIRECTORIE`r`n$($strLineSeparator)"
 if (test-path -path "$($strPF)\BeAnywhere Support Express\GetSupportService" -erroraction silentlycontinue) {
   try {
-    write-host "Removing : $($strPF)\BeAnywhere Support Express\GetSupportService`r`n$($strLineSeparator)"
+    write-output "Removing : $($strPF)\BeAnywhere Support Express\GetSupportService`r`n$($strLineSeparator)"
     $script:diag += "`r`nRemoving : $($strPF)\BeAnywhere Support Express\GetSupportService`r`n$($strLineSeparator)`r`n"
     remove-item -path "$($strPF)\BeAnywhere Support Express\GetSupportService" -recurse -force -erroraction stop
   } catch {
@@ -137,7 +137,7 @@ if (test-path -path "$($strPF)\BeAnywhere Support Express\GetSupportService" -er
 }
 if (test-path -path "$($strPF86)\BeAnywhere Support Express\GetSupportService" -erroraction silentlycontinue) {
   try {
-    write-host "Removing : $($strPF86)\BeAnywhere Support Express\GetSupportService`r`n$($strLineSeparator)"
+    write-output "Removing : $($strPF86)\BeAnywhere Support Express\GetSupportService`r`n$($strLineSeparator)"
     $script:diag += "`r`nRemoving : $($strPF86)\BeAnywhere Support Express\GetSupportService`r`n$($strLineSeparator)`r`n"
     remove-item -path "$($strPF86)\BeAnywhere Support Express\GetSupportService" -recurse -force -erroraction stop
   } catch {
@@ -148,7 +148,7 @@ if (test-path -path "$($strPF86)\BeAnywhere Support Express\GetSupportService" -
 }
 if (test-path -path "$($strPD)\GetSupportService" -erroraction silentlycontinue) {
   try {
-    write-host "Removing : $($strPD)\GetSupportService`r`n$($strLineSeparator)"
+    write-output "Removing : $($strPD)\GetSupportService`r`n$($strLineSeparator)"
     $script:diag += "`r`nRemoving : $($strPD)\GetSupportService`r`n$($strLineSeparator)`r`n"
     remove-item -path "$($strPD)\GetSupportService" -recurse -force -erroraction stop
   } catch {
@@ -159,7 +159,7 @@ if (test-path -path "$($strPD)\GetSupportService" -erroraction silentlycontinue)
 }
 if (test-path -path "$($strPD)\GetSupportService_Common" -erroraction silentlycontinue) {
   try {
-    write-host "Removing : $($strPD)\GetSupportService_Common`r`n$($strLineSeparator)"
+    write-output "Removing : $($strPD)\GetSupportService_Common`r`n$($strLineSeparator)"
     $script:diag += "`r`nRemoving : $($strPD)\GetSupportService_Common`r`n$($strLineSeparator)`r`n"
     remove-item -path "$($strPD)\GetSupportService_Common" -recurse -force -erroraction stop
   } catch {
@@ -168,5 +168,5 @@ if (test-path -path "$($strPD)\GetSupportService_Common" -erroraction silentlyco
     logERR 5 "Uninstall" "$($ddiag)`r`n$($strLineSeparator)"
   }
 }
-write-host "Done`r`n$($strLineSeparator)"
+write-output "Done`r`n$($strLineSeparator)"
 $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"

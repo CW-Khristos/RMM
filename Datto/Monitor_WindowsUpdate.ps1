@@ -23,15 +23,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function logERR($intSTG, $strErr) {
@@ -39,15 +39,15 @@
     #CUSTOM ERROR CODES
     switch ($intSTG) {
       1 {                                                                             #'ERRRET'=1 - ERROR DELETING FILE / FOLDER
-        write-host "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
+        write-output "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
         $script:diag += "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - ERROR DELETING FILE / FOLDER`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
       }
       2 {                                                                             #'ERRRET'=2 - NOT ENOUGH ARGUMENTS, END SCRIPT
-        write-host "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
+        write-output "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n"
         $script:diag += "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strErr)`r`n$($strLineSeparator)`r`n`r`n"
       }
       default {                                                                       #'ERRRET'=3+
-        write-host "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - $($strErr)`r`n$($strLineSeparator)`r`n"
+        write-output "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - $($strErr)`r`n$($strLineSeparator)`r`n"
         $script:diag += "$($strLineSeparator)`r`n$((get-date).ToString('dd-MM-yyyy hh:mm:ss'))`t - Monitor_WindowsUpdate - $($strErr)`r`n$($strLineSeparator)`r`n`r`n"
       }
     }
@@ -67,7 +67,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #endregion ----- FUNCTIONS ----
 
@@ -100,7 +100,7 @@ if ((Get-CimInstance Win32_OperatingSystem).version -like '10*' -and $OSname -no
   if ($Diff -lt '0') {
     $script:blnWARN = $true
     $script:blnBREAK = $true
-    write-host "$($strLineSeparator)`r`n$($OSname) $($Version) is over $($MaxAge) months old, needs upgrading"
+    write-output "$($strLineSeparator)`r`n$($OSname) $($Version) is over $($MaxAge) months old, needs upgrading"
     $script:diag += "$($strLineSeparator)`r`n$($OSname) $($Version) is over $($MaxAge) months old, needs upgrading`r`n"
   }
 }
@@ -109,7 +109,7 @@ $disabled = Get-Service wuauserv, BITS, CryptSvc, RpcSs, EventLog | Where-Object
 if ($disabled) {
   $script:blnWARN = $true
   $script:blnBREAK = $true
-  write-host "$($strLineSeparator)`r`nDisabled Services:`r`n$($disabled)"
+  write-output "$($strLineSeparator)`r`nDisabled Services:`r`n$($disabled)"
   $script:diag += "$($strLineSeparator)`r`nDisabled Services:`r`n$($disabled)`r`n"
 }
 # Check if recent updates are installed
@@ -121,14 +121,14 @@ if (-not $script:blnBREAK) {
     $SSDLastDate = [datetime]$SearchSuccessDate.LastSearchSuccessDate
     $SSDLastDate = (get-date $SSDlastDate).AddHours(-5)
     $SSDDays = (new-timespan -Start $SSDLastDate -End $SSDStartDate | select-object days).days
-    write-host "$($strLineSeparator)`r`nLast Search Success: $($SSDLastDate) ($($SSDDays) days ago)"
+    write-output "$($strLineSeparator)`r`nLast Search Success: $($SSDLastDate) ($($SSDDays) days ago)"
     $script:diag += "$($strLineSeparator)`r`nLast Search Success: $($SSDLastDate) ($($SSDDays) days ago)`r`n"
     $ISDStartDate = get-date
     $InstallSuccessDate = $windowsUpdateObject.Results | select-object LastInstallationSuccessDate
     $ISDLastDate = [datetime]$InstallSuccessDate.LastInstallationSuccessDate
     $ISDLastDate = (get-date $ISDlastDate).AddHours(-5)
     $ISDDays = (new-timespan -Start $ISDLastDate -End $ISDStartDate | select-object days).days
-    write-host "$($strLineSeparator)`r`nLast Installation Success: $($ISDLastDate) ($($ISDDays) days ago)"
+    write-output "$($strLineSeparator)`r`nLast Installation Success: $($ISDLastDate) ($($ISDDays) days ago)"
     $script:diag += "$($strLineSeparator)`r`nLast Installation Success: $($ISDLastDate) ($($ISDDays) days ago)`r`n"
     $LastMonth = (get-date).addmonths(-1).ToString("yyyy-MM")
     $ThisMonth = (get-date).ToString("yyyy-MM")
@@ -143,13 +143,13 @@ if (-not $script:blnBREAK) {
     }
     if (!$xx) {
       $script:blnWARN = $false
-      write-host "$($strLineSeparator)`r`nWARNING - No updates returned"
+      write-output "$($strLineSeparator)`r`nWARNING - No updates returned"
       $script:diag += "$($strLineSeparator)`r`nWARNING - No updates returned`r`n"
     } else {
       $xx = $xx | where-object {(($_ -match "($($LastMonth)|$($ThisMonth)) (Security Monthly Quality Rollup|Cumulative Update)") -or ($_ -match "Feature update"))}
       if (!$xx) {
-        write-host "$($strLineSeparator)`r`nWARNING - No recent rollup/cumulative/feature update detected"
-        write-host "$($strLineSeparator)`r`nLast updates:"
+        write-output "$($strLineSeparator)`r`nWARNING - No recent rollup/cumulative/feature update detected"
+        write-output "$($strLineSeparator)`r`nLast updates:"
         $xx | select-object -ExpandProperty Title -First 1
         $script:diag += "$($strLineSeparator)`r`nWARNING - No recent rollup/cumulative/feature update detected`r`n"
         $script:diag += "$($strLineSeparator)`r`nLast updates:`r`n"
@@ -160,14 +160,14 @@ if (-not $script:blnBREAK) {
           $script:blnWARN = $false
         } elseif ($ISDDays -gt 30 -and $ISDDays -lt 153000) {
           $script:blnWARN = $true
-          write-host "$($strLineSeparator)`r`nWARNING - No recent rollup/cumulative/feature update detected"
+          write-output "$($strLineSeparator)`r`nWARNING - No recent rollup/cumulative/feature update detected"
           $script:diag += "$($strLineSeparator)`r`nWARNING - No recent rollup/cumulative/feature update detected`r`n"
         }
       } else {
         $script:blnWARN = $false
-        write-host "$($strLineSeparator)`r`nRecent rollup or cumulative update detected:"
+        write-output "$($strLineSeparator)`r`nRecent rollup or cumulative update detected:"
         $xx | select-object -ExpandProperty Title -First 1
-        write-host "$($strLineSeparator)"
+        write-output "$($strLineSeparator)"
         $script:diag += "$($strLineSeparator)`r`nRecent rollup or cumulative update detected:`r`n"
         $script:diag += $xx | select-object -ExpandProperty Title -First 1
         $script:diag += "`r`n$($strLineSeparator)`r`n"
@@ -175,12 +175,12 @@ if (-not $script:blnBREAK) {
     }
   } catch {
     $script:blnWARN = $true
-    write-host "$($strLineSeparator)`r`nERROR - Failed to check recent updates : Check Diagnostics`r`n$($strLineSeparator)"
+    write-output "$($strLineSeparator)`r`nERROR - Failed to check recent updates : Check Diagnostics`r`n$($strLineSeparator)"
     $script:diag += "$($strLineSeparator)`r`nERROR - Failed to check recent updates : Check Diagnostics`r`n$($strLineSeparator)`r`n"
   }
 }
 $script:diag += "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - Monitor_WindowsUpdate Complete`r`n$($strLineSeparator)`r`n"
-write-host "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - Monitor_WindowsUpdate Complete`r`n$($strLineSeparator)"
+write-output "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss')) - Monitor_WindowsUpdate Complete`r`n$($strLineSeparator)"
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE

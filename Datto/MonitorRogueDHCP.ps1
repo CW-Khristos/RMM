@@ -8,15 +8,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($Message in $Messages) { $Message }
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
 
   function write-DRMMAlert ($message) {
-      write-host "<-Start Result->"
-      write-host "Alert=$($message)"
-      write-host "<-End Result->"
+      write-output "<-Start Result->"
+      write-output "Alert=$($message)"
+      write-output "<-End Result->"
   } ## write-DRMMAlert
 #ENDREGION ----- FUNCTIONS ----
 
@@ -24,18 +24,18 @@
 #BEGIN SCRIPT
 $version = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentVersion
 if ($Version -lt "6.3") {
-  write-host "Unsupported OS. Only Server 2012R2 and up are supported."
+  write-output "Unsupported OS. Only Server 2012R2 and up are supported."
   #exit 1
 }
 
 try {
   $AllowedDHCPServer = Get-DhcpServerInDC
-  write-host "Local Server (In AD) : "
+  write-output "Local Server (In AD) : "
   $AllowedDHCPServer
 } catch {
   $ipV4 = Test-Connection -ComputerName "$($env:computername)" -Count 1  | Select -ExpandProperty IPV4Address 
   $AllowedDHCPServer = $ipV4.IPAddressToString
-  write-host "Local Server (Local IP) :"
+  write-output "Local Server (Local IP) :"
   $AllowedDHCPServer
 }
 
@@ -56,7 +56,7 @@ $FoundServers = do {
   & "$($DownloadLocation)\DHCPTest.exe" --quiet --query --print-only 54 --wait --timeout 3
   $Tests ++
 } while ($Tests -lt 2)
-write-host "`r`nDHCP SERVERS FOUND (via DHCPTest) :"
+write-output "`r`nDHCP SERVERS FOUND (via DHCPTest) :"
 $FoundServers
 
 #ENSURE ONLY UNIQUE SERVERS ARE IN '$ListedDHCPServers' HASHTABLE
@@ -76,17 +76,17 @@ foreach ($server in $FoundServers) {
     }
   }
 }
-write-host "`r`nDHCP SERVERS TO CHECK :"
+write-output "`r`nDHCP SERVERS TO CHECK :"
 $ListedDHCPServers.values
 
 $DHCPHealth = foreach ($ListedServer in $ListedDHCPServers.values) {
-  write-host "`r`nCHECK SERVER : "
+  write-output "`r`nCHECK SERVER : "
   $ListedServer
   if ($AllowedDHCPServer.IPAddress -notcontains $ListedServer) {
     $blnWARN = $true
-    write-host "Rogue DHCP Server found. IP of rogue server is $($ListedServer)"
+    write-output "Rogue DHCP Server found. IP of rogue server is $($ListedServer)"
   } elseif ($AllowedDHCPServer.IPAddress -contains $ListedServer) {
-    write-host "Authorized DHCP Server found. IP of DHCP server is $($ListedServer)"
+    write-output "Authorized DHCP Server found. IP of DHCP server is $($ListedServer)"
   }
 }
 $DHCPHealth = $DHCPHealth | out-string

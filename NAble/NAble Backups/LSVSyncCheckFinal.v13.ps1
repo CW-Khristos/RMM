@@ -37,14 +37,14 @@ function CheckSync {
 	$BackupServSync = $StatusReport.Statistics.BackupServerSynchronizationStatus
 	#Report results
 	if($BackupServSync -eq "Failed") {
-		Write-Host "Backup Synchronization Failed"
+		write-output "Backup Synchronization Failed"
 		$script:failed = 1
 	} elseif ($BackupServSync -eq "Synchronized") {
-		Write-Host "Backup Synchronized"
+		write-output "Backup Synchronized"
 	} elseif ($BackupServSync -like '*%') {
-		Write-Host "Backup Synchronization: $BackupServSync"
+		write-output "Backup Synchronization: $BackupServSync"
 	} else {
-		Write-Host "Backup Synchronization Data Invalid or Not Found"
+		write-output "Backup Synchronization Data Invalid or Not Found"
 		$script:failed = 1
 	}
 	
@@ -52,14 +52,14 @@ function CheckSync {
 	$LSVSync = $StatusReport.Statistics.LocalSpeedVaultSynchronizationStatus
 	#Report results
 	if($LSVSync -eq "Failed") {
-		Write-Host "LocalSpeedVault Synchronization Failed"
+		write-output "LocalSpeedVault Synchronization Failed"
 		$script:failed = 1
 	} elseif($LSVSync -eq "Synchronized") {
-		Write-Host "LocalSpeedVault Synchronized"
+		write-output "LocalSpeedVault Synchronized"
 	} elseif($LSVSync -like '*%') {
-		Write-Host "LocalSpeedVault Synchronization: $LSVSync"
+		write-output "LocalSpeedVault Synchronization: $LSVSync"
 	} else {
-		Write-Host "LocalSpeedVault Synchronization Data Invalid or Not Found"
+		write-output "LocalSpeedVault Synchronization Data Invalid or Not Found"
 		$script:failed = 1
 	}
 }
@@ -90,7 +90,7 @@ If ($test_MOB -eq $True -And $test_SA -eq $True) {
 	$true_path = $MOB_path
 #If none exist, report & fail check
 } else {
-	Write-Host "StatusReport.xml Not Found"
+	write-output "StatusReport.xml Not Found"
 	$script:failed = 1
 }
 
@@ -101,11 +101,11 @@ if ($true_path) {
 	$LSV_Enabled = $StatusReport.Statistics.LocalSpeedVaultEnabled
 	#If LocalSpeedVaultEnabled is 0, report not enabled
 	if ($LSV_Enabled -eq "0") {
-		Write-Host "LocalSpeedVault is not Enabled"
+		write-output "LocalSpeedVault is not Enabled"
 		$script:failed = 1
 	#If LocalSpeedVaultEnabled is 1, report enabled and go to CheckSync function
 	} elseIf ($LSV_Enabled -eq "1") {
-		Write-Host "LocalSpeedVault is Enabled"
+		write-output "LocalSpeedVault is Enabled"
 		CheckSync -StatusReport $StatusReport
     #Retrieve the LSV Location from ClientTool
     #$test = Get-ProcessOutput -FileName "cmd.exe" -Args "/c `"$CLI_path`" control.setting.list"
@@ -124,13 +124,13 @@ if ($true_path) {
 	$ClientVersion = $StatusReport.Statistics.ClientVersion
 	$OsVersion = $StatusReport.Statistics.OsVersion
 	$IpAddress = $StatusReport.Statistics.IpAddress
-	Write-Host "TimeStamp: $TimeStamp Local Device Time"
-	Write-Host "PartnerName: $PartnerName"
-	Write-Host "Account: $Account"
-	Write-Host "MachineName: $MachineName"
-	Write-Host "ClientVersion: $ClientVersion"
-	Write-Host "OsVersion: $OsVersion"
-	Write-Host "IpAddress: $IpAddress"
+	write-output "TimeStamp: $TimeStamp Local Device Time"
+	write-output "PartnerName: $PartnerName"
+	write-output "Account: $Account"
+	write-output "MachineName: $MachineName"
+	write-output "ClientVersion: $ClientVersion"
+	write-output "OsVersion: $OsVersion"
+	write-output "IpAddress: $IpAddress"
 }
 
 #If $script:failed is 1, cause scriptcheck to fail in dashboard

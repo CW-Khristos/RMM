@@ -13,7 +13,7 @@ Switch ($Right) {
   "R" {$Null}
   "W" {$Null}
   default {
-    Write-Host -foregroundcolor "Red" `
+    write-output -foregroundcolor "Red" `
     `n $Right.ToUpper() " is an invalid choice. Please Try again."`n
     exit
   }
@@ -33,7 +33,7 @@ if ($Verify -eq "Y") {
 
  foreach ($file in $(Get-ChildItem $StartingDir -recurse)) {
   #display filename and old permissions
-  write-Host -foregroundcolor Yellow $file.FullName
+  write-output -foregroundcolor Yellow $file.FullName
   #uncomment if you want to see old permissions
   #CACLS $file.FullName
   
@@ -41,7 +41,7 @@ if ($Verify -eq "Y") {
   CACLS $file.FullName /E /P "${Principal}:${Right}" >$NULL
   
   #display new permissions
-  Write-Host -foregroundcolor Green "New Permissions"
+  write-output -foregroundcolor Green "New Permissions"
   CACLS $file.FullName
  }
 }

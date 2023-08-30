@@ -25,13 +25,13 @@ if (-not $varSite) {
   }
   $CWControlInstallURL = "$($CWControlInstallURL)&c=$($varSite)&c=&c=&c=&c=&c=&c="
 }
-write-host "`r`n==================================="
-write-host "SC Site : $($varSite)"
-write-host "SC Company : $($varCompany)"
-write-host "SC Thumbprint : $($CWKeyThumbprint)"
-write-host "SC Install URL : $($CWControlInstallURL)"
-write-host "SC Base URL : $($ConnectWiseControlBaseUrl)"
-write-host "===================================`r`n"
+write-output "`r`n==================================="
+write-output "SC Site : $($varSite)"
+write-output "SC Company : $($varCompany)"
+write-output "SC Thumbprint : $($CWKeyThumbprint)"
+write-output "SC Install URL : $($CWControlInstallURL)"
+write-output "SC Base URL : $($ConnectWiseControlBaseUrl)"
+write-output "===================================`r`n"
 
 #function provided by Datto
 function verifyPackage ($file, $certificate, $thumbprint, $name, $url) {
@@ -40,29 +40,29 @@ function verifyPackage ($file, $certificate, $thumbprint, $name, $url) {
     $varChain.Build((Get-AuthenticodeSignature -FilePath "$($file)").SignerCertificate) | out-null
   } catch [System.Management.Automation.MethodInvocationException] {
     $err = "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-    write-host "- ERROR: $($name) installer did not contain a valid digital certificate."
-    write-host "  This could suggest a change in the way $($name) is packaged; it could"
-    write-host "  also suggest tampering in the connection chain."
-    write-host "- Please ensure $($url) is whitelisted and try again."
-    write-host "  If this issue persists across different devices, please file a support ticket.`r`n$($err)"
+    write-output "- ERROR: $($name) installer did not contain a valid digital certificate."
+    write-output "  This could suggest a change in the way $($name) is packaged; it could"
+    write-output "  also suggest tampering in the connection chain."
+    write-output "- Please ensure $($url) is whitelisted and try again."
+    write-output "  If this issue persists across different devices, please file a support ticket.`r`n$($err)"
   }
 
   $varIntermediate=($varChain.ChainElements | ForEach-Object {$_.Certificate} | Where-Object {$_.Subject -match "$certificate"}).Thumbprint
 
   if ($varIntermediate -ne $thumbprint) {
-    write-host "- ERROR: $($file) did not pass verification checks for its digital signature."
-    write-host "  This could suggest that the certificate used to sign the $($name) installer"
-    write-host "  has changed; it could also suggest tampering in the connection chain."
+    write-output "- ERROR: $($file) did not pass verification checks for its digital signature."
+    write-output "  This could suggest that the certificate used to sign the $($name) installer"
+    write-output "  has changed; it could also suggest tampering in the connection chain."
     if ($varIntermediate) {
-      write-host ": We received: $($varIntermediate)"
-      write-host "  We expected: $($thumbprint)"
-      write-host "  Please report this issue."
+      write-output ": We received: $($varIntermediate)"
+      write-output "  We expected: $($thumbprint)"
+      write-output "  Please report this issue."
     } else {
-      write-host "  The installer's certificate authority has changed."
+      write-output "  The installer's certificate authority has changed."
     }
-    write-host "- Installation cannot continue. Exiting."
+    write-output "- Installation cannot continue. Exiting."
   } else {
-    write-host "- Digital Signature verification passed."
+    write-output "- Digital Signature verification passed."
   }
 }
 
@@ -71,13 +71,13 @@ function CreateJoinLink {
   $GUID = $Matches[0] -replace '&s='
   $apiLaunchUrl= "$($env:ConnectWiseControlBaseUrl)/Host#Access///$($GUID)/Join"
   Set-Asset-Field -Name "CW Control URL :" -Value "$($apiLaunchUrl)"
-  write-host "- Asset Field 'CW Control URL :' Updated : $($apiLaunchUrl)"
+  write-output "- Asset Field 'CW Control URL :' Updated : $($apiLaunchUrl)"
 }
 
 Log-Activity -Message "CW Control Install Started" -EventName "CW Control"
 if (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\ScreenConnect Client ($CWKeyThumbprint)" ) {
   try {
-    write-host "- ConnectWise Control already installed. Establishing link..."
+    write-output "- ConnectWise Control already installed. Establishing link..."
     CreateJoinLink
   } catch {
     Rmm-Alert -Category 'CW Control' -Body 'CW Control Establishing Link Failed'
@@ -90,7 +90,7 @@ if (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\ScreenConnect Client ($CW
     Invoke-WebRequest -Uri $CWControlInstallURL -OutFile $tmp
     #cert from 16/August/2022 to 15/August/2025
     verifyPackage "$($tmp)" "ConnectWise, LLC" "4c2272fba7a7380f55e2a424e9e624aee1c14579" "ConnectWise Control Client Setup" "$($CWControlInstallURL)"
-    write-host "- Installing ConnectWise Control..."
+    write-output "- Installing ConnectWise Control..."
     Start-Process -Wait -FilePath $tmp -ArgumentList "/qn" -PassThru
     CreateJoinLink
     Close-Rmm-Alert -Category "CW Control" -CloseAlertTicket "true"

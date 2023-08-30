@@ -45,15 +45,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function Convert-UnixTimeToDateTime ($inputUnixTime) {
@@ -81,7 +81,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
   function logERR($intSTG, $strModule, $strErr) {
@@ -91,28 +91,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -139,16 +139,16 @@
     $script:cookies = $websession.Cookies.GetCookies($url)
     $script:websession = $websession
     $script:Authenticate = $webrequest | convertfrom-json
-    #Debug write-host "Cookie : $($script:cookies[0].name) = $($cookies[0].value)"
+    #Debug write-output "Cookie : $($script:cookies[0].name) = $($cookies[0].value)"
     $webrequest
 
     if ($authenticate.visa) {
       $script:blnBMAuth = $true
-      write-host "`tBM Auth : $($script:blnBMAuth)"
+      write-output "`tBM Auth : $($script:blnBMAuth)"
       $script:visa = $authenticate.visa
     } else {
       $script:blnBMAuth = $false
-      write-host "`tBM Auth : $($script:blnBMAuth)"
+      write-output "`tBM Auth : $($script:blnBMAuth)"
       $authMsg = "Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials`r`n`t$($strLineSeparator)"
       $authMsg += "`r`n`tPlease Note: Multiple failed authentication attempts could temporarily lockout your user account`r`n`t$($strLineSeparator)"
       logERR 4 "Send-APICredentialsCookie" "$($authMsg)`r`n$($strLineSeparator)"
@@ -209,7 +209,7 @@
     }
 
     if ($partner.error) {
-      write-host "  $($partner.error.message)"
+      write-output "  $($partner.error.message)"
       $script:diag += "  $($partner.error.message)`r`n"
     }
   } ## Send-GetPartnerInfo API Call
@@ -308,7 +308,7 @@ $script:DeviceDetail = @()
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 remove-item -Path $script:APIcredfile -force
-write-host "$($strLineSeparator)`r`n"
+write-output "$($strLineSeparator)`r`n"
 $script:diag += "$($strLineSeparator)`r`n`r`n"
 cd "C:\Program Files\Backup Manager"
 $beginmsg = "Cached Archive Hash (UDF20) : $($hashArchives)`r`n"
@@ -525,11 +525,11 @@ try {
   if ($script:blnBMAuth) {
     $filter1 = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup
     if ((-not $AllPartners) -and (($null -eq $script:i_BackupName) -or ($script:i_BackupName -eq ""))) {
-      write-host "`r`n$($strLineSeparator)`r`n`tXML Partner: $($xmlPartnerID)"
+      write-output "`r`n$($strLineSeparator)`r`n`tXML Partner: $($xmlPartnerID)"
       $script:diag += "`r`n$($strLineSeparator)`r`n`tXML Partner: $($xmlPartnerID)"
       Send-GetPartnerInfo $xmlPartnerID
     } elseif ((-not $AllPartners) -and (($null -ne $script:i_BackupName) -and ($script:i_BackupName -ne ""))) {
-      write-host "`r`n$($strLineSeparator)`r`n`tPassed Partner: $($script:i_BackupName)"
+      write-output "`r`n$($strLineSeparator)`r`n`tPassed Partner: $($script:i_BackupName)"
       $script:diag += "`r`n$($strLineSeparator)`r`n`tPassed Partner: $($script:i_BackupName)"
       Send-GetPartnerInfo $script:i_BackupName
     }
@@ -542,7 +542,7 @@ try {
     if ($AllDevices) {
       $script:SelectedDevices = $DeviceDetail | 
         select-object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
-      write-host "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
+      write-output "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected"
       $script:diag += "$($strLineSeparator)`r`n  $($SelectedDevices.AccountId.count) Devices Selected`r`n"
     } elseif (-not $AllDevices) {
       #$script:SelectedDevices = $DeviceDetail | 
@@ -552,7 +552,7 @@ try {
         $script:SelectedDevices = $DeviceDetail | 
           select-object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
             where-object {$_.DeviceName -eq $xmlBackupID}
-        write-host "$($strLineSeparator)`r`n`t$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
+        write-output "$($strLineSeparator)`r`n`t$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
         $script:diag += "$($strLineSeparator)`r`n`t$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)`r`n"
       }
     }    
@@ -560,7 +560,7 @@ try {
     if ($null -eq $SelectedDevices) {
       # Cancel was pressed
       # Run cancel script
-      write-host "$($strLineSeparator)`r`n  No Devices Selected`r`n$($strLineSeparator)"
+      write-output "$($strLineSeparator)`r`n  No Devices Selected`r`n$($strLineSeparator)"
       $script:diag += "$($strLineSeparator)`r`n  No Devices Selected`r`n$($strLineSeparator)`r`n"
       break
     } else {
@@ -586,6 +586,8 @@ try {
   $err = "$($_.scriptstacktrace)`r`n$($_.Exception)`r`n$($_)`r`n"
   if ($_.exception -match "CommandNotFoundException") {
     logERR 3 "THROTTLE" "ERROR ENCOUNTERED :`r`n$($err)`r`n`t$($strLineSeparator)`r`n`tSystem doesn't support IWR - Likely Win7/8/2K8 OS`r`n$($strLineSeparator)"
+  } elseif ($_.exception -notmatch "(500) Internal Server Error") {
+    logERR 3 "THROTTLE" "ERROR ENCOUNTERED :`r`n$($err)`r`n`t$($strLineSeparator)`r`n`tInternal Server Error (500)`r`n$($strLineSeparator)"
   } elseif ($_.exception -notmatch "CommandNotFoundException") {
     logERR 4 "THROTTLE" "ERROR ENCOUNTERED :`r`n$($err)`r`n$($strLineSeparator)"
   }

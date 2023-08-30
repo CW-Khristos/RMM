@@ -46,15 +46,15 @@ To Do:
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   }
 
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   }
 
   function MapLevel {
@@ -86,7 +86,7 @@ To Do:
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
@@ -120,8 +120,8 @@ if ($env:i_EventType -match ",") {
 } elseif ($env:i_EventType -notmatch ",") {
   [int]$i_EventType = MapLevel "$($env:i_EventType)"
 }
-write-host "ID : $($arrID)"
-write-host "LEVEL : $($arrTypes)"
+write-output "ID : $($arrID)"
+write-output "LEVEL : $($arrTypes)"
 #CAPTURE TOTAL EVENTS MATCHING FILTERS
 $logInfo = @{
   LogName      = "$($env:i_EventLog)"
@@ -149,14 +149,14 @@ $script:diag += "----------------------------------`r`n"
 $script:diag += "TOTAL EVENTS : $($script:intTotal)`r`n"
 $script:diag += "----------------------------------`r`n"
 $script:diag += "EVENTS WITHIN PAST $($env:i_LogRange) HOURS : $($FilteredEvents.Count)`r`n"
-write-host "----------------------------------"
-write-host "COLLECTING EVENTS MATCHING THE FOLLOWING :"
-write-host "`tLogName : $($env:i_EventLog)`tSource : $($env:i_EventSource)`tEvent ID : $($env:i_EventID)`tEvent Type : $($env:i_EventType)`tTime Range (Hours) : $($env:i_LogRange)"
-write-host "----------------------------------`r`n"
-write-host "----------------------------------"
-write-host "TOTAL EVENTS : $($script:intTotal)"
-write-host "----------------------------------"
-write-host "EVENTS WITHIN PAST $($env:i_LogRange) HOURS : $($FilteredEvents.Count)"
+write-output "----------------------------------"
+write-output "COLLECTING EVENTS MATCHING THE FOLLOWING :"
+write-output "`tLogName : $($env:i_EventLog)`tSource : $($env:i_EventSource)`tEvent ID : $($env:i_EventID)`tEvent Type : $($env:i_EventType)`tTime Range (Hours) : $($env:i_LogRange)"
+write-output "----------------------------------`r`n"
+write-output "----------------------------------"
+write-output "TOTAL EVENTS : $($script:intTotal)"
+write-output "----------------------------------"
+write-output "EVENTS WITHIN PAST $($env:i_LogRange) HOURS : $($FilteredEvents.Count)"
 $EventLogs = foreach ($Event in $FilteredEvents) {
   if ($script:hashEvents.containskey("$($Event.ProviderName) - $($Event.Id) - $($Event.LevelDisplayName)")) {
     if ($script:hashMessage.containskey("$($Event.Message)")) {
@@ -188,10 +188,10 @@ $EventLogs = foreach ($Event in $FilteredEvents) {
 StopClock
 #DATTO OUTPUT
 $script:diag += "`r`n`r`nDATTO OUTPUT :`r`n"
-write-host "`r`nDATTO OUTPUT :" -foregroundcolor yellow
+write-output "`r`nDATTO OUTPUT :" -foregroundcolor yellow
 if ($FilteredEvents.Count -lt $env:i_EventThreshold) {
   $script:diag += "`r`n - Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
-  write-host "`r`n - Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)" -foregroundcolor green
+  write-output "`r`n - Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)" -foregroundcolor green
   write-DRRMAlert "Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
   write-DRMMDiag "$($script:diag)"
   exit 0
@@ -205,16 +205,16 @@ if ($FilteredEvents.Count -lt $env:i_EventThreshold) {
   $script:diag += "`r`n"
   $script:diag += "OCCURENCES : $($script:hashMessage["$($Event.Message)"].Occurences)`r`n"
   $script:diag += "TIMESTAMPS :`r`n"
-  write-host "----------------------------------"
-  write-host "ALERT"
-  write-host "----------------------------------"
-  write-host "The following Event Log Entries passed thresholds ($($env:i_EventThreshold) Events in $($env:i_LogRange) hours) :" -foregroundcolor yellow
-  write-host $arrHash -foregroundcolor red
-  write-host "OCCURENCES : $($script:hashMessage["$($Event.Message)"].Occurences)" -foregroundcolor red
-  write-host "TIMESTAMPS :" -foregroundcolor red
+  write-output "----------------------------------"
+  write-output "ALERT"
+  write-output "----------------------------------"
+  write-output "The following Event Log Entries passed thresholds ($($env:i_EventThreshold) Events in $($env:i_LogRange) hours) :" -foregroundcolor yellow
+  write-output $arrHash -foregroundcolor red
+  write-output "OCCURENCES : $($script:hashMessage["$($Event.Message)"].Occurences)" -foregroundcolor red
+  write-output "TIMESTAMPS :" -foregroundcolor red
   foreach ($Value in $script:hashEvents["$($Event.ProviderName) - $($Event.Id) - $($Event.LevelDisplayName)"].keys) {
     $script:diag += "$($script:hashMessage[$Value].TimeCreated)`r`n"
-    write-host "$($script:hashMessage[$Value].TimeCreated)" -foregroundcolor red
+    write-output "$($script:hashMessage[$Value].TimeCreated)" -foregroundcolor red
   }
   write-DRRMAlert "Event Log : Warning - $($FilteredEvents.Count) Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
   write-DRMMDiag "$($script:diag)"

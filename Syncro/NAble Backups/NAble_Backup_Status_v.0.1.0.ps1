@@ -71,7 +71,7 @@ $FailedBackups = foreach ($session in $SessionsList) {
   if ($Session.state -eq 'Skipped') { "Backup has been skipped as previous job was still running. Backup Started at $($session.START)" }
 }
 #SYNCRO OUTPUT
-write-host 'SYNCRO OUTPUT :'
+write-output 'SYNCRO OUTPUT :'
 if ($FailedBackups) {
   $alert = $FailedBackups, $SessionsList | Out-String
   Rmm-Alert -Category "SolarWinds MSP Backup Status : Warning" -Body "$($alert)"

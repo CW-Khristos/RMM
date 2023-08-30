@@ -53,15 +53,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
 #region ----- MISC FUNCTIONS ----
@@ -83,27 +83,27 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       {3,4} {                                                     #'ERRRET'=3 & 4
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=5+
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - Warranty_WatchDog - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -133,24 +133,24 @@
     $avgHudu = [math]::Round(($script:huduCalls / $Minutes))
     #DISPLAY API THRESHOLDS
     $psa = PSA-GetThreshold $script:psaHeaders
-    write-host "`r`n$($strLineSeparator)`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
-    write-host "$($strLineSeparator)`r`nAPI Limits :$($strLineSeparator)"
-    write-host "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold)"
-    write-host "API Limits - Hudu API (per Minute) : $($avgHudu) / 300`r`n$($strLineSeparator)"
-    write-host "Total Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "`r`n$($strLineSeparator)`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
+    write-output "$($strLineSeparator)`r`nAPI Limits :$($strLineSeparator)"
+    write-output "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold)"
+    write-output "API Limits - Hudu API (per Minute) : $($avgHudu) / 300`r`n$($strLineSeparator)"
+    write-output "Total Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`n$($strLineSeparator)`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - Hudu API : $($script:huduCalls)"
     $script:diag += "`r`n$($strLineSeparator)`r`nAPI Limits :`r`n$($strLineSeparator)"
     $script:diag += "`r`nAPI Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold)"
     $script:diag += "`r`nAPI Limits - Hudu API (per Minute) : $($avgHudu) / 300`r`n$($strLineSeparator)"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     if ($Minutes -eq 0) {
-      write-host "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
+      write-output "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
       $script:diag += "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)`r`n"
     } elseif ($Minutes -gt 0) {
       $amin = [string]($asecs / 60)
       $amin = $amin.split(".")[0]
       $amin = $amin.SubString(0,[math]::min(2,$amin.length))
-      write-host "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
+      write-output "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
       $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)`r`n"
     }
   }
@@ -259,8 +259,8 @@
           CompanyClass    = $company.classification
           CompanyCategory = $company.companyCategoryID
         }
-        #write-host "$($company.companyName) : $($company.companyType)"
-        #write-host "Type Map : $(script:typeMap[[int]$company.companyType])"
+        #write-output "$($company.companyName) : $($company.companyType)"
+        #write-output "Type Map : $(script:typeMap[[int]$company.companyType])"
       }
     } catch {
       $psadiag = $null
@@ -350,7 +350,7 @@ if (Get-Module -ListAvailable -Name PSWarranty) {
   }
 }
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
-write-host "$($strLineSeparator)`r`nInitializing"
+write-output "$($strLineSeparator)`r`nInitializing"
 $script:diag += "`r`n$($strLineSeparator)`r`nInitializing`r`n"
 #Attempt Hudu Authentication; Fail Script if this fails
 if (-not $script:blnBREAK) {
@@ -387,7 +387,7 @@ if (-not $script:blnBREAK) {
     update-warrantyinfo -Hudu -HuduAPIKey $script:HuduAPIKey -HuduBaseURL $script:HuduBaseDomain -HuduDeviceAssetLayout "Workstaion" -HuduWarrantyField $HuduWarrantyField -SyncWithSource:$true -OverwriteWarranty:$true -ExcludeApple:$true
     $atcreds = $null
     $pass = $null
-    write-host "Done`r`n$($strLineSeparator)"
+    write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   } catch {
     $script:blnBREAK = $true

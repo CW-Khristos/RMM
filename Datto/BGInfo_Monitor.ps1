@@ -57,15 +57,15 @@ namespace Win32{
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function StopClock {
@@ -77,7 +77,7 @@ namespace Win32{
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
     $ScriptStopTime = (Get-Date).ToString('yyyy-MM-dd hh:mm:ss')
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
@@ -88,28 +88,28 @@ namespace Win32{
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - BG_Info - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
       }
     }
   }
@@ -122,7 +122,7 @@ namespace Win32{
     $xmldiag = $null
     #RETRIEVE VERSION XML FROM GITHUB
     $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
-    write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
+    write-output "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
     $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/Datto/version.xml"
     try {
       $verXML = New-Object System.Xml.XmlDocument
@@ -130,14 +130,14 @@ namespace Win32{
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "XML.Load() - Could not open $($srcVER)`r`n$($err)`r`n"
-      write-host "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
+      write-output "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
       try {
         $web = new-object system.net.webclient
         [xml]$verXML = $web.DownloadString($srcVER)
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         $xmldiag += "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)`r`n"
-        write-host "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
+        write-output "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
         try {
           start-bitstransfer -erroraction stop -source $srcVER -destination "C:\IT\Scripts\version.xml"
           [xml]$verXML = "C:\IT\Scripts\version.xml"
@@ -145,23 +145,23 @@ namespace Win32{
           $blnXML = $false
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
           $xmldiag += "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n"
-          write-host "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
+          write-output "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
         }
       }
     }
     #READ VERSION XML DATA INTO NESTED HASHTABLE FOR LATER USE
     try {
       if (-not $blnXML) {
-        write-host $blnXML
+        write-output $blnXML
       } elseif ($blnXML) {
         foreach ($objSCR in $verXML.SCRIPTS.ChildNodes) {
           if ($objSCR.name -match $strSCR) {
             #CHECK LATEST VERSION
             $xmldiag += "`r`n`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)`r`n"
-            write-host "`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)"
+            write-output "`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)"
             if ([version]$objSCR.innertext -gt $strVER) {
               $xmldiag += "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
-              write-host "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              write-output "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               #REMOVE PREVIOUS COPIES OF SCRIPT
               if (test-path -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1") {
                 remove-item -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1" -force -erroraction stop
@@ -175,17 +175,17 @@ namespace Win32{
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
               $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n`r`n"
-              write-host "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              write-output "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               $output = C:\Windows\System32\cmd.exe "/C powershell -executionpolicy bypass -file `"C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1`""
               foreach ($line in $output) {$stdout += "$($line)`r`n"}
               $xmldiag += "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)`r`n"
-              write-host "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)"
+              write-output "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)"
               $xmldiag += "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
-              write-host "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
+              write-output "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
               $script:blnBREAK = $true
             } elseif ([version]$objSCR.innertext -le $strVER) {
               $xmldiag += "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
-              write-host "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
+              write-output "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
             }
             break
           }
@@ -197,7 +197,7 @@ namespace Win32{
       $script:blnBREAK = $false
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "Error reading Version XML : $($srcVER)`r`n$($err)`r`n"
-      write-host "Error reading Version XML : $($srcVER)`r`n$($err)"
+      write-output "Error reading Version XML : $($srcVER)`r`n$($err)"
       $script:diag += "$($xmldiag)"
       $xmldiag = $null
     }
@@ -344,8 +344,8 @@ namespace Win32{
     #furnish a quick CMD script
     write-Script "$($cmdScript)" $true
     # inform the user
-    write-host "- BGInfo has been installed and configured to run on Startup"
-    write-host "  Endpoints will need to be rebooted for changes to take effect"
+    write-output "- BGInfo has been installed and configured to run on Startup"
+    write-output "  Endpoints will need to be rebooted for changes to take effect"
     $script:diag += "- BGInfo has been installed and configured to run on Startup`r`n"
     $script:diag += "  Endpoints will need to be rebooted for changes to take effect`r`n"
   }
@@ -429,15 +429,15 @@ namespace Win32{
   function run-Remove () {
     #Remove Registry Keys
     foreach ($key in $bgKeys) {
-      write-host "Checking Registry for Key : $($key)"
+      write-output "Checking Registry for Key : $($key)"
       $script:diag += "Checking Registry for Key : $($key)`r`n"
       $bgKey = get-itemproperty -path "$($key)" -erroraction silentlycontinue
       if ($bgKey) {
-        write-host "Found Key : $($key) : REMOVING"
+        write-output "Found Key : $($key) : REMOVING"
         $script:diag += "Found Key : $($key) : REMOVING`r`n"
         remove-item -path "$($key)" -recurse -force -erroraction stop
       } elseif (-not $bgKey) {
-        write-host "Key : $($key) : NOT PRESENT"
+        write-output "Key : $($key) : NOT PRESENT"
         $script:diag += "Key : $($key) : NOT PRESENT`r`n"
       }
     }
@@ -450,16 +450,16 @@ namespace Win32{
       $running = $false
     }
     #REMOVE FILES
-    write-host "Removing BGInfo Files"
+    write-output "Removing BGInfo Files"
     $script:diag += "Removing BGInfo Files`r`n"
     try {
       remove-item -path "C:\IT\BGInfo" -recurse -force -erroraction stop
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
-        write-host "NOT PRESENT : C:\IT\BGInfo"
+        write-output "NOT PRESENT : C:\IT\BGInfo"
         $script:diag += "NOT PRESENT : C:\IT\BGInfo`r`n"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
-        write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        write-output "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       }
     }
@@ -467,10 +467,10 @@ namespace Win32{
       remove-item -path "$($newLink)" -force -erroraction stop
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
-        write-host "NOT PRESENT : $($newLink)"
+        write-output "NOT PRESENT : $($newLink)"
         $script:diag += "NOT PRESENT : $($newLink)`r`n"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
-        write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        write-output "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       }
     }
@@ -478,10 +478,10 @@ namespace Win32{
       remove-item -path "$($allLink)" -force -erroraction stop
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
-        write-host "NOT PRESENT : $($allLink)"
+        write-output "NOT PRESENT : $($allLink)"
         $script:diag += "NOT PRESENT : $($allLink)`r`n"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
-        write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        write-output "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
       }
     }
@@ -489,7 +489,7 @@ namespace Win32{
     try {
       Set-Wallpaper("$($wallpaper)") -erroraction stop
     } catch {
-      write-host "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      write-output "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
     }
   }

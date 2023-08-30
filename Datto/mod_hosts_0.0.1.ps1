@@ -31,44 +31,44 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 #ENDREGION ----- FUNCTIONS ----
 
 #------------
 #BEGIN SCRIPT
 #RETRIEVE CURRENT HOSTS FILE
-write-host "SCANNING HOSTS :`r`n"
+write-output "SCANNING HOSTS :`r`n"
 $script:diag += "SCANNING HOSTS :`r`n`r`n"
 get-content "$env:SystemRoot\System32\drivers\etc\hosts" | foreach-object {
   $script:blnMOD
   if (($_ -match "$($env:i_IP)") -and ($_ -match "$($env:i_Host)")) {$script:blnMOD = $false}
   $hosts += "$($_)`r`n"
 }
-write-host "CURRENT HOSTS :"
-write-host "$($hosts)`r`n"
+write-output "CURRENT HOSTS :"
+write-output "$($hosts)`r`n"
 $script:diag += "CURRENT HOSTS :`r`n"
 $script:diag += "$($hosts)`r`n`r`n"
 if ($blnMOD) {
-  write-host "MODIFYING HOSTS...`r`n"
+  write-output "MODIFYING HOSTS...`r`n"
   $script:diag += "MODIFYING HOSTS...`r`n`r`n"
   $hosts = "$($hosts)`r`n$($env:i_IP)`t$($env:i_Host)"
   #WRITE HOSTS FILE
   try {
     remove-item "$env:SystemRoot\System32\drivers\etc\hosts" -force
     set-content -path "$env:SystemRoot\System32\drivers\etc\hosts" -value "$($hosts)" -force
-    write-host "MODIFIED HOSTS :"
+    write-output "MODIFIED HOSTS :"
     $script:diag += "MODIFIED HOSTS :`r`n"
     get-content "$env:SystemRoot\System32\drivers\etc\hosts" | foreach-object {
-      write-host "$($_)`r`n"
+      write-output "$($_)`r`n"
       $script:diag += "$($_)`r`n"
     }
     write-DRMMAlert "HOSTS file modified successfully"
@@ -77,14 +77,14 @@ if ($blnMOD) {
   } catch {
     $script:diag += "HOSTS file modification failed.`r`n`r`n$($_.Exception)`r`n-----`r`n"
     $script:diag += "$($_.scriptstacktrace)`r`n-----`r`n$($_)`r`n"
-    write-host "HOSTS file modification failed.`r`n`r`n$($_.Exception)`r`n-----"
-    write-host "$($_.scriptstacktrace)`r`n-----`r`n$($_)`r`n"
+    write-output "HOSTS file modification failed.`r`n`r`n$($_.Exception)`r`n-----"
+    write-output "$($_.scriptstacktrace)`r`n-----`r`n$($_)`r`n"
     write-DRMMAlert "HOSTS file modification failed. See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     exit 1
   }
 } elseif (-not ($blnMOD)) {
-  write-host "HOSTS file does not require modification"
+  write-output "HOSTS file does not require modification"
   $script:diag += "HOSTS file does not require modification`r`n"
   write-DRMMAlert "HOSTS file does not require modification"
   write-DRMMDiag "$($script:diag)"

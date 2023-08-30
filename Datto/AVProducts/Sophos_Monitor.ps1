@@ -21,15 +21,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  "<-Start Diagnostic->"
+    write-output  "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRRMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRRMAlert
 
   function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
@@ -97,7 +97,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #ENDREGION ----- FUNCTIONS ----
 
@@ -133,7 +133,7 @@ switch ($env:i_Action.toupper()) {
         $script:engDIR = $_.FullName
       }
     }
-    write-host "Latest Engine : $($script:engDIR)"
+    write-output "Latest Engine : $($script:engDIR)"
     #GET LATEST DATA DIRECTORY
     get-childitem -directory "$($script:dataDIR)" | % {
       if (($null -eq $script:datatime) -or ($script:datatime -eq "")) {
@@ -144,39 +144,39 @@ switch ($env:i_Action.toupper()) {
         $script:dataDIR = $_.FullName
       }
     }
-    write-host "Latest Engine Data : $($script:dataDIR)"
+    write-output "Latest Engine Data : $($script:dataDIR)"
     #START SOPHOS SCAN
     $script:diag += " - STARTING SOPHOS SCAN`r`n`r`n"
-    write-host " - STARTING SOPHOS SCAN`r`n"
+    write-output " - STARTING SOPHOS SCAN`r`n"
     try {
       #$scan = Get-ProcessOutput -FileName "$($script:engDIR)\SophosSAVICLI.exe" -Args "-vdldir=`"$($script:dataDIR)`" -dn -archive -all c:\it --stop-scan -P=C:\IT\Log\SophosScan.txt"
       #$scan = [string]$scan.standardoutput
       $scan = { & "$($script:engDIR)\SophosSAVICLI.exe" "-vdldir=`"$($script:dataDIR)`" -dn -archive -all c:\ --stop-scan -P=C:\IT\Log\SophosScan.txt" }
       Start-Job -name "SophosScan" -ScriptBlock $scan
       $script:diag += "$($scan)`r`n`r`nScanning Started : See Log : 'C:\IT\Log\SophosScan.txt'`r`n"
-      write-host "`r`nScanning Started : See Log : 'C:\IT\Log\SophosScan.txt'"
+      write-output "`r`nScanning Started : See Log : 'C:\IT\Log\SophosScan.txt'"
     } catch {
       $script:blnWARN = $true
       $script:diag += "Error Starting Scan`r`n$($_.Exception)`r`n`r`n$($_.scriptstacktrace)`r`n`r`n$($_)`r`n"
-      write-host "Error Starting Scan"
-      write-host $_.Exception
-      write-host $_.scriptstacktrace
-      write-host $_
+      write-output "Error Starting Scan"
+      write-output $_.Exception
+      write-output $_.scriptstacktrace
+      write-output $_
     }
   }
   "SOPHOS UPDATE" {
     #START SOPHOS UPDATE
     $script:diag += " - STARTING SOPHOS UPDATE`r`n`r`n"
-    write-host " - STARTING SOPHOS UPDATE`r`n"
+    write-output " - STARTING SOPHOS UPDATE`r`n"
     try {
       $update = Get-ProcessOutput -FileName "$($script:auEXE)" -Args "UpdateNow"
       $update = [string]$update.standardoutput
       $script:diag += "$($update)`r`nUpdate Started`r`n"
-      write-host "$($update)`r`nUpdate Started"
+      write-output "$($update)`r`nUpdate Started"
     } catch {
       $script:blnWARN = $true
       $script:diag += "Error Running Update`r`n"
-      write-host "Error Running Update"
+      write-output "Error Running Update"
     }
   }
 }

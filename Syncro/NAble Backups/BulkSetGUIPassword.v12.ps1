@@ -71,22 +71,22 @@
 
   #Clear-Host
   $ErrorActionPreference = 'Continue'
-  Write-Host "  Bulk Set GUI Password `n"
-  #$Syntax = Get-Command $PSCommandPath -Syntax ; Write-Host "Script Parameter Syntax:`n`n  $Syntax"
-  Write-Host "  Current Parameters:"
-  Write-Host "  -AllPartners     = $AllPartners"
-  Write-Host "  -AllDevices      = $AllDevices"
-  Write-Host "  -SetGUIPassword  = $SetGUIPassword"
-  Write-Host "  -RestoreOnly     = $RestoreOnly"
-  Write-Host "  -WipeGUIPassword = $WipeGUIPassword"
-  Write-Host "  -i_BackupCMD = $($env:i_BackupCMD)"
-  Write-Host "  -i_GUILength = $($env:i_GUILength)"
-  Write-Host "  -i_GUIpassword = $($env:i_GUIpassword)"
-  Write-Host "  -i_PartnerName = $($env:i_PartnerName)"
-  Write-Host "  -i_BackupName = $($env:i_BackupName)"
-  Write-Host "  -i_BackupUser = $($env:i_BackupUser)"
-  Write-Host "  -i_BackupPWD = {ENCRYPTED}"
-  Write-Host "  -i_UDFNumber = $($env:i_UDFNumber)"
+  write-output "  Bulk Set GUI Password `n"
+  #$Syntax = Get-Command $PSCommandPath -Syntax ; write-output "Script Parameter Syntax:`n`n  $Syntax"
+  write-output "  Current Parameters:"
+  write-output "  -AllPartners     = $AllPartners"
+  write-output "  -AllDevices      = $AllDevices"
+  write-output "  -SetGUIPassword  = $SetGUIPassword"
+  write-output "  -RestoreOnly     = $RestoreOnly"
+  write-output "  -WipeGUIPassword = $WipeGUIPassword"
+  write-output "  -i_BackupCMD = $($env:i_BackupCMD)"
+  write-output "  -i_GUILength = $($env:i_GUILength)"
+  write-output "  -i_GUIpassword = $($env:i_GUIpassword)"
+  write-output "  -i_PartnerName = $($env:i_PartnerName)"
+  write-output "  -i_BackupName = $($env:i_BackupName)"
+  write-output "  -i_BackupUser = $($env:i_BackupUser)"
+  write-output "  -i_BackupPWD = {ENCRYPTED}"
+  write-output "  -i_UDFNumber = $($env:i_UDFNumber)"
   
   #$scriptpath = $MyInvocation.MyCommand.Path
   #$dir = Split-Path $scriptpath
@@ -125,18 +125,18 @@
 
 #region ----- Authentication ----
   Function Set-APICredentials {
-    Write-Host $Script:strLineSeparator 
-    Write-Host "  Setting Backup API Credentials"
+    write-output $Script:strLineSeparator 
+    write-output "  Setting Backup API Credentials"
     ## CHECK FOR EXISTING API FILE
     if (Test-Path $APIcredpath) {
-      Write-Host $Script:strLineSeparator
-      Write-Host "  Backup API Credential Path Present"
+      write-output $Script:strLineSeparator
+      write-output "  Backup API Credential Path Present"
     } else {
       New-Item -ItemType Directory -Path $APIcredpath
     }
     ## SET PARTNER NAME
     if (($null -eq $i_PartnerName) -or ($i_PartnerName -eq "")) {
-      Write-Host "  Enter Exact, Case Sensitive Partner Name for N-able Backup.Management API i.e. 'Acme, Inc (bob@acme.net)'"
+      write-output "  Enter Exact, Case Sensitive Partner Name for N-able Backup.Management API i.e. 'Acme, Inc (bob@acme.net)'"
       DO{$Script:PartnerName = Read-Host "  Enter Login Partner Name"}
       WHILE ($PartnerName.length -eq 0)
     } elseif (($null -ne $i_PartnerName) -and ($i_PartnerName -ne "")) {
@@ -165,16 +165,16 @@
     if (($ClearCredentials) -and (Test-Path $APIcredfile)) {                    ## CLEAR API CREDENTIALS
       Remove-Item -Path $Script:APIcredfile
       $ClearCredentials = $Null
-      Write-Host $Script:strLineSeparator 
-      Write-Host "  Backup API Credential File Cleared"
+      write-output $Script:strLineSeparator 
+      write-output "  Backup API Credential File Cleared"
       Send-APICredentialsCookie  ## Retry Authentication
     } else {                                                                    ## RETRIEVE API CREDENTIALS
-      Write-Host $Script:strLineSeparator 
-      Write-Host "  Getting Backup API Credentials" 
+      write-output $Script:strLineSeparator 
+      write-output "  Getting Backup API Credentials" 
   
       if (Test-Path $APIcredfile) {                                             ## API FILE EXISTS
-        Write-Host $Script:strLineSeparator        
-        Write-Host "  Backup API Credential File Present"
+        write-output $Script:strLineSeparator        
+        write-output "  Backup API Credential File Present"
         $APIcredentials = get-content $APIcredfile
         
         $Script:cred0 = [string]$APIcredentials[0] 
@@ -182,13 +182,13 @@
         $Script:cred2 = $APIcredentials[2] | Convertto-SecureString 
         $Script:cred2 = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($Script:cred2))
 
-        Write-Host $Script:strLineSeparator 
-        Write-Host "  Stored Backup API Partner  = $($Script:cred0)"
-        Write-Host "  Stored Backup API User     = $($Script:cred1)"
-        Write-Host "  Stored Backup API Password = Encrypted"
+        write-output $Script:strLineSeparator 
+        write-output "  Stored Backup API Partner  = $($Script:cred0)"
+        write-output "  Stored Backup API User     = $($Script:cred1)"
+        write-output "  Stored Backup API Password = Encrypted"
       } else {                                                                  ## API FILE DOES NOT EXIST
-        Write-Host $Script:strLineSeparator 
-        Write-Host "  Backup API Credential File Not Present"
+        write-output $Script:strLineSeparator 
+        write-output "  Backup API Credential File Not Present"
         Set-APICredentials  ## Create API Credential File if Not Found
       }
     }
@@ -215,15 +215,15 @@
       $Script:cookies = $websession.Cookies.GetCookies($url)
       $Script:websession = $websession
       $Script:Authenticate = $webrequest | convertfrom-json
-    #Debug Write-Host "$($Script:cookies[0].name) = $($cookies[0].value)"
+    #Debug write-output "$($Script:cookies[0].name) = $($cookies[0].value)"
 
     if ($authenticate.visa) {
       $Script:visa = $authenticate.visa
     } else {
-      Write-Host    $Script:strLineSeparator 
-      Write-Host "  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials"
-      Write-Host "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account"
-      Write-Host    $Script:strLineSeparator
+      write-output    $Script:strLineSeparator 
+      write-output "  Authentication Failed: Please confirm your Backup.Management Partner Name and Credentials"
+      write-output "  Please Note: Multiple failed authentication attempts could temporarily lockout your user account"
+      write-output    $Script:strLineSeparator
       Set-APICredentials  ## Create API Credential File if Authentication Fails
     }
   }  ## Use Backup.Management credentials to Authenticate
@@ -275,19 +275,19 @@
       [int]$Script:PartnerId = [int]$Partner.result.result.Id
       [String]$script:Level = $Partner.result.result.Level
       [String]$Script:PartnerName = $Partner.result.result.Name
-      Write-Host $Script:strLineSeparator
-      Write-Host "  $($PartnerName) - $($partnerId) - $($Uid)"
-      Write-Host $Script:strLineSeparator
+      write-output $Script:strLineSeparator
+      write-output "  $($PartnerName) - $($partnerId) - $($Uid)"
+      write-output $Script:strLineSeparator
     } else {
-      Write-Host $Script:strLineSeparator
-      Write-Host "  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed"
-      Write-Host $Script:strLineSeparator
+      write-output $Script:strLineSeparator
+      write-output "  Lookup for $($Partner.result.result.Level) Partner Level Not Allowed"
+      write-output $Script:strLineSeparator
       $Script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
       Send-GetPartnerInfo $Script:partnername
     }
 
     if ($partner.error) {
-      Write-Host "  $($partner.error.message)"
+      write-output "  $($partner.error.message)"
       $Script:PartnerName = Read-Host "  Enter EXACT Case Sensitive Customer/ Partner displayed name to lookup i.e. 'Acme, Inc (bob@acme.net)'"
       Send-GetPartnerInfo $Script:partnername
     }
@@ -310,9 +310,9 @@
     # (Call the JSON Web Request Function to get the EnumeratePartners Object)
     [array]$Script:EnumeratePartnersSession = CallJSON $urlJSON $objEnumeratePartners
     $Script:visa = $EnumeratePartnersSession.visa
-    Write-Host    $Script:strLineSeparator
-    Write-Host    "  Using Visa: $($Script:visa)"
-    Write-Host    $Script:strLineSeparator
+    write-output    $Script:strLineSeparator
+    write-output    "  Using Visa: $($Script:visa)"
+    write-output    $Script:strLineSeparator
     # (Added Delay in case command takes a bit to respond)
     Start-Sleep -Milliseconds 100
     # (Get Result Status of EnumerateAccountProfiles)
@@ -321,11 +321,11 @@
     
     # (Check for Errors with EnumeratePartners - Check if ErrorCode has a value)
     if ($EnumeratePartnersSessionErrorCode) {
-      Write-Host    $Script:strLineSeparator
-      Write-Host    "  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)"
-      Write-Host    "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)"
-      Write-Host    $Script:strLineSeparator
-      Write-Host    "  Exiting Script"
+      write-output    $Script:strLineSeparator
+      write-output    "  EnumeratePartnersSession Error Code:  $($EnumeratePartnersSessionErrorCode)"
+      write-output    "  EnumeratePartnersSession Message:  $($EnumeratePartnersSessionErrorMsg)"
+      write-output    $Script:strLineSeparator
+      write-output    "  Exiting Script"
       # (Exit Script if there is a problem)
       #Break Script
     } else {
@@ -352,8 +352,8 @@
       if ($AllPartners) {
         $script:Selection = $Script:SelectedPartners | 
           Select-object id,Name,Level,CreationTime,State,TrialRegistrationTime,TrialExpirationTime,Uid | sort-object Level,name
-        Write-Host    $Script:strLineSeparator
-        Write-Host    "  All Partners Selected"
+        write-output    $Script:strLineSeparator
+        write-output    "  All Partners Selected"
       } else {
         $script:Selection = $Script:SelectedPartners |  
           Select-object id,Name,Level,CreationTime,State,TrialRegistrationTime,TrialExpirationTime,Uid | sort-object Level,name | 
@@ -361,8 +361,8 @@
         if (($null -eq $Selection) -or ($Selection -eq "")) {
           # Cancel was pressed
           # Run cancel script
-          Write-Host    $Script:strLineSeparator
-          Write-Host    "  No Partners Selected"
+          write-output    $Script:strLineSeparator
+          write-output    "  No Partners Selected"
           Break
         } else {
             # OK was pressed, $Selection contains what was chosen
@@ -444,7 +444,7 @@
     }
     if ($i_BackupCMD -eq "-WipeGUIPassword") {
       $UnsecureGUIPassword = ""
-      Write-Host -NoNewline "Wiping GUI Password"
+      write-output -NoNewline "Wiping GUI Password"
     }
 
     $url = "https://backup.management/jsonrpcv1"
@@ -459,7 +459,7 @@
     $data.params.ids = @([System.Int32[]]$selecteddevice.accountid)
     $jsondata = (ConvertTo-Json $data -depth 6)
     #$jsondata  ## Debug
-    Write-Host "`n##Sending Remote Command##`n$($data.params.command)`n$($CommandParameters)" ## Output sent Remote Command
+    write-output "`n##Sending Remote Command##`n$($data.params.command)`n$($CommandParameters)" ## Output sent Remote Command
 
     $params = @{
       Uri         = $url
@@ -471,7 +471,7 @@
 
     $Script:sendResult = Invoke-RestMethod @params
     #$Script:sendResult.result.result | Select-Object Id,@{Name="Status"; Expression={$_.Result.code}},@{Name="Message"; Expression={$_.Result.Message}} | Format-Table
-    Write-Host " $($Script:sendResult.result.result.id) $($Script:sendResult.result.result.result.code)"
+    write-output " $($Script:sendResult.result.result.id) $($Script:sendResult.result.result.result.code)"
   } ## Send-RemoteCommand API Call
 
   Function UpdateCustomColumn ($DeviceId,$ColumnId,$Message) {
@@ -492,8 +492,8 @@
       `n"
 
     $Script:updateCC = Invoke-RestMethod $urlJSON -Method 'POST' -Headers $headers -Body $body
-    Write-Host $Script:strLineSeparator
-    Write-Host "  UpdateCC : $($Script:updateCC)"
+    write-output $Script:strLineSeparator
+    write-output "  UpdateCC : $($Script:updateCC)"
   } ## UpdateCustomColumn API Call
 #endregion ----- Backup.Management JSON Calls ----
 #endregion ----- Functions ----
@@ -502,8 +502,8 @@
 #BEGIN SCRIPT
 Set-APICredentials
 Send-APICredentialsCookie
-Write-Host $Script:strLineSeparator
-Write-Host ""
+write-output $Script:strLineSeparator
+write-output ""
 # OBTAIN PARTNER AND BACKUP ACCOUNT ID
 [xml]$statusXML = Get-Content -LiteralPath $mxbPath\StatusReport.xml
 $xmlBackupID = $statusXML.Statistics.Account
@@ -511,10 +511,10 @@ $xmlPartnerID = $statusXML.Statistics.PartnerName
 #Send-GetPartnerInfo $Script:cred0
 #Send-EnumeratePartners
 if ((-not $AllPartners) -and (($null -eq $i_BackupName) -or ($i_BackupName -eq ""))) {
-  write-host "  XML Partner: $($xmlPartnerID)"
+  write-output "  XML Partner: $($xmlPartnerID)"
   Send-GetPartnerInfo $xmlPartnerID
 } elseif ((-not $AllPartners) -and (($null -ne $i_BackupName) -and ($i_BackupName -ne ""))) {
-  write-host "  Passed Partner: $($i_BackupName)"
+  write-output "  Passed Partner: $($i_BackupName)"
   Send-GetPartnerInfo $i_BackupName
 }
 $filter1 = "AT == 1 AND PN != 'Documents'"   ### Excludes M365 and Documents devices from lookup.
@@ -527,8 +527,8 @@ if ($AllPartners) {
 if ($AllDevices) {
   $script:SelectedDevices = $DeviceDetail | 
     Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo
-  Write-Host    $Script:strLineSeparator
-  Write-Host    "  $($SelectedDevices.AccountId.count) Devices Selected"
+  write-output    $Script:strLineSeparator
+  write-output    "  $($SelectedDevices.AccountId.count) Devices Selected"
 } elseif (-not $allDevices) {
   #$script:SelectedDevices = $DeviceDetail | 
   #  Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
@@ -537,16 +537,16 @@ if ($AllDevices) {
     $script:SelectedDevices = $DeviceDetail | 
       Select-Object PartnerId,PartnerName,Reference,AccountID,DeviceName,ComputerName,DeviceAlias,GUIPassword,IPMGUIPwd,Creation,TimeStamp,LastSuccess,ProductId,Product,ProfileId,Profile,DataSources,SelectedGB,UsedGB,Location,OS,Notes,TempInfo | 
         Where-object {$_.DeviceName -eq $xmlBackupID}
-    Write-Host $Script:strLineSeparator
-    Write-Host "  $($SelectedDevices.AccountId.count) Devices Selected"
+    write-output $Script:strLineSeparator
+    write-output "  $($SelectedDevices.AccountId.count) Devices Selected"
   }
 }    
 
 if($null -eq $SelectedDevices) {
   # Cancel was pressed
   # Run cancel script
-  Write-Host $Script:strLineSeparator
-  Write-Host "  No Devices Selected"
+  write-output $Script:strLineSeparator
+  write-output "  No Devices Selected"
   Break
 } else {
   # OK was pressed, $Selection contains what was chosen
@@ -557,20 +557,20 @@ if($null -eq $SelectedDevices) {
 
   if ($i_BackupCMD -eq "-SetGUIPassword") {
     #$SecurePassword = Read-Host "  Enter Backup Manager GUI Password to be applied to $($SelectedDevices.AccountId.count) Devices" -AsSecureString
-    Write-Host $Script:strLineSeparator
-    Write-Host "  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient."
+    write-output $Script:strLineSeparator
+    write-output "  Applying GUI Password to $($SelectedDevices.AccountId.count) Devices, please be patient."
   }
 
   foreach ($selecteddevice in $SelectedDevices) {
     $device = $selecteddevice.DeviceName
     # UPDATE CUSOTM COLUMN 'GUI PW'
-    Write-Host $Script:strLineSeparator
-    Write-Host "  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)"
+    write-output $Script:strLineSeparator
+    write-output "  Updating GUI PW Column for $($device) - $($selecteddevice.AccountID) 2531 $($password)"
     UpdateCustomColumn $selecteddevice.AccountID 2531 $password
     Start-Sleep -Milliseconds 500
     # SEND REMOTE COMMAND
-    Write-Host $Script:strLineSeparator
-    Write-Host "  Updating GUI PW for $device"
+    write-output $Script:strLineSeparator
+    write-output "  Updating GUI PW for $device"
     Send-RemoteCommand
     Start-Sleep -Milliseconds 500
   }

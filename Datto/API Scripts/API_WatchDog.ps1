@@ -70,15 +70,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
@@ -117,7 +117,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -138,7 +138,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -152,7 +152,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -174,7 +174,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   } ## PSA-GetMaps
 
@@ -203,8 +203,8 @@
           fax             = "$($company.fax)"
           webAddress      = "$($company.webAddress)"
         }
-        #write-host "$($company.companyName) : $($company.companyType)"
-        #write-host "Type Map : $(script:typeMap[[int]$company.companyType])"
+        #write-output "$($company.companyName) : $($company.companyType)"
+        #write-output "Type Map : $(script:typeMap[[int]$company.companyType])"
       }
     } catch {
       $script:blnFAIL = $true
@@ -212,7 +212,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   } ## PSA-GetCompanies API Call
 #endregion ----- PSA FUNCTIONS ----
@@ -239,7 +239,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -271,7 +271,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -295,7 +295,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -326,7 +326,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -346,7 +346,7 @@
         $script:diag += "`r`n$($_.Exception)"
         $script:diag += "`r`n$($_.scriptstacktrace)"
         $script:diag += "`r`n$($_)"
-        write-host "$($script:diag)`r`n"
+        write-output "$($script:diag)`r`n"
       }
     } catch {
       $script:blnFAIL = $true
@@ -354,7 +354,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -390,7 +390,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 
@@ -425,7 +425,7 @@
       $script:diag += "`r`n$($_.Exception)"
       $script:diag += "`r`n$($_.scriptstacktrace)"
       $script:diag += "`r`n$($_)"
-      write-host "$($script:diag)`r`n"
+      write-output "$($script:diag)`r`n"
     }
   }
 #endregion ----- RMM FUNCTIONS ----
@@ -437,16 +437,16 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        write-output "$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
+        write-output "$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
       }
       default {                                                   #'ERRRET'=3+
         $script:diag += "`r`n$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
-        write-host "$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
+        write-output "$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
       }
     }
   }
@@ -472,20 +472,20 @@
     $amill = $amill.SubString(0,[math]::min(3,$mill.length))
     #DISPLAY API THRESHOLDS
     $psa = PSA-GetThreshold $script:psaHeaders
-    write-host "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls)"
-    write-host "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600"
-    write-host "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
+    write-output "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls)"
+    write-output "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600"
+    write-output "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
     $script:diag += "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls)`r`n"
     $script:diag += "API Limits :`r`nPSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600`r`n"
     $script:diag += "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
     if ($Minutes -eq 0) {
-      write-host "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds"
+      write-output "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds"
       $script:diag += "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
     } elseif ($Minutes -gt 0) {
       $amin = [string]($asecs / 60)
       $amin = $amin.split(".")[0]
       $amin = $amin.SubString(0,[math]::min(2,$amin.length))
-      write-host "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
+      write-output "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
       $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n`r`n"
     }
   }
@@ -547,16 +547,16 @@ New-HuduAPIKey $script:HuduAPIKey
 New-HuduBaseUrl $script:HuduBaseDomain
 #QUERY PSA API
 $countries = PSA-FilterQuery $script:psaHeaders "GET" "Countries" $psaGenFilter
-write-host "------------------------------"
-write-host "`tCLASS MAP :"
+write-output "------------------------------"
+write-output "`tCLASS MAP :"
 PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
 $script:classMap
-write-host "------------------------------"
-write-host "------------------------------"
-write-host "`tCATEGORY MAP :"
+write-output "------------------------------"
+write-output "------------------------------"
+write-output "`tCATEGORY MAP :"
 PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
 $script:categoryMap
-write-host "------------------------------"
+write-output "------------------------------"
 PSA-GetCompanies $script:psaHeaders
 #QUERY RMM API
 $script:rmmToken = RMM-ApiAccessToken
@@ -564,20 +564,20 @@ RMM-GetSites
 #OUTPUT
 if (-not $script:blnFAIL) {
   $date = get-date
-  write-host "`r`n$($script:strLineSeparator)"
-  write-host "COMPANIES :"
-  write-host "$($script:strLineSeparator)"
+  write-output "`r`n$($script:strLineSeparator)"
+  write-output "COMPANIES :"
+  write-output "$($script:strLineSeparator)"
   $script:diag += "`r`n`r`n$($script:strLineSeparator)`r`n"
   $script:diag += "COMPANIES :`r`n"
   $script:diag += "$($script:strLineSeparator)`r`n"
   foreach ($company in $script:CompanyDetails) {
-    write-host "`r`n$($script:strLineSeparator)"
-    write-host "COMPANY : $($company.CompanyName)"
-    write-host "ID : $($company.CompanyID)"
-    write-host "TYPE : $($script:typeMap[[int]$($company.CompanyType)])"
-    write-host "CATEGORY : $($script:categoryMap[[int]$($company.CompanyCategory)])"
-    write-host "CLASSIFICATION : $($script:classMap[[int]$($company.CompanyClass)])"
-    write-host "$($script:strLineSeparator)"
+    write-output "`r`n$($script:strLineSeparator)"
+    write-output "COMPANY : $($company.CompanyName)"
+    write-output "ID : $($company.CompanyID)"
+    write-output "TYPE : $($script:typeMap[[int]$($company.CompanyType)])"
+    write-output "CATEGORY : $($script:categoryMap[[int]$($company.CompanyCategory)])"
+    write-output "CLASSIFICATION : $($script:classMap[[int]$($company.CompanyClass)])"
+    write-output "$($script:strLineSeparator)"
     $script:diag += "`r`n$($script:strLineSeparator)`r`n"
     $script:diag += "ID : $($company.CompanyID)`r`n"
     $script:diag += "TYPE : $($script:typeMap[[int]$($company.CompanyType)])`r`n"
@@ -593,8 +593,8 @@ if (-not $script:blnFAIL) {
       ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
         #CHECK FOR COMPANY IN DRMM SITES
         $rmmSite = $script:sitesList.sites | where-object {$_.name -eq "$($company.CompanyName)"}
-        write-host "$($rmmSite)"
-        write-host "$($script:strLineSeparator)"
+        write-output "$($rmmSite)"
+        write-output "$($script:strLineSeparator)"
         $script:diag += "$($rmmSite)`r`n"
         $script:diag += "$($script:strLineSeparator)`r`n"
         #CREATE SITE IN DRMM
@@ -612,19 +612,19 @@ if (-not $script:blnFAIL) {
               installSplashtop    = "true"
             }
             $postSite = (RMM-NewSite @params -UseBasicParsing)
-            write-host "$($postSite)`r`n$($script:strLineSeparator)"
+            write-output "$($postSite)`r`n$($script:strLineSeparator)"
             $script:diag += "$($postSite)`r`n$($script:strLineSeparator)`r`n"
             if ($postSite) {
-              write-host "RMM CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
+              write-output "RMM CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
               $script:diag += "RMM CREATE : $($company.CompanyName) : SUCCESS`r`n"
             } elseif (-not $postSite) {
               $script:blnWARN = $true
-              write-host "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+              write-output "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
               $script:diag += "RMM CREATE : $($company.CompanyName) : FAILED`r`n"
             }
           } catch {
             $script:blnWARN = $true
-            write-host "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+            write-output "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
             $script:diag += "`r`nRMM CREATE : $($company.CompanyName) : FAILED"
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
@@ -633,10 +633,10 @@ if (-not $script:blnFAIL) {
         #UPDATE SITE IN DRMM
         } elseif (($null -ne $rmmSite) -and ($rmmSite -ne "")) {
           try {
-            write-host "---------Notes :`r`n$($rmmSite.notes)`r`n---------"
-            write-host "---------Description :`r`n$($rmmSite.description)`r`n---------"
+            write-output "---------Notes :`r`n$($rmmSite.notes)`r`n---------"
+            write-output "---------Description :`r`n$($rmmSite.description)`r`n---------"
             if ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
-              write-host "UPDATE SITE : $($company.CompanyName)"
+              write-output "UPDATE SITE : $($company.CompanyName)"
               $script:diag += "UPDATE SITE : $($company.CompanyName)`r`n"
               $note = "$($rmmSite.notes)"
               $params = @{
@@ -649,23 +649,23 @@ if (-not $script:blnFAIL) {
                 installSplashtop    = "true"
               }
               $updateSite = (RMM-UpdateSite @params -UseBasicParsing)
-              write-host "$($updateSite)`r`n$($script:strLineSeparator)"
+              write-output "$($updateSite)`r`n$($script:strLineSeparator)"
               $script:diag += "$($updateSite)`r`n$($script:strLineSeparator)`r`n"
               if ($updateSite) {
-                write-host "UPDATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
+                write-output "UPDATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
                 $script:diag += "UPDATE : $($company.CompanyName) : SUCCESS`r`n"
               } elseif (-not $updateSite) {
                 $script:blnWARN = $true
-                write-host "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+                write-output "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
                 $script:diag += "UPDATE : $($company.CompanyName) : FAILED`r`n"
               }
             } elseif ($rmmSite.description -like "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
-              write-host "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)"
+              write-output "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)"
               $script:diag += "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)`r`n"
             }
           } catch {
             $script:blnWARN = $true
-            write-host "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+            write-output "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
             $script:diag += "`r`nUPDATE : $($company.CompanyName) : FAILED"
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
@@ -677,7 +677,7 @@ if (-not $script:blnFAIL) {
         #CREATE COMPANY IN HUDU
         if (($null -eq $huduSite) -or ($huduSite -eq "")) {
           $script:blnSITE = $true
-          write-host "NEED TO CREATE COMPANY IN HUDU"
+          write-output "NEED TO CREATE COMPANY IN HUDU"
           $script:diag += "NEED TO CREATE COMPANY IN HUDU`r`n"
           try {
             $country = $countries.items | where {($_.id -eq $company.countryID)} | select displayName
@@ -698,26 +698,26 @@ if (-not $script:blnFAIL) {
               notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
             }
             $postHUDU = (New-HuduCompany @params -erroraction stop)
-            write-host "$($postHUDU)`r`n$($script:strLineSeparator)"
+            write-output "$($postHUDU)`r`n$($script:strLineSeparator)"
             $script:diag += "$($postHUDU)`r`n$($script:strLineSeparator)`r`n"
             if ($postHUDU) {
-              write-host "HUDU CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
+              write-output "HUDU CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
               $script:diag += "HUDU CREATE : $($company.CompanyName) : SUCCESS`r`n"
             } elseif (-not $postHUDU) {
               $script:blnWARN = $true
-              write-host "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+              write-output "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
               $script:diag += "HUDU CREATE : $($company.CompanyName) : FAILED`r`n"
             }
           } catch {
             $script:blnWARN = $true
-            write-host "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
+            write-output "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
             $script:diag += "`r`nHUDU CREATE : $($company.CompanyName) : FAILED"
             $script:diag += "`r`n$($_.Exception)"
             $script:diag += "`r`n$($_.scriptstacktrace)"
             $script:diag += "`r`n$($_)"
           }
         } elseif (($null -ne $huduSite) -and ($huduSite -ne "")) {
-          write-host "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)"
+          write-output "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)"
           $script:diag += "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)`r`n"
         }
     }

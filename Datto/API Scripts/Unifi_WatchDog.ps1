@@ -65,15 +65,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function logERR ($intSTG, $strModule, $strErr) {
@@ -83,16 +83,16 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnFAIL = $true
         $script:diag += "`r`n$($(get-date))`t - Unifi_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - Unifi_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        write-output "$($(get-date))`t - Unifi_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
       2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
         $script:blnFAIL = $true
         $script:diag += "`r`n$($(get-date))`t - Unifi_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
-        write-host "$($(get-date))`t - Unifi_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
+        write-output "$($(get-date))`t - Unifi_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
       }
       default {                                                   #'ERRRET'=3+
         $script:diag += "`r`n$($(get-date))`t - Unifi_WatchDog - $($strModule) : $($strErr)"
-        write-host "$($(get-date))`t - Unifi_WatchDog - $($strModule) : $($strErr)"
+        write-output "$($(get-date))`t - Unifi_WatchDog - $($strModule) : $($strErr)"
       }
     }
   }
@@ -111,7 +111,7 @@
     $mill = $mill.split(".")[1]
     $mill = $mill.SubString(0,[math]::min(3,$mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #endregion ----- FUNCTIONS ----
 
@@ -203,7 +203,7 @@ if (-not $script:blnFAIL) {
         position = 7
       }
     )
-    Write-Host "Missing Site Layout $($HuduSiteLayoutName)"
+    write-output "Missing Site Layout $($HuduSiteLayoutName)"
     $script:diag += "Missing Site Layout $($HuduSiteLayoutName)`r`n"
     #$NewLayout = New-HuduAssetLayout -name $HuduSiteLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $true -include_photos $true -include_comments $true -include_files $true -fields $AssetLayoutFields
     #$SiteLayout = Get-HuduAssetLayouts -name $HuduSiteLayoutName
@@ -274,7 +274,7 @@ if (-not $script:blnFAIL) {
         position = 2
       }
     )
-    Write-Host "Missing Asset Layout $($HuduAssetLayoutName)"
+    write-output "Missing Asset Layout $($HuduAssetLayoutName)"
     $script:diag += "Missing Asset Layout $($HuduAssetLayoutName)`r`n"
     #$NewLayout = New-HuduAssetLayout -name $HuduAssetLayoutName -icon "fas fa-network-wired" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $true -include_photos $true -include_comments $true -include_files $true -fields $AssetLayoutFields
     #$DeviceLayout = Get-HuduAssetLayouts -name $HuduAssetLayoutName
@@ -284,24 +284,24 @@ if (-not $script:blnFAIL) {
     $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
     $script:diag += "Start documentation process.`r`nLogging in to Unifi API.`r`n"
     $script:diag += "$($strLineSeparator)`r`n"
-    write-host "`r`n$($strLineSeparator)"
-    write-host "Start documentation process.`r`nLogging in to Unifi API." -foregroundColor green
-    write-host "$($strLineSeparator)"
+    write-output "`r`n$($strLineSeparator)"
+    write-output "Start documentation process.`r`nLogging in to Unifi API." -foregroundColor green
+    write-output "$($strLineSeparator)"
     try {
       Invoke-RestMethod -Uri "$($UnifiBaseUri)/login" -Method POST -Body $script:uniFiCredentials -SessionVariable websession
     } catch {
       $script:blnFAIL = $true
       $script:diag += "Failed to log in on the Unifi API.`r`n`tError was: $($_.Exception.Message)`r`n"
       $script:diag += "$($strLineSeparator)`r`n`r`n"
-      write-host "Failed to log in on the Unifi API.`r`n`tError was: $($_.Exception.Message)" -ForegroundColor Red
-      write-host "$($strLineSeparator)`r`n"
+      write-output "Failed to log in on the Unifi API.`r`n`tError was: $($_.Exception.Message)" -ForegroundColor Red
+      write-output "$($strLineSeparator)`r`n"
     }
     $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
     $script:diag += "Collecting sites from Unifi API.`r`n"
     $script:diag += "$($strLineSeparator)`r`n"
-    write-host "`r`n$($strLineSeparator)"
-    write-host "Collecting sites from Unifi API." -ForegroundColor Green
-    write-host "$($strLineSeparator)"
+    write-output "`r`n$($strLineSeparator)"
+    write-output "Collecting sites from Unifi API." -ForegroundColor Green
+    write-output "$($strLineSeparator)"
     try {
       $sites = (Invoke-RestMethod -Uri "$($UnifiBaseUri)/self/sites" -WebSession $websession).data
       $sites = $sites | sort -property desc
@@ -309,16 +309,16 @@ if (-not $script:blnFAIL) {
       $script:blnFAIL = $true
       $script:diag += "Failed to collect the sites.`r`n`tError was: $($_.Exception.Message)`r`n"
       $script:diag += "$($strLineSeparator)`r`n`r`n"
-      write-host "Failed to collect the sites.`r`n`tError was: $($_.Exception.Message)" -ForegroundColor Red
-      write-host "$($strLineSeparator)`r`n"
+      write-output "Failed to collect the sites.`r`n`tError was: $($_.Exception.Message)" -ForegroundColor Red
+      write-output "$($strLineSeparator)`r`n"
     }
 
     foreach ($site in $sites) {
       ######################### Unifi Site Documentation ###########################
       #First we will see if there is an Asset that matches the site name with this Asset Layout
-      write-host "`r`n$($strLineSeparator)"
-      Write-Host "Attempting to map $($site.desc)"
-      write-host "$($strLineSeparator)"
+      write-output "`r`n$($strLineSeparator)"
+      write-output "Attempting to map $($site.desc)"
+      write-output "$($strLineSeparator)"
       $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
       $script:diag += "Attempting to map $($site.desc)`r`n"
       $script:diag += "$($strLineSeparator)`r`n"
@@ -329,8 +329,8 @@ if (-not $script:blnFAIL) {
         if (!$company) {
           $script:diag += "A company in Hudu could not be matched to the site : $($site.desc). Please create a blank $($HuduSiteLayoutName) asset, with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to.`r`n"
           $script:diag += "$($strLineSeparator)`r`n`r`n"
-          Write-Host "A company in Hudu could not be matched to the site : $($site.desc). Please create a blank $($HuduSiteLayoutName) asset, with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to." -ForegroundColor Red
-          write-host "$($strLineSeparator)`r`n"
+          write-output "A company in Hudu could not be matched to the site : $($site.desc). Please create a blank $($HuduSiteLayoutName) asset, with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to." -ForegroundColor Red
+          write-output "$($strLineSeparator)`r`n"
           continue
         }
       }
@@ -444,15 +444,15 @@ if (-not $script:blnFAIL) {
       if (!$SiteAsset) {
         $script:blnSITE = $true
         $companyid = $company.id
-        Write-Host "Creating new Site Unifi - AutoDoc : $($AssetName)"
-        write-host "$($strLineSeparator)"
+        write-output "Creating new Site Unifi - AutoDoc : $($AssetName)"
+        write-output "$($strLineSeparator)"
         $script:diag += "Creating new Site Unifi - AutoDoc : $($AssetName)`r`n"
         $script:diag += "$($strLineSeparator)`r`n"
         try {
           $SiteAsset = New-HuduAsset -name $AssetName -company_id $companyid -asset_layout_id $SiteLayout.id -fields $AssetFields	
         } catch {
-          Write-Host "Error Creating new Site Unifi - AutoDoc : $($AssetName)" -foregroundColor red
-          write-host "$($strLineSeparator)`r`n"
+          write-output "Error Creating new Site Unifi - AutoDoc : $($AssetName)" -foregroundColor red
+          write-output "$($strLineSeparator)`r`n"
           $script:diag += "Error Creating new Site Unifi - AutoDoc : $($AssetName)`r`n"
           $script:diag += "$($strLineSeparator)`r`n`r`n"
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
@@ -460,15 +460,15 @@ if (-not $script:blnFAIL) {
         }
       } else {
         $companyid = $SiteAsset.company_id
-        Write-Host "Updating Site Unifi - AutoDoc : $($AssetName)"
-        write-host "$($strLineSeparator)"
+        write-output "Updating Site Unifi - AutoDoc : $($AssetName)"
+        write-output "$($strLineSeparator)"
         $script:diag += "Updating Site Unifi - AutoDoc : $($AssetName)`r`n"
         $script:diag += "$($strLineSeparator)`r`n"
         try {
           $SiteAsset = Set-HuduAsset -asset_id $SiteAsset.id -name $AssetName -company_id $companyid -asset_layout_id $SiteLayout.id -fields $AssetFields	
         } catch {
-          Write-Host "Error Updating Site Unifi - AutoDoc : $($AssetName)" -foregroundColor red
-          write-host "$($strLineSeparator)`r`n"
+          write-output "Error Updating Site Unifi - AutoDoc : $($AssetName)" -foregroundColor red
+          write-output "$($strLineSeparator)`r`n"
           $script:diag += "Error Updating Site Unifi - AutoDoc : $($AssetName)`r`n"
           $script:diag += "$($strLineSeparator)`r`n`r`n"
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
@@ -476,17 +476,17 @@ if (-not $script:blnFAIL) {
         }
       }
       ######################### Unifi Device Documentation ###########################
-      write-host "`r`n$($strLineSeparator)"
-      Write-Host "Attempting to map $($site.desc) devices"
-      write-host "$($strLineSeparator)"
+      write-output "`r`n$($strLineSeparator)"
+      write-output "Attempting to map $($site.desc) devices"
+      write-output "$($strLineSeparator)"
       $script:diag += "`r`n`r`n$($strLineSeparator)`r`n"
       $script:diag += "Attempting to map $($site.desc) devices`r`n"
       $script:diag += "$($strLineSeparator)`r`n"
       if (!$SiteLayout) {
         $script:diag += "Please run the Hudu-Unifi-Documentation.ps1 first to create the Unifi site layout or check the name in '$($HuduSiteLayoutName)'`r`n"
         $script:diag += "$($strLineSeparator)`r`n`r`n"
-        Write-Host "Please run the Hudu-Unifi-Documentation.ps1 first to create the Unifi site layout or check the name in '$($HuduSiteLayoutName)'"
-        write-host "$($strLineSeparator)`r`n"
+        write-output "Please run the Hudu-Unifi-Documentation.ps1 first to create the Unifi site layout or check the name in '$($HuduSiteLayoutName)'"
+        write-output "$($strLineSeparator)`r`n"
         #WRITE TO LOGFILE
         "$($script:diag)" | add-content $script:logPath -force
         write-DRMMAlert "Unifi_WatchDog : Execution Failed : Please Create the 'Unifi - AutoDoc' Site Layout"
@@ -498,8 +498,8 @@ if (-not $script:blnFAIL) {
       if (!$SiteAsset) {
         $script:diag += "A Site in Hudu could not be matched to the site : $($site.desc). Please create a blank Unifi site asset (created with the other Unifi Sync script), with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to.`r`n"
         $script:diag += "$($strLineSeparator)`r`n`r`n"
-        Write-Host "A Site in Hudu could not be matched to the site : $($site.desc). Please create a blank Unifi site asset (created with the other Unifi Sync script), with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to."  -ForegroundColor Red
-        write-host "$($strLineSeparator)`r`n"
+        write-output "A Site in Hudu could not be matched to the site : $($site.desc). Please create a blank Unifi site asset (created with the other Unifi Sync script), with a name of `"$($site.desc) - Unifi`" under the company in Hudu you wish to map this site to."  -ForegroundColor Red
+        write-output "$($strLineSeparator)`r`n"
         continue
       }
       
@@ -537,14 +537,14 @@ if (-not $script:blnFAIL) {
         #Check if there is already an asset	
         $Asset = Get-HuduAssets -name $AssetName -companyid $companyid -assetlayoutid $DeviceLayout.id
         if (!$Asset) {
-          Write-Host "Creating new Asset - $($AssetName)"
-          write-host "$($strLineSeparator)"
+          write-output "Creating new Asset - $($AssetName)"
+          write-output "$($strLineSeparator)"
           $script:diag += "Creating new Asset - $($AssetName)`r`n"
           $script:diag += "$($strLineSeparator)`r`n"
           $Asset = New-HuduAsset -name $AssetName -company_id $companyid -asset_layout_id $DeviceLayout.id -fields $AssetFields	
         } else {
-          Write-Host "Updating Asset - $($AssetName)"
-          write-host "$($strLineSeparator)"
+          write-output "Updating Asset - $($AssetName)"
+          write-output "$($strLineSeparator)"
           $script:diag += "Updating Asset - $($AssetName)`r`n"
           $script:diag += "$($strLineSeparator)`r`n"
           $Asset = Set-HuduAsset -asset_id $Asset.id -name $AssetName -company_id $companyid -asset_layout_id $DeviceLayout.id -fields $AssetFields	

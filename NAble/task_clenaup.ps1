@@ -33,7 +33,7 @@
 #BEGIN SCRIPT
 foreach ($task in $tasks) {
   try {
-    if (Get-ScheduledTask -TaskName "$($task)" -erroraction silentlycontinue) { write-host "Deleting Task : $($task)" }
+    if (Get-ScheduledTask -TaskName "$($task)" -erroraction silentlycontinue) { write-output "Deleting Task : $($task)" }
     try {
       Unregister-ScheduledTask -TaskName "$($task)" -Confirm:$false -erroraction silentlycontinue
       remove-item "C:\Windows\System32\Tasks$($taskFOL)" -force -erroraction silentlycontinue
@@ -46,13 +46,13 @@ foreach ($task in $tasks) {
       }
     }
   } catch {
-    write-host "Error - Task : $($task) still present"
+    write-output "Error - Task : $($task) still present"
   }
   $xmltasks = Get-ChildItem -Path 'C:\Windows\System32\Tasks' | where-object { $_.Name -match "$($task)" }
   if (!$xmltasks) {
-    write-host "Confirmed Task $($task) deleted"
+    write-output "Confirmed Task $($task) deleted"
   } elseif ($xmltasks) {
-    write-host "Error - Task : $($task) still present"
+    write-output "Error - Task : $($task) still present"
   }
   #schtasks /Delete /TN "<task folder path>\<task name>" /F
 }

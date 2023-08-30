@@ -10,7 +10,7 @@ function New-HuduAPIKey {
 	if ($ApiKey) {
 		$SecApiKey = ConvertTo-SecureString $ApiKey -AsPlainText -Force
 	} else {
-		Write-Host "Please enter your Hudu API key, you can obtain it from https://your-hudu-domain/admin/api_keys:"
+		write-output "Please enter your Hudu API key, you can obtain it from https://your-hudu-domain/admin/api_keys:"
 		$SecApiKey = Read-Host -AsSecureString
 	}
 	Set-Variable -Name "Int_HuduAPIKey" -Value $SecApiKey -Visibility Private -Scope script -Force
@@ -18,7 +18,7 @@ function New-HuduAPIKey {
 	if ($script:Int_HuduBaseURL) {
 		[version]$version = (Get-HuduAppInfo).version
 		if ($version -lt $script:HuduRequiredVersion) {
-			Write-Host "A connection error occured or Hudu version is below $script:HuduRequiredVersion" -foregroundcolor yellow
+			write-output "A connection error occured or Hudu version is below $script:HuduRequiredVersion" -foregroundcolor yellow
 		}
 	}
 }

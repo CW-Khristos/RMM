@@ -15,56 +15,56 @@ $ApplianceID = $XmlAppliance.ApplianceConfig.ApplianceID
 $BackupServerIP = $XmlServer.ServerConfig.BackupServerIP
 If (($ApplianceID -ne -1) -And ($ApplianceID -ne $null)) {
   Copy-Item -LiteralPath $AgentConfigPath\ApplianceConfig.xml -Destination $AgentConfigPath\ApplianceConfig.xml.Good -Force
-  Write-Host {Backed up ApplianceConfig.xml}
+  write-output {Backed up ApplianceConfig.xml}
   If (($BackupServerIP -ne "localhost") -And ($BackupServerIP -ne $null)) {
     Copy-Item -LiteralPath $AgentConfigPath\ServerConfig.xml -Destination $AgentConfigPath\ServerConfig.xml.Good -Force
-    Write-Host {Backed up ServerConfig.xml}
+    write-output {Backed up ServerConfig.xml}
   } Else {
-    Write-Host {Rejected bad ServerConfig.xml}
+    write-output {Rejected bad ServerConfig.xml}
     If ($GoodServerBackupExists) {
       $AgentStopped = NET STOP "Windows Agent Service"
-      Write-Host $AgentStopped[1]
+      write-output $AgentStopped[1]
       If ($AgentStopped[1] -eq 'The Windows Agent Service service could not be stopped.') {
-        Write-Host {Terminating agent.exe via TaskKill...}
+        write-output {Terminating agent.exe via TaskKill...}
         TASKKILL /IM agent.exe /F
       }
       Copy-Item -LiteralPath $AgentConfigPath\ServerConfig.xml -Destination $AgentConfigPath\ServerConfig.xml.Bad -Force
       Copy-Item -LiteralPath $AgentConfigPath\ServerConfig.xml.Good -Destination $AgentConfigPath\ServerConfig.xml -Force
-      Write-Host {Restored ServerConfig.xml from good backup}
+      write-output {Restored ServerConfig.xml from good backup}
       Start-Sleep -Seconds 2
       NET START "Windows Agent Service"
     } Else {
-      Write-Host {FAILURE: No good backup of ServerConfig.xml exists!}
+      write-output {FAILURE: No good backup of ServerConfig.xml exists!}
     }
   }
 } Else {
-  Write-Host {Rejected bad ApplianceConfig.xml}
+  write-output {Rejected bad ApplianceConfig.xml}
   If ($GoodApplianceBackupExists) {
-    Write-Host {The Windows Agent Service service is stopping...}
+    write-output {The Windows Agent Service service is stopping...}
     $AgentStopped = NET STOP "Windows Agent Service"
-    Write-Host $AgentStopped[1]
+    write-output $AgentStopped[1]
     If ($AgentStopped[1] -eq 'The Windows Agent Service service could not be stopped.') {
-      Write-Host {Terminating agent.exe via TaskKill...}
+      write-output {Terminating agent.exe via TaskKill...}
       TASKKILL /IM agent.exe /F
     }
     Copy-Item -LiteralPath $AgentConfigPath\ApplianceConfig.xml -Destination $AgentConfigPath\ApplianceConfig.xml.Bad -Force
     Copy-Item -LiteralPath $AgentConfigPath\ApplianceConfig.xml.Good -Destination $AgentConfigPath\ApplianceConfig.xml -Force
-    Write-Host {Restored ApplianceConfig.xml from good backup}
+    write-output {Restored ApplianceConfig.xml from good backup}
     If (($BackupServerIP -ne "localhost") -And ($BackupServerIP -ne $null)) {
-      Write-Host {Since ApplianceConfig.xml was bad, skipping backup of ServerConfig.xml}
+      write-output {Since ApplianceConfig.xml was bad, skipping backup of ServerConfig.xml}
     } Else {
-      Write-Host {Rejected bad ServerConfig.xml}
+      write-output {Rejected bad ServerConfig.xml}
       If ($GoodServerBackupExists) {
         Copy-Item -LiteralPath $AgentConfigPath\ServerConfig.xml -Destination $AgentConfigPath\ServerConfig.xml.Bad -Force
         Copy-Item -LiteralPath $AgentConfigPath\ServerConfig.xml.Good -Destination $AgentConfigPath\ServerConfig.xml -Force
-        Write-Host {Restored ServerConfig.xml from good backup}
+        write-output {Restored ServerConfig.xml from good backup}
       } Else {
-        Write-Host {FAILURE: No good backup of ServerConfig.xml exists!}
+        write-output {FAILURE: No good backup of ServerConfig.xml exists!}
       }
     }
     Start-Sleep -Seconds 2
     NET START "Windows Agent Service"
   } Else {
-    Write-Host {FAILURE: No good backup of ApplianceConfig.xml exists!}
+    write-output {FAILURE: No good backup of ApplianceConfig.xml exists!}
   }
 }

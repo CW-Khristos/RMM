@@ -31,15 +31,15 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host  '<-Start Diagnostic->'
+    write-output  '<-Start Diagnostic->'
     foreach ($Message in $Messages) {$Message}
-    write-host '<-End Diagnostic->'
+    write-output '<-End Diagnostic->'
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host '<-Start Result->'
-    write-host "Alert=$($message)"
-    write-host '<-End Result->'
+    write-output '<-Start Result->'
+    write-output "Alert=$($message)"
+    write-output '<-End Result->'
   } ## write-DRRMAlert
 #ENDREGION ----- FUNCTIONS ----
 
@@ -53,13 +53,13 @@ if ((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name L
   Get-Content "$env:SystemRoot\System32\drivers\etc\hosts" | ForEach-Object {
     if ((($null -ne $_) -and ($_ -ne "")) -and ($_ -ne $script:arrHOST[$script:intLN])) {
       #FLAG CHANGE
-      write-host "DETECTED CHANGE : $($_)"
+      write-output "DETECTED CHANGE : $($_)"
       $script:diag += "DETECTED CHANGE : $($_)`r`n"
       $script:arrCHG.add($_)
     }
     $script:intLN += 1
   }
-  write-host $script:arrCHG
+  write-output $script:arrCHG
   $strMod = $((Get-ItemProperty -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Name LastWriteTime).LastWriteTime)
   write-DRMMAlert "HOSTS modified within the last 24 hours. Last modification @ $($strMod)"
   write-DRMMDiag "$($script:diag)"

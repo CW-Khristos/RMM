@@ -37,6 +37,18 @@ if (Get-Module -ListAvailable -Name RunAsUser) {
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
 
 $ScriptBlock = {
+  function write-DRMMDiag ($messages) {
+    write-output "<-Start Diagnostic->"
+    foreach ($message in $messages) {$message}
+    write-output "<-End Diagnostic->"
+  } ## write-DRMMDiag
+
+  function write-DRMMAlert ($message) {
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
+  } ## write-DRMMAlert
+
 Add-Type @'
 using System;
 using System.Diagnostics;
@@ -79,27 +91,15 @@ namespace PInvoke.Win32 {
 }
 '@
 
-  $script:diag        = $null
+  $blockdiag        = $null
   $strLineSerparator  = "----------"
   $logTask            = "C:\IT\Log\Idle_RunAs"
-
-  function write-DRMMDiag ($messages) {
-    write-output "<-Start Diagnostic->"
-    foreach ($message in $messages) {$message}
-    write-output "<-End Diagnostic->"
-  } ## write-DRMMDiag
-
-  function write-DRMMAlert ($message) {
-    write-output "<-Start Result->"
-    write-output "Alert=$($message)"
-    write-output "<-End Result->"
-  } ## write-DRMMAlert
 
   try {
     $idle = ("Idle for " + [PInvoke.Win32.UserInput]::IdleTime)
     $last = ("Last input " + ([PInvoke.Win32.UserInput]::LastInput).ToLocalTime().ToString("MM/dd/yyyy hh:mm tt"))
     write-output "$($idle)`r`n$($strLineSerparator)`r`n$($last)"
-    $script:diag += "$($idle)`r`n$($strLineSerparator)`r`n$($last)`r`n"
+    $blockdiag += "$($idle)`r`n$($strLineSerparator)`r`n$($last)`r`n"
     
     $Customfield = "Custom$($ENV:UDFNumber)"
     $IdleTime = [PInvoke.Win32.UserInput]::IdleTime
@@ -114,10 +114,10 @@ namespace PInvoke.Win32 {
     $idleMsg += "$($strLineSerparator)`r`nLast user keyboard/mouse input: $($LastStr)`r`n"
     $idleMsg += "$($strLineSerparator)`r`n$($RegKey)`r`n"
     write-output "$($idleMsg)"
-    $script:diag += "$($idleMsg)`r`n"
-    "$($script:diag)" | add-content $logTask -force
-    write-DRMMAlert "Last user input: $($LastStr) - Idle : $($IdleTime)"
-    exit 0
+    $blockdiag += "$($idleMsg)`r`n"
+    "$($blockdiag)" | add-content $logTask -force
+    write-DRMMAlert "Alert=Last user input: $($LastStr) - Idle : $($IdleTime)"
+    write-DRMMDiag "$($blockdiag)"
     exit 0
   } catch {
     #CLEAR LOGFILE
@@ -125,21 +125,19 @@ namespace PInvoke.Win32 {
     #WRITE TO LOGFILE
     $err = "ERROR - Invoke-AsCurrentUser -`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
     write-output "$($err)"
-    $script:diag += "$($err)`r`n"
-    "$($script:diag)" | add-content $logTask -force
-    write-DRMMAlert "ERROR - Invoke-AsCurrentUser - $($_.Exception)"
-    exit 1
+    $blockdiag += "$($err)`r`n"
+    "$($blockdiag)" | add-content $logTask -force
+    write-DRMMAlert "Alert=ERROR - Invoke-AsCurrentUser - $($_.Exception)"
+    write-DRMMDiag "$($blockdiag)"
     exit 1
   }
-  exit 0
-  exit 0
 }
 
 try {
-  $idleScript = (get-content $ScriptPath)
-  $idleScript | set-content "C:\IT\Scripts\idle_time.ps1" -force
   $idleTask = get-scheduledtask -taskname 'Idle Time' -erroraction silentlycontinue
   if (-not $idleTask) {
+    $idleScript = (get-content $ScriptPath)
+    $idleScript | set-content "C:\IT\Scripts\idle_time.ps1" -force
     $settings = New-ScheduledTaskSettingsSet
     $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -RunLevel Highest
     $idleAction = new-scheduledtaskaction -execute 'powershell.exe' -argument '-executionpolicy bypass -file "C:\IT\Scripts\idle_time.ps1"'
@@ -150,12 +148,12 @@ try {
   #CLEAR LOGFILE
   $null | set-content $logTrigger -force
   #WRITE TO LOGFILE
-  $output = Invoke-AsCurrentUser -UseWindowsPowerShell -CaptureOutput -scriptblock $ScriptBlock -erroraction stop
+  $output = Invoke-AsCurrentUser -NonElevatedSession -UseWindowsPowerShell -CaptureOutput -scriptblock $ScriptBlock -erroraction stop
   write-output "$($output)"
   $script:diag += "$($output)`r`n"
   "$($script:diag)" | add-content $logTrigger -force
-  write-DRMMAlert "$($output)"
-  exit 0
+  write-DRMMAlert "$(($output -split('Alert='))[1])"
+  write-DRMMDiag "$($script:diag)"
   exit 0
 } catch {
   #CLEAR LOGFILE
@@ -166,7 +164,6 @@ try {
   $script:diag += "$($err)`r`n"
   "$($script:diag)" | add-content $logTrigger -force
   write-DRMMAlert "ERROR - Invoke-AsCurrentUser - $($_.Exception)"
-  exit 1
+  write-DRMMDiag "$($script:diag)"
   exit 1
 }
-exit 0

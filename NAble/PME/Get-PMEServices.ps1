@@ -70,7 +70,7 @@
                         0.2.2.2 + Update for compatibility with version expectation when using legacy PME
                         0.2.2.3 + Update OS Compatibility Output, Status/Version Output
                         0.2.2.4 + Changed Legacy PME Detection Method
-                        0.2.2.5 + Converted from Throw to Write-Host for AMP compatibility, Hardcoded Legacy PME Release Date for devices that cannot access the website
+                        0.2.2.5 + Converted from Throw to write-output for AMP compatibility, Hardcoded Legacy PME Release Date for devices that cannot access the website
                         0.2.2.6 + Updating 32-bit OS compatibility with Legacy and 2.x PME
                         0.2.2.7 + Updated for PME 2.1 Testing and minor information output improvements. 
                         Pending Update Fix courtesy of Ashley How
@@ -126,12 +126,12 @@ $CommunityPMESetup_detailsURIHTTPS = "https://raw.githubusercontent.com/N-able/C
 $LegacyPMESetup_detailsURIHTTPS = "https://sis.n-able.com/Components/MSP-PME/latest/PMESetup_details.xml"
 $LegacyPMESetup_detailsURIHTTP = "http://sis.n-able.com/Components/MSP-PME/latest/PMESetup_details.xml"
 
-Write-Host ""
-Write-Host "Get-PMEServices $Version" -ForegroundColor Cyan
-Write-Host ""
+write-output ""
+write-output "Get-PMEServices $Version" -ForegroundColor Cyan
+write-output ""
 
 if ($Diagnostics -eq 'True'){
-    Write-Host "Diagnostics Mode Enabled" -foregroundcolor Yellow
+    write-output "Diagnostics Mode Enabled" -foregroundcolor Yellow
 }
 
 #region Functions
@@ -141,10 +141,10 @@ $winbuild = (Get-WmiObject -class Win32_OperatingSystem).Version
 # [string]$WinBuild=[System.Environment]::OSVersion.Version
 $UBR = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name UBR).UBR
 $OSBuildVersion = $winbuild + "." + $UBR 
-write-Host "Windows Build Version: " -nonewline; Write-Host "$osbuildversion" -ForegroundColor Green
+write-output "Windows Build Version: " -nonewline; write-output "$osbuildversion" -ForegroundColor Green
 
 $OSName = (Get-WmiObject Win32_OperatingSystem).Caption
-Write-Host "OS: " -nonewline; Write-Host "$OSName" -ForegroundColor Green
+write-output "OS: " -nonewline; write-output "$OSName" -ForegroundColor Green
     if (($osname -match "XP") -or ($osname -match "Vista")  -or ($osname -match "Home") -or ($osname -match "2003") -or (($osname -match "2008") -and ($osname -notmatch "2008 R2")) ) {
         
         $Continue = $False
@@ -160,14 +160,14 @@ Write-Host "OS: " -nonewline; Write-Host "$OSName" -ForegroundColor Green
         $StatusMessage = "$(Get-Date) - Error: The OS running on this device ($OSName $osbuildversion) is not supported by N-Central PME."
         $installernotes = $StatusMessage
 
-        Write-Host "$StatusMessage" -ForegroundColor Red
+        write-output "$StatusMessage" -ForegroundColor Red
 
     }
     else {
         $statusmessage = "$(Get-Date) - Information: The OS running on this device ($OSName $osbuildversion) is supported by N-Central PME"
         $installernotes = $statusmessage
-        Write-Host "$statusmessage" -ForegroundColor Green
-        Write-Host ""
+        write-output "$statusmessage" -ForegroundColor Green
+        write-output ""
         $Continue = $True
 
         # See: https://chocolatey.org/docs/installation#completely-offline-install
@@ -185,7 +185,7 @@ Write-Host "OS: " -nonewline; Write-Host "$OSName" -ForegroundColor Green
             #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
         } 
         catch {
-            Write-Host 'Unable to set PowerShell to use TLS 1.2 and TLS 1.1 due to old .NET Framework installed. If you see underlying connection closed or trust errors, you may need to upgrade to .NET Framework 4.5+ and PowerShell v3+.' -ForegroundColor Red
+            write-output 'Unable to set PowerShell to use TLS 1.2 and TLS 1.1 due to old .NET Framework installed. If you see underlying connection closed or trust errors, you may need to upgrade to .NET Framework 4.5+ and PowerShell v3+.' -ForegroundColor Red
         }
 
         [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
@@ -198,12 +198,12 @@ Function Set-PMEExpectations {
 #$OSArch = (Get-WmiObject Win32_OperatingSystem).OSArchitecture
 $64bitOS = [System.Environment]::Is64BitOperatingSystem
 if ($64bitOS -eq $true) {
-    Write-Host "64-Bit OS Detected" -ForegroundColor Cyan
+    write-output "64-Bit OS Detected" -ForegroundColor Cyan
     $OSArch = "64-bit"
     $UninstallRegLocation = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
 }
 else {
-    Write-Host "32-Bit OS Detected" -ForegroundColor Cyan
+    write-output "32-Bit OS Detected" -ForegroundColor Cyan
     $OSArch = "32-Bit"
     $UninstallRegLocation = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 }
@@ -216,11 +216,11 @@ else {
         if ($MSPPlatformCoreLogSize -gt '0') {
         $legacyPME = $false
         # N-Able have pre-announced PME via https://status.n-able.com/release-notes/ although there is no direct category for it
-        Write-Host "Warning: PME 2.x Detected - Artificially setting version and release date expectation via Community XML" -ForegroundColor Yellow
+        write-output "Warning: PME 2.x Detected - Artificially setting version and release date expectation via Community XML" -ForegroundColor Yellow
         #$PMEExpectationSetting = $True
 
-        #Write-Host "PME Latest Version: $PME20LatestVersionPlaceholder" -ForegroundColor Yellow
-        #Write-Host "PME Release Date: $PME20ReleaseDatePlaceholder" -ForegroundColor Yellow
+        #write-output "PME Latest Version: $PME20LatestVersionPlaceholder" -ForegroundColor Yellow
+        #write-output "PME Release Date: $PME20ReleaseDatePlaceholder" -ForegroundColor Yellow
 
         $PMEProgramDataFolder = "$env:programdata\MspPlatform\PME"
         If ($64bitOS -eq $true) {
@@ -325,9 +325,9 @@ Function Get-PMESetupDetails {
             if ($legacyPME -eq $false) {
                 $PMEReleaseDate = $request.ComponentDetails.ReleaseDate
                 if ($? -eq $true) {
-                    Write-Host "Success reading from Community XML!" -ForegroundColor Green
+                    write-output "Success reading from Community XML!" -ForegroundColor Green
                 }
-                Write-Host "Setting PME Component Version Expectation to individual PME Component Versions:" -ForegroundColor Cyan
+                write-output "Setting PME Component Version Expectation to individual PME Component Versions:" -ForegroundColor Cyan
                 $LatestPMEAgentVersion = $request.ComponentDetails.PatchManagementServiceControllerVersion
                 $LatestCacheServiceVersion = $request.ComponentDetails.FileCacheServiceAgentVersion
                 $LatestRPCServerVersion = $request.ComponentDetails.RequestHandlerAgentVersion
@@ -337,13 +337,13 @@ Function Get-PMESetupDetails {
             $overallstatus = '2'
             $diagnosticserrorint = '2'
             $message = "$(Get-Date) ERROR: Error fetching PMESetup_Details.xml, check the source URL $($PMESetup_detailsURI), aborting. Error: $($_.Exception.Message)"
-            write-host $message
+            write-output $message
             $diagnosticsinfo = $diagnosticsinfo + "`n$message"
         } Catch [System.Management.Automation.MetadataException] {
             $overallstatus = '2'
             $diagnosticserrorint = '2'
             $message = "$(Get-Date) ERROR: Error casting to XML, could not parse PMESetup_details.xml, aborting. Error: $($_.Exception.Message)"
-            write-host "$message"
+            write-output "$message"
             $diagnosticsinfo = $diagnosticsinfo + "`n$message"
         } Catch {
             $overallstatus = '2'
@@ -353,7 +353,7 @@ Function Get-PMESetupDetails {
         }
 
         if ($legacyPME -eq $true) {
-            Write-Host "Setting PME Component Version Expectation to match overall PME Version" -ForegroundColor Cyan
+            write-output "Setting PME Component Version Expectation to match overall PME Version" -ForegroundColor Cyan
             $LatestPMEAgentVersion = $request.ComponentDetails.Version
             $LatestCacheServiceVersion = $request.ComponentDetails.Version
             $LatestRPCServerVersion = $request.ComponentDetails.Version
@@ -371,20 +371,20 @@ Function Get-PMESetupDetails {
         } Catch [System.Net.WebException] {
             $overallstatus = '2'
             $diagnosticserrorint = '2'
-            write-host "Error fetching header for PMESetup_Details.xml, check the source URL $($PMESetup_detailsURI), aborting. Error: $($_.Exception.Message)"
+            write-output "Error fetching header for PMESetup_Details.xml, check the source URL $($PMESetup_detailsURI), aborting. Error: $($_.Exception.Message)"
         } Catch {
             $overallstatus = '2'
             $diagnosticserrorint = '2'
-            write-host "Error fetching header for PMESetup_Details.xml, aborting. Error: $($_.Exception.Message)"
+            write-output "Error fetching header for PMESetup_Details.xml, aborting. Error: $($_.Exception.Message)"
         }
     }
   
-    Write-Host "Latest PME Version: " -nonewline; Write-Host "$latestversion" -ForegroundColor Green
-    Write-Host "Latest PME Release Date: " -nonewline; Write-Host "$PMEReleaseDate" -ForegroundColor Green
-    Write-Host "Latest PME Agent Version: " -nonewline; Write-Host "$latestPMEAgentversion" -ForegroundColor Green
-    Write-Host "Latest Cache Service Version: " -nonewline; Write-Host "$LatestCacheServiceVersion" -ForegroundColor Green
-    Write-Host "Latest RPC Server Version: " -nonewline; Write-Host "$latestrpcserverversion" -ForegroundColor Green
-    Write-Host ""
+    write-output "Latest PME Version: " -nonewline; write-output "$latestversion" -ForegroundColor Green
+    write-output "Latest PME Release Date: " -nonewline; write-output "$PMEReleaseDate" -ForegroundColor Green
+    write-output "Latest PME Agent Version: " -nonewline; write-output "$latestPMEAgentversion" -ForegroundColor Green
+    write-output "Latest Cache Service Version: " -nonewline; write-output "$LatestCacheServiceVersion" -ForegroundColor Green
+    write-output "Latest RPC Server Version: " -nonewline; write-output "$latestrpcserverversion" -ForegroundColor Green
+    write-output ""
 }
 
 Function Get-LatestPMEVersion {
@@ -396,7 +396,7 @@ Function Get-LatestPMEVersion {
             . Confirm-PMEUpdatePending 
         }
         else {
-                Write-Host "PME Insiders Stream Detected" -ForegroundColor Yellow
+                write-output "PME Insiders Stream Detected" -ForegroundColor Yellow
                 #$PMEWrapper = get-content "${Env:ProgramFiles(x86)}\N-able Technologies\Windows Agent\log\PMEWrapper.log"
                 #$Latest = "Pme.GetLatestVersion result = LatestVersion"
                 #$LatestVersion = $LatestMatch.Split(' ')[9].TrimEnd(',')
@@ -427,7 +427,7 @@ Function Restore-Date {
 Function Confirm-PMEInstalled {
 
 # Check if PME Agent is currently installed
-    # Write-Host "Checking if PME Agent is already installed..." -ForegroundColor Cyan
+    # write-output "Checking if PME Agent is already installed..." -ForegroundColor Cyan
     $PATHS = @($UninstallRegLocation)
     $SOFTWARE = $PMEAgentAppName
     ForEach ($path in $PATHS) {
@@ -447,21 +447,21 @@ Function Confirm-PMEInstalled {
                         $InstallDateFormatted = $ConvertDateTime | Get-Date -Format "yyyy.MM.dd"
                     }
                     $IsPMEAgentInstalled = "Yes"
-                    Write-Host "PME Agent Already Installed: Yes" -ForegroundColor Green
+                    write-output "PME Agent Already Installed: Yes" -ForegroundColor Green
                     # Write-Output "Installed PME Agent Version: $PMEAgentAppDisplayVersion"
                     # Write-Output "Installed PME Agent Date: $InstallDateFormatted"
                 }
             }
         } Else {
             $IsPMEAgentInstalled = "No"
-            Write-Host "PME Agent Already Installed: No" -ForegroundColor Yellow
+            write-output "PME Agent Already Installed: No" -ForegroundColor Yellow
         }
     }
 
 
 # Check if PME RPC Service is currently installed
 
-    # Write-Host "Checking if PME RPC Server Service is already installed..." -ForegroundColor Cyan
+    # write-output "Checking if PME RPC Server Service is already installed..." -ForegroundColor Cyan
     $PATHS = @($UninstallRegLocation)
     $SOFTWARE = $PMERPCAppName
     ForEach ($path in $PATHS) {
@@ -481,20 +481,20 @@ Function Confirm-PMEInstalled {
                         $InstallDateFormatted = $ConvertDateTime | Get-Date -Format "yyyy.MM.dd"
                     }
                     $IsPMERPCServerServiceInstalled = "Yes"
-                    Write-Host "PME RPC Server Service Already Installed: Yes" -ForegroundColor Green
+                    write-output "PME RPC Server Service Already Installed: Yes" -ForegroundColor Green
                     # Write-Output "Installed PME RPC Server Service Version: $PMERPCServerAppDisplayVersion"
                     # Write-Output "Installed PME RPC Server Service Date: $InstallDateFormatted"
                 }
             }
         } Else {
             $IsPMERPCServerServiceInstalled = "No"
-            Write-Host "PME RPC Server Service Already Installed: No" -ForegroundColor Yellow
+            write-output "PME RPC Server Service Already Installed: No" -ForegroundColor Yellow
         }
     }
     
 
 # Check if PME Cache Service is currently installed
-    # Write-Host "Checking if PME RPC Server Service is already installed..." -ForegroundColor Cyan
+    # write-output "Checking if PME RPC Server Service is already installed..." -ForegroundColor Cyan
     $PATHS = @($UninstallRegLocation)
     $SOFTWARE = $PMECacheAppName
     ForEach ($path in $PATHS) {
@@ -514,14 +514,14 @@ Function Confirm-PMEInstalled {
                         $InstallDateFormatted = $ConvertDateTime | Get-Date -Format "yyyy.MM.dd"
                     }
                     $IsPMECacheServiceInstalled = "Yes"
-                    Write-Host "PME Cache Service Already Installed: Yes" -ForegroundColor Green
+                    write-output "PME Cache Service Already Installed: Yes" -ForegroundColor Green
                     # Write-Output "Installed PME Cache Service Version: $PMECacheServiceAppDisplayVersion"
                     # Write-Output "Installed PME Cache Service Date: $InstallDateFormatted"
                 }
             }
         } Else {
             $IsPMECacheServiceInstalled = "No"
-            Write-Host "PME Cache Service Already Installed: No" -ForegroundColor Yellow
+            write-output "PME Cache Service Already Installed: No" -ForegroundColor Yellow
         }
     }
 
@@ -529,7 +529,7 @@ Function Confirm-PMEInstalled {
          
 Function Confirm-PMEUpdatePending {
     # Check if PME is awaiting update for new release but has not updated yet (normally within 48 hours)
-    write-host ""
+    write-output ""
     If ($IsPMEAgentInstalled -eq "Yes") {
         $Date = Get-Date -Format 'yyyy.MM.dd'
         if ($PMEReleaseDate -ne $null) {
@@ -537,23 +537,23 @@ Function Confirm-PMEUpdatePending {
         } 
         if (($legacyPME -eq $true) -and ($PMEReleaseDate -eq $null)){
             $Message = "$(Get-Date) INFO: Script was unable to read PME Release Date from Webpage. Falling back to hardset release date in Script"
-            Write-Host $Mssage -ForegroundColor Red
+            write-output $Mssage -ForegroundColor Red
             $StatusMessage = $StatusMessage + "`n$message"
             $diagnosticsinfo = $diagnosticsinfo + "`n$message"
             $ConvertPMEReleaseDate = [datetime]$legacyPMEReleaseDate
         }
         $SelfHealingDate = $ConvertPMEReleaseDate.AddDays($PendingUpdateDays).ToString('yyyy.MM.dd')
-        Write-Host "INFO: Script considers a PME update to be pending for ($PendingUpdateDays) days after a new version of PME has been released" -ForegroundColor Yellow -BackgroundColor Black
+        write-output "INFO: Script considers a PME update to be pending for ($PendingUpdateDays) days after a new version of PME has been released" -ForegroundColor Yellow -BackgroundColor Black
         $DaysElapsed = (New-TimeSpan -Start $SelfHealingDate -End $Date).Days
         $DaysElapsedReversed = (New-TimeSpan -Start $ConvertPMEReleaseDate -End $Date).Days
 
         # Only run if current $Date is greater than or equal to $SelfHealingDate and $LatestVersion is greater than $app.DisplayVersion
         If (($Date -ge $SelfHealingDate) -and ([version]$LatestVersion -ge [version]$PMEAgentAppDisplayVersion)) {
             $UpdatePending = "No"
-            Write-Host "Update Pending: " -nonewline; Write-Host "No (Last Update was released [$DaysElapsed] days since the grace period)" -ForegroundColor Green    
+            write-output "Update Pending: " -nonewline; write-output "No (Last Update was released [$DaysElapsed] days since the grace period)" -ForegroundColor Green    
         } Else {
             $UpdatePending = "Yes"
-            Write-Host "Update Pending: " -nonewline; Write-Host "Yes (New Update has been released and [$DaysElapsedReversed] days has elapsed since the grace period)" -ForegroundColor Yellow
+            write-output "Update Pending: " -nonewline; write-output "Yes (New Update has been released and [$DaysElapsedReversed] days has elapsed since the grace period)" -ForegroundColor Yellow
         }
     }
 }
@@ -565,19 +565,19 @@ Function Get-PMEServiceVersions {
     $PMERpcServerVersion = (get-item $SolarWindsMSPRpcServerLocation -ErrorAction SilentlyContinue).VersionInfo.ProductVersion
 
     if ($PMEAgentStatus -eq $null) { 
-        Write-Host "PME Agent service is missing" -ForegroundColor Red
+        write-output "PME Agent service is missing" -ForegroundColor Red
         $PMEAgentStatus = 'Service is Missing'
         $PMEAgentVersion = '0.0'
     }
 
     if ($PMECacheStatus -eq $null) {
-        Write-Host "PME Cache service is missing" -ForegroundColor Red
+        write-output "PME Cache service is missing" -ForegroundColor Red
         $PMECacheStatus = 'Service is Missing'
         $PMECacheVersion = '0.0'
     }
 
     if ($PMERpcServerStatus -eq $null) {
-        Write-Host "PME RPC Server service is missing" -ForegroundColor Red
+        write-output "PME RPC Server service is missing" -ForegroundColor Red
         $PMERpcServerStatus = 'Service is Missing'
         $PMERpcServerVersion = '0.0'
     }
@@ -600,19 +600,19 @@ if ($PMEAgentStatus -ne $null) {
 else {
     $pmeprofile = 'Error - Agent is running but config file could not be found'
 }
-Write-Host "PME Profile: " -nonewline; Write-Host "$pmeprofile" -foregroundcolor Green
-Write-Host "PME Offline Scanning: " -nonewline; Write-Host "$pmeofflinescan" -foregroundcolor Green
+write-output "PME Profile: " -nonewline; write-output "$pmeprofile" -foregroundcolor Green
+write-output "PME Offline Scanning: " -nonewline; write-output "$pmeofflinescan" -foregroundcolor Green
     if ($pmeofflinescan -eq '1') {
         $pmeofflinescanbool = $True
-        Write-Host "INFO: PME Offline Scanning is enabled" -ForegroundColor Yellow -BackgroundColor Black
+        write-output "INFO: PME Offline Scanning is enabled" -ForegroundColor Yellow -BackgroundColor Black
     }
     elseif ($pmeofflinescan -eq "N/A")  {
     }
     else {
         $pmeofflinescanbool = $False
-        Write-Host "INFO: PME Offline Scanning is not enabled" -ForegroundColor Yellow -BackgroundColor Black
+        write-output "INFO: PME Offline Scanning is not enabled" -ForegroundColor Yellow -BackgroundColor Black
     }
-    write-host ""
+    write-output ""
 }
 
 Function Test-PMEConnectivity {
@@ -621,40 +621,40 @@ Function Test-PMEConnectivity {
     # Performs connectivity tests to destinations required for PME
     $OSVersion = (Get-WmiObject Win32_OperatingSystem).Caption
     If (($PSVersionTable.PSVersion -ge "4.0") -and (!($OSVersion -match 'Windows 7')) -and (!($OSVersion -match '2008 R2')) -and (!($OSVersion -match 'Small Business Server 2011 Standard'))) {
-        Write-Host "Performing HTTPS connectivity tests for PME required destinations..." -ForegroundColor Cyan
+        write-output "Performing HTTPS connectivity tests for PME required destinations..." -ForegroundColor Cyan
         $List1= @("sis.n-able.com")
         $HTTPSError = @()
         $List1 | ForEach-Object {
             $Test1 = Test-NetConnection $_ -port 443
             If ($Test1.tcptestsucceeded -eq $True) {
                 $Message = "OK: Connectivity to https://$_ ($(($Test1).RemoteAddress.IpAddressToString)) established"
-                Write-Host "$Message" -ForegroundColor Green
+                write-output "$Message" -ForegroundColor Green
                 $HTTPSError += "No" 
                 $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message
             }
             Else {
                 $Message = "ERROR: Unable to establish connectivity to https://$_ ($(($Test1).RemoteAddress.IpAddressToString))"
-                Write-Host "$Message" -ForegroundColor Red
+                write-output "$Message" -ForegroundColor Red
                 $StatusMessage = $StatusMessage + "`n$Message"
                 $HTTPSError += "Yes"
                 $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message
             }
         }
 
-        Write-Host "Performing HTTP connectivity tests for PME required destinations..." -ForegroundColor Cyan
+        write-output "Performing HTTP connectivity tests for PME required destinations..." -ForegroundColor Cyan
         $HTTPError = @()
         $List2= @("sis.n-able.com","download.windowsupdate.com","fg.ds.b1.download.windowsupdate.com")
         $List2 | ForEach-Object {
             $Test1 = Test-NetConnection $_ -port 80
             If ($Test1.tcptestsucceeded -eq $True) {
                 $Message = "OK: Connectivity to http://$_ ($(($Test1).RemoteAddress.IpAddressToString)) established"
-                Write-Host "$Message" -ForegroundColor Green
+                write-output "$Message" -ForegroundColor Green
                 $HTTPError += "No"
                 $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message 
             }
             Else {
                 $message = "ERROR: Unable to establish connectivity to http://$_ ($(($Test1).RemoteAddress.IpAddressToString))"
-                Write-Host $message -ForegroundColor Red
+                write-output $message -ForegroundColor Red
                 $StatusMessage = $StatusMessage + "`n$Message"
                 $HTTPError += "Yes"
                 $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message 
@@ -665,12 +665,12 @@ Function Test-PMEConnectivity {
             $Message = "ERROR: No connectivity to $($List2[0]) can be established"
             Write-EventLog -LogName Application -Source "Get-PMEServices" -EntryType Information -EventID 100 -Message "$Message, aborting.`nScript: Get-PMEServices.ps1"  
             $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message
-            write-host "ERROR: No connectivity to $($List2[0]) can be established, aborting"
+            write-output "ERROR: No connectivity to $($List2[0]) can be established, aborting"
         }
         ElseIf (($HTTPError[0] -like "*Yes*") -or ($HTTPSError[0] -like "*Yes*")) {
             $Message = "WARNING: Partial connectivity to $($List2[0]) established, falling back to HTTP."
             Write-EventLog -LogName Application -Source "Get-PMEServices" -EntryType Information -EventID 100 -Message "$Message`nScript: Get-PMEServices.ps1"  
-            Write-Host "$Message" -ForegroundColor Yellow
+            write-output "$Message" -ForegroundColor Yellow
             $Fallback = "Yes"
             $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message
         }
@@ -678,20 +678,20 @@ Function Test-PMEConnectivity {
         If ($HTTPError[1] -like "*Yes*") {
             $Message = "WARNING: No connectivity to $($List2[1]) can be established"
             Write-EventLog -LogName Application -Source "Get-PMEServices" -EntryType Information -EventID 100 -Message "$Message, you will be unable to download Microsoft Updates!`nScript: Get-PMEServices.ps1"  
-            Write-Host "$Message, you will be unable to download Microsoft Updates!" -ForegroundColor Red
+            write-output "$Message, you will be unable to download Microsoft Updates!" -ForegroundColor Red
             $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message
         }
 
         If ($HTTPError[2] -like "*Yes*") {
             $Message = "WARNING: No connectivity to $($List2[2]) can be established"
             Write-EventLog -LogName Application -Source "Get-PMEServices" -EntryType Information -EventID 100 -Message "$Message, you will be unable to download Windows Feature Updates!`nScript: Get-PMEServices.ps1"  
-            Write-Host "$Message, you will be unable to download Windows Feature Updates!" -ForegroundColor Red  
+            write-output "$Message, you will be unable to download Windows Feature Updates!" -ForegroundColor Red  
             $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message
     }
 }
     Else {
         $Message = "Windows: $OSVersion`nPowershell: $($PSVersionTable.PSVersion)`nSkipping connectivity tests for PME required destinations as OS is Windows 7/ Server 2008 (R2)/ SBS 2011 and/or Powershell 4.0 or above is not installed"
-        Write-Host $Message
+        write-output $Message
         $Fallback = "Yes" 
         $diagnosticsinfo = $diagnosticsinfo + '`n' + $Message  
     }
@@ -705,35 +705,35 @@ Function Test-PMEConnectivity {
 }
 
 Function Write-Status {
-Write-Host ""
-Write-Host "SolarWinds MSP PME Agent Status: $PMEAgentStatus ($PMEAgentVersion)"
-Write-Host "SolarWinds MSP Cache Service Status: $PMECacheStatus ($PMECacheVersion)"
-Write-Host "SolarWinds MSP RPC Server Status: $PMERpcServerStatus ($PMERpcServerVersion)"
-Write-Host ""
+write-output ""
+write-output "SolarWinds MSP PME Agent Status: $PMEAgentStatus ($PMEAgentVersion)"
+write-output "SolarWinds MSP Cache Service Status: $PMECacheStatus ($PMECacheVersion)"
+write-output "SolarWinds MSP RPC Server Status: $PMERpcServerStatus ($PMERpcServerVersion)"
+write-output ""
 }
 
 Function Start-Services {
     if (($PMEAgentStatus -eq 'Running') -and ($PMECacheStatus -eq 'Running') -and ($PMERpcServerStatus -eq 'Running')) {
-            Write-Host "$(Get-Date) - OK - All PME Services are in a Running State" -foregroundcolor Green
+            write-output "$(Get-Date) - OK - All PME Services are in a Running State" -foregroundcolor Green
     }
     else {
         $RecheckStatus = $True
         if ($PMEAgentStatus -ne 'Running') {
-            Write-Host "Starting SolarWinds MSP PME Agent" -ForegroundColor Yellow
+            write-output "Starting SolarWinds MSP PME Agent" -ForegroundColor Yellow
             New-EventLog -LogName Application -Source $EventLogCompanyName -erroraction silentlycontinue
             Write-EventLog -LogName Application -Source $EventLogCompanyName -EntryType Information -EventID 100 -Message "Starting SolarWinds MSP PME Agent...`nSource: Get-PMEServices.ps1"
             start-service -Name "SolarWinds.MSP.PME.Agent.PmeService" 
         }
 
         if ($PMERpcServerStatus -ne 'Running') {
-            Write-Host "Starting SolarWinds MSP RPC Server" -ForegroundColor Yellow
+            write-output "Starting SolarWinds MSP RPC Server" -ForegroundColor Yellow
             New-EventLog -LogName Application -Source $EventLogCompanyName -erroraction silentlycontinue
             Write-EventLog -LogName Application -Source $EventLogCompanyName -EntryType Information -EventID 100 -Message "Starting SolarWinds MSP RPC Server Service...`nSource: Get-PMEServices.ps1"
             start-service -Name "SolarWinds MSP RPC Server" 
         }
 
         if ($PMECacheStatus -ne 'Running') {
-            Write-Host "Starting SolarWinds MSP Cache Service Service" -ForegroundColor Yellow
+            write-output "Starting SolarWinds MSP Cache Service Service" -ForegroundColor Yellow
             New-EventLog -LogName Application -Source $EventLogCompanyName -erroraction silentlycontinue
             Write-EventLog -LogName Application -Source $EventLogCompanyName -EntryType Information -EventID 100 -Message "Starting SolarWinds MSP Cache Service...`nSource: Get-PMEServices.ps1"
             start-service -Name "SolarWinds MSP Cache Service Service" 
@@ -743,26 +743,26 @@ Function Start-Services {
 
 Function Set-AutomaticStartup {
     if (($SolarWinds.MSP.PME.Agent.PmeServiceStartup -eq 'Auto') -and ($SolarWinds.MSP.CacheServiceStartup -eq 'Auto') -and ($SolarWinds.MSP.RpcServerServiceStartup -eq 'Auto')) {
-            Write-Host "$(Get-Date) - OK - All PME Services are set to Automatic Startup" -foregroundcolor Green
+            write-output "$(Get-Date) - OK - All PME Services are set to Automatic Startup" -foregroundcolor Green
     }
     else {
         $RecheckStatus = $True
         if ($SolarWinds.MSP.PME.Agent.PmeServiceStartup -ne 'Auto') {
-            Write-Host "Changing SolarWinds MSP PME Agent to Automatic" -ForegroundColor Yellow
+            write-output "Changing SolarWinds MSP PME Agent to Automatic" -ForegroundColor Yellow
             New-EventLog -LogName Application -Source $EventLogCompanyName -erroraction silentlycontinue
             Write-EventLog -LogName Application -Source $EventLogCompanyName -EntryType Information -EventID 102 -Message "Setting SolarWinds MSP PME Agent to Automatic...`nSource: Get-PMEServices.ps1"
             set-service -Name "SolarWinds.MSP.PME.Agent.PmeService" -StartupType Automatic
         }
 
         if ($SolarWinds.MSP.RpcServerServiceStartup -ne 'Auto') {
-            Write-Host "Changing SolarWinds MSP RPC Server to Automatic" -ForegroundColor Yellow
+            write-output "Changing SolarWinds MSP RPC Server to Automatic" -ForegroundColor Yellow
             New-EventLog -LogName Application -Source $EventLogCompanyName -erroraction silentlycontinue
             Write-EventLog -LogName Application -Source $EventLogCompanyName -EntryType Information -EventID 102 -Message "Setting SolarWinds MSP RPC Server Service to Automatic...`nSource: Get-PMEServices.ps1"
             set-service -Name "SolarWinds MSP RPC Server" -StartupType Automatic
         }
 
         if ($SolarWinds.MSP.CacheServiceStartup -ne 'Auto') {
-            Write-Host "Changing SolarWinds MSP Cache Service Service to Automatic" -ForegroundColor Yellow
+            write-output "Changing SolarWinds MSP Cache Service Service to Automatic" -ForegroundColor Yellow
             New-EventLog -LogName Application -Source $EventLogCompanyName -erroraction silentlycontinue
             Write-EventLog -LogName Application -Source $EventLogCompanyName -EntryType Information -EventID 102 -Message "Setting SolarWinds MSP Cache Service to Automatic...`nSource: Get-PMEServices.ps1"
             set-service -Name "SolarWinds MSP Cache Service Service" -StartupType Automatic 
@@ -771,62 +771,62 @@ Function Set-AutomaticStartup {
 }   
 
 Function Validate-PME {
-Write-Host ""
+write-output ""
 If ([version]$PMEAgentVersion -ge [version]$latestpmeagentversion) {
-    Write-Host "PME Agent Version: " -nonewline; Write-Host "Up To Date ($PMEAgentVersion)" -ForegroundColor Green
+    write-output "PME Agent Version: " -nonewline; write-output "Up To Date ($PMEAgentVersion)" -ForegroundColor Green
 }
 else {
-    Write-Host "PME Agent Version: " -nonewline; Write-Host "Not Up To Date ($PMEAgentVersion)" -ForegroundColor Red
+    write-output "PME Agent Version: " -nonewline; write-output "Not Up To Date ($PMEAgentVersion)" -ForegroundColor Red
 }
 
 If ([version]$PMECacheVersion -ge [version]$LatestCacheServiceVersion) {
-    Write-Host "PME Cache Service Version: " -nonewline; Write-Host "Up To Date ($PMECacheVersion)" -ForegroundColor Green
+    write-output "PME Cache Service Version: " -nonewline; write-output "Up To Date ($PMECacheVersion)" -ForegroundColor Green
 }
 else {
-    Write-Host "PME Cache Service Version: " -nonewline; Write-Host "Not Up To Date ($PMECacheVersion)" -ForegroundColor Red
+    write-output "PME Cache Service Version: " -nonewline; write-output "Not Up To Date ($PMECacheVersion)" -ForegroundColor Red
 }
 
 If ([version]$PMERpcServerVersion -ge [version]$latestrpcserverversion) {
-    Write-Host "PME RPC Server Version: " -nonewline; Write-Host "Up To Date ($PMERpcServerVersion)" -ForegroundColor Green
+    write-output "PME RPC Server Version: " -nonewline; write-output "Up To Date ($PMERpcServerVersion)" -ForegroundColor Green
 }
 else {
-    Write-Host "PME RPC Server Version: " -nonewline; Write-Host "Not Up To Date ($PMERpcServerVersion)" -ForegroundColor Red
+    write-output "PME RPC Server Version: " -nonewline; write-output "Not Up To Date ($PMERpcServerVersion)" -ForegroundColor Red
 }
 
 
 if (($PMECacheVersion -eq '0.0') -or ($PMEAgentVersion -eq '0.0') -or ($PMERpcServerVersion -eq '0.0')) {
     $OverallStatus = 1
     $StatusMessage = "$(Get-Date) - WARNING: PME is missing one or more application installs"
-    Write-Host ""
-    Write-Host "$StatusMessage" -ForegroundColor Red
+    write-output ""
+    write-output "$StatusMessage" -ForegroundColor Red
 }
 
 elseif (([version]$PMECacheVersion -ge [version]$latestcacheserviceversion) -and ([version]$PMEAgentVersion -ge [version]$latestpmeagentversion) -and ([version]$PMERpcServerVersion -ge [version]$latestrpcserverversion)) {
     $OverallStatus = 0  
     $StatusMessage = "$(Get-Date) - OK: All PME Services are running the latest version`n" + $StatusMessage  
-    Write-Host ""
-    Write-Host "$StatusMessage" -foregroundcolor Green
+    write-output ""
+    write-output "$StatusMessage" -foregroundcolor Green
 }
 elseif ($UpdatePending -eq "Yes") {
     $OverallStatus = 0  
     $StatusMessage = "$(Get-Date) - OK: All PME Services are awaiting an update to the latest version`n" + $StatusMessage
-    Write-Host ""   
-    Write-Host "$StatusMessage" -foregroundcolor Green    
+    write-output ""   
+    write-output "$StatusMessage" -foregroundcolor Green    
 }
 else {
     $OverallStatus = 2
     $StatusMessage = "$(Get-Date) - WARNING: One or more PME Services are not running the latest version`n" + $StatusMessage
-    Write-Host "" 
-    Write-Host "$StatusMessage" -foregroundcolor Yellow
-    Write-Host ""
+    write-output "" 
+    write-output "$StatusMessage" -foregroundcolor Yellow
+    write-output ""
 }
 if ($OverallStatus -eq "0") {
-    Write-Host "PME Status: " -nonewline; Write-Host "$OverallStatus" -ForegroundColor Green
+    write-output "PME Status: " -nonewline; write-output "$OverallStatus" -ForegroundColor Green
 }
 else {
-    Write-Host "PME Status: " -nonewline; Write-Host "$OverallStatus" -ForegroundColor Red
+    write-output "PME Status: " -nonewline; write-output "$OverallStatus" -ForegroundColor Red
 }
-Write-Host ""
+write-output ""
 }
 
 Function Get-PMEAnalysis {
@@ -848,12 +848,12 @@ if (test-path "$NCentralLog\PME_Install_*.log") {
     $PMEQueryLogContent = get-content "$PMEProgramDataFolder\log\QueryManager.log"
     $PMEScanDateFound = $PMEQueryLogContent -contains '===============================>>>>> Start scan <<<<<========================================'
     if (($PMEQueryLogContent -eq $null) -or ($PMESCanDateFound -eq $false)) {
-        Write-Host "No PME Scan data was found" -ForegroundColor Red
+        write-output "No PME Scan data was found" -ForegroundColor Red
         $lastdetectionlogdate = $null
         $PMELastScanData = "There has been no recent patch detection scan." 
     }
     else {
-        Write-Host "PME Scan data was found" -ForegroundColor Green
+        write-output "PME Scan data was found" -ForegroundColor Green
     [datetime]$lastdetectionlogdate = (($PMEQueryLogContent -contains '===============================>>>>> Start scan <<<<<========================================')[-1]).Split(" ")[1]
     $detectiontimedifference = ($dateexecute - $lastdetectionlogdate).Days
     $PMELastScanData = "The last patch detection scan took place $detectiontimedifference Days ago"
@@ -867,7 +867,7 @@ if (test-path "$NCentralLog\PME_Install_*.log") {
     }
 
     $PMEAnalysisMessage = "Installed PME Version: $PMEAgentVersion`nLatest PME Version: $latestversion`n$PMEInstallTimeData`n$PMELastScanData`n$InstallProblem"
-    Write-Host "$PMEAnalysisMessage"
+    write-output "$PMEAnalysisMessage"
 
     $PMEInstallerExefromLog = [Regex]::Matches(($pmeinstalllogcontent -match "Original Setup EXE"),'[A-Z]:\\(?:[^\\\/:*?"<>|\r\n]+\\)*[^\\\/:*?"<>|\r\n]*$').value
     $startinglinecontent = "Installing SolarWinds.MSP.PME.Agent.exe windows service"
@@ -877,33 +877,33 @@ if (test-path "$NCentralLog\PME_Install_*.log") {
     if ($startinglinenumber -ne '-2'){ 
         $relevantlines = $TotalLinesInFile - $startinglinenumber
         $UpgradeError = get-content $pmeinstalllog -last $relevantlines
-        Write-Host ""
-        Write-Host "Installer EXE: " -ForegroundColor Green -nonewline; Write-Host "$PMEInstallerExefromLog"
+        write-output ""
+        write-output "Installer EXE: " -ForegroundColor Green -nonewline; write-output "$PMEInstallerExefromLog"
         if ($pmeInstallerExefromLog -ne "$PMEProgramDataFolder\PME\Archives\PMESetup_$LatestVersion.exe") {
-            Write-Host "Incorrect Setup EXE is being used" -foregroundcolor Red
+            write-output "Incorrect Setup EXE is being used" -foregroundcolor Red
         }
         else {
-            Write-Host "Correct Setup EXE is being used" -foregroundcolor Green
+            write-output "Correct Setup EXE is being used" -foregroundcolor Green
         }
-        Write-Host ""
-        Write-Host "Last Upgrade Results: " -ForegroundColor Green
+        write-output ""
+        write-output "Last Upgrade Results: " -ForegroundColor Green
         get-content $pmeinstalllog -last $relevantlines
         }
         else {
             $pmeinstalllog = 'Error: There was no successful upgrades detected'
-            Write-Host $pmeinstalllog -foregroundcolor Red        
+            write-output $pmeinstalllog -foregroundcolor Red        
         }
     }
     else {
         $pmeinstalllog = 'Error: There was no successful upgrades detected'
-        Write-Host $pmeinstalllog -foregroundcolor Red    
+        write-output $pmeinstalllog -foregroundcolor Red    
     }
     
 }
     
 Function Get-PMEConfigMisconfigurations {
     # Check PME Config and inform of possible misconfigurations
-    Write-Host "PME Config Details:" -ForegroundColor Cyan
+    write-output "PME Config Details:" -ForegroundColor Cyan
      Try {
 
         If (Test-Path "$CacheServiceConfigFile") {
@@ -917,7 +917,7 @@ Function Get-PMEConfigMisconfigurations {
                     Write-Warning "$CacheConfigMessage"
                 } ElseIf ($CacheServiceConfig.CanBypassProxyCacheService -eq "True") {
                     $CacheConfigMessage = "$(Get-Date) - INFO: Patch profile allows PME to fallback to external sources"
-                    Write-Host "$CacheConfigMessage" -ForegroundColor Yellow -BackgroundColor Black
+                    write-output "$CacheConfigMessage" -ForegroundColor Yellow -BackgroundColor Black
                 } Else {
                     $CacheConfigMessage = "$(Get-Date) - WARNING: Unable to determine if patch profile allows PME to fallback to external sources"
                     Write-Warning "$CacheConfigMessage"
@@ -926,7 +926,7 @@ Function Get-PMEConfigMisconfigurations {
 
                 If ($CacheServiceConfig.CacheSizeInMB -eq 10240) {
                     $CacheConfigSizeMessage = "$(Get-Date) - INFO: Cache Service is set to default cache size of 10240 MB"
-                    Write-Host "$CacheConfigSizeMessage" -ForegroundColor Yellow -BackgroundColor Black
+                    write-output "$CacheConfigSizeMessage" -ForegroundColor Yellow -BackgroundColor Black
                 } Else {
                     $CacheSize = $CacheServiceConfig.CacheSizeInMB
                     $CacheConfigSizeMessage = "$(Get-Date) - WARNING: Cache Service is not set to default cache size of 10240 MB (currently $CacheSize MB), PME may not work at expected!"
@@ -941,7 +941,7 @@ Function Get-PMEConfigMisconfigurations {
     }   
 
 $StatusMessage = $StatusMessage + "`n" + $CacheConfigMessage + "`n" + $CacheConfigSizeMessage
-Write-Host ""
+write-output ""
 }
 
 #endregion
@@ -968,11 +968,11 @@ if ($continue -eq $true) {
     }
 
     if (($OverallStatus -ne '0') -or ($Diagnostics -eq 'True')) {
-        Write-Host "Error Detected. Running diagnostics..." -ForegroundColor Red
+        write-output "Error Detected. Running diagnostics..." -ForegroundColor Red
     . Test-PMEConnectivity
-    # Write-Host "$DiagnosticsInfo`n"
-    # Write-Host "$DiagnosticsError"
-    Write-Host "Diagnostics Error: " -nonewline; Write-Host "$DiagnosticsErrorInt" -ForegroundColor Green
+    # write-output "$DiagnosticsInfo`n"
+    # write-output "$DiagnosticsError"
+    write-output "Diagnostics Error: " -nonewline; write-output "$DiagnosticsErrorInt" -ForegroundColor Green
     }
 
     if ($OverallStatus -ne '0') {

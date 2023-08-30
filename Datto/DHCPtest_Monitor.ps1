@@ -17,15 +17,15 @@
 
 #region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-host "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
-    write-host "<-End Diagnostic->"
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-host "<-Start Result->"
-    write-host "Alert=$($message)"
-    write-host "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 
   function StopClock {
@@ -37,7 +37,7 @@
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
     $ScriptStopTime = (Get-Date).ToString('yyyy-MM-dd hh:mm:ss')
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
+    write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds"
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 
@@ -48,28 +48,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - ($($strModule)) :" -foregroundcolor red
-        write-host "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - ($($strModule)) :" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-host "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :" -foregroundcolor yellow
-        write-host "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
       }
     }
   }
@@ -82,7 +82,7 @@
     $xmldiag = $null
     #RETRIEVE VERSION XML FROM GITHUB
     $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
-    write-host "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
+    write-output "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
     $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/Datto/version.xml"
     try {
       $verXML = New-Object System.Xml.XmlDocument
@@ -90,14 +90,14 @@
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "XML.Load() - Could not open $($srcVER)`r`n$($err)`r`n"
-      write-host "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
+      write-output "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
       try {
         $web = new-object system.net.webclient
         [xml]$verXML = $web.DownloadString($srcVER)
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         $xmldiag += "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)`r`n"
-        write-host "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
+        write-output "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
         try {
           start-bitstransfer -erroraction stop -source $srcVER -destination "C:\IT\Scripts\version.xml"
           [xml]$verXML = "C:\IT\Scripts\version.xml"
@@ -105,23 +105,23 @@
           $blnXML = $false
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
           $xmldiag += "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n"
-          write-host "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
+          write-output "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
         }
       }
     }
     #READ VERSION XML DATA INTO NESTED HASHTABLE FOR LATER USE
     try {
       if (-not $blnXML) {
-        write-host $blnXML
+        write-output $blnXML
       } elseif ($blnXML) {
         foreach ($objSCR in $verXML.SCRIPTS.ChildNodes) {
           if ($objSCR.name -match $strSCR) {
             #CHECK LATEST VERSION
             $xmldiag += "`r`n`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)`r`n"
-            write-host "`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)"
+            write-output "`t$($strLineSeparator)`r`n`t - CHKAU : $($strVER) : GitHub - $($strBRCH) : $($objSCR.innertext)"
             if ([version]$objSCR.innertext -gt $strVER) {
               $xmldiag += "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
-              write-host "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              write-output "`t`t - UPDATING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               #REMOVE PREVIOUS COPIES OF SCRIPT
               if (test-path -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1") {
                 remove-item -path "C:\IT\Scripts\$($strSCR)_$($strVER).ps1" -force -erroraction stop
@@ -135,17 +135,17 @@
               Invoke-WebRequest "$($strURL)" | Select-Object -ExpandProperty Content | Out-File "C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1"
               #RE-EXECUTE LATEST VERSION OF SCRIPT
               $xmldiag += "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n`r`n"
-              write-host "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
+              write-output "`t`t - RE-EXECUTING : $($objSCR.name) : $($objSCR.innertext)`r`n"
               $output = C:\Windows\System32\cmd.exe "/C powershell -executionpolicy bypass -file `"C:\IT\Scripts\$($strSCR)_$($objSCR.innertext).ps1`""
               foreach ($line in $output) {$stdout += "$($line)`r`n"}
               $xmldiag += "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)`r`n"
-              write-host "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)"
+              write-output "`t`t - StdOut : $($stdout)`r`n`t`t$($strLineSeparator)"
               $xmldiag += "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
-              write-host "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
+              write-output "`t`t - CHKAU COMPLETED : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
               $script:blnBREAK = $true
             } elseif ([version]$objSCR.innertext -le $strVER) {
               $xmldiag += "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)`r`n"
-              write-host "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
+              write-output "`t`t - NO UPDATE : $($objSCR.name) : $($objSCR.innertext)`r`n`t$($strLineSeparator)"
             }
             break
           }
@@ -157,7 +157,7 @@
       $script:blnBREAK = $false
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "Error reading Version XML : $($srcVER)`r`n$($err)`r`n"
-      write-host "Error reading Version XML : $($srcVER)`r`n$($err)"
+      write-output "Error reading Version XML : $($srcVER)`r`n$($err)"
       $script:diag += "$($xmldiag)"
       $xmldiag = $null
     }
@@ -170,13 +170,13 @@
       $dlFile = $web.downloadfile($strURL, "C:\IT\DHCPtest\$($file)")
     } catch {
       $dldiag = "Web.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-host "Web.DownloadFile() - Could not download $($strURL)" -foregroundcolor red
+      write-output "Web.DownloadFile() - Could not download $($strURL)" -foregroundcolor red
       logERR 3 "download-Files" "$($dldiag)"
       try {
         start-bitstransfer -source $strURL -destination "C:\IT\DHCPtest\$($file)" -erroraction stop
       } catch {
         $dldiag = "BITS.Transfer() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-        write-host "BITS.Transfer() - Could not download $($strURL)" -foregroundcolor red
+        write-output "BITS.Transfer() - Could not download $($strURL)" -foregroundcolor red
         logERR 2 "download-Files" "$($dldiag)"
       }
     }

@@ -721,11 +721,11 @@ $Results = [PSCustomObject]@{
 } 
  
 if ($results.psobject.properties.value -contains $false) {
-    write-host "This device is not compatible with Windows 11. See the detailed results for more information"
+    write-output "This device is not compatible with Windows 11. See the detailed results for more information"
     $Results | Format-List
 }
 else {
-    write-host "This device is compatible with Windows 11. See the detailed results for more information"
+    write-output "This device is compatible with Windows 11. See the detailed results for more information"
     $Results | format-list
 }
 
