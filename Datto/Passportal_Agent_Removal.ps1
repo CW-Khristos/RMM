@@ -23,6 +23,7 @@
     return $output
   } ## Get-ProcessOutput
 
+$blnINSTALL = $false  
 #PASSPORTAL AGENT REMOVAL
 $script:installed = (Get-ItemProperty "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ea SilentlyContinue) | where-object {$_.DisplayName -contains "Passportal Agent"}
 write-output "PASSPORTAL AGENT:"
