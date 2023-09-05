@@ -9,7 +9,6 @@
   $script:blnWARN   = $false
   $script:blnFAIL   = $false
   $blnUninstall     = $false
-  $blnMatch         = $false
   $script:arrAV     = @(
     "Avast",
     "AVG",
@@ -35,16 +34,16 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-output  "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRMMAlert ($message) {
+  function write-DRRMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRMMAlert
+  } ## write-DRRMAlert
 
   function Get-ProcessOutput {
     Param (
@@ -155,18 +154,13 @@ if ($env:blnRemove.toupper() -eq "TRUE") {
 $UninstallStrings = get-childitem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 $UninstallStrings += get-childitem "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
 if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET AV WAS PASSED
-  #REMOVAL VIA REGISTRY
-  write-output "BEGINNING REMOVAL VIA REGISTRY :"
-  write-output "$($strLineSeparator)"
-  $script:diag += "BEGINNING REMOVAL VIA REGISTRY :`r`n"
-  $script:diag += "$($strLineSeparator)`r`n"
   $avUninstall = $UninstallStrings | get-itemproperty | where {$_.displayname -like "*$($env:strAV)*"}
   if (($null -ne $avUninstall) -and ($avUninstall -ne "")) {          #TARGET AV FOUND
     #SET REBOOT STRINGS
     switch ($env:strAV.toupper()) {
-      "MALWAREBYTES" {$strReboot = "/SILENT /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /L*v"}
-      "MCAFEE" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS /L*v"}
-      "SOPHOS" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS /L*v"}
+      "MALWAREBYTES" {$strReboot = "/SILENT /VERYSILENT /SUPPRESSMSGBOXES /NORESTART"}
+      "MCAFEE" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS"}
+      "SOPHOS" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS"}
     }
     foreach ($item in $avUninstall) {
       write-output "`r`n$($strLineSeparator)`r`nFOUND $($item.displayname):`r`nDescription : $($item.comments)`r`n$($item.UninstallString)"
@@ -193,11 +187,7 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
           }
         } elseif ($item.UninstallString -notlike "*msiexec*") {       #EXE UNINSTALL
           try {
-            $output = Get-ProcessOutput -FileName "$($item.UninstallString)" -Args "$($strReboot) `"C:\IT\Log\$($item.displayname)_uninstall`""
-            write-output "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
-            write-output "$($strLineSeparator)"
-            $script:diag += "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`"`r`n"
-            $script:diag += "$($strLineSeparator)`r`n"
+            $output = Get-ProcessOutput -FileName "$($item.UninstallString)" -Args "$($strReboot)"
           } catch {
             $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
             logERR 3 "$($item.displayname) UNINSTALL UNSUCCESSFUL :" $err
@@ -219,25 +209,15 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
     $script:diag += "NO $($env:strAV.toupper()) INSTALLATION DETECTED`r`n"
     $script:diag += "$($strLineSeparator)`r`n"
   }
-  #REMOVAL VIA AV TOOLS
-  write-output "BEGINNING REMOVAL VIA REMOVAL TOOLS :"
-  write-output "$($strLineSeparator)"
-  $script:diag += "BEGINNING REMOVAL VIA REMOVAL TOOLS :`r`n"
-  $script:diag += "$($strLineSeparator)`r`n"
 } elseif (($null -eq $env:strAV) -or ($env:strAV -eq "")) {           #A TARGET AV WAS NOT PASSED
   foreach ($av in $script:arrAV) {
-    #REMOVAL VIA REGISTRY
-    write-output "BEGINNING REMOVAL VIA REGISTRY :"
-    write-output "$($strLineSeparator)"
-    $script:diag += "BEGINNING REMOVAL VIA REGISTRY :`r`n"
-    $script:diag += "$($strLineSeparator)`r`n"
     $avUninstall = $UninstallStrings | get-itemproperty | where {$_.displayname -like "*$($av)*"}
     if (($null -ne $avUninstall) -and ($avUninstall -ne "")) {        #TARGET AV FOUND
       #SET REBOOT STRINGS
       switch ($av.toupper()) {
-        "MALWAREBYTES" {$strReboot = "/SILENT /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /L*v"}
-        "MCAFEE" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS /L*v"}
-        "SOPHOS" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS /L*v"}
+        "MALWAREBYTES" {$strReboot = "/SILENT /VERYSILENT /SUPPRESSMSGBOXES /NORESTART"}
+        "MCAFEE" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS"}
+        "SOPHOS" {$strReboot = "/SILENT /VERYSILENT /quiet /qn /norestart REBOOT=SUPPRESS"}
       }
       foreach ($item in $avUninstall) {
         write-output "`r`n$($strLineSeparator)`r`nFOUND $($item.displayname):`r`nDescription : $($item.comments)`r`n$($item.UninstallString)"
@@ -264,11 +244,7 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
             }
           } elseif ($item.UninstallString -notlike "*msiexec*") {     #EXE UNINSTALL
             try {
-              $output = Get-ProcessOutput -FileName "$($item.UninstallString)" -Args "$($strReboot) `"C:\IT\Log\$($item.displayname)_uninstall`""
-              write-output "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`""
-              write-output "$($strLineSeparator)"
-              $script:diag += "UNINSTALL TRIGGERED; SEE `"C:\IT\Log\$($item.displayname)_uninstall`"`r`n"
-              $script:diag += "$($strLineSeparator)`r`n"
+              $output = Get-ProcessOutput -FileName "$($item.UninstallString)" -Args "$($strReboot)"
             } catch {
               $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
               logERR 3 "$($item.displayname) UNINSTALL UNSUCCESSFUL :" $err
@@ -290,51 +266,6 @@ if (($null -ne $env:strAV) -and ($env:strAV -ne "")) {                #A TARGET 
       $script:diag += "NO $($av.toupper()) INSTALLATION DETECTED`r`n"
       $script:diag += "$($strLineSeparator)`r`n"
     }
-    #REMOVAL VIA AV TOOLS
-    write-output "BEGINNING REMOVAL VIA REMOVAL TOOLS :"
-    write-output "$($strLineSeparator)"
-    $script:diag += "BEGINNING REMOVAL VIA REMOVAL TOOLS :`r`n"
-    $script:diag += "$($strLineSeparator)`r`n"
-    #SET REMOVAL TOOL
-    switch ($av.toupper()) {
-      "AVAST" {$blnMatch = $false}
-      {"AVD","AVDEFENDER","AV DEFENDER"} {
-        $blnMatch = $true
-        $strDir = "AVD_Latest_Removal_Tool"
-        $strUninstall = @(
-          "Uninstall_Tool_6.4.2.79.exe",
-          "Uninstall_Tool_6.6.2.49.exe",
-          "Uninstall_Tool_6.6.10.148.exe",
-          "Uninstall_Tool_6.6.11.164.exe",
-          "Uninstall_Tool_6.6.23.330.exe",
-          "Uninstall_Tool_7.2.2.92.exe",
-          "Uninstall_Tool_7.2.2.101.exe",
-          "Uninstall_Tool_7.4.3.146.exe"
-        )
-        $strArgs = "/bruteForce /noWait /skipUnsafeCheck /unsafe"
-      }
-      "AVG" {$blnMatch = $false}
-      "COMODO" {$blnMatch = $false}
-      "CROWDSTRIKE" {
-        $blnMatch = $true
-        $strDir = "CrowdStrike"
-        $strUninstall = @("csuninstalltool.exe")
-        $strArgs = "/quiet"
-      }
-      "KASPERSKY" {$blnMatch = $false}
-      {"MWB","MALWAREBYTES"} {$blnMatch = $false}
-      "MCAFEE" {$blnMatch = $false}
-      "NORTON" {
-        $blnMatch = $true
-        $strDir = "Norton"
-        $strUninstall = @("NRnR.exe")
-        $strArgs = "/cleanup /noeula /advancedoptions /norepair /noautofix /uninstall /admin /forceremove /automationmode"
-      }
-      "SOPHOS" {$blnMatch = $false}
-      {"TREND MICRO","TRENDMICRO"} {$blnMatch = $false}
-      "WEBROOT" {}
-      default {$blnMatch = $false}
-    }
   }
 }
 write-output "`r`n$($strLineSeparator)"
@@ -349,11 +280,11 @@ StopClock
 $script:diag | out-file $logPath
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-DRMMAlert "All_AV_Removal : Execution Failure : See Diagnostics"
+  write-DRRMAlert "All_AV_Removal : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRMMAlert "All_AV_Removal : Completed Execution"
+  write-DRRMAlert "All_AV_Removal : Completed Execution"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
