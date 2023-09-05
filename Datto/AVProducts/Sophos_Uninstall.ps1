@@ -11,7 +11,7 @@
     Script will output logfile to C:\IT\Log\Sophos_Uninstall
  
 .NOTES
-    Version        : 0.1.2 (2 February 2023)
+    Version        : 0.1.3 (05 September 2023)
     Creation Date  : 25 January 2023
     Purpose/Change : Provide modern Powershell conversion of Sophos Uninstall BAT Script : https://support.sophos.com/support/s/article/KB-000035419?language=en_US
     File Name      : Sophos_Uninstall.ps1 
@@ -455,33 +455,33 @@ if (-not $script:blnBREAK) {
   #SOPHOS
   if (test-path -path "C:\Program Files\Sophos") {
     <#--      PS freezes attempting to use 'remove-item' on these items; even with '-force' switch--#>
-    get-childitem -path "C:\Program Files\Sophos\AutoUpdate" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\AutoUpdate" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Endpoint Defense" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Endpoint Defense" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Sophos ML Engine" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Sophos ML Engine" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Sophos Standalone Engine" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Sophos Standalone Engine" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Sophos Data Protection" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Sophos Data Protection" -recurse -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\AutoUpdate" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\AutoUpdate" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Endpoint Defense" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Endpoint Defense" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos ML Engine" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos ML Engine" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Standalone Engine" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Standalone Engine" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Data Protection" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Data Protection" -force -erroraction silentlycontinue
   }
   if (test-path -path "C:\Program Files (x86)\Sophos") {
     <#--      PS freezes attempting to use 'remove-item' on these items; even with '-force' switch--#>
-    get-childitem -path "C:\Program Files\Sophos\AutoUpdate" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\AutoUpdate" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Endpoint Defense" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Endpoint Defense" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Sophos ML Engine" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Sophos ML Engine" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Sophos Standalone Engine" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Sophos Standalone Engine" -recurse -force -erroraction silentlycontinue
-    get-childitem -path "C:\Program Files\Sophos\Sophos Data Protection" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\Program Files\Sophos\Sophos Data Protection" -recurse -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\AutoUpdate" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\AutoUpdate" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Endpoint Defense" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Endpoint Defense" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Endpoint Agent" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos ML Engine" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos ML Engine" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Standalone Engine" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Standalone Engine" -force -erroraction silentlycontinue
+    get-childitem -path "C:\Program Files\Sophos\Sophos Data Protection" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\Program Files\Sophos\Sophos Data Protection" -force -erroraction silentlycontinue
   }
   if (test-path -path "C:\ProgramData\Sophos") {
     <#--      RE-ENABLE THIS IF CANNOT REMOVE
@@ -493,8 +493,8 @@ if (-not $script:blnBREAK) {
     $lines
     --#>
     <#--      PS freezes attempting to use 'remove-item' on these items; even with '-force' switch--#>
-    get-childitem -path "C:\ProgramData\Sophos" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\ProgramData\Sophos" -recurse -force -erroraction silentlycontinue
+    get-childitem -path "C:\ProgramData\Sophos" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\ProgramData\Sophos" -force -erroraction silentlycontinue
   }
   #HITMAN PRO
   if (test-path -path "C:\Program Files (x86)\HitmanPro.Alert") {
@@ -516,8 +516,8 @@ if (-not $script:blnBREAK) {
     $lines
     $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
     $lines
-    get-childitem -path "C:\ProgramData\HitmanPro.Alert" -recurse | remove-item -recurse -force -erroraction silentlycontinue
-    remove-item -path "C:\ProgramData\HitmanPro.Alert" -recurse -force -erroraction silentlycontinue
+    get-childitem -path "C:\ProgramData\HitmanPro.Alert" -recurse | remove-item -force -erroraction silentlycontinue
+    remove-item -path "C:\ProgramData\HitmanPro.Alert" -force -erroraction silentlycontinue
   }
   #CLEANUP WMI INSTANCES
   if ($script:producttype -ne "Workstation") {
