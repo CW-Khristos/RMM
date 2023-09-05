@@ -9,16 +9,16 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-output  "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-ProcessOutput {
     Param (
@@ -143,11 +143,11 @@ StopClock
 $script:diag | out-file $logPath
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-DRRMAlert "FireEye_Uninstall : Execution Failure : See Diagnostics"
+  write-DRMMAlert "FireEye_Uninstall : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "FireEye_Uninstall : Completed Execution"
+  write-DRMMAlert "FireEye_Uninstall : Completed Execution"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
