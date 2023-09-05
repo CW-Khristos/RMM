@@ -144,26 +144,26 @@ if (-not (test-path -path "C:\IT\Scripts")) {
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 #INSTALL NUGET PROVIDER
 if (-not (Get-PackageProvider -name NuGet)) {
-  Install-PackageProvider -Name NuGet -Force -Confirm:$false
+  Install-PackageProvider -Name NuGet -force -Confirm:$false
 }
 #INSTALL POWERSHELLGET MODULE
 if (Get-Module -ListAvailable -Name PowershellGet) {
-  Import-Module PowershellGet -force
+  Import-Module PowershellGet 
 } else {
   Install-Module PowershellGet -force -Confirm:$false
-  Import-Module PowershellGet -force
+  Import-Module PowershellGet
 }
 #Get the Hudu API Module if not installed
 if (Get-Module -ListAvailable -Name HuduAPI) {
   try {
-    Import-Module HuduAPI -force
+    Import-Module HuduAPI
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
 } else {
   try {
     install-module HuduAPI -MaximumVersion 2.3.2 -force -confirm:$false
-    Import-Module HuduAPI -force
+    Import-Module HuduAPI
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
