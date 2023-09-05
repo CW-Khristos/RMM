@@ -11,7 +11,7 @@
     Removes NCentral remnants
  
 .NOTES
-    Version        : 0.1.1 (01 December 2022)
+    Version        : 0.1.2 (05 September 2023)
     Creation Date  : 07 October 2022
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
     File Name      : CClutter_0.1.1.ps1 
@@ -29,13 +29,13 @@
 #region ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
-  Param (
-    [Parameter(Mandatory=$false)]$blnLOG,
-    [Parameter(Mandatory=$false)]$clrFOL
-  )
+  #Param (
+  #  [Parameter(Mandatory=$false)]$blnLOG,
+  #  [Parameter(Mandatory=$false)]$clrFOL
+  #)
   #VERSION FOR SCRIPT UPDATE
   $strSCR           = "CClutter"
-  $strVER           = [version]"0.1.1"
+  $strVER           = [version]"0.1.2"
   $strREPO          = "RMM"
   $strBRCH          = "dev"
   $strDIR           = "Datto"
@@ -448,8 +448,8 @@ write-output "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE
-if ($blnLOG) {
-  $script:diag | out-file $logPath
+if ($blnLOG -eq "true") {
+  $script:diag | out-file $logPath -force
 }
 #DATTO OUTPUT
 if ($script:blnWARN) {
