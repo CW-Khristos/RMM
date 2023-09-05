@@ -49,7 +49,6 @@
 write-output "SCANNING HOSTS :`r`n"
 $script:diag += "SCANNING HOSTS :`r`n`r`n"
 get-content "$env:SystemRoot\System32\drivers\etc\hosts" | foreach-object {
-  $script:blnMOD
   if (($_ -match "$($env:i_IP)") -and ($_ -match "$($env:i_Host)")) {$script:blnMOD = $false}
   $hosts += "$($_)`r`n"
 }
