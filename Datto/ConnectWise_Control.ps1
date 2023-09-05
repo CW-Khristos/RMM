@@ -310,10 +310,10 @@ if ($varCompany -match ' ') {$varCompany = $varCompany.replace(' ','%20')}
 if ($CWControlInstallURL -match "|") {$CWControlInstallURL = $CWControlInstallURL.replace('|','&')}
 $CWControlInstallURL = "$($CWControlInstallURL)&y=Guest&c=$($varCompany)"
 if (-not $varSite) {
-  $CWControlInstallURL = "$($CWControlInstallURL)&c=&c=&c=&c=&c=&c=&c="
+  $CWControlInstallURL = "$($CWControlInstallURL)&c=&c=&c=&c=&c=Business&c=&c="
 } elseif ($varSite) {
   if ($varSite -match ' ') {$varSite = $varSite.replace(' ','%20')}
-  $CWControlInstallURL = "$($CWControlInstallURL)&c=$($varSite)&c=&c=&c=&c=&c=&c="
+  $CWControlInstallURL = "$($CWControlInstallURL)&c=$($varSite)&c=&c=&c=&c=Business&c=&c="
 }
 #SETTINGS
 $settings = "`r`n===================================`r`n"
