@@ -52,7 +52,7 @@ if ($version -lt "6.3") {
   $script:diag += "`r`n$($strLineSeparator)`r`nUnsupported OS. Only Server 2012R2 and up are supported.`r`n$($strLineSeparator)`r`n"
   #exit 1
 }
-#GRAB ACCOUNT CHANGES IN PAST 24 HOURS
+#GRAB ACCOUNT CHANGES IN PAST X HOURS
 $LastDay = (Get-Date).addhours(-1 * $env:varHours)
 $AdminGroup = Get-LocalGroupMember -SID "S-1-5-32-544"
 write-output "$($strLineSeparator)`r`nCollecting Admin Accounts....`r`n$($strLineSeparator)"
