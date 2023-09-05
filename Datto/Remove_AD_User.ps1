@@ -1,6 +1,11 @@
 #REGION ----- DECLARATIONS ----
+  #UNCOMMENT BELOW PARAM() TO UTILIZE IN CLI
+  #Param(
+  #  [Parameter(Mandatory=$true)]$strUser
+  #)
   $script:diag = $null
   $script:blnWARN = $false
+  $cmdEXE = "C:\WINDOWS\system32\cmd.exe"
 #ENDREGION ----- DECLARATIONS ----
 
 #REGION ----- FUNCTIONS ----
@@ -10,11 +15,11 @@
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-ProcessOutput {
     Param (
@@ -64,12 +69,15 @@
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 try {
-  $cmdOutput = Get-ProcessOutput -FileName $cmdEXE -Args "net user $($env:strUser) /delete /domain"
+  $cmdOutput = Get-ProcessOutput -FileName $cmdEXE -Args "/c net user $($env:strUser) /delete /domain"
   $script:diag += "$($cmdOutput)`r`n"
   write-output "$($cmdOutput)"
 } catch {
   $script:blnWARN = $true
   $script:diag += "ERROR DELETING USER : $($env:strUser)`r`n"
+  $script:diag += "$($_.Exception)`r`n"
+  $script:diag += "$($_.scriptstacktrace)`r`n"
+  $script:diag += "$($_)`r`n`r`n"
   write-output "ERROR DELETING USER : $($env:strUser)"
 }
 #Stop script execution time calculation
