@@ -101,24 +101,20 @@ if ($script:blnDL) {
   $script:bdSRC = "https://download.bitdefender.com/SMB/Hydra/release/bst_win/uninstallTool/BEST_uninstallTool.exe"
   if (-not (test-path -path $script:bdEXE -pathtype leaf)) {
     try {
-      #IPM-Khristos
       $script:diag += "BITS.Transfer() - Downloading latest version of BEST_uninstallTool.exe`r`n"
       write-output "BITS.Transfer() - Downloading latest version of BEST_uninstallTool.exe" -foregroundcolor yellow
       start-bitstransfer -erroraction stop -source $script:bdSRC -destination $script:bdEXE
       (get-childitem -path $script:bdEXE).creationtime = (get-date)
     } catch {
-      #IPM-Khristos
       $script:diag += "BITS.Transfer() - Could not download $($script:bdSRC)`r`n"
       write-output "BITS.Transfer() - Could not download $($script:bdSRC)" -foregroundcolor red
       try {
-        #IPM-Khristos
         $script:diag += "Web.DownloadFile() - Downloading latest version of BEST_uninstallTool.exe`r`n"
         write-output "Web.DownloadFile() - Downloading latest version of BEST_uninstallTool.exe" -foregroundcolor yellow
         $web = new-object system.net.webclient
         $web.downloadfile($script:bdSRC, $script:bdEXE)
         (get-childitem -path $script:bdEXE).creationtime = (get-date)
       } catch {
-        #IPM-Khristos
         $script:diag += "Web.DownloadFile() - Could not download $($script:bdSRC)`r`n"
         write-output "Web.DownloadFile() - Could not download $($script:bdSRC)" -foregroundcolor red
         $script:diag += "$($_.Exception)`r`n"
