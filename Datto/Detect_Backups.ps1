@@ -91,4 +91,4 @@ if (Get-Service | where-object {$_.name -like 'BackupAssist*'}){
 }
 
 write-output "`r`nDetected backup Product: $($backupproduct)"
-new-itemproperty -path "HKLM:\Software\Centrastage" -name $env:custom -value "$($backupproduct)" -force
+new-itemproperty -path "HKLM:\Software\Centrastage" -name $env:Custom -value "$($backupproduct)" -force
