@@ -7,7 +7,7 @@
     Only searches and alerts on the most recent specified Time Range in the specified Event Log
  
 .NOTES
-    Version        : 0.1.0 (04 August 2022)
+    Version        : 0.1.1 (05 September 2023)
     Creation Date  : 04 August 2022
     Purpose/Change : Modification of DRMM Event Log monitoring to reduce duplication of alerts
     File Name      : EventLog_Monitoring_0.1.0.ps1
@@ -46,7 +46,7 @@ To Do:
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-output  "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-output "<-End Diagnostic->"
   }
