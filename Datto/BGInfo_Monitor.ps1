@@ -379,8 +379,8 @@ namespace Win32{
         $cfgCompare = "C:\IT\BGInfo\compare.bgi"
         $result = test-path -path "$($cfgCompare)"
         if (-not $result) {
+          $cfgOriginal = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/default.bgi"
           try {
-            $cfgOriginal = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/$($strDIR)/default.bgi"
             $web = new-object system.net.webclient
             $dlFile = $web.downloadfile($cfgOriginal, $cfgCompare)
           } catch {
