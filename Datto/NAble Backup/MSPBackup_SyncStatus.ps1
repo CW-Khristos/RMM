@@ -94,6 +94,12 @@ $script:blnWARN = $false
         write-output "LocalSpeedVault Synchronization: $($LSVSync)"
         $script:lsv = "LSV Sync : $($LSVSync)"
         $script:diag += "LocalSpeedVault Synchronization: $($LSVSync)`r`n"
+        $percentage = $LSVSync.replace('%', "")
+        if ([int]$percentage -lt [int]$env:syncThreshold) {
+          $script:blnWARN = $true
+          write-output "`tWARNING : LSV Sync is below Threshold ($($env:syncThreshold))"
+          $script:diag += "`tWARNING : LSV Sync is below Threshold ($($env:syncThreshold))`r`n"
+        }
       } else {
         write-output "LocalSpeedVault Synchronization Data Invalid or Not Found"
         $script:lsv = "LSV Sync : Data Invalid or Not Found"
