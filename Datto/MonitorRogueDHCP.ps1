@@ -14,9 +14,9 @@
   } ## write-DRMMDiag
 
   function write-DRMMAlert ($message) {
-      write-output "<-Start Result->"
-      write-output "Alert=$($message)"
-      write-output "<-End Result->"
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
   } ## write-DRMMAlert
 #ENDREGION ----- FUNCTIONS ----
 
@@ -71,9 +71,7 @@ foreach ($server in $FoundServers) {
         break
       }
     }
-    if ($blnADD) {
-      $ListedDHCPServers.add($server, $server)
-    }
+    if ($blnADD) {$ListedDHCPServers.add($server, $server)}
   }
 }
 write-output "`r`nDHCP SERVERS TO CHECK :"
