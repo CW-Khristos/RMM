@@ -13,16 +13,16 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-output  "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function StopClock {
     #Stop script execution time calculation
@@ -44,9 +44,11 @@
 
 #------------
 #BEGIN SCRIPT
-if ($env:blnAlertErr -eq "True") {
+$script:diag += "ALERT ON ERRORS : $($env:blnAlertErr)`r`n"
+write-output "ALERT ON ERRORS : $($env:blnAlertErr)"
+if ($env:blnAlertErr.tolower() -eq "true") {
   $env:blnAlertErr = $true
-} elseif ($env:blnAlertErr -eq "False") {
+} elseif ($env:blnAlertErr.tolower() -eq "false") {
   $env:blnAlertErr = $false
 }
 #Start script execution time calculation
@@ -104,13 +106,21 @@ try {
     if ($line -match "ERROR - ") {
       if ($env:blnAlertErr) {
         $script:blnWARN = $true
+      } elseif (-not ($env:blnAlertErr)) {
+        $script:diag += "ERROR DETECTED - ALERTING DISABLED`r`n"
+        write-output "ERROR DETECTED - ALERTING DISABLED"
       }
       $script:diag += "$($line)`r`n"
       write-output "$($line)" -foregroundcolor red
     }
   }
 } catch {
-  $script:blnWARN = $true
+  if ($env:blnAlertErr) {
+    $script:blnWARN = $true
+  } elseif (-not ($env:blnAlertErr)) {
+    $script:diag += "ERROR DETECTED - ALERTING DISABLED`r`n"
+    write-output "ERROR DETECTED - ALERTING DISABLED"
+  }
   $script:diag += "Passportal 'pserv' Logfile Not Found!`r`n"
   $script:diag += "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
   write-output "Passportal 'pserv' Logfile Not Found!" -foregroundcolor red
@@ -123,11 +133,11 @@ write-output "--------------------------------------" -foregroundcolor yellow
 #DATTO OUTPUT
 StopClock
 if ($script:blnWARN) {
-  write-DRRMAlert "PassPortal Monitoring : Warning : See Diagnostics"
+  write-DRMMAlert "PassPortal Monitoring : Warning : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "PassPortal Monitoring : Healthy"
+  write-DRMMAlert "PassPortal Monitoring : Healthy"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
