@@ -76,6 +76,7 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 if (($null -ne $env:ExcludedDrives) -and ($env:ExcludedDrives -ne "")) {
   $Excludes = $env:ExcludedDrives.split("|",[System.StringSplitOptions]::RemoveEmptyEntries)
 }
+write-output "$($strLineSeparator)`r`nEXCLUDED DRIVES :`r`n$($Excludes)`r`n$($strLineSeparator)`r`n"
 #COLLECT ALL DRIVES / PARTITIONS FOR MATCHING CANARY PATHS TO DRIVE EXCLUSIONS
 $pDisks = Get-WmiObject -Class Win32_DiskDrive | Select DeviceID, Caption
 $dPartitions = Get-WmiObject -Class Win32_DiskDriveToDiskPartition
@@ -83,8 +84,8 @@ $lPartitions = Get-WmiObject -Class Win32_LogicalDiskToPartition
 
 $CanaryStatus = foreach ($Locations in $CreateLocations) {
   $AllLocations = switch ($Locations) {
-    "AllDesktops" { (Get-ChildItem "C:\Users\" -Recurse -Force -Filter 'Desktop' -Depth 3).FullName }
-    "AllDocuments" { (Get-ChildItem "C:\Users\" -Recurse -Force -Filter 'Documents' -Depth 3).fullname }
+    "AllDesktops" { (Get-ChildItem "C:\Users\" -Recurse -Force -erroraction silentlycontinue -Filter 'Desktop' -Depth 3).FullName }
+    "AllDocuments" { (Get-ChildItem "C:\Users\" -Recurse -Force -erroraction silentlycontinue -Filter 'Documents' -Depth 3).fullname }
     "AllDrives" { ([System.IO.DriveInfo]::getdrives() | Where-Object { $_.DriveType -eq 'Fixed' }).Name }
     default { $Locations }
   }
@@ -97,9 +98,11 @@ $CanaryStatus = foreach ($Locations in $CreateLocations) {
       $localdrive = $pDisks | where {$localdrive.antecedent -match $_.deviceid.replace("\", "").replace(".", "")}
     }
     foreach ($exclude in $Excludes) {
-      if (($localdrive.model -like "*$($exclude)*") -or ($localdrive.caption -like "*$($exclude)*")) {
-        $script:blnBREAK = $true
-        write-output "TRIGGERED EXCLUDE FOR DRIVE :" $location
+      if (($localdrive.caption -like "*$($exclude)*") -or 
+        ($localdrive.model -like "*$($exclude)*") -or 
+        ($localdrive.deviceid -like "*$($exclude)*")) {
+          $script:blnBREAK = $true
+          write-output "TRIGGERED EXCLUDE FOR DRIVE :" $location
       }
     }
     if (-not $script:blnBREAK) {
