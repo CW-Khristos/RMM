@@ -7,7 +7,7 @@
     Removes All / Specified AV from WMI AVProduct and FWProduct Namespaces
  
 .NOTES
-    Version        : 0.1.0 (09 September 2022)
+    Version        : 0.1.1 (05 September 2023)
     Creation Date  : 09 September 2022
     Purpose/Change : PS conversion of AV_WMICleanup VBS Script
     File Name      : AV_WMICleanup_0.1.0.ps1
@@ -40,7 +40,7 @@ To Do:
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-output  "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-output "<-End Diagnostic->"
   }
