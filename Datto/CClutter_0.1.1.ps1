@@ -310,12 +310,8 @@
 #BEGIN SCRIPT
 clear-host
 #DATTO VARIABLES
-if (($null -ne $env:blnLOG) -and ($env:blnLOG -ne "")) {
-  $blnLOG = $env:blnLOG
-}
-if (($null -ne $env:clrFOL) -and ($env:clrFOL -ne "")) {
-  $clrFOL = $env:clrFOL
-}
+if (($null -ne $env:blnLOG) -and ($env:blnLOG -ne "")) {$blnLOG = $env:blnLOG}
+if (($null -ne $env:clrFOL) -and ($env:clrFOL -ne "")) {$clrFOL = $env:clrFOL}
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
@@ -448,9 +444,7 @@ write-output "$($strLineSeparator)`r`n$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss
 #Stop script execution time calculation
 StopClock
 #WRITE LOGFILE
-if ($blnLOG -eq "true") {
-  $script:diag | out-file $logPath -force
-}
+if ($blnLOG -eq "true") {$script:diag | out-file $logPath -force}
 #DATTO OUTPUT
 if ($script:blnWARN) {
   write-DRMMAlert "CCLUTTER : Execution Completed with Warnings : See Diagnostics"
