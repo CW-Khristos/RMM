@@ -87,8 +87,8 @@ $ScrptStartTime = (get-date).ToString('yyyy-MM-dd hh:mm:ss')
 #RETRIEVE SESSION LIST FROM WITHIN ELECTED TIME RANGE ABOVE AND ONLY RETURN 'FAILED' BACKUPS
 logERR 3 "MSPBackup_Status" "Querying Backup Sessions"
 try {
-  $SessionsList = & "C:\Program Files\Backup Manager\clienttool.exe" -machine-readable control.session.list  -delimiter "," | convertfrom-csv -Delimiter "," | 
-    where { [datetime]$_.start -gt $Date } | sort -property start -descending
+  $SessionsList = & "C:\Program Files\Backup Manager\clienttool.exe" -machine-readable control.session.list -delimiter "," | convertfrom-csv -delimiter "," | 
+    where {[datetime]$_.start -gt $Date} | sort -property start -descending
 
   $Backups = foreach ($source in $DataSources) {
     $Session = $SessionsList | where {$_.DSRC -eq $source} | sort -property start -descending | select -first 1
@@ -118,7 +118,7 @@ $FailedBackups = $Backups | where {(($null -ne $_.state) -and
   (($_.state -eq "InProcess" -and $_.start -lt $Date))))} | out-string
 $UncertainBackups = $Backups | where {(($null -ne $_.state) -and 
   ((($_.state -ne "Failed") -and ($_.state -ne "CompletedWithErrors") -and 
-  ($_.state -ne "Completed") -and ($_.state -ne "InProcess")) -or 
+  ($_.state -ne "Completed") -and ($_.state -ne "InProcess") -and ($_.state -ne "Skipped")) -or 
   (($_.state -eq "InProcess" -and $_.start -lt $Date))))} | out-string
 logERR 3 "MSPBackup_Status" "Failed:`r`n$($FailedBackups)"
 logERR 3 "MSPBackup_Status" "UnCertain:`r`n$($UncertainBackups)"
