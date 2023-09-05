@@ -180,7 +180,7 @@
         run-Deploy
       }
       try {
-        $out = Get-ProcessOutput -File "$($exePath)\speedtest.exe"
+        $out = Get-ProcessOutput -Filename "$($exePath)\speedtest.exe" -Args "--accept-license"
         write-output "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)`r`n$($strLineSeparator)"
         $script:diag += "`tSTDOUT :`r`n`t$($out.standardoutput)`r`n`tSTDERR :`r`n`t$($out.standarderror)`r`n$($strLineSeparator)`r`n"
       } catch {
