@@ -131,11 +131,9 @@
         #DOWNLOAD BLUESCREENVIEW.ZIP FROM NIRSOFT
         if (-not (test-path -path "C:\IT\BlueScreenView.zip")) {
           try {
-            #IPM-Khristos
             start-bitstransfer -source $srcBSV -destination "C:\IT\BlueScreenView.zip" -erroraction stop
           } catch {
             try {
-              #IPM-Khristos
               $web = new-object system.net.webclient
               $web.downloadfile($srcBSV, "C:\IT\BlueScreenView.zip")
             } catch {
@@ -297,7 +295,7 @@ if ($env:strTask -eq "DEPLOY") {
 StopClock
 #CLEAR LOGFILE
 $null | set-content $logPath -force
-$finish = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
+$finish = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
 if (-not $script:blnBREAK) {
   if (-not $script:blnWARN) {
     $result = "$($env:strTask) : Execution Successful : $($finish)"
