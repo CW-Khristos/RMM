@@ -9,7 +9,7 @@
     Combines AutoTask and Customer Services MagicDash and DNS History enhancements to Hudu
  
 .NOTES
-    Version                  : 0.1.4 (10 March 2023)
+    Version                  : 0.1.5 (05 September 2023)
     Creation Date            : 23 August 2022
     Purpose/Change           : Modification of AutoTask and Customer Services MagicDash to integrate NAble / Cove Data Protection
                                https://mspp.io/hudu-datto-psa-autotask-open-tickets-magic-dash/
@@ -449,7 +449,6 @@ To Do:
     $data.params.partner = $script:bmRoot
     $data.params.username = $script:bmUser
     $data.params.password = $script:bmPass
-
     $script:bmCalls += 1
     $webrequest = Invoke-WebRequest -Method POST `
       -ContentType 'application/json' `
@@ -508,7 +507,6 @@ To Do:
     $data.method = 'GetPartnerInfo'
     $data.params = @{}
     $data.params.name = [String]$PartnerName
-
     $script:bmCalls += 1
     $webrequest = Invoke-WebRequest -Method POST `
       -ContentType 'application/json' `
@@ -1413,13 +1411,13 @@ if (-not $script:blnBREAK) {
               (($null -ne $psaAsset.refTitle) -and ($psaAsset.refTitle -ne ""))) {
                 #Map rmmTypeID to Hudu Asset Types
                 $type = switch ($psaAsset.rmmTypeID) {
-                  1   {'Workstations'}
-                  2   {'Workstations'}
-                  3   {'Servers'}
+                  1   {'Workstation'}
+                  2   {'Workstation'}
+                  3   {'Server'}
                   6   {'Printers'}
-                  7   {'Network - APs'}
-                  9   {'Network - Switches'}
-                  10  {'Network - Routers'}
+                  7   {'Network - AP'}
+                  9   {'Network - Switch'}
+                  10  {'Network - Router'}
                   11  {'UPS'}
                   12  {'Unknown'}
                   15  {'Network - NAS/SAN'}
@@ -1733,7 +1731,7 @@ if (-not $script:blnBREAK) {
       $script:diag += "`r`n$($strLineSeparator)`r`n$($dnsname) lookup successful"
       write-output "$($strLineSeparator)`r`n$($dnsname) lookup successful" -foregroundcolor green
       #Check if there is already an asset
-      $Asset = $DNSAssets | where {$_.name -eq "$($AssetName)"}    #Get-HuduAssets -name "$($AssetName)" -companyid $companyid -assetlayoutid $DNSLayout.id
+      $Asset = $DNSAssets | where {(($_.name -eq "$($AssetName)") -and $_.company_name -eq "$($website.company_name)")}    #Get-HuduAssets -name "$($AssetName)" -companyid $companyid -assetlayoutid $DNSLayout.id
       #If the Asset does not exist, we edit the body to be in the form of a new asset, if not, we just upload.
       if (!$Asset) {
         try {
