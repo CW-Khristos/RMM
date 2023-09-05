@@ -42,7 +42,7 @@ foreach ($task in $tasks) {
         Unregister-ScheduledTask -TaskPath "$($taskFOL)" -TaskName "$($task)" -Confirm:$false -erroraction silentlycontinue
         remove-item "C:\Windows\System32\Tasks$($taskFOL)" -force -erroraction silentlycontinue
       } catch {
-        write-hot "Couldn't remove task : $($task)`r`n"
+        write-output "Couldn't remove task : $($task)`r`n"
       }
     }
   } catch {
