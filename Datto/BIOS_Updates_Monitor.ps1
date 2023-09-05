@@ -80,12 +80,12 @@ try {
   $script:diag += "$($strLineSeparator)`r`nChecking System BIOS :`r`n$($strLineSeparator)`r`n"
   write-output "`tReading : -path '$($sysRegKey)' -name 'SystemBiosDate'"
   $script:diag += "`tReading : -path '$($sysRegKey)' -name 'SystemBiosDate'`r`n"
-  $sysDate = get-itemproperty -path "$($sysRegKey)" -name "SystemBiosDate" -erroraction stop
+  $sysDate = get-itemproperty -path "$($sysRegKey)" -name "SystemBiosDate" -erroraction silentlycontinue
 
   $biosVersion = $null
   write-output "`tReading : -path '$($sysRegKey)' -name 'SystemBiosVersion'"
   $script:diag += "`tReading : -path '$($sysRegKey)' -name 'SystemBiosVersion'`r`n"
-  $sysVersion = get-itemproperty -path "$($sysRegKey)" -name "SystemBiosVersion" -erroraction stop
+  $sysVersion = get-itemproperty -path "$($sysRegKey)" -name "SystemBiosVersion" -erroraction silentlycontinue
   foreach ($line in $sysVersion.SystemBiosVersion) {$biosVersion += "`t$($line)`r`n"}
 
   write-output "`t$($strLineSeparator)`r`n`tBIOS Release Date : $($sysDate.SystemBiosDate)"
@@ -98,15 +98,15 @@ try {
   $script:diag += "$($strLineSeparator)`r`nChecking BIOS Release Version :`r`n$($strLineSeparator)`r`n"
   write-output "`tReading : -path '$($biosRegKey)' -name 'BIOSVendor'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BIOSVendor'`r`n"
-  $biosVendor = get-itemproperty -path "$($biosRegKey)" -name "BIOSVendor" -erroraction stop
+  $biosVendor = get-itemproperty -path "$($biosRegKey)" -name "BIOSVendor" -erroraction silentlycontinue
 
   write-output "`tReading : -path '$($biosRegKey)' -name 'BaseBoardManufacturer'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BaseBoardManufacturer'`r`n"
-  $boardManufacturer = get-itemproperty -path "$($biosRegKey)" -name "BaseBoardManufacturer" -erroraction stop
+  $boardManufacturer = get-itemproperty -path "$($biosRegKey)" -name "BaseBoardManufacturer" -erroraction silentlycontinue
 
   write-output "`tReading : -path '$($biosRegKey)' -name 'BaseBoardProduct'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BaseBoardProduct'`r`n"
-  $boardProduct = get-itemproperty -path "$($biosRegKey)" -name "BaseBoardProduct" -erroraction stop
+  $boardProduct = get-itemproperty -path "$($biosRegKey)" -name "BaseBoardProduct" -erroraction silentlycontinue
 
   write-output "`tReading : -path '$($biosRegKey)' -name 'BIOSReleaseDate'"
   $script:diag += "`tReading : -path '$($biosRegKey)' -name 'BIOSReleaseDate'`r`n"
