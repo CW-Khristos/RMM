@@ -21,16 +21,16 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-output  "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
@@ -152,7 +152,7 @@ switch ($env:i_Action.toupper()) {
       #$scan = Get-ProcessOutput -FileName "$($script:engDIR)\SophosSAVICLI.exe" -Args "-vdldir=`"$($script:dataDIR)`" -dn -archive -all c:\it --stop-scan -P=C:\IT\Log\SophosScan.txt"
       #$scan = [string]$scan.standardoutput
       $scan = { & "$($script:engDIR)\SophosSAVICLI.exe" "-vdldir=`"$($script:dataDIR)`" -dn -archive -all c:\ --stop-scan -P=C:\IT\Log\SophosScan.txt" }
-      Start-Job -name "SophosScan" -ScriptBlock $scan
+      Start-Job -name "Sophos Scan" -ScriptBlock $scan
       $script:diag += "$($scan)`r`n`r`nScanning Started : See Log : 'C:\IT\Log\SophosScan.txt'`r`n"
       write-output "`r`nScanning Started : See Log : 'C:\IT\Log\SophosScan.txt'"
     } catch {
@@ -182,11 +182,11 @@ switch ($env:i_Action.toupper()) {
 }
 StopClock
 if ($script:blnWARN) {
-  write-DRRMAlert "$($env:i_Action) : Execution Failure : See Diagnostics"
+  write-DRMMAlert "$($env:i_Action) : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "($env:i_Action) : Completed Execution"
+  write-DRMMAlert "($env:i_Action) : Completed Execution"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }
