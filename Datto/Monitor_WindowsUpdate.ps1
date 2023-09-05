@@ -1,5 +1,5 @@
 #Monitor - Windows Update
-#nullzilla — 12/19/2022 5:42 PM
+#nullzilla - 12/19/2022 5:42 PM
 #Checking on and fixing some basic windows update health
 #need to get around to adding failed install check too
 #change the max age for builds to whatever you want
@@ -18,6 +18,7 @@
   $script:blnWARN   = $false
   $script:blnBREAK  = $false
   $strLineSeparator = "---------"
+  $blnLOG           = $false
   $logPath          = "C:\IT\Log\Monitor_WindowsUpdate"
 #endregion ----- DECLARATIONS ----
 
@@ -77,11 +78,16 @@ clear-host
 #Start script execution time calculation
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
+if ($env:EnableLog -eq "false") {
+  $blnLOG = $false
+} elseif ($env:EnableLog -eq "true") {
+  $blnLOG = $true
+}
 # Check Windows 10/11 version age
 $OSname = Get-CimInstance Win32_OperatingSystem | select-object -ExpandProperty Caption
 if ((Get-CimInstance Win32_OperatingSystem).version -like '10*' -and $OSname -notlike '*Server*') {
   if ($OSname -match 'Windows 10') {
-    $MaxAge = "18" # Maximum age in months of builds you want to allow
+    $MaxAge = $env:Win10Age # Maximum age in months of builds you want to allow
     $CurrentDate = (get-date).AddMonths(-$MaxAge).ToString("yyMM")
     # Grab version and convert to numerical format, 19041 and older do not have DispalyVersion so we grab ReleaseID
     if ((Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").DisplayVersion) {
@@ -91,7 +97,7 @@ if ((Get-CimInstance Win32_OperatingSystem).version -like '10*' -and $OSname -no
     }
   }
   if ($OSname -match 'Windows 11') {
-    $MaxAge = "24" # Maximum age of builds you want to support in months 
+    $MaxAge = $env:Win11Age # Maximum age of builds you want to support in months 
     $CurrentDate = (get-date).AddMonths(-$MaxAge).ToString("yyMM")
     # Grab version and convert to numerical format
     $Version = ((Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").DisplayVersion).replace('H1','05').replace('H2','11')
@@ -109,12 +115,18 @@ $disabled = Get-Service wuauserv, BITS, CryptSvc, RpcSs, EventLog | Where-Object
 if ($disabled) {
   $script:blnWARN = $true
   $script:blnBREAK = $true
-  write-output "$($strLineSeparator)`r`nDisabled Services:`r`n$($disabled)"
-  $script:diag += "$($strLineSeparator)`r`nDisabled Services:`r`n$($disabled)`r`n"
+  write-output "$($strLineSeparator)`r`nDisabled Services:"
+  $script:diag += "$($strLineSeparator)`r`nDisabled Services:`r`n"
+  foreach ($service in $disabled) {
+    write-output "`t$($service.displayname)($($service.name))"
+    $script:diag += "`t$($service.displayname)($($service.name))`r`n"
+  }
 }
 # Check if recent updates are installed
 if (-not $script:blnBREAK) {
   try {
+    write-output "$($strLineSeparator)`r`nQuerying Windows Updates..."
+    $script:diag += "$($strLineSeparator)`r`nQuerying Windows Updates...`r`n"
     $SSDStartDate = get-date
     $WindowsUpdateObject = new-object -ComObject Microsoft.Update.AutoUpdate
     $SearchSuccessDate = $WindowsUpdateObject.Results | select-object LastSearchSuccessDate
@@ -156,9 +168,9 @@ if (-not $script:blnBREAK) {
         $script:diag += $xx | select-object -ExpandProperty Title -First 1
         $script:diag += "`r`n$($strLineSeparator)`r`n"
         # If last install succes was recent, let's not fail out
-        if ($ISDDays -lt 30 -or $ISDDays -gt 153000) {
+        if ($ISDDays -lt $env:DaysWithoutUpdate -or $ISDDays -gt 153000) {
           $script:blnWARN = $false
-        } elseif ($ISDDays -gt 30 -and $ISDDays -lt 153000) {
+        } elseif ($ISDDays -gt $env:DaysWithoutUpdate -and $ISDDays -lt 153000) {
           $script:blnWARN = $true
           write-output "$($strLineSeparator)`r`nWARNING - No recent rollup/cumulative/feature update detected"
           $script:diag += "$($strLineSeparator)`r`nWARNING - No recent rollup/cumulative/feature update detected`r`n"
