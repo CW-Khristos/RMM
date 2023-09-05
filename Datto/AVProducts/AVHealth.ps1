@@ -11,7 +11,7 @@
     Script is intended to replace 'AV Status' VBS Monitoring Script
  
 .NOTES
-    Version        : 0.2.7 (18 April 2023)
+    Version        : 0.2.8 (05 September 2023)
     Creation Date  : 14 December 2021
     Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
     File Name      : AVHealth.ps1 
@@ -919,9 +919,9 @@
     [datetime]$timeWindow = [datetime]$window
     [datetime]$runTime = $timeWindow.ToString('yyyy-MM-dd HH:mm:ss')
     $rebootdiag += "Scheduled Run : $($runtime)`r`n"
-    [datetime]$startWindow = ($timeWindow).AddMinutes(-30)  #30 Minutes before scheduled time
+    [datetime]$startWindow = ($timeWindow).AddMinutes(-30)    #30 Minutes before scheduled time
     $rebootdiag += "Start Window : $($startwindow)`r`n"
-    [datetime]$endWindow = ($timeWindow).AddMinutes(30)     #30 Minutes after scheduled time
+    [datetime]$endWindow = ($timeWindow).AddMinutes(30)       #30 Minutes after scheduled time
     $rebootdiag += "End Window : $($endwindow)`r`n"
     if (($curTime -ge $startWindow) -and ($curTime -le $endWindow)) {
       #Execute stuff
