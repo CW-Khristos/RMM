@@ -10,7 +10,7 @@
     Pulls important security facts from Active Directory and generates nicely viewable reports in HTML format by highlighting the spots that require attention
  
 .NOTES
-    Version        : 0.1.2 (25 January 2022)
+    Version        : 0.1.3 (05 September 2023)
     Creation Date  : 10 January 2022
     Purpose/Change : Pulls important security facts from Active Directory and generates nicely viewable reports in HTML format
     File Name      : AD_SecurityCheck.ps1 
@@ -75,7 +75,7 @@ $script:ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin"
 # Functions Section
 #---------------------------------------------------------------------------------------------------------------------------------------------
   function write-DRMMDiag ($messages) {
-    write-output  '<-Start Diagnostic->'
+    write-output '<-Start Diagnostic->'
     foreach ($Message in $Messages) {$Message}
     write-output '<-End Diagnostic->'
   } ## write-DRMMDiag
@@ -780,7 +780,7 @@ $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext(
 $domainController = [System.DirectoryServices.ActiveDirectory.DomainController]::findOne($context)
 ForEach ($partition in $partitions) {
   $domainControllerMetadata = $domainController.GetReplicationMetadata($partition)
-  $dsaSignature = $domainControllerMetadata.Item(“dsaSignature”)
+  $dsaSignature = $domainControllerMetadata.Item("dsaSignature")
   Write-Log "$partition was backed up $($dsaSignature.LastOriginatingChangeTime.DateTime)"
   $tsbkprow += "<tr>
     <td class=bold_class>Last backup of '$partition'</td>
