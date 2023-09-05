@@ -5,16 +5,16 @@
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
   #####################################################################
-  $RecursiveDepth = 2
-  $script:diag = $null
+  $RecursiveDepth         = 2
+  $script:diag            = $null
   # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
-  $HuduAPIKey = $env:HuduKey
+  $script:HuduAPIKey      = $env:HuduKey
   # Set the base domain of your Hudu instance without a trailing /
-  $HuduBaseDomain = $env:HuduDomain
+  $script:HuduBaseDomain  = $env:HuduDomain
   #Company Name as it appears in Hudu
-  $CompanyName = $env:CS_PROFILE_NAME
-  $HuduAssetLayoutName = "File Shares - AutoDoc"
-  $timestamp = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
+  $CompanyName            = $env:CS_PROFILE_NAME
+  $HuduAssetLayoutName    = "File Shares - AutoDoc"
+  $timestamp              = "$((Get-Date).ToString('dd-MM-yyyy hh:mm:ss'))"
   #####################################################################
 #endregion ----- DECLARATIONS ----
 
@@ -75,8 +75,8 @@ if(Get-Module -ListAvailable -Name "NTFSSecurity") {
 }
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
 #Set Hudu logon information
-New-HuduAPIKey $HuduAPIKey
-New-HuduBaseUrl $HuduBaseDomain
+New-HuduAPIKey $script:HuduAPIKey
+New-HuduBaseUrl $script:HuduBaseDomain
 
 $Company = Get-HuduCompanies -name $CompanyName 
 if ($Company) {
@@ -153,13 +153,13 @@ if ($Company) {
 					position = 10
 				}
 			)
-			write-output "Creating New Asset Layout $HuduAssetLayoutName"
+			write-output "Creating New Asset Layout $($HuduAssetLayoutName)"
 			$NewLayout = New-HuduAssetLayout -name $HuduAssetLayoutName -icon "fas fa-folder-open" -color "#4CAF50" -icon_color "#ffffff" -include_passwords $false -include_photos $false -include_comments $false -include_files $false -fields $AssetLayoutFields
 			$Layout = Get-HuduAssetLayouts -name $HuduAssetLayoutName
 		}
 
 		#Collect Data
-		$AllsmbShares = Get-SmbShare | Where-Object {( (@('Remote Admin', 'Default share', 'Remote IPC', 'Printer Drivers') -notcontains $_.Description) ) -and $_.ShareType -eq 'FileSystemDirectory'}
+		$AllSMBShares = Get-SmbShare | Where-Object {( (@('Remote Admin', 'Default share', 'Remote IPC', 'Printer Drivers') -notcontains $_.Description) ) -and $_.ShareType -eq 'FileSystemDirectory'}
 		foreach ($SMBShare in $AllSMBShares) {
       $output = Get-ProcessOutput -FileName "C:\Windows\System32\net.exe" -Args "share `"$($SMBShare.name)`""
       $NetOut = $output.StandardOutput -split "Permission"
@@ -212,12 +212,14 @@ if ($Company) {
       }
 		
       try {
+        start-sleep -seconds 5
         $AssetName = "$($ComputerName) - $($SMBShare.name)"
         write-output "Documenting to Hudu"  -ForegroundColor Green
         $Asset = Get-HuduAssets -name $AssetName -companyid $Company.id -assetlayoutid $Layout.id
         #If the Asset does not exist, we edit the body to be in the form of a new asset, if not, we just upload.
         if (!$Asset) {
           try {
+            start-sleep -seconds 5
             write-output "Creating new Asset"
             $Asset = New-HuduAsset -name $AssetName -company_id $Company.id -asset_layout_id $Layout.id -fields $AssetFields
           } catch {
@@ -230,6 +232,7 @@ if ($Company) {
           }
         } else {
           try {
+            start-sleep -seconds 5
             write-output "Updating Asset"
             $Asset = Set-HuduAsset -asset_id $Asset.id -name $AssetName -company_id $Company.id -asset_layout_id $Layout.id -fields $AssetFields
           } catch {
