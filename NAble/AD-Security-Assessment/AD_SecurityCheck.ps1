@@ -111,7 +111,7 @@ Function Get-PrivilegedGroupChanges {
   if ($Members -ne $Null) {
     $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
   } else {
-    write-output "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'." -foregroundcolor Red
+    write-output "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
     $script:o_Notes = $script:o_Notes + "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
   }
 } ## Get-PrivilegedGroupChanges
@@ -516,7 +516,7 @@ try {
     SchemaMaster = "."
     DomainNamingMaster = "."
   }
-  write-output "`r`nGet-ADForest : Could not find a forest identified by: '$DCtoConnect'." -foregroundcolor Red
+  write-output "`r`nGet-ADForest : Could not find a forest identified by: '$DCtoConnect'."
   $script:o_Notes = $script:o_Notes + "`r`nGet-ADForest : Could not find a forest identified by: '$DCtoConnect'."
 }
 $domaininfo = Get-ADDomain -Server $DCtoConnect
@@ -1078,7 +1078,7 @@ $script:o_Notes = $script:o_Notes + "`r`nPRIVILEDGED GROUP CHANGES : " + $GroupC
 $script:o_Notes = $script:o_Notes + "`r`nTEMPORARY USER LIST : " + $TempUserCheck + "<br>" + $TemporaryUsersList
 $script:o_Notes = $script:o_Notes + "`r`nNEW DOMAIN USERS : " + $UserCheck + "<br>" + $UserChanges
 #NOTES
-write-output $script:o_Notes -ForegroundColor Green
+write-output $script:o_Notes
 $script:o_Notes = $script:o_Notes.replace("`r`n", "<br>")
 
 Write-Log "Please find the report in C:\IT\Reports directory."

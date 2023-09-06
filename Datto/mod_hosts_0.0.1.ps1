@@ -5,7 +5,7 @@
     Modifies the HOSTS file and adds a static entry
 
 .NOTES
-    Version        : 0.1.1 (28 July 2022)
+    Version        : 0.1.2 (05 September 2023)
     Creation Date  : 28 July 2022
     Purpose/Change : Modifies HOSTS file
     File Name      : mod_hosts_0.0.1.ps1 
@@ -40,7 +40,7 @@
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 #ENDREGION ----- FUNCTIONS ----
 
 #------------

@@ -39,11 +39,11 @@
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Pop-Warnings {
     param (
@@ -161,7 +161,7 @@ try {
     $ldisks = Get-WMIObject 'Win32_PerfFormattedData_PerfDisk_LogicalDisk' -erroraction stop | where-object {$_.Name -match ":"}
   } catch {
     $script:diag += "Unable to query Drive Statistics via CIM or WMI`r`n"
-    write-DRRMAlert "Warning : Monitoring Failure"
+    write-DRMMAlert "Warning : Monitoring Failure"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
@@ -171,7 +171,7 @@ try {
 $idisks = 0
 foreach ($disk in $ldisks) {
   $idisks += 1
-  write-output "`r`nPOLLING DISK : $($disk.name)`r`n" -foregroundcolor yellow
+  write-output "`r`nPOLLING DISK : $($disk.name)`r`n"
   $dque = $disk.CurrentDiskQueueLength
   $diskdiag += ("Current Disk Queue : $($dque)`r`n").toupper()
   $daque = $disk.AvgDiskQueueLength
@@ -222,16 +222,16 @@ foreach ($disk in $ldisks) {
   #CHECK DRIVE PERFORMANCE VALUES
   chkPERF $disk
   write-output $diskdiag
-  write-output " - DRIVE REPORT : $($disk.name)" -ForegroundColor yellow
+  write-output " - DRIVE REPORT : $($disk.name)"
   $diskdiag += " - DRIVE REPORT $($disk.name):`r`n"
   if (-not $script:diskWARN) {
-    write-output "  - All Drive Performance values passed checks" -ForegroundColor green
+    write-output "  - All Drive Performance values passed checks"
     $diskdiag += "  - All Drive Performance values passed checks`r`n"
   } elseif ($script:diskWARN) {
-    write-output "  - The following Drive Performance values did not pass :" -ForegroundColor red
+    write-output "  - The following Drive Performance values did not pass :"
     $diskdiag += "  - The following Drive Performance values did not pass :`r`n"
     foreach ($warn in $script:disks[$disk.name]) {
-      write-output "$($warn)" -ForegroundColor red
+      write-output "$($warn)"
       $diskdiag += "$($warn)"
     }
     $script:diskWARN = $false
@@ -257,12 +257,12 @@ $script:diag += "Avg. Execution Time - $([math]::round($average / 60)) Minutes :
 #DATTO OUTPUT
 write-output  "DATTO OUTPUT :"
 if ($script:blnWARN) {
-  write-DRRMAlert "Warning : $($script:disks.count) Disk(s) Exceeded Performance Thresholds"
+  write-DRMMAlert "Warning : $($script:disks.count) Disk(s) Exceeded Performance Thresholds"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "Healthy : $($idisks) Disk(s) Within Performance Thresholds"
+  write-DRMMAlert "Healthy : $($idisks) Disk(s) Within Performance Thresholds"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 0

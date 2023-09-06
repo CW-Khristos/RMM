@@ -42,7 +42,7 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-ProcessOutput {
     Param (

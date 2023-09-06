@@ -26,11 +26,11 @@
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
@@ -114,7 +114,7 @@ if ([version]$version -ge [version]"6.0") {
   $script:avjson = "$($script:dirPD)\CentraStage\AEMAgent\antivirus.json"
 } elseif ([version]$version -lt [version]"6.0") {
   $script:diag += "Unsupported OS. Only Vista / Win 7/8 / Server 2008 and up are supported.`r`n`r`n"
-  write-output "Unsupported OS. Only Vista / Win 7/8 / Server 2008 and up are supported.`r`n" -foregroundcolor red
+  write-output "Unsupported OS. Only Vista / Win 7/8 / Server 2008 and up are supported.`r`n"
   $script:avjson = "$($script:dirAU)\Application Data\CentraStage\AEMAgent\antivirus.json"
 }
 #CHECK 'PERSISTENT' FOLDERS
@@ -145,19 +145,19 @@ get-childitem -path "C:\IT"  | where-object {$_.name -match "eps.rmm.exe"} | % {
 if ($script:blnDL) {
     try {
       $script:diag += "Invoke-WebRequest() - Determining latest version of eps.rmm.exe`r`n"
-      write-output "Invoke-WebRequest() - Determining latest version of eps.rmm.exe" -foregroundcolor yellow
+      write-output "Invoke-WebRequest() - Determining latest version of eps.rmm.exe"
       $script:epsVER = [System.Text.Encoding]::ASCII.GetString((invoke-webrequest -URI "http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat" -UseBasicParsing -erroraction stop).content)
     } catch {
       $script:diag += "Unable to determine latest version of eps.rmm.exe`r`n"
       $script:diag += "Invoke-WebRequest() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat`r`n"
       write-output "Unable to determine latest version of eps.rmm.exe"
-      write-output "Invoke-WebRequest() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat" -foregroundcolor red
+      write-output "Invoke-WebRequest() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat"
       $script:diag += "$($_.Exception)`r`n"
       $script:diag += "$($_.scriptstacktrace)`r`n"
       $script:diag += "$($_)`r`n`r`n"
       try {
         $script:diag += "Web.DownloadFile() - Determining latest version of eps.rmm.exe`r`n"
-        write-output "Web.DownloadFile() - Determining latest version of eps.rmm.exe" -foregroundcolor yellow
+        write-output "Web.DownloadFile() - Determining latest version of eps.rmm.exe"
         $web = new-object system.net.webclient
         $web.downloadfile("http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat", "C:\IT\latest.dat")
         $script:epsVER = get-content -path "C:\IT\latest.dat"
@@ -165,7 +165,7 @@ if ($script:blnDL) {
         $script:diag += "Unable to determine latest version of eps.rmm.exe`r`n"
         $script:diag += "Web.DownloadFile() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat`r`n"
         write-output "Unable to determine latest version of eps.rmm.exe"
-        write-output "Web.DownloadFile() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat" -foregroundcolor red
+        write-output "Web.DownloadFile() - Could not open http://download.bitdefender.com/SMB/RMM/Tools/Win/latest.dat"
         $script:diag += "$($_.Exception)`r`n"
         $script:diag += "$($_.scriptstacktrace)`r`n"
         $script:diag += "$($_)`r`n`r`n"
@@ -177,21 +177,21 @@ if ($script:blnDL) {
       if (-not (test-path -path $script:epsEXE -pathtype leaf)) {
         try {
           $script:diag += "BITS.Transfer() - Downloading latest version of eps.rmm.exe ($($script:epsVER))`r`n"
-          write-output "BITS.Transfer() - Downloading latest version of eps.rmm.exe ($($script:epsVER))" -foregroundcolor yellow
+          write-output "BITS.Transfer() - Downloading latest version of eps.rmm.exe ($($script:epsVER))"
           start-bitstransfer -erroraction stop -source $script:epsSRC -destination $script:epsEXE
           (get-childitem -path $script:epsEXE).creationtime = (get-date)
         } catch {
           $script:diag += "BITS.Transfer() - Could not download $($script:epsSRC)`r`n"
-          write-output "BITS.Transfer() - Could not download $($script:epsSRC)" -foregroundcolor red
+          write-output "BITS.Transfer() - Could not download $($script:epsSRC)"
           try {
             $script:diag += "Web.DownloadFile() - Downloading latest version of eps.rmm.exe ($($script:epsVER))`r`n"
-            write-output "Web.DownloadFile() - Downloading latest version of eps.rmm.exe ($($script:epsVER))" -foregroundcolor yellow
+            write-output "Web.DownloadFile() - Downloading latest version of eps.rmm.exe ($($script:epsVER))"
             $web = new-object system.net.webclient
             $web.downloadfile($script:epsSRC, $script:epsEXE)
             (get-childitem -path $script:epsEXE).creationtime = (get-date)
           } catch {
             $script:diag += "Web.DownloadFile() - Could not download $($script:epsSRC)`r`n"
-            write-output "Web.DownloadFile() - Could not download $($script:epsSRC)" -foregroundcolor red
+            write-output "Web.DownloadFile() - Could not download $($script:epsSRC)"
             $script:diag += "$($_.Exception)`r`n"
             $script:diag += "$($_.scriptstacktrace)`r`n"
             $script:diag += "$($_)`r`n`r`n"
@@ -203,45 +203,45 @@ if ($script:blnDL) {
 }
 if ($script:blnFAIL) {
   StopClock
-  write-DRRMAlert "Execution Failed : Please See Diagnostics"
+  write-DRMMAlert "Execution Failed : Please See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnFAIL) {
   #UTILIZE EPS.RMM.EXE TO DETECT BD INSTALL
   $script:diag += " - CHECKING BDGZ INSTALL`r`n"
-  write-output " - CHECKING BDGZ INSTALL" -foregroundcolor yellow
+  write-output " - CHECKING BDGZ INSTALL"
   $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-detect"
   $script:detected = [int]$output.standardoutput.split("|")[0]
   #UTILIZE EPS.RMM.EXE TO DETECT BD UPDATE STATUS
   $script:diag += " - CHECKING BDGZ UPDATE STATUS`r`n`r`n"
-  write-output " - CHECKING BDGZ UPDATE STATUS`r`n" -foregroundcolor yellow
+  write-output " - CHECKING BDGZ UPDATE STATUS`r`n"
   $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-isUpToDate"
   $script:isupdated = [bool][int]$output.standardoutput
   #INITIAL STATUS CHECK
   switch ($script:detected) {
     0 {
       $script:diag += "BDGZ not installed`r`n`r`n"
-      write-output "BDGZ not installed`r`n" -foregroundcolor red
+      write-output "BDGZ not installed`r`n"
       remove-item "$($script:avjson)" -force -erroraction silentlycontinue
       StopClock
-      write-DRRMAlert "BDGZ not installed"
+      write-DRMMAlert "BDGZ not installed"
       write-DRMMDiag "$($script:diag)"
       exit 1
     }
     1 {
       $script:running = $true
       $script:diag += "BDGZ installed; AV running`r`n`r`n"
-      write-output "BDGZ installed; AV running`r`n" -foregroundcolor green
+      write-output "BDGZ installed; AV running`r`n"
     }
     2 {
       $script:running = $false
       $script:diag += "BDGZ installed; AV not running`r`n`r`n"
-      write-output "BDGZ installed; AV not running`r`n" -foregroundcolor red
+      write-output "BDGZ installed; AV not running`r`n"
       remove-item "$($script:avjson)" -force -erroraction silentlycontinue
       $json = "{`"product`":`"Bitdefender Endpoint Security Tools`",`"running`":$($script:running.tostring().tolower()),`"upToDate`":$($script:isupdated.tostring().tolower())}"
       set-content "$($script:avjson)" -value "$($json)"
       StopClock
-      write-DRRMAlert "BDGZ installed; AV not running"
+      write-DRMMAlert "BDGZ installed; AV not running"
       write-DRMMDiag "$($script:diag)"
       exit 1
     }
@@ -251,7 +251,7 @@ if ($script:blnFAIL) {
     {($_ -eq "VERIFYINSTALL") -or ($_ -eq "VERIFYUPDATE")} {
       $act = $env:i_Action.replace("Verify", "")
       $script:diag += " - VERIFYING BDGZ $($act)`r`n`r`n"
-      write-output " - VERIFYING BDGZ $($act)`r`n" -foregroundcolor yellow
+      write-output " - VERIFYING BDGZ $($act)`r`n"
       $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-getProductVersion"
       $bdver = [string]$output.standardoutput
       $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-getLastUpdate"
@@ -279,7 +279,7 @@ if ($script:blnFAIL) {
       }
       $script:diag += "$($status)`r`n`r`n"
       #$script:diag += "$($status)`r`n - WRITING ANTIVIRUS.JSON FILE`r`n`r`n"
-      #write-output "$($status)`r`n - WRITING ANTIVIRUS.JSON FILE`r`n" -foregroundcolor yellow
+      #write-output "$($status)`r`n - WRITING ANTIVIRUS.JSON FILE`r`n"
       remove-item "$($script:avjson)" -force -erroraction silentlycontinue
       $json = "{`"product`":`"Bitdefender Endpoint Security Tools`",`"running`":$($script:running.tostring().tolower()),`"upToDate`":$($script:isupdated.tostring().tolower())}"
       set-content "$($script:avjson)" -value "$($json)"
@@ -287,7 +287,7 @@ if ($script:blnFAIL) {
     {($_ -eq "VERIFYSCANS")} {
       $act = $env:i_Action.replace("Verify", "")
       $script:diag += " - VERIFYING BDGZ $($act)`r`n`r`n"
-      write-output " - VERIFYING BDGZ $($act)`r`n" -foregroundcolor yellow
+      write-output " - VERIFYING BDGZ $($act)`r`n"
       $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-getLastSystemScan"
       #FULL SCANS
       $script:fscan = $output.standardoutput.split("|")[0]
@@ -310,7 +310,7 @@ if ($script:blnFAIL) {
     {($_ -eq "RUNUPDATE")} {
       $act = $env:i_Action.replace("Run", "")
       $script:diag += " - RUNNING BDGZ $($act)`r`n`r`n"
-      write-output " - RUNNING BDGZ $($act)`r`n" -foregroundcolor yellow
+      write-output " - RUNNING BDGZ $($act)`r`n"
       $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-getProductVersion"
       $bdver = [string]$output.standardoutput
       $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-getLastUpdate"
@@ -339,7 +339,7 @@ if ($script:blnFAIL) {
     {($_ -eq "RUNFULLSCAN") -or ($_ -eq "RUNQUICKSCAN")} {
       $act = $env:i_Action.replace("Run", "")
       $script:diag += " - RUNNING BDGZ $($act)`r`n`r`n"
-      write-output " - RUNNING BDGZ $($act)`r`n" -foregroundcolor yellow
+      write-output " - RUNNING BDGZ $($act)`r`n"
       $output = Get-ProcessOutput -FileName $script:epsEXE -Args "-getLastSystemScan"
       switch ($env:i_Action.toupper()) {
         "RUNFULLSCAN" {
@@ -375,15 +375,15 @@ if ($script:blnFAIL) {
 }
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-output "$($status)" -foregroundcolor red
+  write-output "$($status)"
   StopClock
-  write-DRRMAlert "$($status)"
+  write-DRMMAlert "$($status)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-output "$($status)" -foregroundcolor green
+  write-output "$($status)"
   StopClock
-  write-DRRMAlert "$($status)"
+  write-DRMMAlert "$($status)"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }

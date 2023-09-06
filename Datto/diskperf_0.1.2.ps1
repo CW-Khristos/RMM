@@ -9,7 +9,7 @@
 .NOTES
     Version        : 0.1.3 (05 September 2023)
     Creation Date  : 24 March 2022
-    Purpose/Change : Provide Primary AV Product Status and Report Possible AV Conflicts
+    Purpose/Change : Query Disk Performance Statistics for all connected drives
     File Name      : diskperf_0.1.2.ps1 
     Author         : Christopher Bledsoe - cbledsoe@ipmcomputers.com
     Thanks         : Chris Taylor (christaylor.codes ) for objectively providing the best answer
@@ -39,11 +39,11 @@
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function StopClock {
     #Stop script execution time calculation
@@ -160,17 +160,17 @@
     #CHECK DRIVE PERFORMANCE VALUES
     check-PERF $objPERF $objDISK
     write-output "$($diskdiag)--------------------------------------"
-    write-output " - DRIVE REPORT : $($objPERF.name)" -ForegroundColor yellow
+    write-output " - DRIVE REPORT : $($objPERF.name)"
     $diskdiag += "--------------------------------------`r`n"
     $diskdiag += " - DRIVE REPORT $($objPERF.name):`r`n"
     if (-not $script:diskWARN) {
-      write-output "  - All Drive Performance values passed checks" -ForegroundColor green
+      write-output "  - All Drive Performance values passed checks"
       $diskdiag += "  - All Drive Performance values passed checks`r`n"
     } elseif ($script:diskWARN) {
-      write-output "  - The following Drive Performance values did not pass :" -ForegroundColor red
+      write-output "  - The following Drive Performance values did not pass :"
       $diskdiag += "  - The following Drive Performance values did not pass :`r`n"
       foreach ($warn in $script:disks[$objPERF.name]) {
-        write-output "$($warn)" -ForegroundColor red
+        write-output "$($warn)"
         $diskdiag += "$($warn)"
       }
       $script:diskWARN = $false
@@ -283,7 +283,7 @@ try {
       Get-CimInstance -Query $drives | ForEach-Object {
         $pdrive = $_
         write-output "--------------------------------------`r`n"
-        write-output "POLLING DISK : $($ddisk.name)`r`n" -foregroundcolor yellow
+        write-output "POLLING DISK : $($ddisk.name)`r`n"
         write-output "--------------------------------------"
         write-output "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)"
         write-output "--------------------------------------"
@@ -311,7 +311,7 @@ try {
         Get-WmiObject -Query $drives | ForEach-Object {
           $pdrive = $_
           write-output "--------------------------------------`r`n"
-          write-output "POLLING DISK : $($ddisk.name)`r`n" -foregroundcolor yellow
+          write-output "POLLING DISK : $($ddisk.name)`r`n"
           write-output "--------------------------------------"
           write-output "$($pdrive.DeviceID) - $($ddisk.name) - $($ddisk.serialnumber)"
           write-output "--------------------------------------"
@@ -334,7 +334,7 @@ try {
     write-output $_.Exception
     write-output $_.scriptstacktrace
     write-output $_
-    write-DRRMAlert "Warning : Monitoring Failure"
+    write-DRMMAlert "Warning : Monitoring Failure"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
@@ -345,12 +345,12 @@ StopClock
 #DATTO OUTPUT
 write-output  "DATTO OUTPUT :"
 if ($script:blnWARN) {
-  write-DRRMAlert "Warning : $($script:disks.count) Disk(s) Exceeded Performance Thresholds"
+  write-DRMMAlert "Warning : $($script:disks.count) Disk(s) Exceeded Performance Thresholds"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "Healthy : $($idisks) Disk(s) Within Performance Thresholds"
+  write-DRMMAlert "Healthy : $($idisks) Disk(s) Within Performance Thresholds"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 0

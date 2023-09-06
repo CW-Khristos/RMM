@@ -1,10 +1,12 @@
 #region ----- DECLARATIONS ----
-  $script:diag = $null
-  $script:blnWARN = $false
-  $script:blnBREAK = $false
-  $strLineSeparator = "----------------------------------"
-  $Backups = @{}
-  $DataSources = @(
+  $script:diag        = $null
+  $script:blnWARN     = $false
+  $script:blnBREAK    = $false
+  $script:bitarch     = $null
+  $script:ostype      = $null
+  $strLineSeparator   = "----------------------------------"
+  $Backups            = @{}
+  $DataSources        = @(
     "FileSystem",
     "SystemState",
     "Exchange",
@@ -29,7 +31,17 @@
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
+
+  function Get-OSType {                                           #Determine OS Type
+    #OS Type
+    $osproduct = (Get-WmiObject -class Win32_OperatingSystem).Producttype
+    Switch ($osproduct) {
+      "1" {$script:ostype = "Workstation"}
+      "2" {$script:ostype = "DC"}
+      "3" {$script:ostype = "Server"}
+    }
+  } ## Get-OSType
 
   function StopClock {
     #Stop script execution time calculation
@@ -51,28 +63,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - ($($strModule)) :" -foregroundcolor red
-        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - ($($strModule)) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
       }
     }
   }
@@ -80,7 +92,12 @@
 
 #------------
 #BEGIN SCRIPT
-$Date = (get-date).AddHours(-24)
+Get-OSType
+switch ($script:ostype) {
+  "Workstation" {$range = 4}
+  {"DC","Server"} {$range = 12}
+}
+$Date = (get-date).AddHours(-($range))
 #Start script execution time calculation
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 $ScrptStartTime = (get-date).ToString('yyyy-MM-dd hh:mm:ss')

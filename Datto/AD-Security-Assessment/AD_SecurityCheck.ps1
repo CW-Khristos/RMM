@@ -80,11 +80,11 @@ $script:ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin"
     write-output '<-End Diagnostic->'
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output '<-Start Result->'
     write-output "Alert=$($message)"
     write-output '<-End Result->'
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
   
   function Write-Log {
       [CmdletBinding()]
@@ -124,7 +124,7 @@ $script:ArrayOfNames = @("test", "tmp","skykick","mig", "migwiz","temp","-admin"
     if ($Members -ne $Null) {
       $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
     } else {
-      write-output "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'." -foregroundcolor Red
+      write-output "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
       $script:o_Notes += "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
     }
   } ## Get-PrivilegedGroupChanges
@@ -540,7 +540,7 @@ try {
     SchemaMaster = "."
     DomainNamingMaster = "."
   }
-  write-output "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'." -foregroundcolor Red
+  write-output "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'."
   $script:o_Notes += "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'."
 }
 $domaininfo = Get-ADDomain -Server $DCtoConnect
@@ -1119,15 +1119,15 @@ $script:o_Notes = $script:o_Notes + "`r`nNEW DOMAIN USERS : " + $UserCheck + "<b
 #NOTES
 Write-Log "Please find the report in C:\IT\Reports directory."
 $script:o_Notes += "`r`nPlease find the report in C:\IT\Reports directory."
-write-output $script:o_Notes -ForegroundColor Green
+write-output $script:o_Notes
 $script:o_Notes = $script:o_Notes.replace("`r`n", "<br>")
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-DRRMAlert "AD Security Check : Warning : Check Diagnostics and $($HealthReport) and $($Logfile) for full output"
+  write-DRMMAlert "AD Security Check : Warning : Check Diagnostics and $($HealthReport) and $($Logfile) for full output"
   write-DRMMDiag "$($script:o_Notes)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "AD Security Check : Healthy"
+  write-DRMMAlert "AD Security Check : Healthy"
   write-DRMMDiag "$($script:o_Notes)"
   exit 0
 }

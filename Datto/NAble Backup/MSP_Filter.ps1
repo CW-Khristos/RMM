@@ -378,7 +378,7 @@ if (-not ($script:blnFAIL)) {
         remove-item "C:\IT\Scripts\filters.txt" -force
       }
       $script:diag += "`t - Loading : NAble Backup Filters`r`n"
-      write-output "`t - Loading : NAble Backup Filters" -foregroundcolor yellow
+      write-output "`t - Loading : NAble Backup Filters"
       $srcTXT = "$($strURL)/filters.txt"
       try {
         $web = new-object system.net.webclient
@@ -387,7 +387,7 @@ if (-not ($script:blnFAIL)) {
         $script:blnPSTXT = $true
       } catch {
         $script:diag += "`t - Web.DownloadFile() - Could not download $($srcTXT)`r`n"
-        write-output "`t - Web.DownloadFile() - Could not download $($srcTXT)" -foregroundcolor red
+        write-output "`t - Web.DownloadFile() - Could not download $($srcTXT)"
         write-output $_.Exception
         write-output $_.scriptstacktrace
         write-output $_
@@ -398,7 +398,7 @@ if (-not ($script:blnFAIL)) {
         } catch {
           $script:blnPSTXT = $false
           $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
-          write-output "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
+          write-output "`t - BITS.Transfer() - Could not download $($srcTXT)"
           write-output $_.Exception
           write-output $_.scriptstacktrace
           write-output $_
@@ -501,7 +501,7 @@ if (-not ($script:blnFAIL)) {
         remove-item "C:\IT\Scripts\includes.txt" -force
       }
       $script:diag += "`r`n`r`n`t - Loading : NAble Backup includes`r`n"
-      write-output "`r`n`t - Loading : NAble Backup includes" -foregroundcolor yellow
+      write-output "`r`n`t - Loading : NAble Backup includes"
       $srcTXT = "$($strURL)/includes.txt"
       try {
         $web = new-object system.net.webclient
@@ -510,7 +510,7 @@ if (-not ($script:blnFAIL)) {
         $script:blnPSTXT = $true
       } catch {
         $script:diag += "`t - Web.DownloadFile() - Could not download $($srcTXT)`r`n"
-        write-output "`t - Web.DownloadFile() - Could not download $($srcTXT)" -foregroundcolor red
+        write-output "`t - Web.DownloadFile() - Could not download $($srcTXT)"
         write-output $_.Exception
         write-output $_.scriptstacktrace
         write-output $_
@@ -521,7 +521,7 @@ if (-not ($script:blnFAIL)) {
         } catch {
           $script:blnPSTXT = $false
           $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
-          write-output "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
+          write-output "`t - BITS.Transfer() - Could not download $($srcTXT)"
           write-output $_.Exception
           write-output $_.scriptstacktrace
           write-output $_
@@ -617,7 +617,7 @@ if (-not ($script:blnFAIL)) {
         remove-item "C:\IT\Scripts\cloud_filters.txt" -force
       }
       $script:diag += "`r`n`r`n`t - Loading : NAble Backup Filters`r`n"
-      write-output "`r`n`t - Loading : NAble Backup Filters" -foregroundcolor yellow
+      write-output "`r`n`t - Loading : NAble Backup Filters"
       $srcTXT = "$($strURL)/cloud_filters.txt"
       try {
         $web = new-object system.net.webclient
@@ -626,7 +626,7 @@ if (-not ($script:blnFAIL)) {
         $script:blnPSTXT = $true
       } catch {
         $script:diag += "`t - Web.DownloadFile() - Could not download $($srcTXT)`r`n"
-        write-output "`t - Web.DownloadFile() - Could not download $($srcTXT)" -foregroundcolor red
+        write-output "`t - Web.DownloadFile() - Could not download $($srcTXT)"
         write-output $_.Exception
         write-output $_.scriptstacktrace
         write-output $_
@@ -637,7 +637,7 @@ if (-not ($script:blnFAIL)) {
         } catch {
           $script:blnPSTXT = $false
           $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
-          write-output "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
+          write-output "`t - BITS.Transfer() - Could not download $($srcTXT)"
           write-output $_.Exception
           write-output $_.scriptstacktrace
           write-output $_
@@ -740,7 +740,7 @@ if (-not ($script:blnFAIL)) {
         remove-item "C:\IT\Scripts\cloud_includes.txt" -force
       }
       $script:diag += "`r`n`r`n`t - Loading : NAble Backup Includes`r`n"
-      write-output "`r`n`t - Loading : NAble Backup Includes" -foregroundcolor yellow
+      write-output "`r`n`t - Loading : NAble Backup Includes"
       $srcTXT = "$($strURL)/cloud_includes.txt"
       try {
         $web = new-object system.net.webclient
@@ -749,7 +749,7 @@ if (-not ($script:blnFAIL)) {
         $script:blnPSTXT = $true
       } catch {
         $script:diag += "`t - Web.DownloadFile() - Could not download $($srcTXT)`r`n"
-        write-output "`t - Web.DownloadFile() - Could not download $($srcTXT)" -foregroundcolor red
+        write-output "`t - Web.DownloadFile() - Could not download $($srcTXT)"
         write-output $_.Exception
         write-output $_.scriptstacktrace
         write-output $_
@@ -760,7 +760,7 @@ if (-not ($script:blnFAIL)) {
         } catch {
           $script:blnPSTXT = $false
           $script:diag += "`t - BITS.Transfer() - Could not download $($srcTXT)`r`n"
-          write-output "`t - BITS.Transfer() - Could not download $($srcTXT)" -foregroundcolor red
+          write-output "`t - BITS.Transfer() - Could not download $($srcTXT)"
           write-output $_.Exception
           write-output $_.scriptstacktrace
           write-output $_

@@ -41,7 +41,7 @@
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 #ENDREGION ----- FUNCTIONS ----
 
 #------------

@@ -11,16 +11,16 @@
 
 #REGION ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
-    write-output  "<-Start Diagnostic->"
+    write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-ProcessOutput {
     Param (
@@ -102,21 +102,21 @@ if ($script:blnDL) {
   if (-not (test-path -path $script:bdEXE -pathtype leaf)) {
     try {
       $script:diag += "BITS.Transfer() - Downloading latest version of BEST_uninstallTool.exe`r`n"
-      write-output "BITS.Transfer() - Downloading latest version of BEST_uninstallTool.exe" -foregroundcolor yellow
+      write-output "BITS.Transfer() - Downloading latest version of BEST_uninstallTool.exe"
       start-bitstransfer -erroraction stop -source $script:bdSRC -destination $script:bdEXE
       (get-childitem -path $script:bdEXE).creationtime = (get-date)
     } catch {
       $script:diag += "BITS.Transfer() - Could not download $($script:bdSRC)`r`n"
-      write-output "BITS.Transfer() - Could not download $($script:bdSRC)" -foregroundcolor red
+      write-output "BITS.Transfer() - Could not download $($script:bdSRC)"
       try {
         $script:diag += "Web.DownloadFile() - Downloading latest version of BEST_uninstallTool.exe`r`n"
-        write-output "Web.DownloadFile() - Downloading latest version of BEST_uninstallTool.exe" -foregroundcolor yellow
+        write-output "Web.DownloadFile() - Downloading latest version of BEST_uninstallTool.exe"
         $web = new-object system.net.webclient
         $web.downloadfile($script:bdSRC, $script:bdEXE)
         (get-childitem -path $script:bdEXE).creationtime = (get-date)
       } catch {
         $script:diag += "Web.DownloadFile() - Could not download $($script:bdSRC)`r`n"
-        write-output "Web.DownloadFile() - Could not download $($script:bdSRC)" -foregroundcolor red
+        write-output "Web.DownloadFile() - Could not download $($script:bdSRC)"
         $script:diag += "$($_.Exception)`r`n"
         $script:diag += "$($_.scriptstacktrace)`r`n"
         $script:diag += "$($_)`r`n`r`n"
@@ -127,14 +127,14 @@ if ($script:blnDL) {
 }
 if ($script:blnFAIL) {
   StopClock
-  write-DRRMAlert "Execution Failed : Please See Diagnostics"
+  write-DRMMAlert "Execution Failed : Please See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnFAIL) {
   #UTILIZE BD CLI REMOVAL TOOL TO UNINSTALL BITDEFENDER
   #
   $script:diag += " - RUNNING BDGZ UNINSTALL TOOL`r`n"
-  write-output " - RUNNING BDGZ UNINSTALL TOOL" -foregroundcolor yellow
+  write-output " - RUNNING BDGZ UNINSTALL TOOL"
   $output = Get-ProcessOutput -FileName $script:bdEXE -Args "/bdparams /bruteForce /log"
   $results = [string]$output.standardoutput
   $errors = [string]$output.standarderror
@@ -144,18 +144,18 @@ if ($script:blnFAIL) {
 #DATTO OUTPUT
 $script:diag += "$($status)`r`n"
 if ($script:blnWARN) {
-  write-output "$($status)" -foregroundcolor red
+  write-output "$($status)"
 } elseif (-not $script:blnWARN) {
-  write-output "$($status)" -foregroundcolor green
+  write-output "$($status)"
 }
 #Stop script execution time calculation
 StopClock
 if ($script:blnWARN) {
-  write-DRRMAlert "$($status)"
+  write-DRMMAlert "$($status)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "$($status)"
+  write-DRMMAlert "$($status)"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }

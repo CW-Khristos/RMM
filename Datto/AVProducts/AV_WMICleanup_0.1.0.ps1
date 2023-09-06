@@ -45,7 +45,7 @@ To Do:
     write-output "<-End Diagnostic->"
   }
 
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
@@ -223,11 +223,11 @@ StopClock
 $script:diag | out-file $logPath
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-DRRMAlert "AV_WMICLEANUP : Execution Failure : See Diagnostics"
+  write-DRMMAlert "AV_WMICLEANUP : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "AV_WMICLEANUP : Completed Execution"
+  write-DRMMAlert "AV_WMICLEANUP : Completed Execution"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }

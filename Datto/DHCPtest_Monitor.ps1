@@ -48,28 +48,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - ($($strModule)) :" -foregroundcolor red
-        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - ($($strModule)) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - DHCPtest_Monitor - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
       }
     }
   }
@@ -82,7 +82,7 @@
     $xmldiag = $null
     #RETRIEVE VERSION XML FROM GITHUB
     $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
-    write-output "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
+    write-output "Loading : '$($strREPO)/$($strBRCH)' Version XML"
     $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/Datto/version.xml"
     try {
       $verXML = New-Object System.Xml.XmlDocument
@@ -90,14 +90,14 @@
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "XML.Load() - Could not open $($srcVER)`r`n$($err)`r`n"
-      write-output "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
+      write-output "XML.Load() - Could not open $($srcVER)`r`n$($err)"
       try {
         $web = new-object system.net.webclient
         [xml]$verXML = $web.DownloadString($srcVER)
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         $xmldiag += "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)`r`n"
-        write-output "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
+        write-output "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)"
         try {
           start-bitstransfer -erroraction stop -source $srcVER -destination "C:\IT\Scripts\version.xml"
           [xml]$verXML = "C:\IT\Scripts\version.xml"
@@ -105,7 +105,7 @@
           $blnXML = $false
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
           $xmldiag += "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n"
-          write-output "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
+          write-output "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n"
         }
       }
     }
@@ -170,13 +170,13 @@
       $dlFile = $web.downloadfile($strURL, "C:\IT\DHCPtest\$($file)")
     } catch {
       $dldiag = "Web.DownloadFile() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-output "Web.DownloadFile() - Could not download $($strURL)" -foregroundcolor red
+      write-output "Web.DownloadFile() - Could not download $($strURL)"
       logERR 3 "download-Files" "$($dldiag)"
       try {
         start-bitstransfer -source $strURL -destination "C:\IT\DHCPtest\$($file)" -erroraction stop
       } catch {
         $dldiag = "BITS.Transfer() - Could not download $($strURL)`r`n$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-        write-output "BITS.Transfer() - Could not download $($strURL)" -foregroundcolor red
+        write-output "BITS.Transfer() - Could not download $($strURL)"
         logERR 2 "download-Files" "$($dldiag)"
       }
     }

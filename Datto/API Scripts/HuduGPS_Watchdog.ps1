@@ -33,11 +33,11 @@
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-ProcessOutput {
     Param (
@@ -279,7 +279,7 @@ if (-not $script:blnBREAK) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nHuduGPS_Watchdog : Execution Successful"
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "HuduGPS_Watchdog : Execution Successful"
+    write-DRMMAlert "HuduGPS_Watchdog : Execution Successful"
     #write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 0
@@ -287,7 +287,7 @@ if (-not $script:blnBREAK) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nHuduGPS_Watchdog : Execution Completed with Warnings : See Diagnostics"
     "$($script:diag)" | add-content $logPath -force
-    write-DRRMAlert "HuduGPS_Watchdog : Execution Completed with Warnings : See Diagnostics"
+    write-DRMMAlert "HuduGPS_Watchdog : Execution Completed with Warnings : See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
     exit 1
@@ -296,7 +296,7 @@ if (-not $script:blnBREAK) {
   #WRITE TO LOGFILE
   $script:diag += "`r`n`r`nHuduGPS_Watchdog : Execution Failure : See Diagnostics"
   "$($script:diag)" | add-content $logPath -force
-  write-DRRMAlert "HuduGPS_Watchdog : Execution Failure : See Diagnostics"
+  write-DRMMAlert "HuduGPS_Watchdog : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1

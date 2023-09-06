@@ -71,36 +71,36 @@ if (-not (test-path -path "C:\IT\Scripts")) {
 $script:diag += "`r`n--------------------------------------`r`n"
 $script:diag += "POLLING PASSPORTAL SERVICE`r`n"
 $script:diag += "--------------------------------------`r`n"
-write-output "--------------------------------------" -foregroundcolor yellow
-write-output "POLLING PASSPORTAL SERVICE" -foregroundcolor yellow
-write-output "--------------------------------------" -foregroundcolor yellow
+write-output "--------------------------------------"
+write-output "POLLING PASSPORTAL SERVICE"
+write-output "--------------------------------------"
 try {
   $script:svcPP = get-service -name passportal -erroraction stop
   $script:diag += "$($script:svcPP.name) - $($script:svcPP.status)`r`n"
   if ($script:svcPP.status -eq "Running") {
-    write-output $script:svcPP -foregroundcolor green
+    write-output $script:svcPP
   } elseif ($script:svcPP.status -ne "Running") {
     $script:blnWARN = $true
-    write-output $script:svcPP -foregroundcolor red
+    write-output $script:svcPP
   }
 } catch {
   $script:blnWARN = $true
   $script:diag += "Passportal Service Not Found!`r`n"
   $script:diag += "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-  write-output "Passportal Service Not Found!" -foregroundcolor red
+  write-output "Passportal Service Not Found!"
   write-output $_.Exception
   write-output $_.scriptstacktrace
   write-output $_
 }
 $script:diag += "--------------------------------------`r`n"
-write-output "--------------------------------------" -foregroundcolor yellow
+write-output "--------------------------------------"
 #CHECK PASSPORTAL LOGS
 $script:diag += "`r`n--------------------------------------`r`n"
 $script:diag += "PARSING PASSPORTAL LOGS`r`n"
 $script:diag += "--------------------------------------`r`n"
-write-output "--------------------------------------" -foregroundcolor yellow
-write-output "PARSING PASSPORTAL LOGS" -foregroundcolor yellow
-write-output "--------------------------------------" -foregroundcolor yellow
+write-output "--------------------------------------"
+write-output "PARSING PASSPORTAL LOGS"
+write-output "--------------------------------------"
 try {
   foreach ($line in get-content "C:\Program Files\N-able\Passportal Agent\Logs\pserv.log" -erroraction stop) {
     if ($line -match "ERROR - ") {
@@ -111,7 +111,7 @@ try {
         write-output "ERROR DETECTED - ALERTING DISABLED"
       }
       $script:diag += "$($line)`r`n"
-      write-output "$($line)" -foregroundcolor red
+      write-output "$($line)"
     }
   }
 } catch {
@@ -123,13 +123,13 @@ try {
   }
   $script:diag += "Passportal 'pserv' Logfile Not Found!`r`n"
   $script:diag += "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-  write-output "Passportal 'pserv' Logfile Not Found!" -foregroundcolor red
+  write-output "Passportal 'pserv' Logfile Not Found!"
   write-output $_.Exception
   write-output $_.scriptstacktrace
   write-output $_
 }
 $script:diag += "--------------------------------------`r`n"
-write-output "--------------------------------------" -foregroundcolor yellow
+write-output "--------------------------------------"
 #DATTO OUTPUT
 StopClock
 if ($script:blnWARN) {

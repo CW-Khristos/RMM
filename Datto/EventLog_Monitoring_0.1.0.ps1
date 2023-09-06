@@ -51,7 +51,7 @@ To Do:
     write-output "<-End Diagnostic->"
   }
 
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
@@ -188,11 +188,11 @@ $EventLogs = foreach ($Event in $FilteredEvents) {
 StopClock
 #DATTO OUTPUT
 $script:diag += "`r`n`r`nDATTO OUTPUT :`r`n"
-write-output "`r`nDATTO OUTPUT :" -foregroundcolor yellow
+write-output "`r`nDATTO OUTPUT :"
 if ($FilteredEvents.Count -lt $env:i_EventThreshold) {
   $script:diag += "`r`n - Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
-  write-output "`r`n - Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)" -foregroundcolor green
-  write-DRRMAlert "Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
+  write-output "`r`n - Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
+  write-DRMMAlert "Event Log : Healthy - No Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
   write-DRMMDiag "$($script:diag)"
   exit 0
 } elseif ($FilteredEvents.Count -ge $env:i_EventThreshold) {
@@ -208,15 +208,15 @@ if ($FilteredEvents.Count -lt $env:i_EventThreshold) {
   write-output "----------------------------------"
   write-output "ALERT"
   write-output "----------------------------------"
-  write-output "The following Event Log Entries passed thresholds ($($env:i_EventThreshold) Events in $($env:i_LogRange) hours) :" -foregroundcolor yellow
-  write-output $arrHash -foregroundcolor red
-  write-output "OCCURENCES : $($script:hashMessage["$($Event.Message)"].Occurences)" -foregroundcolor red
-  write-output "TIMESTAMPS :" -foregroundcolor red
+  write-output "The following Event Log Entries passed thresholds ($($env:i_EventThreshold) Events in $($env:i_LogRange) hours) :"
+  write-output $arrHash
+  write-output "OCCURENCES : $($script:hashMessage["$($Event.Message)"].Occurences)"
+  write-output "TIMESTAMPS :"
   foreach ($Value in $script:hashEvents["$($Event.ProviderName) - $($Event.Id) - $($Event.LevelDisplayName)"].keys) {
     $script:diag += "$($script:hashMessage[$Value].TimeCreated)`r`n"
-    write-output "$($script:hashMessage[$Value].TimeCreated)" -foregroundcolor red
+    write-output "$($script:hashMessage[$Value].TimeCreated)"
   }
-  write-DRRMAlert "Event Log : Warning - $($FilteredEvents.Count) Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
+  write-DRMMAlert "Event Log : Warning - $($FilteredEvents.Count) Source : $($env:i_EventSource) Events detected in LogName : $($env:i_EventLog)"
   write-DRMMDiag "$($script:diag)"
   exit 1
 }

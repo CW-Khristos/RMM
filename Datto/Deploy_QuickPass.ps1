@@ -56,7 +56,7 @@
     write-output "<-End Diagnostic->"
   }
 
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
@@ -146,15 +146,15 @@ if ((($null -eq $psQPInstallTokenID) -or ($psQPInstallTokenID -eq "") -or ($psQP
 
     #Begin download of Quickpass Agent
     $script:diag += "Beginning download of the QuickPass agent`r`n"
-    write-output "Beginning download of the QuickPass agent" -foregroundcolor yellow
+    write-output "Beginning download of the QuickPass agent"
     try {
       $script:diag += "`t - Web.DownloadFile() - Downloading: $($DownloadURL)`r`n"
-      write-output "`t - Web.DownloadFile() - Downloading: $($DownloadURL)" -foregroundcolor yellow
+      write-output "`t - Web.DownloadFile() - Downloading: $($DownloadURL)"
       $web = new-object system.net.webclient
       $web.DownloadFile($DownloadURL, $Setup)
     } catch {
       $script:diag += "`t - Web.DownloadFile() - Could not download $($DownloadURL)`r`n"
-      write-output "`t - Web.DownloadFile() - Could not download $($DownloadURL)" -foregroundcolor red
+      write-output "`t - Web.DownloadFile() - Could not download $($DownloadURL)"
       write-output $_.Exception
       write-output $_.scriptstacktrace
       write-output $_
@@ -162,9 +162,9 @@ if ((($null -eq $psQPInstallTokenID) -or ($psQPInstallTokenID -eq "") -or ($psQP
         start-bitstransfer -source $DownloadURL -destination $Setup -erroraction stop
       } catch {
         $script:diag += "`t - BITS.Transfer() - Downloading: $($DownloadURL)`r`n"
-        write-output "`t - BITS.Transfer() - Downloading: $($DownloadURL)" -foregroundcolor yellow
+        write-output "`t - BITS.Transfer() - Downloading: $($DownloadURL)"
         $script:diag += "`t - BITS.Transfer() - Could not download $($DownloadURL)`r`n"
-        write-output "`t - BITS.Transfer() - Could not download $($DownloadURL)" -foregroundcolor red
+        write-output "`t - BITS.Transfer() - Could not download $($DownloadURL)"
         write-output $_.Exception
         write-output $_.scriptstacktrace
         write-output $_

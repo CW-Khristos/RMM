@@ -13,11 +13,11 @@
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function Get-ProcessOutput {
     Param (
@@ -270,11 +270,11 @@ StopClock
 $script:diag | out-file $logPath
 #DATTO OUTPUT
 if ($script:blnWARN) {
-  write-DRRMAlert "Deploy TechID_DomainService : Execution Failure : See Diagnostics"
+  write-DRMMAlert "Deploy TechID_DomainService : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
-  write-DRRMAlert "Deploy TechID_DomainService : Completed Execution"
+  write-DRMMAlert "Deploy TechID_DomainService : Completed Execution"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }

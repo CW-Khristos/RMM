@@ -91,28 +91,28 @@
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - ($($strModule)) :" -foregroundcolor red
-        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - ($($strModule)) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)"
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - MSPBackup_Schedules - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)"
       }
     }
   }

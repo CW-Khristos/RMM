@@ -105,7 +105,7 @@ try {
     try {
       Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -Name "EnableScriptBLockLogging" -Value 1
       $script:diag += "  - Information - Script Block Logging Enabled`r`n"
-      #write-output "  - Information - Script Block Logging Enabled" -foregroundcolor yellow
+      #write-output "  - Information - Script Block Logging Enabled"
     } catch {
       $script:diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
       #write-output "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging" -foregroundcolor red
@@ -115,7 +115,7 @@ try {
     }
   } else {
     $script:diag += "  - Information - Script Block Logging is enabled`r`n" 
-    #write-output "  - Information - Script Block Logging is enabled" -foregroundcolor yellow 
+    #write-output "  - Information - Script Block Logging is enabled" 
   }
 } catch {
   $script:diag += "  - Error - Script Block Logging is not enabled`r`n  - Enabling Script Block Logging`r`n"
@@ -125,7 +125,7 @@ try {
     New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -Value "default value" -force
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\" -Name "EnableScriptBLockLogging" -Value 1
     $script:diag += "  - Information - Script Block Logging Enabled`r`n"
-    #write-output "  - Information - Script Block Logging Enabled" -foregroundcolor yellow
+    #write-output "  - Information - Script Block Logging Enabled"
   } catch {
     $script:diag += "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging`r`n"
     #write-output "  - Error - Script Block Logging is not enabled`r`n  - Unable to Enable Script Block Logging" -foregroundcolor red
@@ -201,8 +201,8 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
             $script:hashSCMD.add("$($details[0]) - $($details[1]) : $($command)$($syntax)", $hash)
             $script:diag += "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :`r`n"
             $script:diag += "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])`r`n"
-            #write-output "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :" -foregroundcolor yellow
-            #write-output "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])" -foregroundcolor yellow
+            #write-output "`r`n  - $($Event.TimeCreated)`r`n  - Dangerous Command : $($command)$($syntax) found in script block marked 'safe' :"
+            #write-output "    - ScriptBlock ID : $($details[0])`r`n    - Path : $($details[1])"
           }
         }
       }
@@ -212,7 +212,7 @@ $PowerShellLogs = foreach ($Event in $PowerShellEvents) {
 #Stop script execution time calculation
 StopClock
 #DATTO OUTPUT
-write-output "`r`nDATTO OUTPUT :" -foregroundcolor yellow
+write-output "`r`nDATTO OUTPUT :"
 if ($script:dcmds -eq 0) {
   #write-output "`r`n  - Powershell Events : Healthy - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs." -foregroundcolor green
   write-DRMMAlert "Powershell Events : Healthy - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs."
@@ -220,7 +220,7 @@ if ($script:dcmds -eq 0) {
   exit 0
 } elseif ($script:dcmds -gt 0) {
   #write-output "`r`n  - Powershell Events : Warning - $($script:dcmds) Dangerous commands executed by $($script:dscripts) Scripts found in logs." -foregroundcolor red
-  #write-output "`r`nThe following Script Blocks contain dangerous commands :" -foregroundcolor yellow
+  #write-output "`r`nThe following Script Blocks contain dangerous commands :"
   $script:diag += "`r`nThe following Script Blocks contain dangerous commands :"
   foreach ($cmd in $script:hashDCMD.keys) {
     $script:diag += "`r`n  - $($script:hashDCMD[$cmd].TimeCreated)`r`n  - Dangerous Command : $($script:hashDCMD[$cmd].TriggeredCommand) found in script block :`r`n"

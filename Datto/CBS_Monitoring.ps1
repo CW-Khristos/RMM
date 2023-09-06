@@ -12,11 +12,11 @@
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
-  function write-DRRMAlert ($message) {
+  function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
     write-output "<-End Result->"
-  } ## write-DRRMAlert
+  } ## write-DRMMAlert
 
   function StopClock {
     #Stop script execution time calculation
@@ -60,14 +60,14 @@ if ($script:blnWARN) {
   write-output "CBS_MONITOR : CBS Logs Above Threshold (1GB) : See Diagnostics`r`n$($strLineSeparator)"
   #Stop script execution time calculation
   StopClock
-  write-DRRMAlert "CBS_MONITOR : CBS Logs Above Threshold (1GB) : See Diagnostics"
+  write-DRMMAlert "CBS_MONITOR : CBS Logs Above Threshold (1GB) : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
   exit 1
 } elseif (-not $script:blnWARN) {
   write-output "CBS_MONITOR : No Large CBS Logs Found`r`n$($strLineSeparator)"
   #Stop script execution time calculation
   StopClock
-  write-DRRMAlert "CBS_MONITOR : No Large CBS Logs Found"
+  write-DRMMAlert "CBS_MONITOR : No Large CBS Logs Found"
   write-DRMMDiag "$($script:diag)"
   exit 0
 }

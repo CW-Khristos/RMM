@@ -33,7 +33,7 @@ if ($Verify -eq "Y") {
 
  foreach ($file in $(Get-ChildItem $StartingDir -recurse)) {
   #display filename and old permissions
-  write-output -foregroundcolor Yellow $file.FullName
+  write-output $file.FullName
   #uncomment if you want to see old permissions
   #CACLS $file.FullName
   
@@ -41,7 +41,7 @@ if ($Verify -eq "Y") {
   CACLS $file.FullName /E /P "${Principal}:${Right}" >$NULL
   
   #display new permissions
-  write-output -foregroundcolor Green "New Permissions"
+  write-output "New Permissions"
   CACLS $file.FullName
  }
 }

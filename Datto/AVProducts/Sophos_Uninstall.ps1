@@ -151,7 +151,7 @@
     $xmldiag = $null
     #RETRIEVE VERSION XML FROM GITHUB
     $xmldiag += "Loading : '$($strREPO)/$($strBRCH)' Version XML`r`n"
-    write-output "Loading : '$($strREPO)/$($strBRCH)' Version XML" -foregroundcolor yellow
+    write-output "Loading : '$($strREPO)/$($strBRCH)' Version XML"
     $srcVER = "https://raw.githubusercontent.com/CW-Khristos/$($strREPO)/$($strBRCH)/Datto/version.xml"
     try {
       $verXML = New-Object System.Xml.XmlDocument
@@ -159,14 +159,14 @@
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       $xmldiag += "XML.Load() - Could not open $($srcVER)`r`n$($err)`r`n"
-      write-output "XML.Load() - Could not open $($srcVER)`r`n$($err)" -foregroundcolor red
+      write-output "XML.Load() - Could not open $($srcVER)`r`n$($err)"
       try {
         $web = new-object system.net.webclient
         [xml]$verXML = $web.DownloadString($srcVER)
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         $xmldiag += "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)`r`n"
-        write-output "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)" -foregroundcolor red
+        write-output "Web.DownloadString() - Could not download $($srcVER)`r`n$($err)"
         try {
           start-bitstransfer -erroraction stop -source $srcVER -destination "C:\IT\Scripts\version.xml"
           [xml]$verXML = "C:\IT\Scripts\version.xml"
@@ -174,7 +174,7 @@
           $blnXML = $false
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
           $xmldiag += "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n"
-          write-output "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n" -foregroundcolor red
+          write-output "BITS.Transfer() - Could not download $($srcVER)`r`n$($err)`r`n"
         }
       }
     }

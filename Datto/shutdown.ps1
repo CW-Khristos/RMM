@@ -135,7 +135,7 @@ if ($blnReboot) {
       }
     }
     $script:diag += "Reboot has been set; system will reboot in $($varTimeout) $($env:usrTimeoutUnits)`r`n"
-    write-output "Reboot has been set; system will reboot in $($varTimeout) $($env:usrTimeoutUnits)" -foregroundcolor yellow
+    write-output "Reboot has been set; system will reboot in $($varTimeout) $($env:usrTimeoutUnits)"
   } catch {
     write-output $_.scriptstacktrace
     write-output $_
@@ -143,5 +143,5 @@ if ($blnReboot) {
 } elseif (-not $blnReboot) {
   $time = get-date.tostring('yyyy-MM-dd HH:mm:ss')
   $script:diag += "Current System Time $($time) not within configured Reboot Window : $($env:rebootDay), $($env:rebootTime) +-($($env:rebootWindow)min)`r`n"
-  write-output "Current System Time $($time) not within configured Reboot Window : $($env:rebootDay), $($env:rebootTime) +-($($env:rebootWindow)min)`r`n" -foregroundcolor yellow
+  write-output "Current System Time $($time) not within configured Reboot Window : $($env:rebootDay), $($env:rebootTime) +-($($env:rebootWindow)min)`r`n"
 }
