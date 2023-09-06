@@ -111,28 +111,28 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
       1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - ($($strModule)) :" -foregroundcolor red
-        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - ($($strModule)) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
-        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
       }
     }
   }
