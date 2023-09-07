@@ -141,7 +141,7 @@ if ($blnReboot) {
     write-output $_
   }
 } elseif (-not $blnReboot) {
-  $time = get-date.tostring('yyyy-MM-dd HH:mm:ss')
+  $time = (get-date).tostring('yyyy-MM-dd HH:mm:ss')
   $script:diag += "Current System Time $($time) not within configured Reboot Window : $($env:rebootDay), $($env:rebootTime) +-($($env:rebootWindow)min)`r`n"
   write-output "Current System Time $($time) not within configured Reboot Window : $($env:rebootDay), $($env:rebootTime) +-($($env:rebootWindow)min)`r`n"
 }
