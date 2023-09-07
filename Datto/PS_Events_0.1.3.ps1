@@ -1,11 +1,11 @@
 <#
 #DO NOT COMMIT TO GITHUB - HAS 'SECURE' STRING SIGNING SCRIPT AS 'SAFE'#
 .SYNOPSIS 
-    Assists you in finding machines that have ran dangerous commands such as invoke-expression, often used for attacks called 'Living off-the-Land'
+    Assists you in finding machines that have ran dangerous commands, often used for attacks called 'Living off-the-Land'
     Related blog: https://www.cyberdrain.com/monitoring-with-powershell-preventing-powershell-based-attacks-lolbas/
 
 .DESCRIPTION 
-    Assists you in finding machines that have ran dangerous commands such as invoke-expression, often used for attacks called 'Living off-the-Land'
+    Assists you in finding machines that have ran dangerous commands, often used for attacks called 'Living off-the-Land'
  
 .NOTES
     Version        : 0.1.4 (05 September 2023)
