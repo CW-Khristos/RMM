@@ -4,7 +4,7 @@
   #Param (
   #)
   #VERSION FOR SCRIPT UPDATE
-  $strSCR             = "MSPMSPBackup_Schedules"
+  $strSCR             = "MSPBackup_Schedules"
   $strVER             = [version]"0.1.2"
   $strREPO            = "RMM"
   $strBRCH            = "dev"
@@ -28,7 +28,7 @@
   $AllDevices         = $false
   $AllPartners        = $false
   $urlJSON            = 'https://api.backup.management/jsonapi'
-  $logPath            = "C:\IT\Log\MSPMSPBackup_Schedules_$($strVER).log"
+  $logPath            = "C:\IT\Log\MSPBackup_Schedules_$($strVER).log"
   #MXB PATH
   $mxbPath            = ${env:ProgramData} + "\MXB\Backup Manager"
   $script:True_path   = "C:\ProgramData\MXB\"
