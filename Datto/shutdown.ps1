@@ -22,7 +22,7 @@
     $tz = get-timezone
     $rebootdiag = "Timezone : $($tz)`r`n"
     [datetime]$curTime = get-date -format "yyyy-MM-dd HH:mm:ss"
-    $rebootdiag += "Current Time : $($curtime)`r`n"
+    $rebootdiag += "Current Time : $($curTime)`r`n"
     [datetime]$timeWindow = [datetime]$window
     $rebootdiag += "Scheduled Day : $($env:rebootDay)`r`n"
     [datetime]$runTime = $timeWindow.ToString('yyyy-MM-dd HH:mm:ss')
@@ -31,6 +31,7 @@
     $rebootdiag += "Start Window : $($startwindow)`r`n"
     [datetime]$endWindow = ($timeWindow).AddMinutes(($env:rebootWindow))          # Minutes after scheduled time
     $rebootdiag += "End Window : $($endwindow)`r`n"
+    $curTime = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($curTime, [System.TimeZoneInfo]::Local.Id, 'Eastern Standard Time')
     if (($env:rebootDay -match $curTime.dayofweek) -and ($curTime -ge $startWindow) -and ($curTime -le $endWindow)) {
       #Execute stuff
       $rebootdiag += "Current Time : $($curTime) is Inside Window : $($env:rebootDay) - $($runTime) +-($($env:rebootWindow)min); Triggering Reboot`r`n"
