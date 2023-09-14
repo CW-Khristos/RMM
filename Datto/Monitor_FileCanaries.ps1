@@ -125,11 +125,11 @@ StopClock
 #WRITE LOGFILE
 if ($blnLOG) {$script:diag | out-file $logPath}
 #DATTO OUTPUT
-if (!$CanaryStatus) {
+if ((!$CanaryStatus) -or ($script:blnBREAK)) {
   write-DRMMAlert "Healthy - No Canary files edited"
   write-DRMMDiag "$($script:diag)"
   exit 0
-} else {
+} elseif (($CanaryStatus) -and (-not ($script:blnBREAK))) {
   write-DRMMAlert "Canary file edited in the last hour"
   write-DRMMDiag "$($script:diag)"
   exit 1
