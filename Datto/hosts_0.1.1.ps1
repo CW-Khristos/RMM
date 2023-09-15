@@ -89,7 +89,7 @@ if ($strMod -gt $((Get-Date).AddDays(-1))) {
         $script:diag += "`r`nFILE MODIFIED; BUT NO BACKUP FOR COMPARISON"
         write-DRMMAlert "HOSTS : Last Modification @ $($strMod) : No Backup for Comparison"
         write-DRMMDiag "$($script:diag)"
-        exit 1
+        exit 0
     }
   }
 } else {
