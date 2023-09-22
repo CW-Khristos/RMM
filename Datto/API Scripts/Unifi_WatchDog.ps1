@@ -50,15 +50,15 @@
     {"c":"U7LT","t":"uap","n":"UniFi AP-AC-Lite"},{"c":"U7O","t":"uap","n":"UniFi AP-AC Outdoor"},{"c":"U7P","t":"uap","n":"UniFi AP-Pro"},
     {"c":"U7MSH","t":"uap","n":"UniFi AP-AC-Mesh"},{"c":"U7PG2","t":"uap","n":"UniFi AP-AC-Pro"},{"c":"p2N","t":"uap","n":"PicoStation M2"},
     {"c":"US8","t":"usw","n":"UniFi Switch 8"},{"c":"US8P60","t":"usw","n":"UniFi Switch 8 POE-60W"},{"c":"US8P150","t":"usw","n":"UniFi Switch 8 POE-150W"},
-    {"c":"S28150","t":"usw","n":"UniFi Switch 8 AT-150W"},{"c":"USC8","t":"usw","n":"UniFi Switch 8"},{"c":"US16P150","t":"usw","n":"UniFi Switch 16 POE-150W"},
-    {"c":"S216150","t":"usw","n":"UniFi Switch 16 AT-150W"},{"c":"US24","t":"usw","n":"UniFi Switch 24"},{"c":"US24P250","t":"usw","n":"UniFi Switch 24 POE-250W"},
-    {"c":"US24PL2","t":"usw","n":"UniFi Switch 24 L2 POE"},{"c":"US24P500","t":"usw","n":"UniFi Switch 24 POE-500W"},{"c":"S224250","t":"usw","n":"UniFi Switch 24 AT-250W"},
-    {"c":"S224500","t":"usw","n":"UniFi Switch 24 AT-500W"},{"c":"US48","t":"usw","n":"UniFi Switch 48"},{"c":"US48P500","t":"usw","n":"UniFi Switch 48 POE-500W"},
-    {"c":"US48PL2","t":"usw","n":"UniFi Switch 48 L2 POE"},{"c":"US48P750","t":"usw","n":"UniFi Switch 48 POE-750W"},{"c":"S248500","t":"usw","n":"UniFi Switch 48 AT-500W"},
-    {"c":"S248750","t":"usw","n":"UniFi Switch 48 AT-750W"},{"c":"US6XG150","t":"usw","n":"UniFi Switch 6XG POE-150W"},{"c":"USXG","t":"usw","n":"UniFi Switch 16XG"},
-    {"c":"UGW3","t":"ugw","n":"UniFi Security Gateway 3P"},{"c":"UGW4","t":"ugw","n":"UniFi Security Gateway 4P"},{"c":"UGWHD4","t":"ugw","n":"UniFi Security Gateway HD"},
-    {"c":"UGWXG","t":"ugw","n":"UniFi Security Gateway XG-8"},{"c":"UP4","t":"uph","n":"UniFi Phone-X"},{"c":"UP5","t":"uph","n":"UniFi Phone"},
-    {"c":"UP5t","t":"uph","n":"UniFi Phone-Pro"},{"c":"UP7","t":"uph","n":"UniFi Phone-Executive"},{"c":"UP5c","t":"uph","n":"UniFi Phone"},
+    {"c":"S28150","t":"usw","n":"UniFi Switch 8 AT-150W"},{"c":"USC8","t":"usw","n":"UniFi Switch 8"},{"c":"US24PRO","t":"usw","n":"UniFi Switch 24 POE"},
+    {"c":"US16P150","t":"usw","n":"UniFi Switch 16 POE-150W"},{"c":"S216150","t":"usw","n":"UniFi Switch 16 AT-150W"},{"c":"US24","t":"usw","n":"UniFi Switch 24"},
+    {"c":"US24P250","t":"usw","n":"UniFi Switch 24 POE-250W"},{"c":"US24PL2","t":"usw","n":"UniFi Switch 24 L2 POE"},{"c":"US24P500","t":"usw","n":"UniFi Switch 24 POE-500W"},
+    {"c":"S224250","t":"usw","n":"UniFi Switch 24 AT-250W"},{"c":"S224500","t":"usw","n":"UniFi Switch 24 AT-500W"},{"c":"US48","t":"usw","n":"UniFi Switch 48"},
+    {"c":"US48P500","t":"usw","n":"UniFi Switch 48 POE-500W"},{"c":"US48PL2","t":"usw","n":"UniFi Switch 48 L2 POE"},{"c":"US48P750","t":"usw","n":"UniFi Switch 48 POE-750W"},
+    {"c":"S248500","t":"usw","n":"UniFi Switch 48 AT-500W"},{"c":"S248750","t":"usw","n":"UniFi Switch 48 AT-750W"},{"c":"US6XG150","t":"usw","n":"UniFi Switch 6XG POE-150W"},
+    {"c":"USXG","t":"usw","n":"UniFi Switch 16XG"},{"c":"UGW3","t":"ugw","n":"UniFi Security Gateway 3P"},{"c":"UGW4","t":"ugw","n":"UniFi Security Gateway 4P"},
+    {"c":"UGWHD4","t":"ugw","n":"UniFi Security Gateway HD"},{"c":"UGWXG","t":"ugw","n":"UniFi Security Gateway XG-8"},{"c":"UP4","t":"uph","n":"UniFi Phone-X"},
+    {"c":"UP5","t":"uph","n":"UniFi Phone"},{"c":"UP5t","t":"uph","n":"UniFi Phone-Pro"},{"c":"UP7","t":"uph","n":"UniFi Phone-Executive"},{"c":"UP5c","t":"uph","n":"UniFi Phone"},
     {"c":"UP5tc","t":"uph","n":"UniFi Phone-Pro"},{"c":"UP7c","t":"uph","n":"UniFi Phone-Executive"}]
 "@ | ConvertFrom-Json
 #endregion ----- DECLARATIONS ----
@@ -314,7 +314,7 @@ if (-not $script:blnFAIL) {
     }
 
     foreach ($site in $sites) {
-      ######################### Unifi Site Documentation ###########################
+      #region######################## Unifi Site Documentation ###########################
       #First we will see if there is an Asset that matches the site name with this Asset Layout
       write-output "`r`n$($strLineSeparator)"
       write-output "Attempting to map $($site.desc)"
@@ -475,7 +475,8 @@ if (-not $script:blnFAIL) {
           logERR 3 "Create Site Unifi - AutoDoc" $err
         }
       }
-      ######################### Unifi Device Documentation ###########################
+      #endregion
+      #region######################## Unifi Device Documentation ###########################
       write-output "`r`n$($strLineSeparator)"
       write-output "Attempting to map $($site.desc) devices"
       write-output "$($strLineSeparator)"
@@ -550,6 +551,7 @@ if (-not $script:blnFAIL) {
           $Asset = Set-HuduAsset -asset_id $Asset.id -name $AssetName -company_id $companyid -asset_layout_id $DeviceLayout.id -fields $AssetFields	
         }
       }
+      #endregion
     }
   }
   #DATTO OUTPUT
