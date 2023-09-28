@@ -159,8 +159,9 @@ $Scriptpath = $($MyInvocation.MyCommand.Path)
 
 #Report
 $runntime= $((Get-Date).ToString('dd-MM-yyyy'))
-$HealthReport = $Dir + "\Reports\ADsecurity" + "$runntime" + ".htm"
+$HealthReport = $Dir + "\Reports\ADsecurity" + "$($runntime)" + ".htm"
 #Cleanup old Reports
+if (test-path $HealthReport) {remove-item $HealthReport -force}
 Get-ChildItem -path "$($Dir)\Reports" -file | where {$_.name -like "ADsecurity*.htm"} | Sort-Object LastWriteTime -Descending | Select-Object -Skip 2 | Remove-Item
 
 #Logfile 
@@ -843,7 +844,7 @@ Add-Content $HealthReport $gpppwd
 $flag = "passed"
 $Passfoundfiles = ""
 $domainname = ($domaininfo.DistinguishedName.Replace("DC=","")).replace(",",".")
-$DomainSYSVOLShareScan = "\\$domainname\SYSVOL\$domainname\Policies\"
+$DomainSYSVOLShareScan = "\\$($domainname)\SYSVOL\$($domainname)\Policies\"
 Get-ChildItem $DomainSYSVOLShareScan -Filter *.xml -Recurse |  % {
   If (Select-String -Path $_.FullName -Pattern "Cpassword") {
     $Passfoundfiles += $_.FullName + "</br>" ; $Count += 1; $flag= "failed"; $script:blnWARN = $true
@@ -1120,7 +1121,6 @@ $script:o_Notes = $script:o_Notes + "`r`nNEW DOMAIN USERS : " + $UserCheck + "<b
 Write-Log "Please find the report in C:\IT\Reports directory."
 $script:o_Notes += "`r`nPlease find the report in C:\IT\Reports directory."
 write-output $script:o_Notes
-$script:o_Notes = $script:o_Notes.replace("`r`n", "<br>")
 #DATTO OUTPUT
 if ($script:blnWARN) {
   write-DRMMAlert "AD Security Check : Warning : Check Diagnostics and $($HealthReport) and $($Logfile) for full output"
