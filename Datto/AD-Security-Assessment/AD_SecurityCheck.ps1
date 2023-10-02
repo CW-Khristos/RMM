@@ -10,7 +10,7 @@
     Pulls important security facts from Active Directory and generates nicely viewable reports in HTML format by highlighting the spots that require attention
  
 .NOTES
-    Version        : 0.1.3 (05 September 2023)
+    Version        : 0.1.3 (28 September 2023)
     Creation Date  : 10 January 2022
     Purpose/Change : Pulls important security facts from Active Directory and generates nicely viewable reports in HTML format
     File Name      : AD_SecurityCheck.ps1 
@@ -44,15 +44,20 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $script:o_PDC = $null
   #PASSWORDS
   $script:i_PwdComplex = $env:pwdComplexity
+  $script:o_PwdComplexityFlag = $true
   $script:i_MinPwdLen = $env:pwdMinLen
+  $script:o_MinPwdLenFlag = $true
   $script:i_MinPwdAge = $env:pwdMinAge
   $script:i_MinPwdAgeFlag = $true
   $script:i_MaxPwdAge = $env:pwdMaxAge
   $script:i_MaxPwdAgeFlag = $true
   $script:i_PwdHistory = $env:pwdHistory
+  $script:o_PwdHistoryFlag = $true
   $script:i_RevEncrypt = $null
+  $script:o_RevEncryptFlag = $true
   #LOCKOUT
   $script:i_LockThreshold = $env:lockThreshold
+  $script:o_LockThresholdFlag = $true
   $script:i_LockDuration = $env:lockDuration
   $script:o_LockDurationFlag = $true
   $script:i_LockObserve = $env:lockWindow
@@ -496,7 +501,7 @@ try {
   Write-Log "Cannot connect to current Domain."
   $script:o_Notes += "`r`nCannot connect to current Domain."
   $script:blnWARN = $true
-  Break;
+  break;
 }
 $Domain.DomainControllers | ForEach-Object {$DCList += $_.Name}
 
@@ -504,7 +509,7 @@ if (!$DCList) {
   Write-Log "No Domain Controller found. Run this solution on AD server. Please try again."
   $script:o_Notes += "`r`nNo Domain Controller found. Run this solution on AD server. Please try again."
   $script:blnWARN = $true
-  Break;
+  break;
 }
 Write-Log "List of Domain Controllers Discovered"
 #List out all machines discovered in Log File and Console
@@ -515,62 +520,62 @@ Add-Content $HealthReport $dataRow
 if ($DCList.Count -eq 0) {
   Write-Log -Message "As no machines left script won't continue further" -Severity Error
   $script:o_Notes += "`r`nAs no machines left script won't continue further"
-  Break
+  break;
 }
 #Start Container Div and Sub container div
-$dataRow = "<div id=container><div id=portsubcontainer><table border=1px>
-            <caption><h2><a name='Domain Info'>Domain Info</h2></caption>"
-try {
-  $forestinfo = Get-ADForest -Server $DCtoConnect -ErrorAction Stop
-} catch {
-  $forestinfo = @{
-    Name = "."
-    ForestMode = "."
-    SchemaMaster = "."
-    DomainNamingMaster = "."
+  $dataRow = "<div id=container><div id=portsubcontainer><table border=1px>
+              <caption><h2><a name='Domain Info'>Domain Info</h2></caption>"
+  try {
+    $forestinfo = Get-ADForest -Server $DCtoConnect -ErrorAction Stop
+  } catch {
+    $forestinfo = @{
+      Name = "."
+      ForestMode = "."
+      SchemaMaster = "."
+      DomainNamingMaster = "."
+    }
+    write-output "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'."
+    $script:o_Notes += "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'."
   }
-  write-output "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'."
-  $script:o_Notes += "`r`nGet-ADForest : Could not find a forest identified by: '$($DCtoConnect)'."
-}
-$domaininfo = Get-ADDomain -Server $DCtoConnect
-$dataRow += "<tr>
-  <td class=bold_class>ForestName</td>
-  <td>$($($forestinfo.Name).ToUpper())
-  </td></tr>"
-$dataRow += "<tr>
-  <td class=bold_class>DomainName</td>
-  <td>$($($domaininfo.Name).ToUpper())
-  </td></tr>"
-$dataRow += "<tr>
-  <td class=bold_class>ForestMode(FFL)</td>
-  <td>$($forestinfo.ForestMode)
-  </td></tr>"
-$dataRow += "<tr>
-  <td class=bold_class>DomainMode(DFL)</td>
-  <td>$($domaininfo.DomainMode)
-  </td></tr>"
-$dataRow += "<tr>
-  <td class=bold_class>SchemaMaster</td>
-  <td>$($forestinfo.SchemaMaster)
-  </td></tr>"
-$dataRow += "<tr>
-  <td class=bold_class>DomainNamingMaster</td>
-  <td>$($forestinfo.DomainNamingMaster)
-  </td></tr>"
-$dataRow += "<tr>
-  <td class=bold_class>PDCEmulator</td>
-  <td>$($domaininfo.PDCEmulator)
-  </td></tr>"
-$dataRow += "<tr>
-  <td class=bold_class>RIDMaster</td>
-  <td>$($domaininfo.RIDMaster)
-  </td></tr>"
-$dataRow += "<tr>
-  <td class=bold_class>InfrastructureMaster</td>
-  <td>$($domaininfo.InfrastructureMaster)
-  </td></tr>"
-Add-Content $HealthReport $dataRow
-Add-Content $HealthReport "</table></div>"
+  $domaininfo = Get-ADDomain -Server $DCtoConnect
+  $dataRow += "<tr>
+    <td class=bold_class>ForestName</td>
+    <td>$($($forestinfo.Name).ToUpper())
+    </td></tr>"
+  $dataRow += "<tr>
+    <td class=bold_class>DomainName</td>
+    <td>$($($domaininfo.Name).ToUpper())
+    </td></tr>"
+  $dataRow += "<tr>
+    <td class=bold_class>ForestMode(FFL)</td>
+    <td>$($forestinfo.ForestMode)
+    </td></tr>"
+  $dataRow += "<tr>
+    <td class=bold_class>DomainMode(DFL)</td>
+    <td>$($domaininfo.DomainMode)
+    </td></tr>"
+  $dataRow += "<tr>
+    <td class=bold_class>SchemaMaster</td>
+    <td>$($forestinfo.SchemaMaster)
+    </td></tr>"
+  $dataRow += "<tr>
+    <td class=bold_class>DomainNamingMaster</td>
+    <td>$($forestinfo.DomainNamingMaster)
+    </td></tr>"
+  $dataRow += "<tr>
+    <td class=bold_class>PDCEmulator</td>
+    <td>$($domaininfo.PDCEmulator)
+    </td></tr>"
+  $dataRow += "<tr>
+    <td class=bold_class>RIDMaster</td>
+    <td>$($domaininfo.RIDMaster)
+    </td></tr>"
+  $dataRow += "<tr>
+    <td class=bold_class>InfrastructureMaster</td>
+    <td>$($domaininfo.InfrastructureMaster)
+    </td></tr>"
+  Add-Content $HealthReport $dataRow
+  Add-Content $HealthReport "</table></div>"
 #End Sub Container Div
 
 #---------------------------------------------------------------------------
@@ -578,116 +583,117 @@ Add-Content $HealthReport "</table></div>"
 #---------------------------------------------------------------------------
 Write-Log -Message "Performing Domain Users Validation..............."
 #Start Sub Container
-$DomainUsers = "<Div id=DomainUserssubcontainer><table border=1px>
-                <caption><h2><a name='DomainUsers'>Domain Users</h2></caption>"
-Add-Content $HealthReport $DomainUsers
-#Get Domain User Information
-$LastLoggedOnDate = $(Get-Date) - $(New-TimeSpan -days $UserLogonAge)  
-$PasswordStaleDate = $(Get-Date) - $(New-TimeSpan -days $UserPasswordAge)
-$ADLimitedProperties = @(
-  "Name", "Enabled", "SAMAccountname", "DisplayName", "Enabled","LastLogonDate",
-  "PasswordLastSet", "PasswordNeverExpires", "PasswordNotRequired", "PasswordExpired", "SmartcardLogonRequired",
-  "AccountExpirationDate", "AdminCount", "Created", "Modified", "LastBadPasswordAttempt", "badpwdcount",
-  "mail", "CanonicalName", "DistinguishedName", "ServicePrincipalName", "SIDHistory", "PrimaryGroupID", "UserAccountControl"
-)
+  $DomainUsers = "<Div id=DomainUserssubcontainer><table border=1px>
+                  <caption><h2><a name='DomainUsers'>Domain Users</h2></caption>"
+  Add-Content $HealthReport $DomainUsers
+  #Get Domain User Information
+  $LastLoggedOnDate = $(get-date) - $(new-timespan -days $UserLogonAge)  
+  $PasswordStaleDate = $(get-date) - $(new-timespan -days $UserPasswordAge)
+  $ADLimitedProperties = @(
+    "Name", "Enabled", "SAMAccountname", "DisplayName", "Enabled","LastLogonDate",
+    "PasswordLastSet", "PasswordNeverExpires", "PasswordNotRequired", "PasswordExpired", "SmartcardLogonRequired",
+    "AccountExpirationDate", "AdminCount", "Created", "Modified", "LastBadPasswordAttempt", "badpwdcount",
+    "mail", "CanonicalName", "DistinguishedName", "ServicePrincipalName", "SIDHistory", "PrimaryGroupID", "UserAccountControl"
+  )
 
-[array]$DomainUsers = Get-ADUser -Filter * -Property $ADLimitedProperties -Server $DCtoConnect 
-[array]$DomainEnabledUsers = $DomainUsers | Where {$_.Enabled -eq $True }
-[array]$DomainDisabledUsers = $DomainUsers | Where {$_.Enabled -eq $false }
-[array]$DomainEnabledInactiveUsers = $DomainEnabledUsers | Where { ($_.LastLogonDate -le $LastLoggedOnDate) -AND ($_.PasswordLastSet -le $PasswordStaleDate) }
-[array]$DomainUsersWithReversibleEncryptionPasswordArray = $DomainUsers | Where { $_.UserAccountControl -band 0x0080 } 
-[array]$DomainUserPasswordNotRequiredArray = $DomainUsers | Where {$_.PasswordNotRequired -eq $True}
-[array]$DomainUserPasswordNeverExpiresArray = $DomainUsers | Where {$_.PasswordNeverExpires -eq $True}
-[array]$DomainKerberosDESUsersArray = $DomainUsers | Where { $_.UserAccountControl -band 0x200000 }
-[array]$DomainUserDoesNotRequirePreAuthArray = $DomainUsers | Where {$_.DoesNotRequirePreAuth -eq $True}
-[array]$DomainUsersWithSIDHistoryArray = $DomainUsers | Where {$_.SIDHistory -like "*"}
+  [array]$DomainUsers = Get-ADUser -Filter * -Property $ADLimitedProperties -Server $DCtoConnect 
+  [array]$DomainEnabledUsers = $DomainUsers | where {$_.Enabled -eq $True }
+  [array]$DomainDisabledUsers = $DomainUsers | where {$_.Enabled -eq $false }
+  [array]$DomainEnabledInactiveUsers = $DomainEnabledUsers | where { ($_.LastLogonDate -le $LastLoggedOnDate) -AND ($_.PasswordLastSet -le $PasswordStaleDate) }
+  [array]$DomainUsersWithReversibleEncryptionPasswordArray = $DomainUsers | where { $_.UserAccountControl -band 0x0080 } 
+  [array]$DomainUserPasswordNotRequiredArray = $DomainUsers | where {$_.PasswordNotRequired -eq $True}
+  [array]$DomainUserPasswordNeverExpiresArray = $DomainUsers | where {$_.PasswordNeverExpires -eq $True}
+  [array]$DomainKerberosDESUsersArray = $DomainUsers | where { $_.UserAccountControl -band 0x200000 }
+  [array]$DomainUserDoesNotRequirePreAuthArray = $DomainUsers | where {$_.DoesNotRequirePreAuth -eq $True}
+  [array]$DomainUsersWithSIDHistoryArray = $DomainUsers | where {$_.SIDHistory -like "*"}
 
-$domainusersrow = "<thead><tbody><tr>
-  <td class=bold_class>Total Users</td>
-  <td width='40%' style= 'text-align: center'>$($DomainUsers.Count)
-  </td></tr>"
-$domainusersrow += "<tr>
-  <td class=bold_class>Enabled Users</td>
-  <td width='40%' style= 'text-align: center'>$($DomainEnabledUsers.Count)
-  </td></tr>"
-$domainusersrow += "<tr>
-  <td class=bold_class>Disabled Users</td>
-  <td width='40%' style= 'text-align: center'>$($DomainDisabledUsers.Count)
-  </td></tr>"
-$domainusersrow += "<tr>
-  <td class=bold_class>Inactive Users</td>
-  <td width='40%' style= 'text-align: center'>$($DomainEnabledInactiveUsers.Count)
-  </td></tr>"
-$domainusersrow += "<tr>
-  <td class=bold_class>Users With Password Never Expires</td>
-  <td width='40%' style= 'text-align: center'>$($DomainUserPasswordNeverExpiresArray.Count)
-  </td></tr>"
-$domainusersrow += "<tr>
-  <td class=bold_class>Users With SID History</td>
-  <td width='40%' style= 'text-align: center'>$($DomainUsersWithSIDHistoryArray.Count)
-  </td></tr>"
+  $domainusersrow = "<thead><tbody><tr>
+    <td class=bold_class>Total Users</td>
+    <td width='40%' style= 'text-align: center'>$($DomainUsers.Count)
+    </td></tr>"
+  $domainusersrow += "<tr>
+    <td class=bold_class>Enabled Users</td>
+    <td width='40%' style= 'text-align: center'>$($DomainEnabledUsers.Count)
+    </td></tr>"
+  $domainusersrow += "<tr>
+    <td class=bold_class>Disabled Users</td>
+    <td width='40%' style= 'text-align: center'>$($DomainDisabledUsers.Count)
+    </td></tr>"
+  $domainusersrow += "<tr>
+    <td class=bold_class>Inactive Users</td>
+    <td width='40%' style= 'text-align: center'>$($DomainEnabledInactiveUsers.Count)
+    </td></tr>"
+  $domainusersrow += "<tr>
+    <td class=bold_class>Users With Password Never Expires</td>
+    <td width='40%' style= 'text-align: center'>$($DomainUserPasswordNeverExpiresArray.Count)
+    </td></tr>"
+  $domainusersrow += "<tr>
+    <td class=bold_class>Users With SID History</td>
+    <td width='40%' style= 'text-align: center'>$($DomainUsersWithSIDHistoryArray.Count)
+    </td></tr>"
 
-If ($($DomainUsersWithReversibleEncryptionPasswordArray.Count) -gt 0) {
-  $temp = @()
-  $DomainUsersWithReversibleEncryptionPasswordArray | ForEach-Object { $temp = $temp + $_.SamAccountName + "<br>" }
-  $domainusersrow += "<tr>
-    <td class=bold_class>Users With ReversibleEncryptionPasswordArray</td>
-    <td class=failed width='40%' style= 'text-align: center'>
-    <a href='javascript:void(0)' onclick=""Powershellparamater('"+ $temp +"')"">$($DomainUsersWithReversibleEncryptionPasswordArray.Count)</a>
-    </td></tr>" 
-} else {
-  $domainusersrow += "<tr>
-    <td class=bold_class>Users With ReversibleEncryptionPasswordArray</td>
-    <td class=passed width='40%' style= 'text-align: center'>$($DomainUsersWithReversibleEncryptionPasswordArray.Count)
-    </td></tr>" 
-}
+  if ($($DomainUsersWithReversibleEncryptionPasswordArray.Count) -gt 0) {
+    $temp = @()
+    $DomainUsersWithReversibleEncryptionPasswordArray | foreach-object { $temp = $temp + $_.SamAccountName + "<br>" }
+    $domainusersrow += "<tr>
+      <td class=bold_class>Users With ReversibleEncryptionPasswordArray</td>
+      <td class=failed width='40%' style= 'text-align: center'>
+      <a href='javascript:void(0)' onclick=""Powershellparamater('"+ $temp +"')"">$($DomainUsersWithReversibleEncryptionPasswordArray.Count)</a>
+      </td></tr>" 
+  } else {
+    $domainusersrow += "<tr>
+      <td class=bold_class>Users With ReversibleEncryptionPasswordArray</td>
+      <td class=passed width='40%' style= 'text-align: center'>$($DomainUsersWithReversibleEncryptionPasswordArray.Count)
+      </td></tr>" 
+  }
 
-If ($($DomainUserPasswordNotRequiredArray.Count) -gt 0) {
-  $temp = @()
-  $DomainUserPasswordNotRequiredArray | ForEach-Object { $temp = $temp + $_.SamAccountName + "<br>" }
-  $domainusersrow += "<tr>
-    <td class=bold_class>Users With Password Not Required</td>
-    <td class=failed width='40%' style= 'text-align: center'>
-    <a href='javascript:void(0)' onclick=""Powershellparamater('"+ $temp +"')"">$($DomainUserPasswordNotRequiredArray.Count)</a>
-    </td></tr>" 
-} else {
-  $domainusersrow += "<tr>
-    <td class=bold_class>Users With Password Not Required</td>
-    <td class=passed width='40%' style= 'text-align: center'>$($DomainUserPasswordNotRequiredArray.Count)
-    </td></tr>" 
-}
+  if ($($DomainUserPasswordNotRequiredArray.Count) -gt 0) {
+    $temp = @()
+    $DomainUserPasswordNotRequiredArray | foreach-object { $temp = $temp + $_.SamAccountName + "<br>" }
+    $domainusersrow += "<tr>
+      <td class=bold_class>Users With Password Not Required</td>
+      <td class=failed width='40%' style= 'text-align: center'>
+      <a href='javascript:void(0)' onclick=""Powershellparamater('"+ $temp +"')"">$($DomainUserPasswordNotRequiredArray.Count)</a>
+      </td></tr>" 
+  } else {
+    $domainusersrow += "<tr>
+      <td class=bold_class>Users With Password Not Required</td>
+      <td class=passed width='40%' style= 'text-align: center'>$($DomainUserPasswordNotRequiredArray.Count)
+      </td></tr>" 
+  }
 
-If ($($DomainKerberosDESUsersArray.Count) -gt 0) {
-  $temp = @()
-  $DomainKerberosDESUsersArray | ForEach-Object { $temp = $temp + $_.SamAccountName + "<br>" }
-  $domainusersrow += "<tr>
-    <td class=bold_class>Users With Kerberos DES</td>
-    <td class=failed width='40%' style= 'text-align: center'>
-    <a href='javascript:void(0)' onclick=""Powershellparamater('"+ $temp +"')"">$($DomainKerberosDESUsersArray.Count)</a>
-    </td></tr>" 
-} else {
-  $domainusersrow += "<tr>
-    <td class=bold_class>Users With Kerberos DES</td>
-    <td class=passed width='40%' style= 'text-align: center'>$($DomainKerberosDESUsersArray.Count)
-    </td></tr>" 
-}
+  if ($($DomainKerberosDESUsersArray.Count) -gt 0) {
+    $temp = @()
+    $DomainKerberosDESUsersArray | foreach-object { $temp = $temp + $_.SamAccountName + "<br>" }
+    $domainusersrow += "<tr>
+      <td class=bold_class>Users With Kerberos DES</td>
+      <td class=failed width='40%' style= 'text-align: center'>
+      <a href='javascript:void(0)' onclick=""Powershellparamater('"+ $temp +"')"">$($DomainKerberosDESUsersArray.Count)</a>
+      </td></tr>" 
+  } else {
+    $domainusersrow += "<tr>
+      <td class=bold_class>Users With Kerberos DES</td>
+      <td class=passed width='40%' style= 'text-align: center'>$($DomainKerberosDESUsersArray.Count)
+      </td></tr>" 
+  }
 
-If ($($DomainUserDoesNotRequirePreAuthArray.Count) -gt 0) {
-  $temp = @()
-  $DomainUserDoesNotRequirePreAuthArray | ForEach-Object { $temp = $temp + $_.SamAccountName + "<br>" }
-  $domainusersrow += "<tr>
-    <td class=bold_class>Users That Do Not Require Kerberos Pre-Authentication</td>
-    <td class=failed width='40%' style= 'text-align: center'>
-    <a href='javascript:void(0)' onclick=""Powershellparamater('"+ $temp +"')"">$($DomainUserDoesNotRequirePreAuthArray.Count)</a>
-    </td></tr>" 
-} else {
-  $domainusersrow += "<tr>
-    <td class=bold_class>Users That Do Not Require Kerberos Pre-Authentication</td>
-    <td class=passed width='40%' style= 'text-align: center'>$($DomainUserDoesNotRequirePreAuthArray.Count)
-    </td></tr>" 
-}
-Add-Content $HealthReport $domainusersrow
-Add-Content $HealthReport "</tbody></table></div></div>" #End Sub Container Div and Container Div
+  If ($($DomainUserDoesNotRequirePreAuthArray.Count) -gt 0) {
+    $temp = @()
+    $DomainUserDoesNotRequirePreAuthArray | ForEach-Object { $temp = $temp + $_.SamAccountName + "<br>" }
+    $domainusersrow += "<tr>
+      <td class=bold_class>Users That Do Not Require Kerberos Pre-Authentication</td>
+      <td class=failed width='40%' style= 'text-align: center'>
+      <a href='javascript:void(0)' onclick=""Powershellparamater('"+ $temp +"')"">$($DomainUserDoesNotRequirePreAuthArray.Count)</a>
+      </td></tr>" 
+  } else {
+    $domainusersrow += "<tr>
+      <td class=bold_class>Users That Do Not Require Kerberos Pre-Authentication</td>
+      <td class=passed width='40%' style= 'text-align: center'>$($DomainUserDoesNotRequirePreAuthArray.Count)
+      </td></tr>" 
+  }
+  Add-Content $HealthReport $domainusersrow
+  Add-Content $HealthReport "</tbody></table></div></div>"
+#End Sub Container Div and Container Div
 
 #-----------------------
 # Domain Password Policy 
@@ -700,63 +706,85 @@ $props = @(
 )
 [array]$DomainPasswordPolicy = Get-ADDefaultDomainPasswordPolicy -Server $DCtoConnect
 #Start Container and Sub Container Div
-$Pwdpoly = "<div id=container><div id=pwdplysubcontainer><table border=1px>
-            <caption><h2><a name='Pwd Policy'>Domain Password Policy</h2></caption>"
-Add-Content $HealthReport $Pwdpoly
+  $Pwdpoly = "<div id=container><div id=pwdplysubcontainer><table border=1px>
+              <caption><h2><a name='Pwd Policy'>Domain Password Policy</h2></caption>"
+  Add-Content $HealthReport $Pwdpoly
 
-foreach ($item in $props) {
-  $flag = 'passed'
-  If (($item -eq 'ComplexityEnabled') -and ($DomainPasswordPolicy.ComplexityEnabled -ne $script:i_PwdComplex)) { $flag = "failed"; $script:blnWARN = $true }
-  If (($item -eq 'MinPasswordLength') -and ($DomainPasswordPolicy.MinPasswordLength -lt $script:i_MinPwdLen)) { $flag = "failed"; $script:blnWARN = $true }
-  If ($item -eq 'MinPasswordAge') { #-and $DomainPasswordPolicy.MinPasswordAge -lt 1) { $flag = "failed"; $script:o_MinPwdAgeFlag = $false }
-    #CREATE A NEW-TIMESPAN '$time1' SET TO '1' DAYS
-    $time1 = New-TimeSpan -days $script:i_MinPwdAge
-    if ($DomainPasswordPolicy.MinPasswordAge.compareto($time1) -eq -1) {
+  foreach ($item in $props) {
+    $flag = 'passed'
+    if (($item -eq 'ComplexityEnabled') -and ($DomainPasswordPolicy.ComplexityEnabled -ne $script:i_PwdComplex)) {
       $flag = "failed"
       $script:blnWARN = $true
-      $script:o_MinPwdAgeFlag = $false
+      $script:o_PwdComplexityFlag = $false
     }
-  }
-  If ($item -eq 'MaxPasswordAge') { #-and $DomainPasswordPolicy.MaxPasswordAge -gt 60) { $flag = "failed"; $script:o_MaxPwdAgeFlag = $false }
-    #CREATE A NEW-TIMESPAN '$time1' SET TO '60' DAYS
-    #SINCE '$DomainPasswordPolicy.MaxPasswordAge' IS ALREADY A TIMESPAN OBJECT WE CAN USE 'TIMESPAN.COMPARETO()' METHOD
-    # I honestly don't know why I had to do this! Powershell stopped comparing '$DomainPasswordPolicy.MaxPasswordAge' to '60' properly despite this seemingly still working for '$DomainPasswordPolicy.MinPasswordAge'!
-    $time1 = New-TimeSpan -days $script:i_MaxPwdAge
-    if ($DomainPasswordPolicy.MaxPasswordAge.compareto($time1) -gt 0) {
+    if (($item -eq 'MinPasswordLength') -and ([int]$DomainPasswordPolicy.MinPasswordLength -lt [int]$script:i_MinPwdLen)) {
       $flag = "failed"
       $script:blnWARN = $true
-      $script:o_MaxPwdAgeFlag = $false
+      $script:o_MinPwdLenFlag = $false
     }
-  }
-  If (($item -eq 'PasswordHistoryCount') -and $DomainPasswordPolicy.PasswordHistoryCount -lt $script:i_PwdHistory) { $flag = "failed"; $script:blnWARN = $true }
-  If (($item -eq 'ReversibleEncryptionEnabled') -and $DomainPasswordPolicy.ReversibleEncryptionEnabled -eq 'True') { $flag = "failed"; $script:blnWARN = $true }
-  If (($item -eq 'LockoutThreshold') -and ($DomainPasswordPolicy.LockoutThreshold -gt $script:i_LockThreshold -or $DomainPasswordPolicy.LockoutThreshold -eq 0)) { $flag = "failed";$script:blnWARN = $true }
-  If ($item -eq 'LockoutDuration') { #-and $DomainPasswordPolicy.LockoutDuration -lt 15) { $flag = "failed"; $script:o_LockDurationFlag = $false }
-    #CREATE A NEW-TIMESPAN '$time1' SET TO '15' MINUTES
-    $time1 = New-TimeSpan -minutes $script:i_LockDuration
-    if ($DomainPasswordPolicy.LockoutDuration.compareto($time1) -lt 0) {
+    if ($item -eq 'MinPasswordAge') {
+      #CREATE A NEW-TIMESPAN '$time1' SET TO '1' DAYS
+      $time1 = New-TimeSpan -days $script:i_MinPwdAge
+      if ($DomainPasswordPolicy.MinPasswordAge.compareto($time1) -eq -1) {
+        $flag = "failed"
+        $script:blnWARN = $true
+        $script:o_MinPwdAgeFlag = $false
+      }
+    }
+    if ($item -eq 'MaxPasswordAge') {
+      #CREATE A NEW-TIMESPAN '$time1' SET TO '60' DAYS
+      #SINCE '$DomainPasswordPolicy.MaxPasswordAge' IS ALREADY A TIMESPAN OBJECT WE CAN USE 'TIMESPAN.COMPARETO()' METHOD
+      # I honestly don't know why I had to do this! Powershell stopped comparing '$DomainPasswordPolicy.MaxPasswordAge' to '60' properly despite this seemingly still working for '$DomainPasswordPolicy.MinPasswordAge'!
+      $time1 = New-TimeSpan -days $script:i_MaxPwdAge
+      if ($DomainPasswordPolicy.MaxPasswordAge.compareto($time1) -gt 0) {
+        $flag = "failed"
+        $script:blnWARN = $true
+        $script:o_MaxPwdAgeFlag = $false
+      }
+    }
+    if (($item -eq 'PasswordHistoryCount') -and $DomainPasswordPolicy.PasswordHistoryCount -lt $script:i_PwdHistory) {
       $flag = "failed"
       $script:blnWARN = $true
-      $script:o_LockDurationFlag = $false
+      $script:o_PwdHistoryFlag = $false
     }
-  }
-  If ($item -eq 'LockoutObservationWindow') { #-and $DomainPasswordPolicy.LockoutObservationWindow -le 15) { $flag = "failed"; $script:o_LockObserveFlag = $false }
-    #CREATE A NEW-TIMESPAN '$time1' SET TO '15' MINUTES
-    $time1 = New-TimeSpan -minutes $script:i_LockObserve
-    if ($DomainPasswordPolicy.LockoutObservationWindow.compareto($time1) -lt 0) {
+    if (($item -eq 'ReversibleEncryptionEnabled') -and $DomainPasswordPolicy.ReversibleEncryptionEnabled -eq 'True') {
       $flag = "failed"
       $script:blnWARN = $true
-      $script:o_LockObserveFlag = $false
+      $script:o_RevEncryptFlag = $false
     }
-  }
+    if (($item -eq 'LockoutThreshold') -and 
+      (($DomainPasswordPolicy.LockoutThreshold -gt $script:i_LockThreshold) -or ($DomainPasswordPolicy.LockoutThreshold -eq 0))) {
+        $flag = "failed"
+        $script:blnWARN = $true
+        $script:o_LockThresholdFlag = $false
+    }
+    if ($item -eq 'LockoutDuration') {
+      #CREATE A NEW-TIMESPAN '$time1' SET TO '15' MINUTES
+      $time1 = New-TimeSpan -minutes $script:i_LockDuration
+      if ($DomainPasswordPolicy.LockoutDuration.compareto($time1) -lt 0) {
+        $flag = "failed"
+        $script:blnWARN = $true
+        $script:o_LockDurationFlag = $false
+      }
+    }
+    if ($item -eq 'LockoutObservationWindow') {
+      #CREATE A NEW-TIMESPAN '$time1' SET TO '15' MINUTES
+      $time1 = New-TimeSpan -minutes $script:i_LockObserve
+      if ($DomainPasswordPolicy.LockoutObservationWindow.compareto($time1) -lt 0) {
+        $flag = "failed"
+        $script:blnWARN = $true
+        $script:o_LockObserveFlag = $false
+      }
+    }
 
-  $Pwdpolyrow += "<tr>
-    <td class=bold_class>$($item)</td>
-    <td class=$($flag) width='40%' style= 'text-align: center'>$($DomainPasswordPolicy.$item)
-    </td></tr>"
-}
-Add-Content $HealthReport $Pwdpolyrow
-Add-Content $HealthReport "</table></Div>" #End Sub Container
+    $Pwdpolyrow += "<tr>
+      <td class=bold_class>$($item)</td>
+      <td class=$($flag) width='40%' style= 'text-align: center'>$($DomainPasswordPolicy.$item)
+      </td></tr>"
+  }
+  Add-Content $HealthReport $Pwdpolyrow
+  Add-Content $HealthReport "</table></Div>"
+#End Sub Container
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
 # Tombstone and Backup Information
@@ -1067,34 +1095,43 @@ Add-Content $HealthReport "</table></div>"
 #---------------------------------------------------------------------------------------------------------------------------------------------
 #OUTPUT
 #---------------------------------------------------------------------------------------------------------------------------------------------
-$script:o_Notes = $script:o_Notes + "`r`nDOMAIN : $($forestinfo.Name.ToUpper())"
-$script:o_Notes = $script:o_Notes + "`r`nPDC : $($domaininfo.PDCEmulator.ToUpper())"
+$script:o_Notes += "`r`nDOMAIN : $($forestinfo.Name.ToUpper())"
+$script:o_Notes += "`r`nPDC : $($domaininfo.PDCEmulator.ToUpper())"
 #PASSWORDS
-$script:o_Notes = $script:o_Notes + "`r`nPASSWORD COMPLEXITY : $($DomainPasswordPolicy.ComplexityEnabled)"
-$script:o_Notes = $script:o_Notes + "`r`nMIN PASSWORD LENGTH : $($DomainPasswordPolicy.MinPasswordLength)"
-$script:o_Notes = $script:o_Notes + "`r`nMIN PASSWORD AGE : $($script:o_MinPwdAgeFlag) - $($DomainPasswordPolicy.MinPasswordAge)"
-$script:o_Notes = $script:o_Notes + "`r`nMAX PASSWORD AGE : $($script:o_MaxPwdAgeFlag) - $($DomainPasswordPolicy.MaxPasswordAge)"
-$script:o_Notes = $script:o_Notes + "`r`nPASSWORD HISTORY COUNT : $($DomainPasswordPolicy.PasswordHistoryCount)"
-$script:o_Notes = $script:o_Notes + "`r`nREVERSIBLE ENCRYPTION : $($DomainPasswordPolicy.ReversibleEncryptionEnabled)"
+$script:o_Notes += "`r`nPASSWORD COMPLEXITY - Pass : $($script:o_PwdComplexityFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.ComplexityEnabled) - Expected : $($script:i_PwdComplex)"
+$script:o_Notes += "`r`nMIN PASSWORD LENGTH - Pass : $($script:o_MinPwdLenFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.MinPasswordLength) - Expected : $($script:i_MinPwdLen) Characters"
+$script:o_Notes += "`r`nMIN PASSWORD AGE - Pass : $($script:o_MinPwdAgeFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.MinPasswordAge) - Expected : $($script:i_MinPwdAge) Days"
+$script:o_Notes += "`r`nMAX PASSWORD AGE - Pass : $($script:o_MaxPwdAgeFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.MaxPasswordAge) - Expected : $($script:i_MaxPwdAge) Days"
+$script:o_Notes += "`r`nPASSWORD HISTORY COUNT - Pass : $($script:o_PwdHistoryFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.PasswordHistoryCount) - Expected : $($script:i_PwdHistory) Prev. Passwords"
+$script:o_Notes += "`r`nREVERSIBLE ENCRYPTION - Pass : $($script:o_RevEncryptFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.ReversibleEncryptionEnabled) - Expected : $($script:i_RevEncrypt)"
 #LOCKOUT
-$script:o_Notes = $script:o_Notes + "`r`nLOCKOUT THRESHOLD : $($DomainPasswordPolicy.LockoutThreshold)"
-$script:o_Notes = $script:o_Notes + "`r`nLOCKOUT DURATION : $($script:o_LockDurationFlag) - $($DomainPasswordPolicy.LockoutDuration)"
-$script:o_Notes = $script:o_Notes + "`r`nLOCKOUT OBSERVATION WINDOW : $($script:o_LockObserveFlag) - $($DomainPasswordPolicy.LockoutObservationWindow)"
+$script:o_Notes += "`r`nLOCKOUT THRESHOLD - Pass : $($script:o_LockThresholdFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.LockoutThreshold) - Expected : $($script:i_LockThreshold) Attempts"
+$script:o_Notes += "`r`nLOCKOUT DURATION - Pass : $($script:o_LockDurationFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.LockoutDuration) - Expected : $($script:i_LockDuration) Min."
+$script:o_Notes += "`r`nLOCKOUT OBSERVATION WINDOW - Pass : $($script:o_LockObserveFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.LockoutObservationWindow) - Expected : $($script:i_LockObserve) Min."
 #USERS
-$script:o_Notes = $script:o_Notes + "`r`nTOTAL USERS : $($DomainUsers.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nENABLED USERS : $($DomainEnabledUsers.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nDISABLED USERS : $($DomainDisabledUsers.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nINACTIVE USERS : $($DomainEnabledInactiveUsers.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nUSERS W/ PASSWORD NEVER EXPIRES : $($DomainUserPasswordNeverExpiresArray.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nUSERS W/ PASSWORD NOT REQUIRED : $($DomainUserPasswordNotRequiredArray.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nUSERS W/ REVERSIBLE ENCRYPTION : $($DomainUsersWithReversibleEncryptionPasswordArray.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nUSERS W/ SID HISTORY : $($DomainUsersWithSIDHistoryArray.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nUSERS W/ KERBEROS DES : $($DomainKerberosDESUsersArray.Count)"
-$script:o_Notes = $script:o_Notes + "`r`nUSERS W/ KERBEROS PRE-AUTH NOT REQUIRED : $($DomainUserDoesNotRequirePreAuthArray.Count)"
+$script:o_Notes += "`r`nTOTAL USERS - $($DomainUsers.Count)"
+$script:o_Notes += "`r`nENABLED USERS - $($DomainEnabledUsers.Count)"
+$script:o_Notes += "`r`nDISABLED USERS - $($DomainDisabledUsers.Count)"
+$script:o_Notes += "`r`nINACTIVE USERS - $($DomainEnabledInactiveUsers.Count)"
+$script:o_Notes += "`r`nUSERS W/ PASSWORD NEVER EXPIRES - $($DomainUserPasswordNeverExpiresArray.Count)"
+$script:o_Notes += "`r`nUSERS W/ PASSWORD NOT REQUIRED - $($DomainUserPasswordNotRequiredArray.Count)"
+$script:o_Notes += "`r`nUSERS W/ REVERSIBLE ENCRYPTION - $($DomainUsersWithReversibleEncryptionPasswordArray.Count)"
+$script:o_Notes += "`r`nUSERS W/ SID HISTORY - $($DomainUsersWithSIDHistoryArray.Count)"
+$script:o_Notes += "`r`nUSERS W/ KERBEROS DES - $($DomainKerberosDESUsersArray.Count)"
+$script:o_Notes += "`r`nUSERS W/ KERBEROS PRE-AUTH NOT REQUIRED - $($DomainUserDoesNotRequirePreAuthArray.Count)"
 #MISC
-$script:o_Notes = $script:o_Notes + "`r`nPRIVILEDGED GROUP CHANGES : " + $GroupCheck + "<br>" + $GroupChanges
-$script:o_Notes = $script:o_Notes + "`r`nTEMPORARY USER LIST : " + $TempUserCheck + "<br>" + $TemporaryUsersList
-$script:o_Notes = $script:o_Notes + "`r`nNEW DOMAIN USERS : " + $UserCheck + "<br>" + $UserChanges
+$script:o_Notes += "`r`nPRIVILEDGED GROUP CHANGES - " + $GroupCheck + "`r`n" + $GroupChanges
+$script:o_Notes += "`r`nTEMPORARY USER LIST - " + $TempUserCheck + "`r`n" + $TemporaryUsersList
+$script:o_Notes += "`r`nNEW DOMAIN USERS - " + $UserCheck + "`r`n" + $UserChanges
 #NOTES
 Write-Log "Please find the report in C:\IT\Reports directory."
 $script:o_Notes += "`r`nPlease find the report in C:\IT\Reports directory."
