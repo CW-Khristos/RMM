@@ -4,6 +4,7 @@
   $script:blnBREAK    = $false
   $script:bitarch     = $null
   $script:ostype      = $null
+  $range              = $null
   $strLineSeparator   = "----------------------------------"
   $Backups            = @{}
   $DataSources        = @(
@@ -94,8 +95,8 @@
 #BEGIN SCRIPT
 Get-OSType
 switch ($script:ostype) {
-  "Workstation" {$range = 4}
-  {"DC","Server"} {$range = 12}
+  "Workstation" {$range = 4; break;}
+  {"DC","Server"} {$range = 12; break;}
 }
 $Date = (get-date).AddHours(-($range))
 #Start script execution time calculation
