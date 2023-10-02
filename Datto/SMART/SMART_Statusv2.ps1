@@ -7,7 +7,7 @@
     Querys Drive SMART Attributes using SMARTCTL from https://www.smartmontools.org/
  
 .NOTES
-    Version         : 0.1.1 (05 September 2023)
+    Version         : 0.1.1 (02 Obtober 2023)
     Creation Date   : 25 May 2023
     Purpose/Change  : Querys Drive SMART Attributes using SMARTCTL
     File Name       : SMART_Statusv3.ps1 
@@ -367,15 +367,15 @@
     if (($objDRV.id170 -ne "N/A") -and ([int]$objDRV.id170 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Available Space (170) : $($script:arrDRV[$script:i].id170)`r`n")}
     if (($objDRV.id171 -ne "N/A") -and ([int]$objDRV.id171 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Program Fail (171) : $($script:arrDRV[$script:i].id171)`r`n")}
     if (($objDRV.id172 -ne "N/A") -and ([int]$objDRV.id172 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Erase Fail (172) : $($script:arrDRV[$script:i].id172)`r`n")}
-    if (($objDRV.id173 -ne "N/A") -and ([int]$objDRV.id173 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Wear Leveling (173) : $($script:arrDRV[$script:i].id173)`r`n")}
+    if (($objDRV.id173 -ne "N/A") -and ([int]$objDRV.id173 -le 25)) {$script:blnWARN = $true; $script:arrWARN.add("  - Wear Leveling (173) : $($script:arrDRV[$script:i].id173)`r`n")}
     if (($objDRV.id176 -ne "N/A") -and ([int]$objDRV.id176 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Erase Fail (176) : $($script:arrDRV[$script:i].id176)`r`n")}
-    if (($objDRV.id177 -ne "N/A") -and ([int]$objDRV.id177 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Wear Leveling (177) : $($script:arrDRV[$script:i].id177)`r`n")}
+    if (($objDRV.id177 -ne "N/A") -and ([int]$objDRV.id177 -le 25)) {$script:blnWARN = $true; $script:arrWARN.add("  - Wear Leveling (177) : $($script:arrDRV[$script:i].id177)`r`n")}
     if (($objDRV.id181 -ne "N/A") -and ([int]$objDRV.id181 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Program Fail (181) : $($script:arrDRV[$script:i].id181)`r`n")}
     if (($objDRV.id182 -ne "N/A") -and ([int]$objDRV.id182 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Erase Fail (182) : $($script:arrDRV[$script:i].id182)`r`n")}
     if (($objDRV.id190 -ne "N/A") -and ([int]$objDRV.id190 -gt 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Airflow Temperature [C] (190) : $($script:arrDRV[$script:i].id190)`r`n")}
     if (($objDRV.id230 -ne "N/A") -and ([int]$objDRV.id230 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Drive Life Protection (230) : $($script:arrDRV[$script:i].id230)`r`n")}
-    if (($objDRV.id231 -ne "N/A") -and ([int]$objDRV.id231 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - SSD Life Left (231) : $($script:arrDRV[$script:i].id231)`r`n")}
-    if (($objDRV.id232 -ne "N/A") -and ([int]$objDRV.id232 -le 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Endurance Remaining (232) : $($script:arrDRV[$script:i].id232)`r`n")} 
+    if (($objDRV.id231 -ne "N/A") -and ([int]$objDRV.id231 -le 25)) {$script:blnWARN = $true; $script:arrWARN.add("  - SSD Life Left (231) : $($script:arrDRV[$script:i].id231)`r`n")}
+    if (($objDRV.id232 -ne "N/A") -and ([int]$objDRV.id232 -le 25)) {$script:blnWARN = $true; $script:arrWARN.add("  - Endurance Remaining (232) : $($script:arrDRV[$script:i].id232)`r`n")} 
     #NVME ATTRIBUTES
     if (($objDRV.nvmewarn -ne "N/A") -and ([int]$objDRV.nvmewarn -gt 0)) {$script:blnWARN = $true; $script:arrWARN.add("  - Critical Warning (NVMe) : $($script:arrDRV[$script:i].nvmewarn)`r`n")}
     if (($objDRV.nvmetemp -ne "N/A") -and ([int]$objDRV.nvmetemp -gt 50)) {$script:blnWARN = $true; $script:arrWARN.add("  - Temperature [C] (NVMe) : $($script:arrDRV[$script:i].nvmetemp)`r`n")}
