@@ -61,10 +61,10 @@ if (Get-Module -ListAvailable -Name PowershellGet) {
 }
 #INSTALL HUDUAPI MODULE
 if (Get-Module -ListAvailable -Name HuduAPI) {
-  Import-Module HuduAPI 
+  Import-Module HuduAPI -MaximumVersion 2.3.2 -force
 } else {
   install-module HuduAPI -MaximumVersion 2.3.2 -force -confirm:$false
-  Import-Module HuduAPI
+  Import-Module HuduAPI -MaximumVersion 2.3.2 -force
 }
 #INSTALL NTFSSECURITY MODULE
 if(Get-Module -ListAvailable -Name "NTFSSecurity") {
