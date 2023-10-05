@@ -222,14 +222,14 @@ if (Get-Module -Name PowerShellGet -ListAvailable) {
 #Get the Hudu API Module if not installed
 if (Get-Module -ListAvailable -Name HuduAPI) {
   try {
-    Import-Module HuduAPI
+    Import-Module HuduAPI -MaximumVersion 2.3.2 -force
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
 } else {
   try {
     install-module HuduAPI -MaximumVersion 2.3.2 -force -confirm:$false
-    Import-Module HuduAPI
+    Import-Module HuduAPI -MaximumVersion 2.3.2 -force
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
