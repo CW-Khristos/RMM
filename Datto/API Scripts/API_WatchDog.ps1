@@ -514,14 +514,14 @@ if (-not (test-path -path "C:\IT\Scripts")) {
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 if (Get-Module -ListAvailable -Name HuduAPI) {
   try {
-    Import-Module HuduAPI
+    Import-Module HuduAPI -MaximumVersion 2.3.2 -force
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
 } else {
   try {
     install-module HuduAPI -MaximumVersion 2.3.2 -force -confirm:$false
-    Import-Module HuduAPI
+    Import-Module HuduAPI -MaximumVersion 2.3.2 -force
   } catch {
     logERR 2 "HuduAPI" "INSTALL / IMPORT MODULE FAILURE"
   }
