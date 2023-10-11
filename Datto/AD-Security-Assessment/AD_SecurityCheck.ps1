@@ -10,7 +10,7 @@
     Pulls important security facts from Active Directory and generates nicely viewable reports in HTML format by highlighting the spots that require attention
  
 .NOTES
-    Version        : 0.1.3 (28 September 2023)
+    Version        : 0.1.3 (10 October 2023)
     Creation Date  : 10 January 2022
     Purpose/Change : Pulls important security facts from Active Directory and generates nicely viewable reports in HTML format
     File Name      : AD_SecurityCheck.ps1 
@@ -37,6 +37,7 @@
 Remove-Variable * -ErrorAction SilentlyContinue
 
 #region ----- DECLARATIONS ----
+  $strLineSeparator = "---------------"
   $script:blnWARN = $false
   #NOTES
   $script:o_Notes = $null
@@ -48,12 +49,11 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $script:i_MinPwdLen = $env:pwdMinLen
   $script:o_MinPwdLenFlag = $true
   $script:i_MinPwdAge = $env:pwdMinAge
-  $script:i_MinPwdAgeFlag = $true
+  $script:o_MinPwdAgeFlag = $true
   $script:i_MaxPwdAge = $env:pwdMaxAge
-  $script:i_MaxPwdAgeFlag = $true
+  $script:o_MaxPwdAgeFlag = $true
   $script:i_PwdHistory = $env:pwdHistory
   $script:o_PwdHistoryFlag = $true
-  $script:i_RevEncrypt = $null
   $script:o_RevEncryptFlag = $true
   #LOCKOUT
   $script:i_LockThreshold = $env:lockThreshold
@@ -80,15 +80,15 @@ Remove-Variable * -ErrorAction SilentlyContinue
 # Functions Section
 #---------------------------------------------------------------------------------------------------------------------------------------------
   function write-DRMMDiag ($messages) {
-    write-output '<-Start Diagnostic->'
-    foreach ($Message in $Messages) {$Message}
-    write-output '<-End Diagnostic->'
+    write-output "<-Start Diagnostic->"
+    foreach ($message in $messages) {$message}
+    write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
   
   function write-DRMMAlert ($message) {
-    write-output '<-Start Result->'
+    write-output "<-Start Result->"
     write-output "Alert=$($message)"
-    write-output '<-End Result->'
+    write-output "<-End Result->"
   } ## write-DRMMAlert
   
   function Write-Log {
@@ -128,6 +128,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     if ($Members -ne $Null) {
       $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
     } else {
+      $script:blnWARN = $true
       write-output "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
       $script:o_Notes += "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
     }
@@ -725,7 +726,7 @@ $props = @(
     if ($item -eq 'MinPasswordAge') {
       #CREATE A NEW-TIMESPAN '$time1' SET TO '1' DAYS
       $time1 = New-TimeSpan -days $script:i_MinPwdAge
-      if ($DomainPasswordPolicy.MinPasswordAge.compareto($time1) -eq -1) {
+      if ($DomainPasswordPolicy.MinPasswordAge.compareto($time1) -gt 0) {
         $flag = "failed"
         $script:blnWARN = $true
         $script:o_MinPwdAgeFlag = $false
@@ -738,16 +739,16 @@ $props = @(
       $time1 = New-TimeSpan -days $script:i_MaxPwdAge
       if ($DomainPasswordPolicy.MaxPasswordAge.compareto($time1) -gt 0) {
         $flag = "failed"
-        $script:blnWARN = $true
+        #$script:blnWARN = $true
         $script:o_MaxPwdAgeFlag = $false
       }
     }
-    if (($item -eq 'PasswordHistoryCount') -and $DomainPasswordPolicy.PasswordHistoryCount -lt $script:i_PwdHistory) {
+    if (($item -eq 'PasswordHistoryCount') -and ($DomainPasswordPolicy.PasswordHistoryCount -lt $script:i_PwdHistory)) {
       $flag = "failed"
       $script:blnWARN = $true
       $script:o_PwdHistoryFlag = $false
     }
-    if (($item -eq 'ReversibleEncryptionEnabled') -and $DomainPasswordPolicy.ReversibleEncryptionEnabled -eq 'True') {
+    if (($item -eq 'ReversibleEncryptionEnabled') -and ($DomainPasswordPolicy.ReversibleEncryptionEnabled -eq 'True')) {
       $flag = "failed"
       $script:blnWARN = $true
       $script:o_RevEncryptFlag = $false
@@ -991,7 +992,7 @@ $script:o_Notes += "`r`nPerforming Misc. User Checks Report......."
   $ListOfGroupChanges = Get-PrivilegedGroupChanges
   if ($ListOfGroupChanges) {
     foreach ($Item in $ListOfGroupChanges) {
-      $GroupChanges += "Group $($Item.GroupName) has been changed - $($Item.AttributeValue) has been added or removed<br>"
+      $GroupChanges += "Group '$($Item.GroupName)' has been changed - '$($Item.AttributeValue)' has been added or removed<br>"
     }
   }
   if (!$GroupChanges) {
@@ -1095,43 +1096,50 @@ Add-Content $HealthReport "</table></div>"
 #---------------------------------------------------------------------------------------------------------------------------------------------
 #OUTPUT
 #---------------------------------------------------------------------------------------------------------------------------------------------
-$script:o_Notes += "`r`nDOMAIN : $($forestinfo.Name.ToUpper())"
-$script:o_Notes += "`r`nPDC : $($domaininfo.PDCEmulator.ToUpper())"
+$script:o_Notes += "`r`n`r`n$($strLineSeparator)`r`nDOMAIN : $($forestinfo.Name.ToUpper())"
+$script:o_Notes += "`r`nPDC : $($domaininfo.PDCEmulator.ToUpper())`r`n$($strLineSeparator)"
 #PASSWORDS
-$script:o_Notes += "`r`nPASSWORD COMPLEXITY - Pass : $($script:o_PwdComplexityFlag)"
+$script:o_Notes += "`r`n$($strLineSeparator)`r`nPASSWORD POLICY :`r`n$($strLineSeparator)"
+$script:o_Notes += "`r`n`tPASSWORD COMPLEXITY - Pass : $($script:o_PwdComplexityFlag)"
 $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.ComplexityEnabled) - Expected : $($script:i_PwdComplex)"
-$script:o_Notes += "`r`nMIN PASSWORD LENGTH - Pass : $($script:o_MinPwdLenFlag)"
+$script:o_Notes += "`r`n`tMIN PASSWORD LENGTH - Pass : $($script:o_MinPwdLenFlag)"
 $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.MinPasswordLength) - Expected : $($script:i_MinPwdLen) Characters"
-$script:o_Notes += "`r`nMIN PASSWORD AGE - Pass : $($script:o_MinPwdAgeFlag)"
+$script:o_Notes += "`r`n`tMIN PASSWORD AGE - Pass : $($script:o_MinPwdAgeFlag)"
 $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.MinPasswordAge) - Expected : $($script:i_MinPwdAge) Days"
-$script:o_Notes += "`r`nMAX PASSWORD AGE - Pass : $($script:o_MaxPwdAgeFlag)"
-$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.MaxPasswordAge) - Expected : $($script:i_MaxPwdAge) Days"
-$script:o_Notes += "`r`nPASSWORD HISTORY COUNT - Pass : $($script:o_PwdHistoryFlag)"
+$script:o_Notes += "`r`n`tMAX PASSWORD AGE - Pass : $($script:o_MaxPwdAgeFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.MaxPasswordAge) - Expected : $($script:i_MaxPwdAge) Days (Alerting Disabled)"
+$script:o_Notes += "`r`n`tPASSWORD HISTORY COUNT - Pass : $($script:o_PwdHistoryFlag)"
 $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.PasswordHistoryCount) - Expected : $($script:i_PwdHistory) Prev. Passwords"
-$script:o_Notes += "`r`nREVERSIBLE ENCRYPTION - Pass : $($script:o_RevEncryptFlag)"
-$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.ReversibleEncryptionEnabled) - Expected : $($script:i_RevEncrypt)"
+$script:o_Notes += "`r`n`tREVERSIBLE ENCRYPTION - Pass : $($script:o_RevEncryptFlag)"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.ReversibleEncryptionEnabled) - Expected : True"
 #LOCKOUT
-$script:o_Notes += "`r`nLOCKOUT THRESHOLD - Pass : $($script:o_LockThresholdFlag)"
+$script:o_Notes += "`r`n$($strLineSeparator)`r`nLOCKOUT POLICY :`r`n$($strLineSeparator)"
+$script:o_Notes += "`r`n`tLOCKOUT THRESHOLD - Pass : $($script:o_LockThresholdFlag)"
 $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.LockoutThreshold) - Expected : $($script:i_LockThreshold) Attempts"
-$script:o_Notes += "`r`nLOCKOUT DURATION - Pass : $($script:o_LockDurationFlag)"
+$script:o_Notes += "`r`n`tLOCKOUT DURATION - Pass : $($script:o_LockDurationFlag)"
 $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.LockoutDuration) - Expected : $($script:i_LockDuration) Min."
-$script:o_Notes += "`r`nLOCKOUT OBSERVATION WINDOW - Pass : $($script:o_LockObserveFlag)"
+$script:o_Notes += "`r`n`tLOCKOUT OBSERVATION WINDOW - Pass : $($script:o_LockObserveFlag)"
 $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.LockoutObservationWindow) - Expected : $($script:i_LockObserve) Min."
 #USERS
-$script:o_Notes += "`r`nTOTAL USERS - $($DomainUsers.Count)"
-$script:o_Notes += "`r`nENABLED USERS - $($DomainEnabledUsers.Count)"
-$script:o_Notes += "`r`nDISABLED USERS - $($DomainDisabledUsers.Count)"
-$script:o_Notes += "`r`nINACTIVE USERS - $($DomainEnabledInactiveUsers.Count)"
-$script:o_Notes += "`r`nUSERS W/ PASSWORD NEVER EXPIRES - $($DomainUserPasswordNeverExpiresArray.Count)"
-$script:o_Notes += "`r`nUSERS W/ PASSWORD NOT REQUIRED - $($DomainUserPasswordNotRequiredArray.Count)"
-$script:o_Notes += "`r`nUSERS W/ REVERSIBLE ENCRYPTION - $($DomainUsersWithReversibleEncryptionPasswordArray.Count)"
-$script:o_Notes += "`r`nUSERS W/ SID HISTORY - $($DomainUsersWithSIDHistoryArray.Count)"
-$script:o_Notes += "`r`nUSERS W/ KERBEROS DES - $($DomainKerberosDESUsersArray.Count)"
-$script:o_Notes += "`r`nUSERS W/ KERBEROS PRE-AUTH NOT REQUIRED - $($DomainUserDoesNotRequirePreAuthArray.Count)"
+$script:o_Notes += "`r`n$($strLineSeparator)`r`nUSERS :`r`n$($strLineSeparator)"
+$script:o_Notes += "`r`n`tTOTAL USERS - $($DomainUsers.Count)"
+$script:o_Notes += "`r`n`tENABLED USERS - $($DomainEnabledUsers.Count)"
+$script:o_Notes += "`r`n`tDISABLED USERS - $($DomainDisabledUsers.Count)"
+$script:o_Notes += "`r`n`tINACTIVE USERS - $($DomainEnabledInactiveUsers.Count)"
+$script:o_Notes += "`r`n`tUSERS W/ PASSWORD NEVER EXPIRES - $($DomainUserPasswordNeverExpiresArray.Count)"
+$script:o_Notes += "`r`n`tUSERS W/ PASSWORD NOT REQUIRED - $($DomainUserPasswordNotRequiredArray.Count)"
+$script:o_Notes += "`r`n`tUSERS W/ REVERSIBLE ENCRYPTION - $($DomainUsersWithReversibleEncryptionPasswordArray.Count)"
+$script:o_Notes += "`r`n`tUSERS W/ SID HISTORY - $($DomainUsersWithSIDHistoryArray.Count)"
+$script:o_Notes += "`r`n`tUSERS W/ KERBEROS DES - $($DomainKerberosDESUsersArray.Count)"
+$script:o_Notes += "`r`n`tUSERS W/ KERBEROS PRE-AUTH NOT REQUIRED - $($DomainUserDoesNotRequirePreAuthArray.Count)"
 #MISC
-$script:o_Notes += "`r`nPRIVILEDGED GROUP CHANGES - " + $GroupCheck + "`r`n" + $GroupChanges
-$script:o_Notes += "`r`nTEMPORARY USER LIST - " + $TempUserCheck + "`r`n" + $TemporaryUsersList
-$script:o_Notes += "`r`nNEW DOMAIN USERS - " + $UserCheck + "`r`n" + $UserChanges
+$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tPRIVILEDGED GROUP CHANGES - " + $GroupCheck + "`r`n"
+if ($GroupChanges) {foreach ($change in $GroupChanges) {$script:o_Notes += "`t`t" + $change.replace('<br>',"`r`n")}}
+$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tTEMPORARY USER LIST - " + $TempUserCheck + "`r`n"
+if ($TemporaryUsersList) {foreach ($temp in $TemporaryUsersList) {$script:o_Notes += "`t`t" + $temp.replace('<br>',"`r`n")}}
+$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tNEW DOMAIN USERS - " + $UserCheck + "`r`n"
+if ($UserChanges) {foreach ($user in $UserChanges) {$script:o_Notes += "`t`t" + $user.replace('<br>',"`r`n")}}
+$script:o_Notes += "`r`n$($strLineSeparator)"
 #NOTES
 Write-Log "Please find the report in C:\IT\Reports directory."
 $script:o_Notes += "`r`nPlease find the report in C:\IT\Reports directory."
