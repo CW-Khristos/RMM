@@ -51,21 +51,21 @@
           #---NVME ATTRIBUTES --- https://media.kingston.com/support/downloads/MKP_521.6_SMART-DCP1000_attribute.pdf
           #---
           "CRITICAL WARNING"
-            {$script:arrDRV[$script:i].nvmewarn = [uint32]$varVAL}
+            {$script:arrDRV[$script:i].nvmewarn = [uint32]$varVAL; break;}
           "TEMPERATURE"
-            {$script:arrDRV[$script:i].nvmetemp = $varVAL}
+            {$script:arrDRV[$script:i].nvmetemp = $varVAL; break;}
           "AVAILABLE SPARE"
-            {$script:arrDRV[$script:i].nvmeavail = $varVAL}
+            {$script:arrDRV[$script:i].nvmeavail = $varVAL; break;}
           "MEDIA AND DATA INTEGRITY ERRORS"
-            {$script:arrDRV[$script:i].nvmemdi = $varVAL}
+            {$script:arrDRV[$script:i].nvmemdi = $varVAL; break;}
           "ERROR INFORMATION LOG ENTRIES"
-            {$script:arrDRV[$script:i].nvmeerr = $varVAL}
+            {$script:arrDRV[$script:i].nvmeerr = $varVAL; break;}
           "WARNING  COMP. TEMPERATURE TIME"
-            {$script:arrDRV[$script:i].nvmewctemp = $varVAL}
+            {$script:arrDRV[$script:i].nvmewctemp = $varVAL; break;}
           "CRITICAL COMP. TEMPERATURE TIME"
-            {$script:arrDRV[$script:i].nvmecctemp = $varVAL}
+            {$script:arrDRV[$script:i].nvmecctemp = $varVAL; break;}
           default
-            {}
+            {break;}
         }
       }
       #HDD / SDD DRIVES
@@ -79,182 +79,182 @@
           #The raw value has different structure for different vendors and is often not meaningful as a decimal number
           #For some drives, this number may increase during normal operation without necessarily signifying errors
           "RAW READ ERROR RATE"
-            {}
+            {break;}
           #SMART ID 5 - CRITICAL -
           #Count of reallocated sectors
           #The raw value represents a count of the bad sectors that have been found and remapped
           #This value is primarily used as a metric of the life expectancy of the drive
           #A drive which has had any reallocations at all is significantly more likely to fail in the immediate months
           "REALLOCATED SECTOR CT"
-            {$script:arrDRV[$script:i].id5 = $varVAL}
+            {$script:arrDRV[$script:i].id5 = $varVAL; break;}
           #SMART ID 7 Rate of seek errors of the magnetic heads
           #If there is a partial failure in the mechanical positioning system, then seek errors will arise
           #Such a failure may be due to numerous factors, such as damage to a servo, or thermal widening of the hard disk
           #The raw value has different structure for different vendors and is often not meaningful as a decimal number
           #For some drives, this number may increase during normal operation without necessarily signifying errors
           "SEEK ERROR RATE"
-            {}
+            {break;}
           #SMART ID 9 Count of hours in power-on state
           #By default, the total expected lifetime of a hard disk in perfect condition is defined as 5 years (running every day and night on all days)
           #This is equal to 1825 days in 24/7 mode or 43800 hours
           "POWER ON HOURS"
-            {}
+            {break;}
           #SMART ID 10 - CRITICAL -
           #Count of retry of spin start attempts
           #This attribute stores a total count of the spin start attempts to reach the fully operational speed (under the condition that the first attempt was unsuccessful)
           #An increase of this attribute value is a sign of problems in the hard disk mechanical subsystem
           "SPIN RETRY COUNT"
-            {$script:arrDRV[$script:i].id10 = $varVAL}
+            {$script:arrDRV[$script:i].id10 = $varVAL; break;}
           #SMART ID 12 This attribute indicates the count of full hard disk power on/off cycles
           "POWER CYCLE COUNT"
-            {}
+            {break;}
           #SMART ID 184 - CRITICAL -
           #This attribute is a part of Hewlett-Packard's SMART IV technology, as well as part of other vendors' IO Error Detection and Correction schemas
           #Contains a count of parity errors which occur in the data path to the media via the drive's cache RAM
           {($_ -eq "END TO END ERROR") -or ($_ -eq "IOEDC") -or `
             ($_ -eq "END-TO-END ERROR") -or ($_ -eq "ERROR CORRECTION COUNT")}
-              {$script:arrDRV[$script:i].id184 = $varVAL}
+              {$script:arrDRV[$script:i].id184 = $varVAL; break;}
           #SMART ID 187 - CRITICAL -
           #The count of errors that could not be recovered using hardware ECC; see attribute 195
           {($_ -eq "REPORTED UNCORRECTABLE ERRORS") -or `
             ($_ -eq "UNCORRECTABLE ERROR CNT") -or ($_ -eq "REPORTED UNCORRECT")}
-              {$script:arrDRV[$script:i].id187 = $varVAL}
+              {$script:arrDRV[$script:i].id187 = $varVAL; break;}
           #SMART ID 188 - CRITICAL -
           #The count of aborted operations due to HDD timeout
           #Normally this attribute value should be equal to zero
           "COMMAND TIMEOUT"
-            {$script:arrDRV[$script:i].id188 = $varVAL}
+            {$script:arrDRV[$script:i].id188 = $varVAL; break;}
           #SMART ID 190 - CRITICAL -
           #Value is equal to (100-temp. °C), allowing manufacturer to set a minimum threshold which corresponds to a maximum temperature
           #This also follows the convention of 100 being a best-case value and lower values being undesirable
           #However, some older drives may instead report raw Temperature (identical to 0xC2) or Temperature minus 50 here.
           {($_ -eq "TEMPERATURE DIFFERENCE") -or `
             ($_ -eq "AIRFLOW TEMPERATURE") -or ($_ -eq "AIRFLOW TEMPERATURE CEL")}
-              {$script:arrDRV[$script:i].id190 = $varVAL}
+              {$script:arrDRV[$script:i].id190 = $varVAL; break;}
           #SMART ID 194 - CRITICAL -
           #Indicates the device temperature, if the appropriate sensor is fitted
           #Lowest byte of the raw value contains the exact temperature value (Celsius degrees)
           {($_ -eq "TEMPERATURE") -or ($_ -eq "TEMPERATURE CELSIUS")}
-            {$script:arrDRV[$script:i].id194 = $varVAL}
+            {$script:arrDRV[$script:i].id194 = $varVAL; break;}
           #SMART ID 196 -CRITICAL -
           #Count of remap operations
           #The raw value of this attribute shows the total count of attempts to transfer data from reallocated sectors to a spare area
           #Both successful and unsuccessful attempts are counted
           {($_ -eq "REALLOCATION EVENT COUNT") -or ($_ -eq "REALLOCATED EVENT COUNT")}
-            {$script:arrDRV[$script:i].id196 = $varVAL}
+            {$script:arrDRV[$script:i].id196 = $varVAL; break;}
           #SMART ID 197 - CRITICAL -
           #Count of "unstable" sectors (waiting to be remapped, because of unrecoverable read errors)
           #If an unstable sector is subsequently read successfully, the sector is remapped and this value is decreased
           #Read errors on a sector will not remap the sector immediately (since the correct value cannot be read and so the value to remap is not known, and also it might become readable later)
           #Instead, the drive firmware remembers that the sector needs to be remapped, and will remap it the next time it's written
           {($_ -eq "CURRENT PENDING SECTOR") -or ($_ -eq "CURRENT PENDING ECC CNT")}
-            {$script:arrDRV[$script:i].id197 = $varVAL}
+            {$script:arrDRV[$script:i].id197 = $varVAL; break;}
           #SMART ID 198 - CRITICAL -
           #The total count of uncorrectable errors when reading/writing a sector
           #A rise in the value of this attribute indicates defects of the disk surface and/or problems in the mechanical subsystem
           {($_ -eq "OFFLINE UNCORRECTABLE SECTOR COUNT") -or ($_ -eq "OFFLINE UNCORRECTABLE")}
-            {$script:arrDRV[$script:i].id198 = $varVAL}
+            {$script:arrDRV[$script:i].id198 = $varVAL; break;}
           #SMART ID 201 - CRITICAL -
           #Count indicates the number of uncorrectable software read errors
           {($_ -eq "SOFT READ ERROR RATE") -or ($_ -eq "TA COUNTER DETECTED")}
-            {$script:arrDRV[$script:i].id201 = $varVAL}
+            {$script:arrDRV[$script:i].id201 = $varVAL; break;}
           #---
           #---SSD ATTRIBUTES
           #---
           #SMART ID 5 - CRITICAL -
           "REALLOCATE NAND BLK CNT"
-            #{$script:arrDRV[$script:i].ssd5 = $varVAL}
-            {$script:arrDRV[$script:i].id5 = $varVAL}
+            #{$script:arrDRV[$script:i].ssd5 = $varVAL; break;}
+            {$script:arrDRV[$script:i].id5 = $varVAL; break;}
           #SMART ID 170 - CRITICAL -
           #See attribute 232
           {($_ -eq "AVAILABLE SPACE") -or `
             ($_ -eq "UNUSED RSVD BLK CT CHIP") -or ($_ -eq "GROWN BAD BLOCKS")}
-              {$script:arrDRV[$script:i].id170 = $varVAL}
-              #{$script:arrDRV[$script:i].id180 = $varVAL}
-              #{$script:arrDRV[$script:i].id202 = $varVAL}
-              #{$script:arrDRV[$script:i].id231 = $varVAL}
-              #{$script:arrDRV[$script:i].id232 = $varVAL}
+              {$script:arrDRV[$script:i].id170 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id180 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id202 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id231 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id232 = $varVAL; break;}
           #SMART ID 171 - CRITICAL -
           #(Kingston) The total number of flash program operation failures since the drive was deployed
           #Identical to attribute 181
           {($_ -eq "PROGRAM FAIL") -or `
             ($_ -eq "PROGRAM FAIL COUNT") -or ($_ -eq "PROGRAM FAIL COUNT CHIP")}
-              {$script:arrDRV[$script:i].id171 = $varVAL}
-              #{$script:arrDRV[$script:i].id175 = $varVAL}
-              #{$script:arrDRV[$script:i].id181 = $varVAL}
+              {$script:arrDRV[$script:i].id171 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id175 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id181 = $varVAL; break;}
           #SMART ID 172 - CRITICAL -
           #(Kingston) Counts the number of flash erase failures
           #This attribute returns the total number of Flash erase operation failures since the drive was deployed
           #This attribute is identical to attribute 182
           {($_ -eq "ERASE FAIL") -or ($_ -eq "ERASE FAIL COUNT") -or ($_ -eq "ERASE FAIL COUNT CHIP")}
-            {$script:arrDRV[$script:i].id172 = $varVAL}
-            #{$script:arrDRV[$script:i].id176 = $varVAL}
-            #{$script:arrDRV[$script:i].id182 = $varVAL}
+            {$script:arrDRV[$script:i].id172 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id176 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id182 = $varVAL; break;}
           #SMART ID 173 - CRITICAL -
           #Counts the maximum worst erase count on any block
           {($_ -eq "WEAR LEVELING") -or ($_ -eq "WEAR LEVELING COUNT") -or `
             ($_ -eq "AVE BLOCK-ERASE COUNT") -or ($_ -eq "AVERAGE PE CYCLES TLC")}
-              {$script:arrDRV[$script:i].id173 = $varVAL}
-              #{$script:arrDRV[$script:i].id177 = $varVAL}
+              {$script:arrDRV[$script:i].id173 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id177 = $varVAL; break;}
           #SMART ID 175 - CRITICAL -
           {($_ -eq "PROGRAM FAIL") -or ($_ -eq "PROGRAM FAIL COUNT CHIP")}
-            #{$script:arrDRV[$script:i].id171 = $varVAL}
-            {$script:arrDRV[$script:i].id175 = $varVAL}
-            #{$script:arrDRV[$script:i].id181 = $varVAL}
+            #{$script:arrDRV[$script:i].id171 = $varVAL; break;}
+            {$script:arrDRV[$script:i].id175 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id181 = $varVAL; break;}
           #SMART ID 176 - CRITICAL -
           #SMART parameter indicates a number of flash erase command failures
           {($_ -eq "ERASE FAIL") -or ($_ -eq "ERASE FAIL COUNT CHIP")}
-            #{$script:arrDRV[$script:i].id172 = $varVAL}
-            {$script:arrDRV[$script:i].id176 = $varVAL}
-            #{$script:arrDRV[$script:i].id182 = $varVAL}
+            #{$script:arrDRV[$script:i].id172 = $varVAL; break;}
+            {$script:arrDRV[$script:i].id176 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id182 = $varVAL; break;}
           #SMART ID 177 - CRITICAL -
           #Delta between most-worn and least-worn Flash blocks
           #It describes how good/bad the wear-leveling of the SSD works on a more technical way
           {($_ -eq "WEAR LEVELING COUNT") -or ($_ -eq "WEAR RANGE DELTA")}
-            #{$script:arrDRV[$script:i].id173 = $varVAL}
-            {$script:arrDRV[$script:i].id177 = $varVAL}
+            #{$script:arrDRV[$script:i].id173 = $varVAL; break;}
+            {$script:arrDRV[$script:i].id177 = $varVAL; break;}
           #SMART ID 178 "Pre-Fail" attribute used at least in Samsung devices
           {($_ -eq "USED RESERVED BLOCK COUNT") -or ($_ -eq "USED RSVD BLK CNT CHIP")}
-            {}
+            {break;}
           #SMART ID 179 "Pre-Fail" attribute used at least in Samsung devices
           {($_ -eq "USED RESERVED") -or ($_ -eq "USED RSVD BLK CNT TOT")}
-            {}
+            {break;}
           #SMART ID 180 "Pre-Fail" attribute used at least in HP devices
           {($_ -eq "UNUSED RESERVED BLOCK COUNT TOTAL") -or `
             ($_ -eq "UNUSED RSVD BLK CNT TOT") -or ($_ -eq "UNUSED RESERVE NAND BLK")}
-              #{$script:arrDRV[$script:i].id170 = $varVAL}
-              {$script:arrDRV[$script:i].id180 = $varVAL}
-              #{$script:arrDRV[$script:i].id202 = $varVAL}
-              #{$script:arrDRV[$script:i].id231 = $varVAL}
-              #{$script:arrDRV[$script:i].id232 = $varVAL}
+              #{$script:arrDRV[$script:i].id170 = $varVAL; break;}
+              {$script:arrDRV[$script:i].id180 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id202 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id231 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id232 = $varVAL; break;}
           #SMART ID 181 - CRITICAL -
           #Total number of Flash program operation failures since the drive was deployed
           {($_ -eq "PROGRAM FAIL COUNT") -or ($_ -eq "PROGRAM FAIL CNT TOTAL")}
-            #{$script:arrDRV[$script:i].id171 = $varVAL}
-            #{$script:arrDRV[$script:i].id175 = $varVAL}
-            {$script:arrDRV[$script:i].id181 = $varVAL}
+            #{$script:arrDRV[$script:i].id171 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id175 = $varVAL; break;}
+            {$script:arrDRV[$script:i].id181 = $varVAL; break;}
           #SMART ID 182 - CRITICAL -
           #"Pre-Fail" Attribute used at least in Samsung devices
           {($_ -eq "ERASE FAIL COUNT") -or ($_ -eq "ERASE FAIL COUNT TOTAL")}
-            #{$script:arrDRV[$script:i].id172 = $varVAL}
-            #{$script:arrDRV[$script:i].id176 = $varVAL}
-            {$script:arrDRV[$script:i].id182 = $varVAL}
+            #{$script:arrDRV[$script:i].id172 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id176 = $varVAL; break;}
+            {$script:arrDRV[$script:i].id182 = $varVAL; break;}
           #SMART ID 183 the total number of data blocks with detected, uncorrectable errors encountered during normal operation
           #Although degradation of this parameter can be an indicator of drive aging and/or potential electromechanical problems, it does not directly indicate imminent drive failure
           "RUNTIME BAD BLOCK"
-            {}
+            {break;}
           #SMART ID 195 The raw value has different structure for different vendors and is often not meaningful as a decimal number
           #For some drives, this number may increase during normal operation without necessarily signifying errors.
           {($_ -eq "ECC ERROR RATE") -or ($_ -eq "HARDWARE ECC RECOVERED")}
-            {}
+            {break;}
           #SMART ID 199 The count of errors in data transfer via the interface cable as determined by ICRC (Interface Cyclic Redundancy Check)
           "CRC ERROR COUNT"
-            {}
+            {break;}
           #SMART ID 230 - CRITICAL -
           #Amplitude of "thrashing" (repetitive head moving motions between operations)
           #In SSDs, indicates whether usage trajectory is outpacing the expected life curve
           {($_ -eq "GMR HEAD AMPLITUDE") -or ($_ -eq "DRIVE LIFE PROTECTION")}
-            {$script:arrDRV[$script:i].id230 = $varVAL}
+            {$script:arrDRV[$script:i].id230 = $varVAL; break;}
           #SMART ID 202-PERCENT LIFE REMAIN & 231-SSD LIFE LEFT - CRITICAL -
           #Indicates the approximate SSD life left, in terms of program/erase cycles or available reserved blocks
           #A normalized value of 100 represents a new drive, with a threshold value at 10 indicating a need for replacement
@@ -262,41 +262,41 @@
           #Previously (pre-2010) occasionally used for Drive Temperature (more typically reported at 0xC2)
           {($_ -eq "SSD LIFE LEFT") -or ($_ -eq "PERCENT LIFETIME REMAIN") -or `
             ($_ -eq "MEDIA WEAROUT") -or ($_ -eq "MEDIA WEAROUT INDICATOR")}
-              #{$script:arrDRV[$script:i].id170 = $varVAL}
-              #{$script:arrDRV[$script:i].id180 = $varVAL}
-              #{$script:arrDRV[$script:i].id202 = $varVAL}
-              {$script:arrDRV[$script:i].id231 = $varVAL}
-              #{$script:arrDRV[$script:i].id232 = $varVAL}
+              #{$script:arrDRV[$script:i].id170 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id180 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id202 = $varVAL; break;}
+              {$script:arrDRV[$script:i].id231 = $varVAL; break;}
+              #{$script:arrDRV[$script:i].id232 = $varVAL; break;}
           #SMART ID 232 - CRITICAL -
           #Number of physical erase cycles completed on the SSD as a percentage of the maximum physical erase cycles the drive is designed to endure
           #Intel SSDs report the available reserved space as a percentage of the initial reserved space
           {($_ -eq "ENDURANCE REMAINING") -or ($_ -eq "AVAILABLE RESERVD SPACE")}
-            #{$script:arrDRV[$script:i].id170 = $varVAL}
-            #{$script:arrDRV[$script:i].id180 = $varVAL}
-            #{$script:arrDRV[$script:i].id202 = $varVAL}
-            #{$script:arrDRV[$script:i].id231 = $varVAL}
-            {$script:arrDRV[$script:i].id232 = $varVAL}
+            #{$script:arrDRV[$script:i].id170 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id180 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id202 = $varVAL; break;}
+            #{$script:arrDRV[$script:i].id231 = $varVAL; break;}
+            {$script:arrDRV[$script:i].id232 = $varVAL; break;}
           #SMART ID 233 Intel SSDs report a normalized value from 100, a new drive, to a minimum of 1
           #It decreases while the NAND erase cycles increase from 0 to the maximum-rated cycles
           #Previously (pre-2010) occasionally used for Power-On Hours (more typically reported in attribute 0x09)
           {($_ -eq "MEDIA WEAROUT") -or ($_ -eq "MEDIA WEAROUT INDICATOR")}
-            {}
+            {break;}
           #SMART ID 234 Decoded as: byte 0-1-2 = average erase count (big endian) and byte 3-4-5 = max erase count (big endian)
           {($_ -eq "AVERAGE ERASE COUNT") -or ($_ -eq "MAX ERASE COUNT") -or `
             ($_ -eq "AVERAGE ERASE COUNT AND MAXIMUM ERASE COUNT") -or ($_ -eq "AVG / MAX ERASE")}
-              {}
+              {break;}
           #SMART ID 235 Decoded as: byte 0-1-2 = good block count (big endian) and byte 3-4 = system (free) block count
           {($_ -eq "POR RECOVERY COUNT") -or ($_ -eq "GOOD BLOCK COUNT") -or ($_ -eq "SYSTEM FREE COUNT") -or `
             ($_ -eq "GOOD BLOCK COUNT AND SYSTEM FREE BLOCK COUNT") -or ($_ -eq "GOOD BLOCK / SYSTEM FREE COUNT")}
-              {}
+              {break;}
           #SMART ID 241 Total count of LBAs written
           "TOTAL LBAS WRITTEN"
-            {}
+            {break;}
           #UNKNOWNS
           {($_ -like "*UNKNOWN*")}
-            {}
+            {break;}
           default
-            {}
+            {break;}
         }
       }
     }
@@ -492,6 +492,7 @@ foreach ($objDRV in $arrDRV) {
                   #write-output -ForegroundColor green $chunks[0].trim() "     " $chunks[($chunks.length - 1)].trim()
                   mapSMART $chunks[0].trim() $chunks[($chunks.length - 1)].replace("%", "").trim()
                 }
+                break;
               }
               default {
                 if ($line -like "*(*)*") {                                                            #"()" IN RAW VALUE
@@ -519,6 +520,7 @@ foreach ($objDRV in $arrDRV) {
                     mapSMART $chunks[1].trim() $chunks[($chunks.length - 1)].trim()
                   }
                 }
+                break;
               }
             }
         }
@@ -536,17 +538,13 @@ foreach ($objDRV in $arrDRV) {
       $allout += "  - All SMART Attributes passed checks`r`n"
     } elseif ($script:arrWARN.count -gt 0) {
       $allout += "  - The following SMART Attributes did not pass :`r`n"
-      foreach ($warn in $script:arrWARN) {
-        $allout += "$($warn)"
-      }
+      foreach ($warn in $script:arrWARN) {$allout += "$($warn)"}
     }
     #GET DRIVE IDENTITY
     $output = Get-ProcessOutput -FileName $smartEXE -Args "-i $($objDRV.drvID)"
     #PARSE SMARTCTL OUTPUT LINE BY LINE
     $lines = $output.StandardOutput.split("`r`n", [StringSplitOptions]::RemoveEmptyEntries)
-    foreach ($line in $lines) {
-      $allout += "  - $($line)`r`n"
-    }
+    foreach ($line in $lines) {$allout += "  - $($line)`r`n"}
     #BASIC HEALTH
     if ($script:arrDRV[$script:i].fail -eq "PASSED") {
       $ccode = "green"
