@@ -20,9 +20,10 @@
   $cfgDefault         = "C:\IT\LHM\LibreHardwareMonitor.config"
   $strLineSeparator   = "----------------------------------"
   $srcLHM             = "https://github.com/CW-Khristos/scripts/raw/master/LHM/LHM.zip"
-  $lhmConfig          = "`r`n<?xml version=`"1.0`" encoding=`"utf-8`"?>`r`n`t<configuration>`r`n"
-  $lhmConfig          += "`t`t<appSettings>`r`n`t`t`t<add key=`"startMinMenuItem`" value=`"true`" />`r`n"
-  $lhmConfig          += "`t`t</appSettings>`r`n`t</configuration>"
+  $lhmConfig          = "`r`n<?xml version=`"1.0`" encoding=`"utf-8`"?>`r`n<configuration>`r`n"
+  $lhmConfig          += "`t<appSettings>`r`n`t`t`t<add key=`"startMinMenuItem`" value=`"true`" />`r`n`t</appSettings>`r`n"
+  $lhmConfig          += "`t<startup>`r`n`t`t<supportedRuntime version=`"v4.0`" sku=`".NETFramework,Version=v4.7.2`" />"
+  $lhmConfig          += "`r`n`t`t</startup>`r`n</configuration>"
 #endregion ----- DECLARATIONS ----
 
 #region ----- FUNCTIONS ----
