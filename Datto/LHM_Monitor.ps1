@@ -88,21 +88,11 @@
 
   function dir-Check () {
   #CHECK 'PERSISTENT' FOLDERS
-    if (-not (test-path -path "C:\temp")) {
-      new-item -path "C:\temp" -itemtype directory -force
-    }
-    if (-not (test-path -path "C:\IT")) {
-      new-item -path "C:\IT" -itemtype directory -force
-    }
-    if (-not (test-path -path "C:\IT\Log")) {
-      new-item -path "C:\IT\Log" -itemtype directory -force
-    }
-    if (-not (test-path -path "C:\IT\Scripts")) {
-      new-item -path "C:\IT\Scripts" -itemtype directory -force
-    }
-    if (-not (test-path -path "C:\IT\LHM")) {
-      new-item -path "C:\IT\LHM" -itemtype directory -force | out-string
-    }
+    if (-not (test-path -path "C:\temp")) {new-item -path "C:\temp" -itemtype directory -force}
+    if (-not (test-path -path "C:\IT")) {new-item -path "C:\IT" -itemtype directory -force}
+    if (-not (test-path -path "C:\IT\Log")) {new-item -path "C:\IT\Log" -itemtype directory -force}
+    if (-not (test-path -path "C:\IT\Scripts")) {new-item -path "C:\IT\Scripts" -itemtype directory -force}
+    if (-not (test-path -path "C:\IT\LHM")) {new-item -path "C:\IT\LHM" -itemtype directory -force | out-string}
   }
 
   function run-Deploy () {
@@ -217,8 +207,8 @@
         $mondiag = "LibreHardwareMonitor Not Running : $($timestanp)`r`n$($strLineSeparator)"
         logERR 3 "run-Monitor" "$($mondiag)"
       }
-      #IF EITHER LHM EXE OR LHM CONFIG DO NOT EXIST, RE-DEPLOY LHM
-      if ((-not $lhmExists) -or (-not $cfgExists)) {
+      #IF LHM EXE DOES NOT EXIST, RE-DEPLOY LHM
+      if (-not ($lhmExists)) {
         run-Deploy
       }
       #if lhm isn't running, start it
