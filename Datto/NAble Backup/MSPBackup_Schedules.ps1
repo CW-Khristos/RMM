@@ -568,7 +568,7 @@ try {
       $throttle += AuditDeviceBandwidth($SelectedDevices.AccountId)
       logERR 3 "THROTTLE" "$($throttle)`r`n$($strLineSeparator)"
       if ($curThrottle) {
-        logERR 3 "THROTTLE" "PREV THROTTLE :`r`n$($strLineSeparator)`r`n`t$($throttle)`r`n$($strLineSeparator)"
+        logERR 3 "THROTTLE" "PREV THROTTLE :`r`n$($strLineSeparator)`r`n`t$($curThrottle)`r`n$($strLineSeparator)"
         if ($curThrottle.trim() -match $throttle.trim()) {
           $throttleMsg += "| Throttle Settings are same |"
           logERR 3 "THROTTLE" "$($throttleMsg)`r`n$($strLineSeparator)"
