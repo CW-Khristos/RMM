@@ -385,6 +385,7 @@
       }
     } catch {
       $script:blnWARN = $true
+      $script:blnFAIL = $true
       $script:blnSITE = $false
       $script:diag += "`r`nAPI_WatchDog : Failed to update DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
       $script:diag += "`r`n$($_.Exception)"
@@ -420,6 +421,7 @@
       }
     } catch {
       $script:blnWARN = $true
+      $script:blnFAIL = $true
       $script:blnSITE = $false
       $script:diag += "`r`nAPI_WatchDog : Failed to create New DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
       $script:diag += "`r`n$($_.Exception)"
@@ -498,18 +500,10 @@ clear-host
 $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
-if (-not (test-path -path "C:\temp")) {
-  new-item -path "C:\temp" -itemtype directory
-}
-if (-not (test-path -path "C:\IT")) {
-  new-item -path "C:\IT" -itemtype directory
-}
-if (-not (test-path -path "C:\IT\Log")) {
-  new-item -path "C:\IT\Log" -itemtype directory
-}
-if (-not (test-path -path "C:\IT\Scripts")) {
-  new-item -path "C:\IT\Scripts" -itemtype directory
-}
+if (-not (test-path -path "C:\temp")) {new-item -path "C:\temp" -itemtype directory}
+if (-not (test-path -path "C:\IT")) {new-item -path "C:\IT" -itemtype directory}
+if (-not (test-path -path "C:\IT\Log")) {new-item -path "C:\IT\Log" -itemtype directory}
+if (-not (test-path -path "C:\IT\Scripts")) {new-item -path "C:\IT\Scripts" -itemtype directory}
 #Get the Hudu API Module if not installed
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 if (Get-Module -ListAvailable -Name HuduAPI) {
@@ -619,11 +613,13 @@ if (-not $script:blnFAIL) {
               $script:diag += "RMM CREATE : $($company.CompanyName) : SUCCESS`r`n"
             } elseif (-not $postSite) {
               $script:blnWARN = $true
+              $script:blnFAIL = $true
               write-output "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
               $script:diag += "RMM CREATE : $($company.CompanyName) : FAILED`r`n"
             }
           } catch {
             $script:blnWARN = $true
+            $script:blnFAIL = $true
             write-output "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
             $script:diag += "`r`nRMM CREATE : $($company.CompanyName) : FAILED"
             $script:diag += "`r`n$($_.Exception)"
@@ -658,6 +654,7 @@ if (-not $script:blnFAIL) {
                 $script:diag += "UPDATE : $($company.CompanyName) : SUCCESS`r`n"
               } elseif (-not $updateSite) {
                 $script:blnWARN = $true
+                $script:blnFAIL = $true
                 write-output "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
                 $script:diag += "UPDATE : $($company.CompanyName) : FAILED`r`n"
               }
@@ -667,6 +664,7 @@ if (-not $script:blnFAIL) {
             }
           } catch {
             $script:blnWARN = $true
+            $script:blnFAIL = $true
             write-output "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
             $script:diag += "`r`nUPDATE : $($company.CompanyName) : FAILED"
             $script:diag += "`r`n$($_.Exception)"
@@ -707,11 +705,13 @@ if (-not $script:blnFAIL) {
               $script:diag += "HUDU CREATE : $($company.CompanyName) : SUCCESS`r`n"
             } elseif (-not $postHUDU) {
               $script:blnWARN = $true
+              $script:blnFAIL = $true
               write-output "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
               $script:diag += "HUDU CREATE : $($company.CompanyName) : FAILED`r`n"
             }
           } catch {
             $script:blnWARN = $true
+            $script:blnFAIL = $true
             write-output "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
             $script:diag += "`r`nHUDU CREATE : $($company.CompanyName) : FAILED"
             $script:diag += "`r`n$($_.Exception)"
@@ -728,6 +728,14 @@ if (-not $script:blnFAIL) {
   StopClock
   #CLEAR LOGFILE
   $null | set-content $script:logPath -force
+  if ($script:blnFAIL) {
+    #WRITE TO LOGFILE
+    $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Errors : See Diagnostics"
+    "$($script:diag)" | add-content $script:logPath -force
+    write-DRMMAlert "API_WatchDog : Execution Failure : See Diagnostics"
+    write-DRMMDiag "$($script:diag)"
+    $script:diag = $null
+  }
   if ($script:blnSITE) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nAPI_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
@@ -735,7 +743,6 @@ if (-not $script:blnFAIL) {
     write-DRMMAlert "API_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
-    exit 1
   }
   if (-not $script:blnWARN) {
     #WRITE TO LOGFILE
@@ -744,7 +751,6 @@ if (-not $script:blnFAIL) {
     write-DRMMAlert "API_WatchDog : Execution Successful : No Sites Created"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
-    exit 0
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
     $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Warnings : See Diagnostics"
@@ -752,6 +758,10 @@ if (-not $script:blnFAIL) {
     write-DRMMAlert "API_WatchDog : Execution Completed with Warnings : See Diagnostics"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
+  }
+  if ((-not ($script:blnFAIL)) -and (-not ($script:blnWARN)) -and (-not ($script:blnSITE))) {
+    exit 0
+  } elseif (($script:blnFAIL) -or ($script:blnWARN) -or ($script:blnSITE)) {
     exit 1
   }
 } elseif ($script:blnFAIL) {
@@ -760,7 +770,7 @@ if (-not $script:blnFAIL) {
   #CLEAR LOGFILE
   $null | set-content $script:logPath -force
   #WRITE TO LOGFILE
-  $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Warnings : See Diagnostics"
+  $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Errors : See Diagnostics"
   "$($script:diag)" | add-content $script:logPath -force
   write-DRMMAlert "API_WatchDog : Execution Failure : See Diagnostics"
   write-DRMMDiag "$($script:diag)"
