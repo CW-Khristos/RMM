@@ -142,7 +142,7 @@ logERR 3 "MSPBackup_Status" "Failed:`r`n$($FailedBackups)"
 logERR 3 "MSPBackup_Status" "UnCertain:`r`n$($UncertainBackups)"
 logERR 3 "MSPBackup_Status" "Sessions:`r`n$($AllSessions)"
 if (-not $SessionsList) {
-  logERR 4 "MSPBackup_Status" "No Backups in past 24 Hours"
+  logERR 4 "MSPBackup_Status" "No Backups in past $($range) Hours ($($Date))"
 } elseif ($FailedBackups) {
   $script:blnWARN = $true
   logERR 4 "MSPBackup_Status" "Failed Backups Detected"
