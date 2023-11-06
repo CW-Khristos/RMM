@@ -113,7 +113,7 @@ try {
     $State = switch ($Session.state) {
       'Failed' {"Backup has failed with an error. Backup Started at $($session.start)"}
       'Skipped' {"Backup has been skipped as previous job was still running. Backup Started at $($session.start)"}
-      'InProcess' {if ($session.start -lt $Date) {"Backup has been running for over 23 hours. Backup Started at $($session.start)"}}
+      'InProcess' {if ($session.start -lt $Date) {"Backup has been running for over $($range) hours. Backup Started at $($session.start)"}}
       'Interrupted' {"Backup has been interrupted. Backup Started at $($session.start)"}
       'CompletedwithErrors' {"Backup has completed with an error. Backup Started at $($session.start)"}
     }
