@@ -596,6 +596,8 @@ try {
 
   # for each DRMM Site
   foreach ($script:rmmSite in $script:drmmSites) {
+    write-output ""
+    $script:diag += "`r`n"
     start-sleep -Milliseconds 100
     if (($script:rmmSite.name -match 'CreateMe') -or 
       ($script:rmmSite.name -match 'Garland') -or 
@@ -618,11 +620,11 @@ try {
           $diagAsset += "`r`n`t$($strLineSeparator)`r`n$(($script:psaTicketdetails | fl | out-string).trim())"
           logERR 3 "ASSET DIAG" "$($diagAsset)`r`n`t$($strLineSeparator)"
           if ($script:assetTickets) {
-            write-output "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
-            $script:diag += "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n`r`n"
+            write-output "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
+            $script:diag += "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
           } elseif (-not ($script:assetTickets)) {
-            write-output "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
-            $script:diag += "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n`r`n"
+            write-output "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
+            $script:diag += "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
             $newTicket = @{
               id                   = '0'
               companyID            = $script:rmmSite.autotaskCompanyId
