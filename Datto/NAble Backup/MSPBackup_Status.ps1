@@ -94,9 +94,15 @@
 #------------
 #BEGIN SCRIPT
 Get-OSType
-switch ($script:ostype) {
-  "Workstation" {$range = 4; break;}
-  {"DC","Server"} {$range = 12; break;}
+switch ($env:optStatic.toupper()) {
+  "YES" {$range = [int]$env:varRange; break;}
+  "NO" {
+    switch ($script:ostype) {
+      "Workstation" {$range = 4; break;}
+      {"DC","Server"} {$range = 12; break;}
+    }
+    break
+  }
 }
 $Date = (get-date).AddHours(-($range))
 #Start script execution time calculation
