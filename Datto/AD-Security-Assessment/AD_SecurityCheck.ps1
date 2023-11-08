@@ -37,43 +37,44 @@
 Remove-Variable * -ErrorAction SilentlyContinue
 
 #region ----- DECLARATIONS ----
-  $strLineSeparator = "---------------"
-  $script:blnWARN = $false
+  $strLineSeparator             = "---------------"
+  $script:blnWARN               = $false
   #NOTES
-  $script:o_Notes = $null
-  $script:o_Domain = $null
-  $script:o_PDC = $null
+  $script:o_Notes               = $null
+  $script:o_Domain              = $null
+  $script:o_PDC                 = $null
   #PASSWORDS
-  $script:i_PwdComplex = $env:pwdComplexity
-  $script:o_PwdComplexityFlag = $true
-  $script:i_MinPwdLen = $env:pwdMinLen
-  $script:o_MinPwdLenFlag = $true
-  $script:i_MinPwdAge = $env:pwdMinAge
-  $script:o_MinPwdAgeFlag = $true
-  $script:i_MaxPwdAge = $env:pwdMaxAge
-  $script:o_MaxPwdAgeFlag = $true
-  $script:i_PwdHistory = $env:pwdHistory
-  $script:o_PwdHistoryFlag = $true
-  $script:o_RevEncryptFlag = $true
+  $script:i_PwdComplex          = $env:pwdComplexity
+  $script:o_PwdComplexityFlag   = $true
+  $script:i_MinPwdLen           = $env:pwdMinLen
+  $script:o_MinPwdLenFlag       = $true
+  $script:i_MinPwdAge           = $env:pwdMinAge
+  $script:o_MinPwdAgeFlag       = $true
+  $script:i_MaxPwdAge           = $env:pwdMaxAge
+  $script:o_MaxPwdAgeFlag       = $true
+  $script:i_PwdHistory          = $env:pwdHistory
+  $script:o_PwdHistoryFlag      = $true
+  $script:o_RevEncryptFlag      = $true
   #LOCKOUT
-  $script:i_LockThreshold = $env:lockThreshold
-  $script:o_LockThresholdFlag = $true
-  $script:i_LockDuration = $env:lockDuration
-  $script:o_LockDurationFlag = $true
-  $script:i_LockObserve = $env:lockWindow
-  $script:o_LockObserveFlag = $true
+  $script:i_LockThreshold       = $env:lockThreshold
+  $script:o_LockThresholdFlag   = $true
+  $script:i_LockDuration        = $env:lockDuration
+  $script:o_LockDurationFlag    = $true
+  $script:i_LockObserve         = $env:lockWindow
+  $script:o_LockObserveFlag     = $true
   #USERS
-  $script:o_TotalUser = $null
-  $script:o_EnabledUser = $null
-  $script:o_DisabledUser = $null
-  $script:o_InactiveUser = $null
-  $script:o_PwdNoExpire = $null
-  $script:o_SIDHistory = $null
-  $script:o_RevEncryptUser = $null
-  $script:o_PwdNoRequire = $null
-  $script:o_KerbUser = $null
-  $script:o_KerbPreAuthUser = $null
-  $script:ArrayOfNames = @("test","tmp","skykick","mig", "migwiz","temp","-admin","supervisor")
+  $script:o_TotalUser           = $null
+  $script:o_EnabledUser         = $null
+  $script:o_DisabledUser        = $null
+  $script:o_InactiveUser        = $null
+  $script:o_PwdNoExpire         = $null
+  $script:o_SIDHistory          = $null
+  $script:o_RevEncryptUser      = $null
+  $script:o_PwdNoRequire        = $null
+  $script:o_KerbUser            = $null
+  $script:o_KerbPreAuthUser     = $null
+  $script:IgnoreNames           = @("Template ","Performance Test User")
+  $script:ArrayOfNames          = @("test","tmp","skykick","mig", "migwiz","temp","-admin","supervisor")
 #endregion ----- DECLARATIONS ----
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
@@ -113,21 +114,24 @@ Remove-Variable * -ErrorAction SilentlyContinue
       $Server = "localhost",
       $Hour = 24
     )
-
-    $ProtectedGroups = Get-ADGroup -Filter 'AdminCount -eq 1' -Server $Server
-    $Members = @()
-    ForEach ($Group in $ProtectedGroups) {
-      try {
-        $Members += Get-ADReplicationAttributeMetadata -Server $Server -Object $Group.DistinguishedName -ShowAllLinkedValues | 
-          Where-Object {$_.IsLinkValue} | 
-            Select-Object @{name='GroupDN';expression={$Group.DistinguishedName}}, @{name='GroupName';expression={$Group.Name}}, *
-      } catch {
-        $Members = $Null
+    try {
+      $Members = @()
+      $ProtectedGroups = Get-ADGroup -Filter 'AdminCount -eq 1' -Server $Server
+      ForEach ($Group in $ProtectedGroups) {
+        try {
+          $Members += Get-ADReplicationAttributeMetadata -Server $Server -Object $Group.DistinguishedName -ShowAllLinkedValues | 
+            Where-Object {$_.IsLinkValue} | 
+              Select-Object @{name='GroupDN';expression={$Group.DistinguishedName}}, @{name='GroupName';expression={$Group.Name}}, *
+        } catch {
+          $Members = $Null
+        }
       }
-    }
-    if ($Members -ne $Null) {
-      $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
-    } else {
+      if ($Members -ne $Null) {
+        $Members | Where-Object {$_.LastOriginatingChangeTime -gt (Get-Date).AddHours(-1 * $Hour)}
+      } else {
+        return $null
+      }
+    } catch {
       $script:blnWARN = $true
       write-output "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
       $script:o_Notes += "`r`nGet-PrivilegedGroupChanges : Could not obtain AD Replication data: 'Get-ADReplicationAttributeMetadata'."
@@ -1016,13 +1020,15 @@ $script:o_Notes += "`r`nPerforming Misc. User Checks Report......."
     $TempUsers = Get-ADUser -Filter $filter -Properties whenCreated
     if ($TempUsers -ne $null) {
       foreach ($TUser in $TempUsers) {
-        $TemporaryUsersList += "$($TUser.name) temporary user found created at $($TUser.whenCreated)<br>"
+        $blnADD = $true
+        foreach ($ignore in $script:IgnoreNames) {if ($TUser.name -match $ignore) {$blnADD = $false}}
+        if ($blnADD) {$TemporaryUsersList += "$($TUser.name) temporary user found created at $($TUser.whenCreated)<br>"}
       }
     }
   }
-  if (!$TemporaryUsersList) {
+  if (-not ($TemporaryUsersList)) {
     $TempUserCheck = "No Temporary User Accounts Found"
-  } else {
+  } elseif ($TemporaryUsersList) {
     $TempUserCheck = "$($TemporaryUsersList.count) Temporary User Accounts Found"
     $script:blnWARN = $true
   }
