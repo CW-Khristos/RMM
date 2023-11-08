@@ -103,6 +103,13 @@ switch ($env:optStatic.toupper()) {
     }
     break
   }
+  default {
+    switch ($script:ostype) {
+      "Workstation" {$range = 4; break;}
+      {"DC","Server"} {$range = 12; break;}
+    }
+    break
+  }
 }
 $Date = (get-date).AddHours(-($range))
 #Start script execution time calculation
