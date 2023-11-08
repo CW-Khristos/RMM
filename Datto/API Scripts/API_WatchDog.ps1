@@ -504,8 +504,8 @@ if (-not (test-path -path "C:\temp")) {new-item -path "C:\temp" -itemtype direct
 if (-not (test-path -path "C:\IT")) {new-item -path "C:\IT" -itemtype directory}
 if (-not (test-path -path "C:\IT\Log")) {new-item -path "C:\IT\Log" -itemtype directory}
 if (-not (test-path -path "C:\IT\Scripts")) {new-item -path "C:\IT\Scripts" -itemtype directory}
-#Get the Hudu API Module if not installed
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+#Get the Hudu API Module if not installed
 if (Get-Module -ListAvailable -Name HuduAPI) {
   try {
     Import-Module HuduAPI -MaximumVersion 2.3.2 -force
