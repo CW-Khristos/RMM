@@ -120,7 +120,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $Uri = "$($script:psaAPI)/atservicesrest/v1.0/$($entity)/query?search=$($script:psaActFilter)"
     try {
       $list = PSA-FilterQuery $header "GET" "$($entity)" "$($script:psaActFilter)"
-      foreach ($item in $list) {
+      foreach ($item in $list.items) {
         if ($dest.containskey($item.id)) {
           continue
         } elseif (-not $dest.containskey($item.id)) {
