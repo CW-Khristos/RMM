@@ -576,7 +576,7 @@ try {
   PSA-GetTicketFields $script:psaHeaders $script:ticketFields
   #$script:ticketFields
   write-output "`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
-  $script:diag += "`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)`r`n"
+  $script:diag += "`r`n`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)`r`n"
   logERR 3 "AT API" "RETRIEVING COMPANIES :`r`n`t$($strLineSeparator)"
   PSA-GetCompanies $script:psaHeaders
   write-output "`tDone`r`n`t$($strLineSeparator)"
@@ -648,8 +648,12 @@ try {
         }
     }
   }
-  
 } catch {
   $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
   logERR 4 "INIT" "Failed to Query APIs`r`n`t$($err)`r`n$($strLineSeparator)"
 }
+#Stop script execution time calculation
+StopClock
+#CLEAR LOGFILE
+$null | set-content $script:logPath -force
+"$($script:diag)" | add-content $script:logPath -force
