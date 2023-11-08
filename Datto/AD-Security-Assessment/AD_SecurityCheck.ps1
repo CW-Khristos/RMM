@@ -1027,9 +1027,9 @@ $script:o_Notes += "`r`nPerforming Misc. User Checks Report......."
     }
   }
   if (-not ($TemporaryUsersList)) {
-    $TempUserCheck = "No Temporary User Accounts Found"
+    $TempUserCheck = "No Temporary User Accounts Found<br>"
   } elseif ($TemporaryUsersList) {
-    $TempUserCheck = "$($TemporaryUsersList.count) Temporary User Accounts Found"
+    $TempUserCheck = "$($TemporaryUsersList.count) Temporary User Accounts Found<br>"
     $script:blnWARN = $true
   }
   $temprow += $TempUserCheck
@@ -1050,9 +1050,9 @@ $script:o_Notes += "`r`nPerforming Misc. User Checks Report......."
     }
   }
   if (!$UserChanges) {
-    $UserCheck = "No User Additions Detected Since $($When)"
+    $UserCheck = "No User Additions Detected Since $($When)<br>"
   } else {
-    $UserCheck = "$($UserChanges.count) New Users Found"
+    $UserCheck = "$($UserChanges.count) New Users Found<br>"
     $script:blnWARN = $true
   }
   $newrow += $UserCheck
@@ -1139,11 +1139,11 @@ $script:o_Notes += "`r`n`tUSERS W/ SID HISTORY - $($DomainUsersWithSIDHistoryArr
 $script:o_Notes += "`r`n`tUSERS W/ KERBEROS DES - $($DomainKerberosDESUsersArray.Count)"
 $script:o_Notes += "`r`n`tUSERS W/ KERBEROS PRE-AUTH NOT REQUIRED - $($DomainUserDoesNotRequirePreAuthArray.Count)"
 #MISC
-$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tPRIVILEDGED GROUP CHANGES - " + $GroupCheck + "`r`n"
+$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tPRIVILEDGED GROUP CHANGES - " + $GroupCheck.replace('<br>',"`r`n")
 if ($GroupChanges) {foreach ($change in $GroupChanges) {$script:o_Notes += "`t`t" + $change.replace('<br>',"`r`n")}}
-$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tTEMPORARY USER LIST - " + $TempUserCheck + "`r`n"
+$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tTEMPORARY USER LIST - " + $TempUserCheck.replace('<br>',"`r`n")
 if ($TemporaryUsersList) {foreach ($temp in $TemporaryUsersList) {$script:o_Notes += "`t`t" + $temp.replace('<br>',"`r`n")}}
-$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tNEW DOMAIN USERS - " + $UserCheck + "`r`n"
+$script:o_Notes += "`r`n$($strLineSeparator)`r`n`tNEW DOMAIN USERS - " + $UserCheck.replace('<br>',"`r`n")
 if ($UserChanges) {foreach ($user in $UserChanges) {$script:o_Notes += "`t`t" + $user.replace('<br>',"`r`n")}}
 $script:o_Notes += "`r`n$($strLineSeparator)"
 #NOTES
