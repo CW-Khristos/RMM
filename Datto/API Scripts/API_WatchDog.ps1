@@ -684,6 +684,7 @@ if (-not $script:blnFAIL) {
             $script:diag += "CREATE HUDU : $($company.CompanyName)`t - $($company.address1), $($company.address2), $($company.city), $($company.state), $($company.postalCode) $($company.country)`r`n"
             $params = @{
               name                = "$($company.CompanyName)"
+              company_type        = "$($script:categoryMap[[int]$($company.CompanyCategory)])"
               nickname            = ""
               address_line_1      = "$($company.address1)"
               address_line_2      = "$($company.address2)"
