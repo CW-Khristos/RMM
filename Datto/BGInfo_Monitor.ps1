@@ -337,12 +337,13 @@ namespace Win32{
         $varArgs = (ls "C:\IT\BGInfo\*.bgi" -Exclude default.bgi | Select-Object -First 1).Name
         $varArgs = "$($varArgs)"
       } else {
-        $varArgs = 'default.bgi'
+        $varArgs = '.\default.bgi'
       }
       move-item $varArgs "C:\IT\BGInfo" -force
     }
     #furnish a quick CMD script
     write-Script "$($cmdScript)" $true
+    start-process "$($cmdScript)" -windowstyle hidden -wait -passthru
     # inform the user
     write-output "- BGInfo has been installed and configured to run on Startup"
     write-output "  Endpoints will need to be rebooted for changes to take effect"
