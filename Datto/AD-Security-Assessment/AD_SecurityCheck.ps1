@@ -63,6 +63,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $script:i_LockObserve         = $env:lockWindow
   $script:o_LockObserveFlag     = $true
   #USERS
+  $varNewUserRange              = [int]$env:varNewUserRange
+  $varModGroupRange             = [int]$env:varModGroupRange
   $script:o_TotalUser           = $null
   $script:o_EnabledUser         = $null
   $script:o_DisabledUser        = $null
@@ -112,7 +114,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
   Function Get-PrivilegedGroupChanges {
     Param(
       $Server = "localhost",
-      $Hour = 24
+      $Hour = [int]$varModGroupRange
     )
     try {
       $Members = @()
@@ -1042,7 +1044,7 @@ $script:o_Notes += "`r`nPerforming Misc. User Checks Report......."
   $newrow += "<tr>
     <td class=bold_class>New Users</td>
     <td style= 'text-align: center'>"
-  $When = ((Get-Date).AddDays(-1)).Date
+  $When = (Get-Date).AddHours(-1 * $varNewUserRange)
   $GetUsers = Get-ADUser -Filter {whenCreated -ge $When} -Properties whenCreated
   if ($GetUsers) {
     foreach ($User in $GetUsers) {
@@ -1117,7 +1119,7 @@ $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.MaxPasswordAge) - 
 $script:o_Notes += "`r`n`tPASSWORD HISTORY COUNT - Pass : $($script:o_PwdHistoryFlag)"
 $script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.PasswordHistoryCount) - Expected : $($script:i_PwdHistory) Prev. Passwords"
 $script:o_Notes += "`r`n`tREVERSIBLE ENCRYPTION - Pass : $($script:o_RevEncryptFlag)"
-$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.ReversibleEncryptionEnabled) - Expected : True"
+$script:o_Notes += "`r`n`t- Current : $($DomainPasswordPolicy.ReversibleEncryptionEnabled) - Expected : False"
 #LOCKOUT
 $script:o_Notes += "`r`n$($strLineSeparator)`r`nLOCKOUT POLICY :`r`n$($strLineSeparator)"
 $script:o_Notes += "`r`n`tLOCKOUT THRESHOLD - Pass : $($script:o_LockThresholdFlag)"
