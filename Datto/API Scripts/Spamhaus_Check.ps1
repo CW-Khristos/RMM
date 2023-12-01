@@ -777,7 +777,10 @@ if (-not $script:blnBREAK) {
         start-sleep -Milliseconds 200
         write-output "`tChecking : $($extIP.trim()) :`r`n`t`t$($strLineSeparator)"
         $script:diag += "`r`n`tChecking : $($extIP.trim()) :`r`n`t`t$($strLineSeparator)"
-        $script:outCheck = [system.net.dns]::gethostentry("$($extIP.trim()).zen.spamhaus.org")
+        $ipParts = $ip.Split('.')
+        [array]::Reverse($ipParts)
+        $ipParts = [string]::Join('.', $ipParts)
+        $script:outCheck = [system.net.dns]::gethostentry("$($ipParts).zen.spamhaus.org")
       } catch {}
       if ($script:spamMAP["$($script:outCheck.addresslist.ipaddresstostring)"]) {
         $script:spamdiag = "`tBLOCKED : $($extIP.trim()) :`r`n"
