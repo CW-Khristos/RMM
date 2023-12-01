@@ -883,10 +883,10 @@ try {
             if ($offTimestamp -ge [datetime]$script:bdgzDetails.result.lastSeen) {$blnTicket = $true; $warn = "DEVICE ALERT : OFFLINE 30+"}
             if ($offTimestamp -ge [datetime]$script:bdgzDetails.result.agent.lastUpdate) {$blnTicket = $true; $warn = "DEVICE ALERT : AGENT OUTDATED"}
             if ($script:bdgzDetails.result.agent.productOutdated -ne $false) {$blnTicket = $true; $warn = "DEVICE ALERT : PRODUCT OUTDATED"}
-            if ($script:bdgzDetails.result.agent.signatureOutdated -ne $false) {$blnTicket = $true; $warn = "DEVICE ALERT : SIGNATURE OUTDATED"}
+            #if ($script:bdgzDetails.result.agent.signatureOutdated -ne $false) {$blnTicket = $true; $warn = "DEVICE ALERT : SIGNATURE OUTDATED"}
             if (($script:bdgzDetails.result.malwareStatus.detection -ne $false) -or 
               ($script:bdgzDetails.result.malwareStatus.infected -ne $false)) {
-                $blnTicket = $true; $warn = "DEVICE ALERT : SIGNATURE OUTDATED"
+                $blnTicket = $true; $warn = "DEVICE ALERT : MALWARE DETECTED"
             }
             write-output "`t`t$($warn)"
             #CREATE TICKET
