@@ -10,30 +10,180 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $script:logPath           = "C:\IT\Log\Spamhaus_Check"
   $script:spamCHECK         = @{}
   $script:spamMAP           = @{
-    "127.0.0.2"             = @{
-      zone         = "SBL"
-      description  = "Spamhaus SBL Data"
+    "Spamhaus"              = @{
+      siteAddress           = "zen.spamhaus.org" 
+      returnCodes           = @{
+        "127.0.0.2"         = @{
+          zone         = "SBL"
+          description  = "Spamhaus SBL Data"
+        }
+        "127.0.0.3"         = @{
+          zone         = "SBL"
+          description  = "Spamhaus SBL CSS Data"
+        }
+        "127.0.0.4"         = @{
+          zone         = "XBL"
+          description  = "CBL Data"
+        }
+        "127.0.0.9"         = @{
+          zone         = "SBL"
+          description  = "Spamhaus DROP/EDROP Data"
+        }
+        <#"127.0.0.10"      = @{
+          zone         = "PBL"
+          description  = "ISP Maintained PBL Data"
+        }
+        "127.0.0.11"        = @{
+          zone         = "PBL"
+          description  = "Spamhaus Maintained PBL Data"
+        }#>
+      }
     }
-    "127.0.0.3"             = @{
-      zone         = "SBL"
-      description  = "Spamhaus SBL CSS Data"
+    "AbuseAT"               = @{
+      siteAddress           = "cbl.abuseat.org"
+      returnCodes           = @{
+        "127.0.0.2"         = @{
+          zone         = "SBL"
+          description  = "AbuseAT SBL Data"
+        }
+        "127.0.0.3"         = @{
+          zone         = "SBL"
+          description  = "AbuseAT SBL CSS Data"
+        }
+        "127.0.0.4"         = @{
+          zone         = "XBL"
+          description  = "CBL Data"
+        }
+        "127.0.0.9"         = @{
+          zone         = "SBL"
+          description  = "AbuseAT DROP/EDROP Data"
+        }
+        <#"127.0.0.10"      = @{
+          zone         = "PBL"
+          description  = "ISP Maintained PBL Data"
+        }
+        "127.0.0.11"        = @{
+          zone         = "PBL"
+          description  = "AbuseAT Maintained PBL Data"
+        }#>
+      }
     }
-    "127.0.0.4"             = @{
-      zone         = "XBL"
-      description  = "CBL Data"
+	  "Sorbs"                 = @{
+      siteAddress           = "dnsbl.sorbs.net"
+      returnCodes           = @{
+        "127.0.0.2"         = @{
+          zone         = "SBL"
+          description  = "Sorbs SBL Data"
+        }
+        "127.0.0.3"         = @{
+          zone         = "SBL"
+          description  = "Sorbs SBL CSS Data"
+        }
+        "127.0.0.4"         = @{
+          zone         = "XBL"
+          description  = "CBL Data"
+        }
+        "127.0.0.9"         = @{
+          zone         = "SBL"
+          description  = "Sorbs DROP/EDROP Data"
+        }
+        <#"127.0.0.10"      = @{
+          zone         = "PBL"
+          description  = "ISP Maintained PBL Data"
+        }
+        "127.0.0.11"        = @{
+          zone         = "PBL"
+          description  = "Sorbs Maintained PBL Data"
+        }#>
+      }
     }
-    "127.0.0.9"             = @{
-      zone         = "SBL"
-      description  = "Spamhaus DROP/EDROP Data"
+	  "SpamCop"               = @{
+      siteAddress           = "bl.spamcop.net"
+      returnCodes           = @{
+        "127.0.0.2"         = @{
+          zone         = "SBL"
+          description  = "SpamCop SBL Data"
+        }
+        "127.0.0.3"         = @{
+          zone         = "SBL"
+          description  = "SpamCop SBL CSS Data"
+        }
+        "127.0.0.4"         = @{
+          zone         = "XBL"
+          description  = "CBL Data"
+        }
+        "127.0.0.9"         = @{
+          zone         = "SBL"
+          description  = "SpamCop DROP/EDROP Data"
+        }
+        <#"127.0.0.10"      = @{
+          zone         = "PBL"
+          description  = "ISP Maintained PBL Data"
+        }
+        "127.0.0.11"        = @{
+          zone         = "PBL"
+          description  = "SpamCop Maintained PBL Data"
+        }#>
+      }
     }
-    <#"127.0.0.10"            = @{
-      zone         = "PBL"
-      description  = "ISP Maintained PBL Data"
+	  "BarracudaCentral"      = @{
+      siteAddress           = "b.barracudacentral.org"
+      returnCodes           = @{
+        "127.0.0.2"         = @{
+          zone         = "SBL"
+          description  = "BarracudaCentral SBL Data"
+        }
+        "127.0.0.3"         = @{
+          zone         = "SBL"
+          description  = "BarracudaCentral SBL CSS Data"
+        }
+        "127.0.0.4"         = @{
+          zone         = "XBL"
+          description  = "CBL Data"
+        }
+        "127.0.0.9"         = @{
+          zone         = "SBL"
+          description  = "BarracudaCentral DROP/EDROP Data"
+        }
+        <#"127.0.0.10"      = @{
+          zone         = "PBL"
+          description  = "ISP Maintained PBL Data"
+        }
+        "127.0.0.11"        = @{
+          zone         = "PBL"
+          description  = "BarracudaCentral Maintained PBL Data"
+        }#>
+      }
     }
-    "127.0.0.11"            = @{
-      zone         = "PBL"
-      description  = "Spamhaus Maintained PBL Data"
-    }#>
+	  "PskyMe"                = @{
+      siteAddress           = "bad.psky.me"
+      returnCodes           = @{
+        "127.0.0.2"         = @{
+          zone         = "SBL"
+          description  = "PskyMe SBL Data"
+        }
+        "127.0.0.3"         = @{
+          zone         = "SBL"
+          description  = "PskyMe SBL CSS Data"
+        }
+        "127.0.0.4"         = @{
+          zone         = "XBL"
+          description  = "CBL Data"
+        }
+        "127.0.0.9"         = @{
+          zone         = "SBL"
+          description  = "PskyMe DROP/EDROP Data"
+        }
+        <#"127.0.0.10"      = @{
+          zone         = "PBL"
+          description  = "ISP Maintained PBL Data"
+        }
+        "127.0.0.11"        = @{
+          zone         = "PBL"
+          description  = "PskyMe Maintained PBL Data"
+        }#>
+      }
+    }
   }
   #region######################## TLS Settings ###########################
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
@@ -95,7 +245,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     foreach ($message in $messages) {$message}
     write-output "<-End Diagnostic->"
   } ## write-DRMMDiag
-  
+
   function write-DRMMAlert ($message) {
     write-output "<-Start Result->"
     write-output "Alert=$($message)"
@@ -117,11 +267,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to query PSA API via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-Query" "Failed to query PSA API via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -138,11 +285,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to query (filtered) PSA API via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-FilterQuery" "Failed to query (filtered) PSA API via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -152,11 +296,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       PSA-Query $header "GET" "ThresholdInformation" -erroraction stop
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to populate PSA API Utilization via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetThreshold" "Failed to populate PSA API Utilization via API`r`n$($err)"
     }
   }
 
@@ -174,11 +315,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to populate PSA $($entity) Maps via $($Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetMaps" "Failed to populate PSA $($entity) Maps via $($Uri)`r`n$($err)"
     }
   } ## PSA-GetMaps
 
@@ -211,11 +349,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to populate PSA Companies via $($Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetCompanies" "Failed to populate PSA Companies via API`r`n$($err)"
     }
   } ## PSA-GetCompanies API Call
 
@@ -267,14 +402,11 @@ Remove-Variable * -ErrorAction SilentlyContinue
           dattoLastCheckInDateTime         = "$($script:atDevice.dattoLastCheckInDateTime)"
         }
       }
-      return $script:psaDeviceDetails
+      #return $script:psaDeviceDetails
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to populate PSA Devices via $($Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetAssets" "Failed to populate PSA Devices via API`r`n$($err)"
     }
   } ## PSA-GetDevices API Call
 
@@ -373,12 +505,9 @@ Remove-Variable * -ErrorAction SilentlyContinue
     try {
       (Invoke-WebRequest @params -UseBasicParsing -erroraction stop | ConvertFrom-Json).access_token
     } catch {
-      $script:blnFAIL = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to obtain DRMM API Access Token via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $script:blnWARN = $true
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "RMM-ApiAccessToken" "Failed to obtain DRMM API Access Token via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -405,12 +534,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
     try {
       (Invoke-WebRequest @params -UseBasicParsing).Content
     } catch {
-      $script:blnWARN = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to process DRMM API Query via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "RMM-ApiRequest" "Failed to process DRMM API Query via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -426,12 +551,24 @@ Remove-Variable * -ErrorAction SilentlyContinue
     try {
       $postUDF = (RMM-ApiRequest @params -UseBasicParsing)
     } catch {
-      $script:blnWARN = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to populate DRMM Device UDF via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "RMM-PostUDF" "Failed to populate DRMM Device UDF via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
+    }
+  }
+
+  function RMM-GetFilters {
+    $params = @{
+      apiMethod       = "GET"
+      apiUrl          = $script:rmmAPI
+      apiAccessToken  = $script:rmmToken
+      apiRequest      = "/v2/filter/custom-filters"
+      apiRequestBody  = $null
+    }
+    try {
+      $script:drmmFilters = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "RMM-GetFilters" "Failed to populate DRMM Fitlers via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
     }
   }
 
@@ -464,12 +601,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       }
       #return $script:drmmDeviceDetails
     } catch {
-      $script:blnWARN = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to populate DRMM Devices via $($params.apiUrl)$($params.apiRequest)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "RMM-GetDevices" "Failed to populate DRMM Devices via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
     }
   }
 
@@ -484,20 +617,12 @@ Remove-Variable * -ErrorAction SilentlyContinue
     try {
       $script:drmmSites = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
       if (($null -eq $script:drmmSites) -or ($script:drmmSites -eq "")) {
-        $script:blnFAIL = $true
-        $script:diag += "`r`nSpamhaus_Check : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)"
-        $script:diag += "`r`n$($_.Exception)"
-        $script:diag += "`r`n$($_.scriptstacktrace)"
-        $script:diag += "`r`n$($_)"
-        write-output "$($script:diag)`r`n"
+        $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+        logERR 2 "RMM-GetSites" "Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
       }
     } catch {
-      $script:blnFAIL = $true
-      $script:diag += "`r`nSpamhaus_Check : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 2 "RMM-GetSites" "Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
     }
   }
 
@@ -527,13 +652,9 @@ Remove-Variable * -ErrorAction SilentlyContinue
         return $false
       }
     } catch {
-      $script:blnWARN = $true
       $script:blnSITE = $false
-      $script:diag += "`r`nSpamhaus_Check : Failed to update DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "RMM-UpdateSite" "Failed to update DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
       return $false
     }
   }
@@ -559,48 +680,48 @@ Remove-Variable * -ErrorAction SilentlyContinue
     }
   }  ## Convert epoch time to date time
 
-  function Pop-Warnings {
+  function Pop-HashTable {
     param (
       $dest, $customer, $warn
     )
-    #POPULATE AV PRODUCT WARNINGS DATA INTO NESTED HASHTABLE FORMAT FOR LATER USE
+    #POPULATE DATA INTO NESTED HASHTABLE FORMAT FOR LATER USE
     try {
-      if (($warn -ne $null) -and ($customer -ne "")) {
-        if ($dest.containskey($customer)) {
-          $new = [System.Collections.ArrayList]@()
-          $prev = [System.Collections.ArrayList]@()
-          $blnADD = $true
-          $prev = $dest[$customer]
-          $prev = $prev.split("`r`n",[System.StringSplitOptions]::RemoveEmptyEntries)
-          if ($prev -contains $warn) {
-            $blnADD = $false
-          }
-          if ($blnADD) {
-            foreach ($itm in $prev) {
-              $new.add("$($itm)`r`n")
+      #ONLY USE DATA IF NOT NULL / EMPTY
+      if ((($null -ne $warn) -and ($warn -ne "")) -and 
+        (($null -ne $customer) -and ($customer -ne ""))) {
+          #CHECK IF 'customer' KEY ALREADY EXISTS
+          if ($dest.containskey($customer)) {
+            $new = [System.Collections.ArrayList]@()
+            $prev = [System.Collections.ArrayList]@()
+            $blnADD = $true
+            #RETRIEVE PREVIOUS ENTRIES FOR MATCHING 'customer'
+            $prev = $dest[$customer]
+            $prev = $prev.split("`r`n",[System.StringSplitOptions]::RemoveEmptyEntries)
+            #CHECK IF 'warn' DATA MATCHES PREVIOUS ENTRIES
+            if ($prev -contains $warn) {$blnADD = $false}
+            #ADD 'customer' AND 'warn' DATA AS NEW ENTRY
+            if ($blnADD) {
+              #RETAIN ALL PREVIOUS 'customer' DATA AND ADD NEW 'warn' DATA
+              foreach ($itm in $prev) {$new.add("$($itm)`r`n")}
+              $new.add("$($warn)`r`n")
+              #REMOVE AND RE-ADD 'customer' DATA TO 'dest' HASHTABLE
+              $dest.remove($customer)
+              $dest.add($customer, $new)
+              $script:blnWARN = $true
             }
-            $new.add("$($warn)`r`n")
-            $dest.remove($customer)
+          #IF 'customer' KEY DOES NOT ALREADY EXIST
+          } elseif (-not $dest.containskey($customer)) {
+            $new = [System.Collections.ArrayList]@()
+            $new = "$($warn)`r`n"
             $dest.add($customer, $new)
             $script:blnWARN = $true
           }
-        } elseif (-not $dest.containskey($customer)) {
-          $new = [System.Collections.ArrayList]@()
-          $new = "$($warn)`r`n"
-          $dest.add($customer, $new)
-          $script:blnWARN = $true
-        }
       }
     } catch {
-      $warndiag = "Error populating warnings for $($customer)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-output "Error populating warnings for $($customer)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      $script:diag += "$($warndiag)"
-      $warndiag = $null
-      write-output $_.Exception
-      write-output $_.scriptstacktrace
-      write-output $_
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "Pop-HashTable" "Error populating hashtable for $($customer)`r`n$($err)"
     }
-  } ## Pop-Warnings
+  } ## Pop-HashTable
 
   function logERR ($intSTG, $strModule, $strErr) {
     $script:blnWARN = $true
@@ -618,7 +739,14 @@ Remove-Variable * -ErrorAction SilentlyContinue
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - Spamhaus_Check - ($($strModule)) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
       }
-      default {                                                   #'ERRRET'=3+
+      3 {                                                         #'ERRRET'=3
+        $script:blnWARN = $true
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - Spamhaus_Check - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
+        write-output "$($strLineSeparator)`r`n$($(get-date))`t - Spamhaus_Check - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)"
+      }
+      default {                                                   #'ERRRET'=4+
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - Spamhaus_Check - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
@@ -743,19 +871,23 @@ try {
   #ENUMERATE THROUGH DRMM SITES
   foreach ($script:drmmSite in $script:drmmSites.sites) {
     RMM-GetDevices $script:drmmSite.uid $filter.id
+    #ENUMERATE THROUGH DRMM SITE DEVICES
     foreach ($script:drmmDevice in $script:drmmDeviceDetails) {
+      #CHECK EXTERNAL IP OF EACH DRMM DEVICE
       if (($script:drmmDevice.externalIP) -and 
         ($null -ne $script:drmmDevice.externalIP) -and ($script:drmmDevice.externalIP -ne "")) {
-          Pop-Warnings $script:spamCHECK "$($script:drmmSite.name)" "$($script:drmmDevice.externalIP)"
+          #ADD EXTERNAL IP TO 'spamCHECK' HASHTABLE
+          Pop-HashTable $script:spamCHECK "$($script:drmmSite.name)" "$($script:drmmDevice.externalIP)"
       }
     }
   }
 
 } catch {
-  $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-  logERR 2 "BEGIN API" "Spamhaus_Check : Failed to query API via $($params.Uri)`r`n$($err)`r`n$($script:strLineSeparator)"
+  $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+  logERR 2 "BEGIN API" "Spamhaus_Check : Failed to query API via $($params.Uri)`r`n$($err)"
 }
 
+#CHECK THAT A 'BREAKING' ERROR HAS NOT OCCURRED
 if (-not $script:blnBREAK) {
   write-output "`r`n$($strLineSeparator)`r`nThe Following Check(s) Will Be Performed :"
   foreach ($key in $script:spamCHECK.keys) {
@@ -775,52 +907,68 @@ if (-not $script:blnBREAK) {
       $script:outCheck = $null
       try {
         start-sleep -Milliseconds 200
-        write-output "`tChecking : $($extIP.trim()) :`r`n`t`t$($strLineSeparator)"
-        $script:diag += "`r`n`tChecking : $($extIP.trim()) :`r`n`t`t$($strLineSeparator)"
-        $ipParts = $ip.Split('.')
+        #REVERSE THE IP ADDRESS TO CHECK
+        $ipParts = ($extIP.trim()).Split('.')
         [array]::Reverse($ipParts)
         $ipParts = [string]::Join('.', $ipParts)
-        $script:outCheck = [system.net.dns]::gethostentry("$($ipParts).zen.spamhaus.org")
-      } catch {}
-      if ($script:spamMAP["$($script:outCheck.addresslist.ipaddresstostring)"]) {
-        $script:spamdiag = "`tBLOCKED : $($extIP.trim()) :`r`n"
-        $script:spamdiag += "`t`tZone : $($script:spamMAP["$($script:outCheck.addresslist.ipaddresstostring)"].zone)`r`n"
-        $script:spamdiag += "`t`tDescription : $($script:spamMAP["$($script:outCheck.addresslist.ipaddresstostring)"].description)"
-        logERR 3 "SPAMHAUS DIAG" "$($script:spamdiag)`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
-        #SEARCH FOR EXISTING TICKETS
-        $script:psaCompanyID = ($script:drmmSites.sites | where {$_.name -match $key}).autotaskCompanyId
-        $script:psaTickets = PSA-GetTickets $script:psaHeaders $script:psaCompanyID $null "Spamhaus Alert: BLOCKED : $($extIP.trim())"
-        $script:ticketDescription = "Zone : $($script:spamMAP["$($script:outCheck.addresslist.ipaddresstostring)"].zone)`r`n"
-        $script:ticketDescription += "Description : $($script:spamMAP["$($script:outCheck.addresslist.ipaddresstostring)"].description)`r`n"
-        $script:ticketDescription += "$(($script:outCheck | ft | out-string))"
-        logERR 3 "SPAMHAUS DIAG" "$($script:outCheck | ft | out-string)`r`n`t$($strLineSeparator)"
-        if ($script:psaTickets) {
-          write-output "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)"
-          $script:diag += "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n"
-        } elseif (-not ($script:psaTickets)) {
-          write-output "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)"
-          $script:diag += "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n"
-          $newTicket = @{
-            id                   = '0'
-            companyID            = $script:psaCompanyID
-            #configurationItemID  = "$($script:siteAsset.psaID)"
-            queueID              = '8'         #Monitoring Alert
-            ticketType           = '1'         #Standard
-            ticketCategory       = "2"         #Datto RMM Alert
-            status               = '1'         #New
-            priority             = '2'         #Medium
-            DueDateTime          = (get-date).adddays(7)
-            monitorTypeID        = '1'         #Online Status Monitor
-            source               = '8'         #Monitoring Alert
-            issueType            = '18'        #RMM Monitoring
-            subIssueType         = '320'       #Spamhaus Monitor
-            billingCodeID        = '29682804'  #Maintenance
-            title                = "Spamhaus Alert: BLOCKED : $($extIP.trim())"
-            description          = "$($script:ticketDescription)"
+        #RUN THE REVERSE IP LOOKUP
+        foreach ($blocklist in $script:spamMAP.keys) {
+          start-sleep -Milliseconds 200
+          $script:outCheck = $null
+          write-output "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
+          $script:diag += "`r`n`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
+          try {
+            $script:outCheck = [system.net.dns]::gethostentry("$($ipParts).$($script:spamMAP[$blocklist].siteAddress).")
+          } catch {
+            write-output "`tNo Listing for $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).'`r`n`t`t$($strLineSeparator)"
+            #NOT CATCHING ANY ERRORS ATM
           }
-          #$newTicket
-          PSA-CreateTicket $script:psaHeaders $newTicket
+          #IF RETURNED DATA MATCHES KNOWN RETURN CODES in 'spamMAP' HASHTABLE
+          $returnCode = $script:outCheck.addresslist.ipaddresstostring
+          if ($script:spamMAP[$blocklist].returnCodes."$($returnCode)") {
+            $script:spamdiag = "`tBLOCKED : $($extIP.trim()) :`r`n"
+            $script:spamdiag += "`t`tZone : $($script:spamMAP[$blocklist].returnCodes[$returnCode].zone)`r`n"
+            $script:spamdiag += "`t`tDescription : $($script:spamMAP[$blocklist].returnCodes[$returnCode].description)"
+            logERR 3 "SPAMHAUS DIAG" "$($script:spamdiag)`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
+            #SEARCH FOR EXISTING TICKETS
+            $script:psaCompanyID = ($script:drmmSites.sites | where {$_.name -match $key}).autotaskCompanyId
+            $script:psaTickets = PSA-GetTickets $script:psaHeaders $script:psaCompanyID $null "Spamhaus Alert: BLOCKED : $($extIP.trim())"
+            $script:ticketDescription = "Zone : $($script:spamMAP[$blocklist].returnCodes[$returnCode].zone)`r`n"
+            $script:ticketDescription += "Description : $($script:spamMAP[$blocklist].returnCodes[$returnCode].description)`r`n"
+            $script:ticketDescription += "$(($script:outCheck | ft | out-string))"
+            logERR 3 "SPAMHAUS DIAG" "$($script:outCheck | ft | out-string)`r`n`t$($strLineSeparator)"
+            if ($script:psaTickets) {
+              write-output "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)"
+              $script:diag += "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n"
+            } elseif (-not ($script:psaTickets)) {
+              write-output "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)"
+              $script:diag += "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n"
+              $newTicket = @{
+                id                   = '0'
+                companyID            = $script:psaCompanyID
+                #configurationItemID  = "$($script:siteAsset.psaID)"
+                queueID              = '8'         #Monitoring Alert
+                ticketType           = '1'         #Standard
+                ticketCategory       = "2"         #Datto RMM Alert
+                status               = '1'         #New
+                priority             = '2'         #Medium
+                DueDateTime          = (get-date).adddays(7)
+                monitorTypeID        = '1'         #Online Status Monitor
+                source               = '8'         #Monitoring Alert
+                issueType            = '18'        #RMM Monitoring
+                subIssueType         = '320'       #Spamhaus Monitor
+                billingCodeID        = '29682804'  #Maintenance
+                title                = "Spamhaus Alert: BLOCKED : $($extIP.trim())"
+                description          = "$($script:ticketDescription)"
+              }
+              #$newTicket
+              #PSA-CreateTicket $script:psaHeaders $newTicket
+            }
+          }
         }
+      } catch {
+        write-output "No Listing for $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).'"
+        #NOT CATCHING ANY ERRORS ATM
       }
     }
   }
