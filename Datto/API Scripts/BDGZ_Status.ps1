@@ -84,21 +84,20 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
 #region ----- API FUNCTIONS ----
 #region ----- BDGZ FUNCTIONS ----
-  function BDGZ-GetCompanies {
-    param ($customerID)
+  function BDGZ-APIRequest {
+    param ($requestURI, $requestMethod, $requestParams)
     $guid = [guid]::NewGuid()
     $request_data = @{
       jsonrpc     = "2.0"
       id          = "$($guid)"
-      method      = "getCompaniesList"
-      params      = @{}
+      method      = "$($requestMethod)"
+      params      = $requestParams
     }
-    if ($customerID) {$request_data.params.add("parentId", "$($customerID)")}
     #$request_data | convertto-json | out-string
     $params       = @{
       Method      = "POST"
-      ContentType = 'application/json'
-      Uri         = "$($script:bdgzAPI)/network"
+      ContentType = "application/json"
+      Uri         = "$($script:bdgzAPI)/$($requestURI)"
       Body        = "$($request_data | convertto-json | out-string)"
       Headers     = @{
         "Content-Type"  = "application/json"
@@ -107,46 +106,10 @@ Remove-Variable * -ErrorAction SilentlyContinue
     }
     #$params
     try {
+      $page = 1
       $script:bdgzCalls += 1
-      $response = Invoke-RestMethod @params
-      return $response
-    } catch {
-    }
-  }
-
-  function BDGZ-GetEndpoints {
-    param ($customerID)
-    $guid = [guid]::NewGuid()
-    $request_data = @{
-      jsonrpc     = "2.0"
-      id          = "$($guid)"
-      method      = "getEndpointsList"
-      params      = @{
-        page      = 1
-        perPage   = 100
-        options   = @{
-          returnProductOutdated = $true
-        }
-      }
-    }
-    if ($customerID) {$request_data.params.add("parentId", "$($customerID)")}
-    #$request_data | convertto-json | out-string
-    $params       = @{
-      Method      = "POST"
-      ContentType = 'application/json'
-      Uri         = "$($script:bdgzAPI)/network"
-      Body        = "$($request_data | convertto-json | out-string)"
-      Headers     = @{
-        "Content-Type"  = "application/json"
-        "Authorization" = "$($script:bdgzHeader)"
-      }
-    }
-    #$params
-    try {
-      $script:bdgzCalls += 1
-      $response = Invoke-RestMethod @params
-      if ([int]$response.result.pagesCount -gt 1) {
-        $page = 1
+      $response = invoke-restmethod @params
+      if ($response.result | get-member | where {$_.name -eq "pagesCount"}) {
         while ($page -lt [int]$response.result.pagesCount) {
           $page += 1
           $guid = [guid]::NewGuid()
@@ -156,7 +119,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
           $params       = @{
             Method      = "POST"
             ContentType = 'application/json'
-            Uri         = "$($script:bdgzAPI)/network"
+            Uri         = "$($script:bdgzAPI)/$($requestURI)"
             Body        = "$($request_data | convertto-json | out-string)"
             Headers     = @{
               "Content-Type"  = "application/json"
@@ -166,44 +129,57 @@ Remove-Variable * -ErrorAction SilentlyContinue
           #$params
           try {
             $script:bdgzCalls += 1
-            $response += Invoke-RestMethod @params
+            $response += invoke-restmethod @params
           } catch {
+            $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+            logERR 4 "BDGZ-APIRequest" "Failed to query BDGZ API via $($params.Uri)`r`n$($request_data)`r`n$($err)"
           }
         }
       }
       return $response
     } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "BDGZ-APIRequest" "Failed to query BDGZ API via $($params.Uri)`r`n$($request_data)`r`n$($err)"
+    }
+  }
+
+  function BDGZ-GetCompanies {
+    param ($customerID)
+    try {
+      $params = @{}
+      if ($customerID) {$params.add("parentId", "$($customerID)")}
+      BDGZ-APIRequest "network" "getCompaniesList" $params
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "BDGZ-GetCompanies" "Failed to query BDGZ Companies : Customer : $($customerID)`r`n$($err)"
+    }
+  }
+
+  function BDGZ-GetEndpoints {
+    param ($customerID)
+    try {
+      $params = @{
+        perPage  = 100
+        options  = @{
+          returnProductOutdated = $true
+        }
+      }
+      if ($customerID) {$params.add("parentId", "$($customerID)")}
+      BDGZ-APIRequest "network" "getEndpointsList" $params
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "BDGZ-GetEndpoints" "Failed to query BDGZ Endpoints : Customer : $($customerID)`r`n$($err)"
     }
   }
 
   function BDGZ-GetEndpointDetail {
     param ($endpointID)
-    $guid = [guid]::NewGuid()
-    $request_data = @{
-      jsonrpc     = "2.0"
-      id          = "$($guid)"
-      method      = "getManagedEndpointDetails"
-      params      = @{
-        endpointId = "$($endpointID)"
-      }
-    }
-    #$request_data | convertto-json | out-string
-    $params       = @{
-      Method      = "POST"
-      ContentType = 'application/json'
-      Uri         = "$($script:bdgzAPI)/network"
-      Body        = "$($request_data | convertto-json | out-string)"
-      Headers     = @{
-        "Content-Type"  = "application/json"
-        "Authorization" = "$($script:bdgzHeader)"
-      }
-    }
-    #$params
     try {
-      $script:bdgzCalls += 1
-      $response = Invoke-RestMethod @params
-      return $response
+      $params = @{endpointId = "$($endpointID)"}
+      BDGZ-APIRequest "network" "getManagedEndpointDetails" $params
     } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "BDGZ-GetEndpointDetail" "Failed to query BDGZ Endpoint Detail : Endpoint : $($endpointID)`r`n$($err)"
     }
   }
 #endregion ----- BDGZ FUNCTIONS ----
@@ -406,16 +382,13 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Uri         = "$($script:psaAPI)/atservicesrest/v1.0/$($entity)"
       Headers     = $header
     }
-    $script:psaCalls += 1
     try {
+      $script:psaCalls += 1
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to query PSA API via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetCompanies" "Failed to query PSA via API : $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -427,37 +400,32 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Uri         = "$($script:psaAPI)/atservicesrest/v1.0/$($entity)/query?search=$($filter)"
       Headers     = $header
     }
-    $script:psaCalls += 1
     try {
+      $script:psaCalls += 1
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to query (filtered) PSA API via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetCompanies" "Failed to query PSA (filtered) via API : $($params.Uri)`r`n$($err)"
     }
   }
 
   function PSA-GetThreshold {
     param ($header)
     try {
+      $Uri = "$($script:psaAPI)/atservicesrest/v1.0/ThresholdInformation"
       PSA-Query $header "GET" "ThresholdInformation" -erroraction stop
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA API Utilization via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetCompanies" "Failed to populate PSA API Utilization via API : $($Uri)`r`n$($err)"
     }
   }
 
   function PSA-GetMaps {
     param ($header, $dest, $entity)
-    $Uri = "$($script:psaAPI)/$($entity)/atservicesrest/v1.0/query?search=$($script:psaActFilter)"
     try {
+      $Uri = "$($script:psaAPI)/atservicesrest/v1.0/$($entity)/query?search=$($script:psaActFilter)"
       $list = PSA-FilterQuery $header "GET" "$($entity)" "$($psaActFilter)"
       foreach ($item in $list.items) {
         if ($dest.containskey($item.id)) {
@@ -468,11 +436,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA $($entity) Maps via $($Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetCompanies" "Failed to populate PSA $($entity) Maps via API : $($Uri)`r`n$($err)"
     }
   } ## PSA-GetMaps
 
@@ -480,10 +445,11 @@ Remove-Variable * -ErrorAction SilentlyContinue
     param ($header)
     try {
       $script:psaCompanies = @()
+      $Uri = "$($script:psaAPI)/atservicesrest/v1.0/Companies/query?search=$($script:psaActFilter)"
       $script:atCompanies = PSA-FilterQuery $header "GET" "Companies" "$($psaActFilter)"
       $script:sort = ($script:atCompanies.items | Sort-Object -Property companyName)
       foreach ($script:company in $script:sort) {
-        $country = $psaCountries.items | where {($_.id -eq $script:company.countryID)} | select displayName
+        $psaCountry = $psaCountries.items | where {($_.id -eq $script:company.countryID)} | select displayName
         $script:psaCompanies += New-Object -TypeName PSObject -Property @{
           CompanyID       = "$($script:company.id)"
           CompanyName     = "$($script:company.companyName)"
@@ -495,7 +461,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
           city            = "$($script:company.city)"
           state           = "$($script:company.state)"
           postalCode      = "$($script:company.postalCode)"
-          country         = "$($country.displayName)"
+          country         = "$($psaCountry.displayName)"
           phone           = "$($script:company.phone)"
           fax             = "$($script:company.fax)"
           webAddress      = "$($script:company.webAddress)"
@@ -505,11 +471,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA Companies via $($Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetCompanies" "Failed to populate PSA Companies via API : $($Uri)`r`n$($err)"
     }
   } ## PSA-GetCompanies API Call
 
@@ -521,6 +484,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       $deviceFilter += "$($companyID)},"
       $deviceFilter += '{"field":"IsActive","op":"eq","value":true}]}]}'
       #$deviceFilter = "{`"Filter`":[{`"op`":`"and`",`"items`":[{`"field`":`"CompanyID`",`"op`":`"eq`",`"value`":$($companyID)},{`"field`":`"IsActive`",`"op`":`"eq`",`"value`":true}]}]}"
+      $Uri = "$($script:psaAPI)/atservicesrest/v1.0/ConfigurationItems/query?search=$($deviceFilter)"
       $script:atDevices = PSA-FilterQuery $header "GET" "ConfigurationItems" $deviceFilter
       foreach ($script:atDevice in $script:atDevices.items) {
         $script:psaDeviceDetails += New-Object -TypeName PSObject -Property @{
@@ -564,13 +528,10 @@ Remove-Variable * -ErrorAction SilentlyContinue
       return $script:psaDeviceDetails
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA Devices via $($Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "PSA-GetAssets" "Failed to populate PSA Devices via API : $($Uri)`r`n$($err)"
     }
-  } ## PSA-GetDevices API Call
+  } ## PSA-GetAssets API Call
 
   function PSA-GetTickets {
     param ($header, $companyID, $deviceID, $title)
@@ -589,6 +550,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       }
       $ticketFilter += ']}]}'
       #write-output "TICKET FILTER : $($ticketFilter)"
+      $Uri = "$($script:psaAPI)/atservicesrest/v1.0/Tickets/query?search=$($ticketFilter)"
       $script:atTickets = PSA-FilterQuery $header "GET" "Tickets" $ticketFilter
       foreach ($script:atTicket in $script:atTickets.items) {
         $script:psaTicketdetails += New-Object -TypeName PSObject -Property @{
@@ -603,7 +565,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       return $script:psaTicketdetails
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-      logERR 4 "PSA-GetTickets" "Failed to populate PSA Tickets via API : $($ticketFilter)`r`n$($err)"
+      logERR 4 "PSA-GetTickets" "Failed to populate PSA Tickets via API : $($Uri)`r`n$($err)"
     }
   }
 
@@ -616,8 +578,9 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Headers     = $header
     }
     try {
-      $script:psaCalls += 1
-      $list = Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+      $Uri = "$($script:psaAPI)/atservicesrest/v1.0/Tickets/entityInformation/fields"
+      #$list = Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+      $list = PSA-Query $header "GET" "Tickets/entityInformation/fields"
       foreach ($item in $list.fields) {
         if ($dest.containskey($item.name)) {
           continue
@@ -627,7 +590,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       }
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-      logERR 4 "PSA-GetTicketFields" "Failed to obtain create PSA Ticket via $($params.Uri)`r`n$($err)"
+      logERR 4 "PSA-GetTicketFields" "Failed to populate PSA Ticket Fields via API : $($Uri)`r`n$($err)"
     }
   }
 
@@ -645,7 +608,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-      logERR 4 "PSA-CreateTicket" "Failed to obtain create PSA Ticket via $($params.Uri)`r`n$($params.Body)`r`n$($err)"
+      logERR 4 "PSA-CreateTicket" "Failed to create PSA Ticket via API : $($params.Uri)`r`n$($params.Body)`r`n$($err)"
     }
   }
 #endregion ----- AT FUNCTIONS ----
@@ -703,13 +666,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
         }
       }
     } catch {
-      $warndiag = "Error populating warnings for $($customer)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      write-output "Error populating warnings for $($customer)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
-      $script:diag += "$($warndiag)"
-      $warndiag = $null
-      write-output $_.Exception
-      write-output $_.scriptstacktrace
-      write-output $_
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 4 "Pop-Warnings" "Error populating Warnings : $($customer)`r`n$($err)"
     }
   } ## Pop-Warnings
 
