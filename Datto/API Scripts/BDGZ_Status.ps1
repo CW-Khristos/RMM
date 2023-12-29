@@ -615,7 +615,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       "sec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($epochDate))}
       "msec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddMilliSeconds($epochDate))}
     }
-  } ## Get-EpochDate
+  }  ## Get-EpochDate
 
   function Convert-UnixTimeToDateTime($inputUnixTime){
     if ($inputUnixTime -gt 0 ) {
@@ -627,6 +627,14 @@ Remove-Variable * -ErrorAction SilentlyContinue
       return ""
     }
   }  ## Convert epoch time to date time
+
+  function dir-Check () {
+    #CHECK 'PERSISTENT' FOLDERS
+    if (-not (test-path -path "C:\temp")) {new-item -path "C:\temp" -itemtype directory}
+    if (-not (test-path -path "C:\IT")) {new-item -path "C:\IT" -itemtype directory}
+    if (-not (test-path -path "C:\IT\Log")) {new-item -path "C:\IT\Log" -itemtype directory}
+    if (-not (test-path -path "C:\IT\Scripts")) {new-item -path "C:\IT\Scripts" -itemtype directory}
+  }  ## dir-Check
 
   function Pop-Warnings {
     param (
@@ -640,7 +648,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
           $prev = [System.Collections.ArrayList]@()
           $blnADD = $true
           $prev = $dest[$customer]
-          $prev = $prev.split("`r`n",[System.StringSplitOptions]::RemoveEmptyEntries)
+          $prev = $prev.split("`r`n", [System.StringSplitOptions]::RemoveEmptyEntries)
           if ($prev -contains $warn) {
             $blnADD = $false
           }
@@ -664,7 +672,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
       logERR 4 "Pop-Warnings" "Error populating Warnings : $($customer)`r`n$($err)"
     }
-  } ## Pop-Warnings
+  }  ## Pop-Warnings
 
   function logERR ($intSTG, $strModule, $strErr) {
     $script:blnWARN = $true
@@ -709,7 +717,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $secs = [string]($total / 1000)
     $mill = $secs.split(".")[1]
     $secs = $secs.split(".")[0]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
     if ($Minutes -gt 0) {$secs = ($secs - ($Minutes * 60))}
     #AVERAGE
     $average = ($total / ($script:psaCalls + $script:rmmCalls + $script:syncroCalls + $script:bdgzCalls))
@@ -740,15 +748,12 @@ Remove-Variable * -ErrorAction SilentlyContinue
 #------------
 #BEGIN SCRIPT
 clear-host
-$offTimestamp = (get-date).AddDays(-30)
-#Start script execution time calculation
-$ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
-$script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
-if (-not (test-path -path "C:\temp")) {new-item -path "C:\temp" -itemtype directory}
-if (-not (test-path -path "C:\IT")) {new-item -path "C:\IT" -itemtype directory}
-if (-not (test-path -path "C:\IT\Log")) {new-item -path "C:\IT\Log" -itemtype directory}
-if (-not (test-path -path "C:\IT\Scripts")) {new-item -path "C:\IT\Scripts" -itemtype directory}
+dir-Check
+$offTimestamp = (get-date).adddays(-30)
+#Start script execution time calculation
+$ScrptStartTime = (get-date).tostring('dd-MM-yyyy hh:mm:ss')
+$script:sw = [Diagnostics.Stopwatch]::StartNew()
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 #Get the Autotask API Module if not installed
 if (Get-Module -ListAvailable -Name AutotaskAPI) {
@@ -766,7 +771,6 @@ if (Get-Module -ListAvailable -Name AutotaskAPI) {
   }
 }
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
-
 try {
   #QUERY BDGZ API
   logERR 3 "BDGZ API" "QUERYING BDGZ COMPANIES :`r`n`t$($script:strLineSeparator)"
@@ -819,7 +823,7 @@ try {
       }
       #CHECK SYNCRO PSA FOR CUSTOMER
       if ($script:bdgzCompany.name -match "_") {
-        $script:syncroID = $script:bdgzCompany.name.split("_",[System.StringSplitOptions]::RemoveEmptyEntries)[1]
+        $script:syncroID = $script:bdgzCompany.name.split("_", [System.StringSplitOptions]::RemoveEmptyEntries)[1]
         $script:syncroCompany = $script:syncroCustomers.customers | where {$_.id -match $script:syncroID}
       } elseif ($script:bdgzCompany.name -notmatch "_") {
         $script:syncroCompany = $script:syncroCustomers.customers | 
