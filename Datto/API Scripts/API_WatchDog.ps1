@@ -90,8 +90,6 @@
     write-output "<-End Result->"
   } ## write-DRMMAlert
 
-
-
 #region ----- PSA FUNCTIONS ----
   function PSA-Query {
     param ($header, $method, $entity)
@@ -424,7 +422,6 @@
     }
   }
 #endregion ----- RMM FUNCTIONS ----
-
   function Get-EpochDate ($epochDate, $opt) {
     #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
