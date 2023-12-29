@@ -89,7 +89,6 @@
     write-output "Alert=$($message)"
     write-output "<-End Result->"
   } ## write-DRMMAlert
-
 #region ----- PSA FUNCTIONS ----
   function PSA-Query {
     param ($header, $method, $entity)
@@ -207,7 +206,6 @@
     }
   } ## PSA-GetCompanies API Call
 #endregion ----- PSA FUNCTIONS ----
-
 #region ----- RMM FUNCTIONS ----
   function RMM-ApiAccessToken {
     # Convert password to secure string
