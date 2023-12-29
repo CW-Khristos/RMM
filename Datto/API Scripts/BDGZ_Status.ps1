@@ -571,12 +571,6 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
   function PSA-GetTicketFields {
     param ($header, $dest)
-    $params = @{
-      Method      = "GET"
-      ContentType = 'application/json'
-      Uri         = "$($script:psaAPI)/atservicesrest/v1.0/Tickets/entityInformation/fields"
-      Headers     = $header
-    }
     try {
       $Uri = "$($script:psaAPI)/atservicesrest/v1.0/Tickets/entityInformation/fields"
       #$list = Invoke-RestMethod @params -UseBasicParsing -erroraction stop
@@ -615,7 +609,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
 #endregion ----- API FUNCTIONS ----
 
 #region ----- MISC FUNCTIONS ----
-  function Get-EpochDate ($epochDate, $opt) {                     #Convert Epoch Date Timestamps to Local Time
+  function Get-EpochDate ($epochDate, $opt) {
+    #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
       "sec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($epochDate))}
       "msec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddMilliSeconds($epochDate))}
@@ -675,19 +670,22 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
-      1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      1 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - BDGZ_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - BDGZ_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
-      2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      2 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - BDGZ_Status - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - BDGZ_Status - ($($strModule)) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
       }
-      default {                                                   #'ERRRET'=3+
+      #'ERRRET'=3+
+      default {
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - BDGZ_Status - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
@@ -815,7 +813,10 @@ try {
       write-output "`r`n$($script:strLineSeparator)`r`nPROCESSING COMPANY : $($script:bdgzCompany.name)`r`n$($script:strLineSeparator)"
       #CHECK AT PSA FOR CUSTOMER
       $script:psaCompany = $script:psaCompanies | where {$_.CompanyName -match $script:bdgzCompany.name}
-      if ($script:psaCompany) {$script:psaAssets = PSA-GetAssets $script:psaHeaders $script:psaCompany.CompanyID}
+      if ($script:psaCompany) {
+        $script:psaAssets = PSA-GetAssets $script:psaHeaders $script:psaCompany.CompanyID
+        write-output "AT PSA ASSETS COUNT : $($script:psaAssets.count)"
+      }
       #CHECK SYNCRO PSA FOR CUSTOMER
       if ($script:bdgzCompany.name -match "_") {
         $script:syncroID = $script:bdgzCompany.name.split("_",[System.StringSplitOptions]::RemoveEmptyEntries)[1]
@@ -849,13 +850,13 @@ try {
             write-output "`t`t$($warn)"
             #CREATE TICKET
             if ($blnTicket) {
+              #CHECK AT PSA ASSETS
               if ($script:psaAssets.count -gt 0) {
-                write-output "AT PSA ASSETS COUNT : $($script:psaAssets.count)"
                 $script:psaAsset = $script:psaAssets | where {$_.referenceTitle -eq $script:bdgzDetails.result.name}
-                write-output "AT PSA ASSET : $($script:psaAsset | fl | out-string)"
                 #CHECK ASSET TICKETS
                 $script:assetTickets = PSA-GetTickets $script:psaHeaders $script:psaCompany.CompanyID $script:psaAsset.psaID "BDGZ Device Activity Alert: $($script:bdgzDetails.result.name)"
-                $diagAsset = "$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss'))"
+                $diagAsset = "AT PSA ASSET : $(($script:psaAsset | fl | out-string).trim())`r`n"
+                $diagAsset += "$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss'))"
                 $diagAsset += "`r`n`t$($strLineSeparator)`r`n$(($script:psaTicketdetails | fl | out-string).trim())"
                 logERR 3 "ASSET DIAG" "$($diagAsset)`r`n`t$($strLineSeparator)"
                 if ($script:assetTickets) {
@@ -887,6 +888,7 @@ try {
                 }
 
               }
+              #CHECK SYNCRO PSA ASSETS
               if ($script:syncroAssets.assets.count -gt 0) {
                 $script:syncroAsset = $script:syncroAssets.assets | where {$_.name -match $script:bdgzDetails.result.name}
                 if ($script:syncroAsset) {
@@ -932,14 +934,12 @@ try {
   $script:diag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
   write-output "$($script:diag)`r`n"
 }
-
-  write-output "$($strLineSeparator)`r`n"
-
-  #Stop script execution time calculation
-  StopClock
-  logERR 3 "END" "$((get-date).ToString('yyyy-MM-dd hh:mm:ss')) - Completed Execution"
-  #WRITE LOGFILE
-  $null | set-content $script:logPath -force
-  "$($script:diag)" | add-content $script:logPath -force
+write-output "$($strLineSeparator)`r`n"
+#Stop script execution time calculation
+StopClock
+logERR 3 "END" "$((get-date).ToString('yyyy-MM-dd hh:mm:ss')) - Completed Execution"
+#WRITE LOGFILE
+$null | set-content $script:logPath -force
+"$($script:diag)" | add-content $script:logPath -force
 #END SCRIPT
 #------------
