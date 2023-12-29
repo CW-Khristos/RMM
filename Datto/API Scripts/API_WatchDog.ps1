@@ -1,4 +1,4 @@
-#REGION ----- DECLARATIONS ----
+#region ----- DECLARATIONS ----
   #BELOW PARAM() MUST BE COMMENTED OUT FOR USE WITHIN DATTO RMM
   #UNCOMMENT BELOW PARAM() AND RENAME '$env:var' TO '$var' TO UTILIZE IN CLI
   #Param(
@@ -19,11 +19,24 @@
   $script:blnWARN           = $false
   $script:blnSITE           = $false
   $script:strLineSeparator  = "---------"
-  $script:logPath = "C:\IT\Log\API_WatchDog"
-  ######################### TLS Settings ###########################
+  $script:logPath           = "C:\IT\Log\API_WatchDog"
+  #region######################## TLS Settings ###########################
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
-  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
-  ######################### RMM Settings ###########################
+  [System.Net.ServicePointManager]::SecurityProtocol = (
+    [System.Net.SecurityProtocolType]::Tls13 -bor 
+    [System.Net.SecurityProtocolType]::Tls12 -bor 
+    [System.Net.SecurityProtocolType]::Tls11 -bor 
+    [System.Net.SecurityProtocolType]::Tls
+  )
+  #endregion
+  #region######################## Hudu Settings ###########################
+  $script:huduCalls         = 0
+  # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
+  $script:HuduAPIKey        = $env:i_HuduKey
+  # Set the base domain of your Hudu instance without a trailing /
+  $script:HuduBaseDomain    = $env:i_HuduDomain
+  #endregion
+  #region######################## RMM Settings ###########################
   #RMM API CREDS
   $script:rmmKey            = $env:i_rmmKey
   $script:rmmSecret         = $env:i_rmmSecret
@@ -32,7 +45,8 @@
   $script:rmmCalls          = 0
   $script:rmmUDF            = $env:i_rmmUDF
   $script:rmmAPI            = $env:i_rmmAPI
-  ######################### Autotask Settings ###########################
+  #endregion
+  #region######################## Autotask Settings ###########################
   #PSA API DATASETS
   $script:typeMap           = @{
     1 = "Customer"
@@ -60,15 +74,10 @@
   $script:psaAPI            = $env:i_psaAPI
   $script:psaGenFilter      = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
   $script:psaActFilter      = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
-  ######################### Hudu Settings ###########################
-  $script:huduCalls         = 0
-  # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
-  $script:HuduAPIKey        = $env:i_HuduKey
-  # Set the base domain of your Hudu instance without a trailing /
-  $script:HuduBaseDomain    = $env:i_HuduDomain
-#ENDREGION ----- DECLARATIONS ----
+  #endregion
+#endregion ----- DECLARATIONS ----
 
-#REGION ----- FUNCTIONS ----
+#region ----- FUNCTIONS ----
   function write-DRMMDiag ($messages) {
     write-output "<-Start Diagnostic->"
     foreach ($message in $messages) {$message}
@@ -81,23 +90,7 @@
     write-output "<-End Result->"
   } ## write-DRMMAlert
 
-  function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
-    switch ($opt) {
-      "sec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($epochDate))}
-      "msec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddMilliSeconds($epochDate))}
-    }
-  } ## Get-EpochDate
 
-  function Convert-UnixTimeToDateTime($inputUnixTime){
-    if ($inputUnixTime -gt 0 ) {
-      $epoch = Get-Date -Date "1970-01-01 00:00:00Z"
-      $epoch = $epoch.ToUniversalTime()
-      $epoch = $epoch.AddSeconds($inputUnixTime)
-      return $epoch
-    } else {
-      return ""
-    }
-  }  ## Convert epoch time to date time
 
 #region ----- PSA FUNCTIONS ----
   function PSA-Query {
@@ -261,7 +254,7 @@
     }
     $script:rmmCalls += 1
     # Add body to parameters if present
-    if ($apiRequestBody) {$params.Add('Body',$apiRequestBody)}
+    if ($apiRequestBody) {$params.Add('Body', $apiRequestBody)}
     # Make request
     try {
       (Invoke-WebRequest @params -UseBasicParsing).Content
@@ -432,21 +425,51 @@
   }
 #endregion ----- RMM FUNCTIONS ----
 
+  function Get-EpochDate ($epochDate, $opt) {
+    #Convert Epoch Date Timestamps to Local Time
+    switch ($opt) {
+      "sec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($epochDate))}
+      "msec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddMilliSeconds($epochDate))}
+    }
+  } ## Get-EpochDate
+
+  function Convert-UnixTimeToDateTime($inputUnixTime){
+    if ($inputUnixTime -gt 0 ) {
+      $epoch = Get-Date -Date "1970-01-01 00:00:00Z"
+      $epoch = $epoch.ToUniversalTime()
+      $epoch = $epoch.AddSeconds($inputUnixTime)
+      return $epoch
+    } else {
+      return ""
+    }
+  }  ## Convert epoch time to date time
+
+  function dir-Check () {
+    #CHECK 'PERSISTENT' FOLDERS
+    if (-not (test-path -path "C:\temp")) {new-item -path "C:\temp" -itemtype directory}
+    if (-not (test-path -path "C:\IT")) {new-item -path "C:\IT" -itemtype directory}
+    if (-not (test-path -path "C:\IT\Log")) {new-item -path "C:\IT\Log" -itemtype directory}
+    if (-not (test-path -path "C:\IT\Scripts")) {new-item -path "C:\IT\Scripts" -itemtype directory}
+  }  ## dir-Check
+
   function logERR ($intSTG, $strModule, $strErr) {
     $script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
-      1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      1 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
         write-output "$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
-      2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      2 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
         write-output "$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
       }
-      default {                                                   #'ERRRET'=3+
+      #'ERRRET'=3+
+      default {
         $script:diag += "`r`n$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
         write-output "$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
       }
@@ -462,48 +485,46 @@
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
     $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    #TOTAL
     $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
-    $average = ($total / ($script:psaCalls + $script:rmmCalls))
     $secs = [string]($total / 1000)
     $mill = $secs.split(".")[1]
     $secs = $secs.split(".")[0]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
+    if ($Minutes -gt 0) {$secs = ($secs - ($Minutes * 60))}
+    #AVERAGE
+    $average = ($total / ($script:psaCalls + $script:rmmCalls + $script:syncroCalls + $script:bdgzCalls))
     $asecs = [string]($average / 1000)
     $amill = $asecs.split(".")[1]
     $asecs = $asecs.split(".")[0]
-    $amill = $amill.SubString(0,[math]::min(3,$mill.length))
-    #DISPLAY API THRESHOLDS
-    $psa = PSA-GetThreshold $script:psaHeaders
-    write-output "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls)"
-    write-output "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600"
-    write-output "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
-    $script:diag += "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls)`r`n"
-    $script:diag += "API Limits :`r`nPSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600`r`n"
-    $script:diag += "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
-    if ($Minutes -eq 0) {
-      write-output "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds"
-      $script:diag += "Average Execution Time (Per API Call) - $($Minutes) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
-    } elseif ($Minutes -gt 0) {
+    $amill = $amill.SubString(0, [math]::min(3, $mill.length))
+    if ($Minutes -gt 0) {
       $amin = [string]($asecs / 60)
       $amin = $amin.split(".")[0]
-      $amin = $amin.SubString(0,[math]::min(2,$amin.length))
-      write-output "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
-      $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n`r`n"
+      $amin = $amin.SubString(0, [math]::min(2, $amin.length))
+      $asecs = ($asecs - ($amin * 60))
     }
+    #DISPLAY API THRESHOLDS
+    $psa = PSA-GetThreshold $script:psaHeaders
+    write-output "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls) - SYNCRO API : $($script:syncroCalls) - BDGZ API : $($script:bdgzCalls)"
+    write-output "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600 - SYNCRO API (per Minute) : $($script:syncroCalls) / 180 - BDGZ API : $($script:bdgzCalls)"
+    write-output "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
+    write-output "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
+    $script:diag += "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls) - SYNCRO API : $($script:syncroCalls) - BDGZ API : $($script:bdgzCalls)`r`n"
+    $script:diag += "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600 - SYNCRO API (per Minute) : $($script:syncroCalls) / 180 - BDGZ API : $($script:bdgzCalls)`r`n"
+    $script:diag += "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
+    $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n`r`n"
   }
-#ENDREGION ----- FUNCTIONS ----
+#endregion ----- FUNCTIONS ----
 
 #------------
 #BEGIN SCRIPT
 clear-host
-#Start script execution time calculation
-$ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
-$script:sw = [Diagnostics.Stopwatch]::StartNew()
 #CHECK 'PERSISTENT' FOLDERS
-if (-not (test-path -path "C:\temp")) {new-item -path "C:\temp" -itemtype directory}
-if (-not (test-path -path "C:\IT")) {new-item -path "C:\IT" -itemtype directory}
-if (-not (test-path -path "C:\IT\Log")) {new-item -path "C:\IT\Log" -itemtype directory}
-if (-not (test-path -path "C:\IT\Scripts")) {new-item -path "C:\IT\Scripts" -itemtype directory}
+dir-Check
+#Start script execution time calculation
+$ScrptStartTime = (get-date).tostring('dd-MM-yyyy hh:mm:ss')
+$script:sw = [Diagnostics.Stopwatch]::StartNew()
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 #Get the Hudu API Module if not installed
 if (Get-Module -ListAvailable -Name HuduAPI) {
