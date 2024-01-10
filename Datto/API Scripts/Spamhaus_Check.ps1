@@ -265,8 +265,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Uri         = "$($script:psaAPI)/$($entity)"
       Headers     = $header
     }
-    $script:psaCalls += 1
     try {
+      $script:psaCalls += 1
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $script:blnWARN = $true
@@ -283,8 +283,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Uri         = "$($script:psaAPI)/$($entity)/query?search=$($filter)"
       Headers     = $header
     }
-    $script:psaCalls += 1
     try {
+      $script:psaCalls += 1
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $script:blnWARN = $true
@@ -302,8 +302,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Headers     = $header
       Body        = $body
     }
-    $script:psaCalls += 1
     try {
+      $script:psaCalls += 1
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
@@ -324,7 +324,6 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
   function PSA-GetMaps {
     param ($header, $dest, $entity)
-    $Uri = "$($script:psaAPI)/$($entity)/query?search=$($script:psaActFilter)"
     try {
       $list = PSA-FilterQuery $header "GET" "$($entity)" "$($psaActFilter)"
       foreach ($item in $list.items) {
@@ -521,9 +520,9 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Body        = 'grant_type=password&username={0}&password={1}' -f $script:rmmKey, $script:rmmSecret
       Credential  = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList ('public-client', $securePassword)
     }
-    $script:rmmCalls += 1
     # Request access token
     try {
+      $script:rmmCalls += 1
       (Invoke-WebRequest @params -UseBasicParsing -erroraction stop | ConvertFrom-Json).access_token
     } catch {
       $script:blnWARN = $true
@@ -546,11 +545,11 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Uri           = '{0}/api{1}' -f $script:rmmAPI, $apiRequest
       Headers       = @{'Authorization'	= 'Bearer {0}' -f $apiAccessToken}
     }
-    $script:rmmCalls += 1
     # Add body to parameters if present
     if ($apiRequestBody) {$params.Add('Body', $apiRequestBody)}
     # Make request
     try {
+      $script:rmmCalls += 1
       (Invoke-WebRequest @params -UseBasicParsing).Content
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
