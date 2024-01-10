@@ -834,7 +834,7 @@ try {
   logERR 3 "AT API" "$($strLineSeparator)`r`n`tCLASS MAP :"
   PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
   $script:classMap
-  write-output "`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
+  Write-Output "`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
   $script:diag += "`r`n`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)`r`n"
   logERR 3 "AT API" "$($strLineSeparator)`r`n`tCATEGORY MAP :"
   PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
@@ -915,7 +915,7 @@ if (-not $script:blnBREAK) {
         foreach ($blocklist in $script:spamMAP.keys) {
           start-sleep -Milliseconds 200
           $script:outCheck = $null
-          write-output "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
+          logERR 3 "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
           $script:diag += "`r`n`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
           try {
             $script:outCheck = [system.net.dns]::gethostentry("$($ipParts).$($script:spamMAP[$blocklist].siteAddress).")
