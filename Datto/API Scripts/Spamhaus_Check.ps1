@@ -594,12 +594,14 @@ Remove-Variable * -ErrorAction SilentlyContinue
   }
 
   function RMM-GetDevices {
-    param ([string]$siteUID)
+    param ([string]$siteUID, $filterID)
+    if ($siteUID) {$apiRequest = "/v2/site/$($siteUID)/devices"}
+    if ($filterID){$apiRequest = "/v2/account/devices?filterId=$($filterID)"}
     $params = @{
       apiMethod       = "GET"
       apiUrl          = $script:rmmAPI
       ApiAccessToken  = $script:rmmToken
-      apiRequest      = "/v2/site/$($siteUID)/devices"
+      apiRequest      = $apiRequest
       apiRequestBody  = $null
     }
     try {
@@ -607,6 +609,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       $script:rmmDevices = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
       foreach ($script:device in $script:rmmDevices.devices) {
         $script:drmmDeviceDetails += New-Object -TypeName PSObject -Property @{
+          SiteUID         = $script:device.siteUid
           DeviceUID        = $script:device.uid
           Hostname         = $script:device.hostname
           Description      = $script:device.description
@@ -893,7 +896,7 @@ try {
   logERR 3 "DRMM API" "QUERY DRMM DONE`r`n$($strLineSeparator)`r`n"
 
   #ENUMERATE THROUGH DRMM SITES
-  foreach ($script:drmmSite in $script:drmmSites.sites) {
+  #foreach ($script:drmmSite in $script:drmmSites.sites) {
     RMM-GetDevices $script:drmmSite.uid $filter.id
     #ENUMERATE THROUGH DRMM SITE DEVICES
     foreach ($script:drmmDevice in $script:drmmDeviceDetails) {
@@ -901,10 +904,11 @@ try {
       if (($script:drmmDevice.externalIP) -and 
         ($null -ne $script:drmmDevice.externalIP) -and ($script:drmmDevice.externalIP -ne "")) {
           #ADD EXTERNAL IP TO 'spamCHECK' HASHTABLE
+          $script:drmmSite = $script:drmmSites.sites | where {$_.uid -eq $script:device.siteUid}
           Pop-HashTable $script:spamCHECK "$($script:drmmSite.name)" "$($script:drmmDevice.externalIP)"
       }
     }
-  }
+  #}
 
 } catch {
   $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
