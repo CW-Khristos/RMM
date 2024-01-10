@@ -544,9 +544,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       Method        = $apiMethod
       ContentType   = 'application/json'
       Uri           = '{0}/api{1}' -f $script:rmmAPI, $apiRequest
-      Headers       = @{
-        'Authorization'	= 'Bearer {0}' -f $apiAccessToken
-      }
+      Headers       = @{'Authorization'	= 'Bearer {0}' -f $apiAccessToken}
     }
     $script:rmmCalls += 1
     # Add body to parameters if present
@@ -920,9 +918,7 @@ if (-not $script:blnBREAK) {
   write-output "`r`n$($strLineSeparator)`r`nThe Following Check(s) Will Be Performed :"
   foreach ($key in $script:spamCHECK.keys) {
     write-output "`t$($strLineSeparator)`r`n`t$($strLineSeparator)`r`n`t$(($key).trim())`r`n`t`t$($strLineSeparator)"
-    foreach ($check in $script:spamCHECK[$key]) {
-      write-output "`t`t$($check.trim())`r`n`t`t$($strLineSeparator)"
-    }
+    foreach ($check in $script:spamCHECK[$key]) {write-output "`t`t$($check.trim())`r`n`t`t$($strLineSeparator)"}
   }
   write-output "$($strLineSeparator)`r`n"
 
@@ -932,8 +928,8 @@ if (-not $script:blnBREAK) {
     start-sleep -Milliseconds 200
     logERR 3 "SPAMHAUS DIAG" "$($strLineSeparator)`r`n`t$($strLineSeparator)`r`n`t$(($key).trim())`r`n`t`t$($strLineSeparator)"
     foreach ($extIP in $script:spamCHECK[$key]) {
-      $script:outCheck = $null
       try {
+        $script:outCheck = $null
         start-sleep -Milliseconds 200
         #REVERSE THE IP ADDRESS TO CHECK
         $ipParts = ($extIP.trim()).Split('.')
@@ -941,11 +937,11 @@ if (-not $script:blnBREAK) {
         $ipParts = [string]::Join('.', $ipParts)
         #RUN THE REVERSE IP LOOKUP
         foreach ($blocklist in $script:spamMAP.keys) {
-          start-sleep -Milliseconds 200
-          $script:outCheck = $null
-          logERR 3 "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
-          $script:diag += "`r`n`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
           try {
+            $script:outCheck = $null
+            start-sleep -Milliseconds 200
+            logERR 3 "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
+            $script:diag += "`r`n`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
             $script:outCheck = [system.net.dns]::gethostentry("$($ipParts).$($script:spamMAP[$blocklist].siteAddress).")
           } catch {
             write-output "`tNo Listing for $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).'`r`n`t`t$($strLineSeparator)"
