@@ -884,7 +884,7 @@ try {
   #QUERY DRMM API
   $script:rmmToken = RMM-ApiAccessToken
   RMM-GetFilters
-  $filter = $script:drmmFilters.filters | where {$_.name -eq "Site Group: Spamhaus Checks"}
+  $filter = $script:drmmFilters.filters | where {$_.name -eq "Global: Spamhaus Checks"}
   logERR 3 "DRMM API" "QUERYING DRMM API :`r`n`t$($strLineSeparator)"
   logERR 3 "DRMM API" "RETRIEVING DRMM SITES :`r`n`t$($strLineSeparator)"
   RMM-GetSites
