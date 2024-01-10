@@ -236,7 +236,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
   }
   #PSA API VARS
   $script:psaCalls          = 0
-  $script:psaAPI            = $env:ATAPIBase
+  $script:psaAPI            = "$($env:ATAPIBase)/atservicesrest/v1.0"
   $script:psaGenFilter      = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
   $script:psaActFilter      = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
   #endregion
