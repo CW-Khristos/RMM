@@ -966,8 +966,8 @@ if (-not $script:blnBREAK) {
                 title                = "Spamhaus Alert: BLOCKED : $($extIP.trim())"
                 description          = "$($script:ticketDescription)"
               }
-              #$newTicket
-              #PSA-CreateTicket $script:psaHeaders $newTicket
+              $newTicket
+              PSA-CreateTicket $script:psaHeaders $newTicket
             }
           }
         }
