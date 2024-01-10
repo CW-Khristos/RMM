@@ -897,7 +897,7 @@ try {
 
   #ENUMERATE THROUGH DRMM SITES
   #foreach ($script:drmmSite in $script:drmmSites.sites) {
-    RMM-GetDevices $script:drmmSite.uid $filter.id
+    RMM-GetDevices $null $filter.id
     #ENUMERATE THROUGH DRMM SITE DEVICES
     foreach ($script:drmmDevice in $script:drmmDeviceDetails) {
       #CHECK EXTERNAL IP OF EACH DRMM DEVICE
