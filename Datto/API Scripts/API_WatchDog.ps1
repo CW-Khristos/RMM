@@ -15,6 +15,7 @@
   #  [Parameter(Mandatory=$true)]$i_HuduDomain
   #)
   $script:diag              = $null
+  $script:finish            = $null
   $script:blnFAIL           = $false
   $script:blnWARN           = $false
   $script:blnSITE           = $false
@@ -59,6 +60,9 @@
   }
   $script:classMap          = @{}
   $script:categoryMap       = @{}
+  $script:psaSkip           = @(
+    "Cancelation", "Dead", "Lead", "Partner", "Prospect", "Vendor"
+  )
   #PSA API CREDS
   $script:psaUser           = $env:i_psaUser
   $script:psaKey            = $env:i_psaKey
@@ -102,12 +106,8 @@
     try {
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
-      $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to query PSA API via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "PSA-Query" "API_WatchDog : Failed to query PSA API via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -123,12 +123,26 @@
     try {
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
-      $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to query (filtered) PSA API via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "PSA-FilterQuery" "API_WatchDog : Failed to query (filtered) PSA API via $($params.Uri)`r`n$($err)"
+    }
+  }
+
+  function PSA-Put {
+    param ($header, $method, $entity, $body)
+    $params = @{
+      Method      = "$($method)"
+      ContentType = 'application/json'
+      Uri         = "$($script:psaAPI)/$($entity)"
+      Headers     = $header
+      Body        = $body
+    }
+    $script:psaCalls += 1
+    try {
+      Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "PSA-Put" "API_WatchDog : Failed to query PSA API via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -137,12 +151,8 @@
     try {
       PSA-Query $header "GET" "ThresholdInformation" -erroraction stop
     } catch {
-      $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA API Utilization via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "PSA-GetThreshold" "API_WatchDog : Failed to populate PSA API Utilization via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -150,7 +160,7 @@
     param ($header, $dest, $entity)
     $Uri = "$($script:psaAPI)/$($entity)/query?search=$($script:psaActFilter)"
     try {
-      $list = PSA-FilterQuery $header "GET" "$($entity)" "$($psaActFilter)"
+      $list = PSA-FilterQuery $header "GET" "$($entity)" "$($script:psaActFilter)"
       foreach ($item in $list.items) {
         if ($dest.containskey($item.id)) {
           continue
@@ -160,11 +170,8 @@
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA $($entity) Maps via $($Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "PSA-GetMaps" "API_WatchDog : Failed to populate PSA $($entity) Maps via $($Uri)`r`n$($err)"
     }
   } ## PSA-GetMaps
 
@@ -173,7 +180,7 @@
     $script:CompanyDetails = @()
     $Uri = "$($script:psaAPI)/Companies/query?search=$($script:psaActFilter)"
     try {
-      $CompanyList = PSA-FilterQuery $header "GET" "Companies" "$($psaActFilter)"
+      $CompanyList = PSA-FilterQuery $header "GET" "Companies" "$($script:psaActFilter)"
       $sort = ($CompanyList.items | Sort-Object -Property companyName)
       foreach ($company in $sort) {
         $country = $countries.items | where {($_.id -eq $company.countryID)} | select displayName
@@ -198,11 +205,8 @@
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate PSA Companies via $($Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "PSA-GetCompanies" "`r`nAPI_WatchDog : Failed to populate PSA Companies via $($Uri)`r`n$($err)"
     }
   } ## PSA-GetCompanies API Call
 #endregion ----- PSA FUNCTIONS ----
@@ -224,11 +228,8 @@
       (Invoke-WebRequest @params -UseBasicParsing -erroraction stop | ConvertFrom-Json).access_token
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to obtain DRMM API Access Token via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "RMM-ApiAccessToken" "API_WatchDog : Failed to obtain DRMM API Access Token via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -256,11 +257,8 @@
       (Invoke-WebRequest @params -UseBasicParsing).Content
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to process DRMM API Query via $($params.Uri)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "RMM-ApiRequest" "API_WatchDog : Failed to process DRMM API Query via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -280,11 +278,8 @@
       $postUDF = (RMM-ApiRequest @params -UseBasicParsing)
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate DRMM Device UDF via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "RMM-PostUDF" "API_WatchDog : Failed to populate DRMM Device UDF via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
     }
   }
 
@@ -311,11 +306,8 @@
       }
     } catch {
       $script:blnWARN = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate DRMM Devices via $($params.apiUrl)$($params.apiRequest)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "RMM-GetDevices" "API_WatchDog : Failed to populate DRMM Devices via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
     }
   }
 
@@ -331,19 +323,13 @@
       $script:sitesList = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
       if (($null -eq $script:sitesList) -or ($script:sitesList -eq "")) {
         $script:blnFAIL = $true
-        $script:diag += "`r`nAPI_WatchDog : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)"
-        $script:diag += "`r`n$($_.Exception)"
-        $script:diag += "`r`n$($_.scriptstacktrace)"
-        $script:diag += "`r`n$($_)"
-        write-output "$($script:diag)`r`n"
+        $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+        logERR 3 "API_WatchDog : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
       }
     } catch {
       $script:blnFAIL = $true
-      $script:diag += "`r`nAPI_WatchDog : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "RMM-GetSites" "API_WatchDog : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
     }
   }
 
@@ -376,11 +362,8 @@
       $script:blnWARN = $true
       $script:blnFAIL = $true
       $script:blnSITE = $false
-      $script:diag += "`r`nAPI_WatchDog : Failed to update DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "RMM-UpdateSite" "API_WatchDog : Failed to update DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
     }
   }
 
@@ -412,11 +395,8 @@
       $script:blnWARN = $true
       $script:blnFAIL = $true
       $script:blnSITE = $false
-      $script:diag += "`r`nAPI_WatchDog : Failed to create New DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)"
-      $script:diag += "`r`n$($_.Exception)"
-      $script:diag += "`r`n$($_.scriptstacktrace)"
-      $script:diag += "`r`n$($_)"
-      write-output "$($script:diag)`r`n"
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "RMM-NewSite" "API_WatchDog : Failed to create New DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
     }
   }
 #endregion ----- RMM FUNCTIONS ----
@@ -448,25 +428,44 @@
   }  ## dir-Check
 
   function logERR ($intSTG, $strModule, $strErr) {
-    $script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
       #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
       1 {
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-output "$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
+        write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
       #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
       2 {
         $script:blnBREAK = $true
-        $script:diag += "`r`n$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
-        write-output "$($(get-date))`t - API_WatchDog - ($($strModule))`r`n$($strErr), END SCRIPT`r`n`r`n"
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - ($($strModule)) :"
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
+        write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - ($($strModule)) :"
+        write-output "$($script:strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
       }
-      #'ERRRET'=3+
+      #'ERRRET'=3 - ERROR / WARNING
+      3 {
+        $script:blnWARN = $true
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n`t$($strErr)"
+        write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
+        write-output "$($sscript:trLineSeparator)`r`n`t$($strErr)"
+      }
+      #'ERRRET'=4 - INFORMATIONAL
+      4 {
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n`t$($strErr)"
+        write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
+        write-output "$($script:strLineSeparator)`r`n`t$($strErr)"
+      }
+      #'ERRRET'=5+ - DEBUG
       default {
-        $script:diag += "`r`n$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
-        write-output "$($(get-date))`t - API_WatchDog - $($strModule) : $($strErr)"
+        $script:blnWARN = $false
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
+        $script:diag += "`r`n$($script:strLineSeparator)`r`n`t$($strErr)"
+        write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
+        write-output "$($script:strLineSeparator)`r`n`t$($strErr)"
       }
     }
   }
@@ -479,7 +478,7 @@
     $Minutes = $sw.Elapsed.Minutes
     $Seconds = $sw.Elapsed.Seconds
     $Milliseconds = $sw.Elapsed.Milliseconds
-    $ScriptStopTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
+    $script:finish = (get-date).tostring('yyyy-MM-dd hh:mm:ss')
     #TOTAL
     $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
     $secs = [string]($total / 1000)
@@ -502,11 +501,11 @@
     #DISPLAY API THRESHOLDS
     $psa = PSA-GetThreshold $script:psaHeaders
     write-output "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls) - SYNCRO API : $($script:syncroCalls) - BDGZ API : $($script:bdgzCalls)"
-    write-output "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600 - SYNCRO API (per Minute) : $($script:syncroCalls) / 180 - BDGZ API : $($script:bdgzCalls)"
-    write-output "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
+    write-output "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600 - SYNCRO API (per Minute) : $($script:syncroCalls) / 180 - BDGZ API : $($script:bdgzCalls)`r`n"
+    write-output "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds"
     write-output "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n"
     $script:diag += "`r`nAPI Calls :`r`nPSA API : $($script:psaCalls) - RMM API : $($script:rmmCalls) - SYNCRO API : $($script:syncroCalls) - BDGZ API : $($script:bdgzCalls)`r`n"
-    $script:diag += "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600 - SYNCRO API (per Minute) : $($script:syncroCalls) / 180 - BDGZ API : $($script:bdgzCalls)`r`n"
+    $script:diag += "API Limits - PSA API (per Hour) : $($psa.currentTimeframeRequestCount) / $($psa.externalRequestThreshold) - RMM API (per Minute) : $($script:rmmCalls) / 600 - SYNCRO API (per Minute) : $($script:syncroCalls) / 180 - BDGZ API : $($script:bdgzCalls)`r`n`r`n"
     $script:diag += "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
     $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n`r`n"
   }
@@ -556,189 +555,278 @@ Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
 New-HuduAPIKey $script:HuduAPIKey
 New-HuduBaseUrl $script:HuduBaseDomain
 #QUERY PSA API
-$countries = PSA-FilterQuery $script:psaHeaders "GET" "Countries" $psaGenFilter
-write-output "------------------------------"
-write-output "`tCLASS MAP :"
+$countries = PSA-FilterQuery $script:psaHeaders "GET" "Countries" $script:psaGenFilter
+logERR 4 "QUERY PSA API" "Classification Map`r`n`t$($script:strLineSeparator)"
 PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
-$script:classMap
-write-output "------------------------------"
-write-output "------------------------------"
-write-output "`tCATEGORY MAP :"
+write-output "$(($script:classMap | out-string).trim())`r`n`t$($script:strLineSeparator)`r`n`tDone`r`n$($script:strLineSeparator)"
+$script:diag += "$(($script:classMap | out-string).trim())`r`n`t$($script:strLineSeparator)`r`n`tDone`r`n$($script:strLineSeparator)`r`n"
+logERR 4 "QUERY PSA API" "Company Category Map`r`n`t$($script:strLineSeparator)"
 PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
-$script:categoryMap
-write-output "------------------------------"
+write-output "$(($script:categoryMap | out-string).trim())`r`n`t$($script:strLineSeparator)`r`n`tDone`r`n$($script:strLineSeparator)"
+$script:diag += "$(($script:categoryMap | out-string).trim())`r`n`t$($script:strLineSeparator)`r`n`tDone`r`n$($script:strLineSeparator)`r`n"
+logERR 4 "QUERY PSA API" "PSA Opportunity Fields`r`n`t$($script:strLineSeparator)"
+$script:psaOpFields = PSA-Query $script:psaHeaders "GET" "Opportunities/entityInformation/fields"
+#$script:psaOpFields
+$script:OpStages = $script:psaOpFields.fields | where {$_.name -eq 'stage'}
+$script:OpStatuses = $script:psaOpFields.fields | where {$_.name -eq 'status'}
+write-output "`tStages :`r`n`t$($script:strLineSeparator)`r`n"
+write-output "$(($script:OpStages.picklistValues | select Value, Label | out-string).trim())`r`n`t$($script:strLineSeparator)"
+$script:diag += "`tStages :`r`n`t$($script:strLineSeparator)`r`n"
+$script:diag += "$(($script:OpStages.picklistValues | select Value, Label | out-string).trim())`r`n`t$($script:strLineSeparator)`r`n"
+write-output "`tStatuses :`r`n`t$($script:strLineSeparator)`r`n"
+write-output "$(($script:OpStatuses.picklistValues | select Value, Label | out-string).trim())`r`n`t$($script:strLineSeparator)"
+$script:diag += "`tStatuses :`r`n`t$($script:strLineSeparator)`r`n"
+$script:diag += "$(($script:OpStatuses.picklistValues | select Value, Label | out-string).trim())`r`n`t$($script:strLineSeparator)`r`n"
+write-output "`tDone`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)"
+$script:diag += "`tDone`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)`r`n"
+logERR 4 "QUERY PSA API" "PSA Opportunities`r`n`t$($script:strLineSeparator)"
+$script:psaAllOpps = PSA-FilterQuery $script:psaHeaders "GET" "Opportunities" $psaGenFilter
+write-output "`tDone`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)"
+$script:diag += "`tDone`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)`r`n"
+logERR 4 "QUERY PSA API" "PSA Companies`r`n`t$($script:strLineSeparator)"
 PSA-GetCompanies $script:psaHeaders
+write-output "`tDone`r`n$($script:strLineSeparator)"
+$script:diag += "`tDone`r`n$($script:strLineSeparator)`r`n"
 #QUERY RMM API
+logERR 4 "QUERY RMM API" "RMM Sites`r`n$($script:strLineSeparator)"
 $script:rmmToken = RMM-ApiAccessToken
 RMM-GetSites
+write-output "`tDone`r`n$($script:strLineSeparator)`r`n"
+$script:diag += "`tDone`r`n$($script:strLineSeparator)`r`n`r`n"
 #OUTPUT
+$date = get-date
 if (-not $script:blnFAIL) {
-  $date = get-date
-  write-output "`r`n$($script:strLineSeparator)"
-  write-output "COMPANIES :"
-  write-output "$($script:strLineSeparator)"
-  $script:diag += "`r`n`r`n$($script:strLineSeparator)`r`n"
-  $script:diag += "COMPANIES :`r`n"
-  $script:diag += "$($script:strLineSeparator)`r`n"
+  logERR 4 "POCESSING" "PROCESSING COMPANIES :`r`n$($script:strLineSeparator)"
   foreach ($company in $script:CompanyDetails) {
-    write-output "`r`n$($script:strLineSeparator)"
+    $blnUpdate = $false
+    write-output "$($script:strLineSeparator)"
     write-output "COMPANY : $($company.CompanyName)"
     write-output "ID : $($company.CompanyID)"
     write-output "TYPE : $($script:typeMap[[int]$($company.CompanyType)])"
     write-output "CATEGORY : $($script:categoryMap[[int]$($company.CompanyCategory)])"
     write-output "CLASSIFICATION : $($script:classMap[[int]$($company.CompanyClass)])"
     write-output "$($script:strLineSeparator)"
-    $script:diag += "`r`n$($script:strLineSeparator)`r`n"
+    $script:diag += "$($script:strLineSeparator)`r`n"
     $script:diag += "ID : $($company.CompanyID)`r`n"
     $script:diag += "TYPE : $($script:typeMap[[int]$($company.CompanyType)])`r`n"
     $script:diag += "COMPANY : $($company.CompanyName)`r`n"
     $script:diag += "CATEGORY : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`n"
     $script:diag += "CLASSIFICATION : $($script:classMap[[int]$($company.CompanyClass)])`r`n"
     $script:diag += "$($script:strLineSeparator)`r`n"
-    if (($($script:typeMap[[int]$($company.CompanyType)]) -ne "Dead") -and 
-      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Vendor") -and
-      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Partner") -and
-      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Prospect") -and
-      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Lead") -and 
-      ($($script:typeMap[[int]$($company.CompanyType)]) -ne "Cancelation")) {
-        #CHECK FOR COMPANY IN DRMM SITES
-        $rmmSite = $script:sitesList.sites | where-object {$_.name -eq "$($company.CompanyName)"}
-        write-output "$($rmmSite)"
-        write-output "$($script:strLineSeparator)"
-        $script:diag += "$($rmmSite)`r`n"
-        $script:diag += "$($script:strLineSeparator)`r`n"
-        #CREATE SITE IN DRMM
-        if (($null -eq $rmmSite) -or ($rmmSite -eq "")) {
-          try {
-            $script:rmmSites += 1
-            $script:blnSITE = $true
-            $script:diag += "CREATE SITE : $($company.CompanyName)`r`n"
-            $params = @{
-              id                  = $company.CompanyID
-              name                = $company.CompanyName
-              description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
-              notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
-              onDemand            = "false"
-              installSplashtop    = "true"
+    if ($script:psaSkip -contains "$($script:typeMap[[int]$($company.CompanyType)])") {
+      write-output "Skipping : Not Managed`r`n$($script:strLineSeparator)`r`n"
+      $script:diag += "Skipping : Not Managed`r`n$($script:strLineSeparator)`r`n`r`n"
+    } elseif ($script:psaSkip -notcontains "$($script:typeMap[[int]$($company.CompanyType)])") {
+      #GET COMPLETE PSA COMPANY DETAILS
+      $script:fullCompany = PSA-Query $script:psaHeaders "GET" "Companies/$($company.companyID)"
+      #COLLECT PSA COMPANY OPPORTUNITIES VIA NAMING STANDARD : 'Managed Services'
+      $script:psaOpps = $script:psaAllOpps.items | where {(($_.companyID -eq $company.CompanyID) -and 
+        (($_.title -match "Managed Services") -or ($_.title -match "Risk Assessment") -or ($_.title -match "Assessment MSA")))}
+      $oppStage = ($script:OpStages.picklistValues | where {$_.value -eq $script:psaOpps.stage}).label
+      $oppStatus = ($script:OpStatuses.picklistValues | where {$_.value -eq $script:psaOpps.status}).label
+      #CHECK PSA OPPORTUNITY PROGRESSION VIA STAUTS / STAGE
+      switch ($oppStatus) {
+        "Active" {
+          switch ($oppStage) {
+            {(($_ -eq "New Lead") -or ($_ -eq "Stage 1 First Contact"))} {
+              if (($script:fullCompany.item.companyType -ne 3) -or 
+                ($script:fullCompany.item.classification -ne 7) -or 
+                ($script:fullCompany.item.companyCategoryID -ne 1)) {
+                  write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                  $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                  $script:fullCompany.item.companyType = 3            #Company Type 'Prospect'
+                  $script:fullCompany.item.classification = 7         #Company Classification 'Target'
+                  $script:fullCompany.item.companyCategoryID = 1      #Company Category 'Standard'
+                  $blnUpdate = $true
+              }
             }
-            $postSite = (RMM-NewSite @params -UseBasicParsing)
-            write-output "$($postSite)`r`n$($script:strLineSeparator)"
-            $script:diag += "$($postSite)`r`n$($script:strLineSeparator)`r`n"
-            if ($postSite) {
-              write-output "RMM CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
-              $script:diag += "RMM CREATE : $($company.CompanyName) : SUCCESS`r`n"
-            } elseif (-not $postSite) {
-              $script:blnWARN = $true
-              $script:blnFAIL = $true
-              write-output "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-              $script:diag += "RMM CREATE : $($company.CompanyName) : FAILED`r`n"
+            {(($_ -eq "Stage 2 Qualification") -or ($_ -eq "Stage 3 Proposal Sent") -or 
+              ($_ -eq "Stage 4 Contract Sent") -or ($_ -eq "On Hold"))} {
+                if (($script:fullCompany.item.companyType -ne 1) -or 
+                  ($script:fullCompany.item.classification -ne 202) -or 
+                  ($script:fullCompany.item.companyCategoryID -ne 101)) {
+                    write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                    $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                    $script:fullCompany.item.companyType = 1            #Company Type 'Customer'
+                    $script:fullCompany.item.classification = 202       #Company Classification 'Assessment'
+                    $script:fullCompany.item.companyCategoryID = 101    #Company Category 'Assessment'
+                    $blnUpdate = $true
+                }
             }
-          } catch {
+          }
+        }
+        "Closed" {
+          switch ($oppStage) {
+            {$_ -eq "Stage 5 Closed - Won"} {
+              if (($script:fullCompany.item.companyType -ne 1) -or 
+                ($script:fullCompany.item.classification -ne 18) -or 
+                ($script:fullCompany.item.companyCategoryID -ne 100)) {
+                  write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                  $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                  $script:fullCompany.item.companyType = 1            #Company Type 'Customer'
+                  $script:fullCompany.item.classification = 18        #Company Classification 'Managed Services'
+                  $script:fullCompany.item.companyCategoryID = 100    #Company Category 'Fully Managed'
+                  $blnUpdate = $true
+              }
+            }
+          }
+        }
+        "Lost" {
+          switch ($oppStage) {
+            {$_ -eq "Stage 5 Closed - Lost"} {
+              if (($script:fullCompany.item.companyType -ne 1) -or 
+                ($script:fullCompany.item.classification -ne 18) -or 
+                ($script:fullCompany.item.companyCategoryID -ne 100)) {
+                  write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                  $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                  $script:fullCompany.item.companyType = 4            #Company Type 'Dead'
+                  $script:fullCompany.item.classification = 204       #Company Classification 'Lost'
+                  $script:fullCompany.item.companyCategoryID = 106    #Company Category 'Lost'
+                  $blnUpdate = $true
+              }
+            }
+          }
+        }
+      }
+      #UPDATE COMPANY - SHOULD BASE SETS OF ACTIONS DEPENDENT ON CURRENT COMPANY CLASSIFICATION
+      if ($blnUpdate) {
+        write-output "OPPORTUNITY DIAG : UPDATING : $($company.CompanyName)`r`n$($script:fullCompany.item | convertto-json)`r`n$($script:strLineSeparator)"
+        $script:diag += "OPPORTUNITY DIAG : UPDATING : $($company.CompanyName)`r`n$($script:fullCompany.item | convertto-json)`r`n$($script:strLineSeparator)`r`n"
+        #PSA-Put $script:psaHeaders "PUT" "Companies" ($script:fullCompany.item | convertto-json)
+      } elseif (-not ($blnUpdate)) {
+        write-output "OPPORTUNITY DIAG : NO NEED TO UPDATE : $($company.CompanyName)`r`n$($script:strLineSeparator)"
+        $script:diag += "OPPORTUNITY DIAG : NO NEED TO UPDATE : $($company.CompanyName)`r`n$($script:strLineSeparator)`r`n"
+      }
+      #CHECK FOR COMPANY IN DRMM SITES
+      $rmmSite = $script:sitesList.sites | where-object {$_.name -eq "$($company.CompanyName)"}
+      write-output "---------RMM Site :`r`n$($rmmSite)`r`n$($script:strLineSeparator)"
+      $script:diag += "---------RMM Site :`r`n$($rmmSite)`r`n$($script:strLineSeparator)`r`n"
+      #CREATE SITE IN DRMM
+      if (($null -eq $rmmSite) -or ($rmmSite -eq "")) {
+        try {
+          $script:rmmSites += 1
+          $script:blnSITE = $true
+          write-output "NEED TO CREATE COMPANY IN RMM"
+          $script:diag += "NEED TO CREATE COMPANY IN RMM`r`n"
+          logERR 4 "RMM CREATE SITE" "RMM CREATE SITE : $($company.CompanyName)`r`n$($script:strLineSeparator)"
+          $params = @{
+            id                  = $company.CompanyID
+            name                = $company.CompanyName
+            description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`nCreated by API Watchdog`r`n$($date)"
+            notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`nCreated by API Watchdog`r`n$($date)"
+            onDemand            = "false"
+            installSplashtop    = "true"
+          }
+          $postSite = (RMM-NewSite @params -UseBasicParsing)
+          write-output "$($postSite)`r`n$($script:strLineSeparator)"
+          $script:diag += "$($postSite)`r`n$($script:strLineSeparator)`r`n"
+          if ($postSite) {
+            write-output "RMM CREATE SITE : $($company.CompanyName) : SUCCESS"
+            $script:diag += "RMM CREATE SITE : $($company.CompanyName) : SUCCESS`r`n"
+          } elseif (-not $postSite) {
             $script:blnWARN = $true
             $script:blnFAIL = $true
-            write-output "RMM CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-            $script:diag += "`r`nRMM CREATE : $($company.CompanyName) : FAILED"
-            $script:diag += "`r`n$($_.Exception)"
-            $script:diag += "`r`n$($_.scriptstacktrace)"
-            $script:diag += "`r`n$($_)"
+            write-output "RMM CREATE SITE : $($company.CompanyName) : FAILED"
+            $script:diag += "RMM CREATE SITE : $($company.CompanyName) : FAILED`r`n"
           }
-        #UPDATE SITE IN DRMM
-        } elseif (($null -ne $rmmSite) -and ($rmmSite -ne "")) {
+        } catch {
+          $script:blnWARN = $true
+          $script:blnFAIL = $true
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+          logERR 3 "RMM CREATE SITE" "RMM CREATE SITE : $($company.CompanyName) : FAILED`r`n$($err)"
+        }
+      #UPDATE SITE IN DRMM
+      } elseif (($null -ne $rmmSite) -and ($rmmSite -ne "")) {
+        try {
           write-output "---------Notes :`r`n$($rmmSite.notes)`r`n---------"
           $script:diag += "---------Notes :`r`n$($rmmSite.notes)`r`n---------`r`n"
           write-output "---------Description :`r`n$($rmmSite.description)`r`n---------"
           $script:diag += "---------Description :`r`n$($rmmSite.description)`r`n---------`r`n"
-          try {
-            if ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
-              write-output "UPDATE SITE : $($company.CompanyName)"
-              $script:diag += "UPDATE SITE : $($company.CompanyName)`r`n"
-              $note = "$($rmmSite.notes)"
-              $params = @{
-                rmmID               = $rmmSite.uid
-                psaID               = $company.CompanyID
-                name                = $company.CompanyName
-                description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nUpdated by API Watchdog\n$($date)"
-                notes               = "$($note)"
-                onDemand            = "false"
-                installSplashtop    = "true"
-              }
-              $updateSite = (RMM-UpdateSite @params -UseBasicParsing)
-              write-output "$($updateSite)`r`n$($script:strLineSeparator)"
-              $script:diag += "$($updateSite)`r`n$($script:strLineSeparator)`r`n"
-              if ($updateSite) {
-                write-output "UPDATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
-                $script:diag += "UPDATE : $($company.CompanyName) : SUCCESS`r`n"
-              } elseif (-not $updateSite) {
-                $script:blnWARN = $true
-                $script:blnFAIL = $true
-                write-output "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-                $script:diag += "UPDATE : $($company.CompanyName) : FAILED`r`n"
-              }
-            } elseif ($rmmSite.description -like "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
-              write-output "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)"
-              $script:diag += "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)`r`n"
+          if ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
+            logERR 4 "RMM UPDATE SITE" "RMM UPDATE SITE : $($company.CompanyName)`r`n$($script:strLineSeparator)"
+            $note = "$($rmmSite.notes)"
+            $params = @{
+              rmmID               = $rmmSite.uid
+              psaID               = $company.CompanyID
+              name                = $company.CompanyName
+              description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`nUpdated by API Watchdog`r`n$($date)"
+              notes               = "$($note)"
+              onDemand            = "false"
+              installSplashtop    = "true"
             }
-          } catch {
-            $script:blnWARN = $true
-            $script:blnFAIL = $true
-            write-output "UPDATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-            $script:diag += "`r`nUPDATE : $($company.CompanyName) : FAILED"
-            $script:diag += "`r`n$($_.Exception)"
-            $script:diag += "`r`n$($_.scriptstacktrace)"
-            $script:diag += "`r`n$($_)"
+            $updateSite = (RMM-UpdateSite @params -UseBasicParsing)
+            write-output "$($updateSite)`r`n$($script:strLineSeparator)"
+            $script:diag += "$($updateSite)`r`n$($script:strLineSeparator)`r`n"
+            if ($updateSite) {
+              write-output "UPDATE : $($company.CompanyName) : SUCCESS"
+              $script:diag += "UPDATE : $($company.CompanyName) : SUCCESS`r`n"
+            } elseif (-not $updateSite) {
+              $script:blnWARN = $true
+              $script:blnFAIL = $true
+              write-output "UPDATE : $($company.CompanyName) : FAILED"
+              $script:diag += "UPDATE : $($company.CompanyName) : FAILED`r`n"
+            }
+          } elseif ($rmmSite.description -like "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
+            write-output "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)"
+            $script:diag += "DO NOT NEED TO CREATE / UPDATE SITE IN RMM`r`n$($script:strLineSeparator)`r`n"
           }
+        } catch {
+          $script:blnWARN = $true
+          $script:blnFAIL = $true
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+          logERR 3 "RMM UPDATE SITE" "RMM UPDATE SITE : $($company.CompanyName) : FAILED`r`n$($err)"
         }
-        #CHECK FOR COMPANY IN HUDU
-        $huduSite = Get-HuduCompanies -Name "$($company.CompanyName)"
-        #CREATE COMPANY IN HUDU
-        if (($null -eq $huduSite) -or ($huduSite -eq "")) {
+      }
+      #CHECK FOR COMPANY IN HUDU
+      $huduSite = Get-HuduCompanies -Name "$($company.CompanyName)"
+      #CREATE COMPANY IN HUDU
+      if (($null -eq $huduSite) -or ($huduSite -eq "")) {
+        try {
+          $script:huduSites += 1
           $script:blnSITE = $true
           write-output "NEED TO CREATE COMPANY IN HUDU"
           $script:diag += "NEED TO CREATE COMPANY IN HUDU`r`n"
-          try {
-            $country = $countries.items | where {($_.id -eq $company.countryID)} | select displayName
-            $script:diag += "CREATE HUDU : $($company.CompanyName)`t - $($company.address1), $($company.address2), $($company.city), $($company.state), $($company.postalCode) $($company.country)`r`n"
-            $params = @{
-              name                = "$($company.CompanyName)"
-              company_type        = "$($script:categoryMap[[int]$($company.CompanyCategory)])"
-              nickname            = ""
-              address_line_1      = "$($company.address1)"
-              address_line_2      = "$($company.address2)"
-              city                = "$($company.city)"
-              state               = "$($company.state)"
-              zip                 = "$($company.postalCode)"
-              country_name        = "$($country.displayName)"
-              phone_number        = "$($company.phone)"
-              fax_number          = "$($company.fax)"
-              website             = "$($company.webAddress)"
-              id_number           = ""
-              notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
-            }
-            $postHUDU = (New-HuduCompany @params -erroraction stop)
-            write-output "$($postHUDU)`r`n$($script:strLineSeparator)"
-            $script:diag += "$($postHUDU)`r`n$($script:strLineSeparator)`r`n"
-            if ($postHUDU) {
-              write-output "HUDU CREATE : $($company.CompanyName) : SUCCESS" -foregroundcolor green
-              $script:diag += "HUDU CREATE : $($company.CompanyName) : SUCCESS`r`n"
-            } elseif (-not $postHUDU) {
-              $script:blnWARN = $true
-              $script:blnFAIL = $true
-              write-output "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-              $script:diag += "HUDU CREATE : $($company.CompanyName) : FAILED`r`n"
-            }
-          } catch {
+          $country = $countries.items | where {($_.id -eq $company.countryID)} | select displayName
+          $huduInfo = "$($company.address1), $($company.address2), $($company.city), $($company.state), $($company.postalCode) $($company.country)"
+          logERR 4 "HUDU CREATE COMPANY" "HUDU CREATE COMPANY : $($company.CompanyName) :`r`n`t$($huduInfo)`r`n$($strLineSeparator)"
+          $params = @{
+            name                = "$($company.CompanyName)"
+            company_type        = "$($script:categoryMap[[int]$($company.CompanyCategory)])"
+            nickname            = ""
+            address_line_1      = "$($company.address1)"
+            address_line_2      = "$($company.address2)"
+            city                = "$($company.city)"
+            state               = "$($company.state)"
+            zip                 = "$($company.postalCode)"
+            country_name        = "$($country.displayName)"
+            phone_number        = "$($company.phone)"
+            fax_number          = "$($company.fax)"
+            website             = "$($company.webAddress)"
+            id_number           = ""
+            notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`nCreated by API Watchdog`r`n$($date)"
+          }
+          $postHUDU = (New-HuduCompany @params -erroraction stop)
+          write-output "$($postHUDU)`r`n$($script:strLineSeparator)"
+          $script:diag += "$($postHUDU)`r`n$($script:strLineSeparator)`r`n"
+          if ($postHUDU) {
+            write-output "HUDU CREATE COMPANY : $($company.CompanyName) : SUCCESS`r`n"
+            $script:diag += "HUDU CREATE COMPANY : $($company.CompanyName) : SUCCESS`r`n`r`n"
+          } elseif (-not $postHUDU) {
             $script:blnWARN = $true
             $script:blnFAIL = $true
-            write-output "HUDU CREATE : $($company.CompanyName) : FAILED" -foregroundcolor red
-            $script:diag += "`r`nHUDU CREATE : $($company.CompanyName) : FAILED"
-            $script:diag += "`r`n$($_.Exception)"
-            $script:diag += "`r`n$($_.scriptstacktrace)"
-            $script:diag += "`r`n$($_)"
+            write-output "HUDU CREATE COMPANY : $($company.CompanyName) : FAILED`r`n"
+            $script:diag += "HUDU CREATE COMPANY : $($company.CompanyName) : FAILED`r`n`r`n"
           }
-        } elseif (($null -ne $huduSite) -and ($huduSite -ne "")) {
-          write-output "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)"
-          $script:diag += "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)`r`n"
+        } catch {
+          $script:blnWARN = $true
+          $script:blnFAIL = $true
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+          logERR 3 "HUDU CREATE COMPANY" "HUDU CREATE COMPANY : $($company.CompanyName) : FAILED`r`n$($err)"
         }
+      } elseif (($null -ne $huduSite) -and ($huduSite -ne "")) {
+        write-output "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)`r`n"
+        $script:diag += "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)`r`n`r`n"
+      }
     }
   }
   #Stop script execution time calculation
@@ -747,49 +835,46 @@ if (-not $script:blnFAIL) {
   $null | set-content $script:logPath -force
   if ($script:blnFAIL) {
     #WRITE TO LOGFILE
-    $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Errors : See Diagnostics"
+    logERR 3 "END" "Execution Failure : See Diagnostics : $($script:finish)`r`n$($script:strLineSeparator)"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRMMAlert "API_WatchDog : Execution Failure : See Diagnostics"
+    write-DRMMAlert "API_WatchDog : Execution Failure : See Diagnostics : $($script:finish)"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
   }
   if ($script:blnSITE) {
     #WRITE TO LOGFILE
-    $script:diag += "`r`n`r`nAPI_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
+    logERR 3 "END" "Execution Successful : Site(s) Created - See Diagnostics : $($script:finish)`r`n$($script:strLineSeparator)"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRMMAlert "API_WatchDog : Execution Successful : Site(s) Created - See Diagnostics"
+    write-DRMMAlert "API_WatchDog : Execution Successful : Site(s) Created - See Diagnostics : $($script:finish)"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
   }
   if (-not $script:blnWARN) {
     #WRITE TO LOGFILE
-    $script:diag += "`r`n`r`nAPI_WatchDog : Execution Successful : No Sites Created"
+    logERR 4 "END" "Execution Successful : No Sites Created : $($script:finish)`r`n$($script:strLineSeparator)"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRMMAlert "API_WatchDog : Execution Successful : No Sites Created"
+    write-DRMMAlert "API_WatchDog : Execution Successful : No Sites Created : $($script:finish)"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
   } elseif ($script:blnWARN) {
     #WRITE TO LOGFILE
-    $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Warnings : See Diagnostics"
+    logERR 3 "END" "Execution Completed with Warnings : See Diagnostics : $($script:finish)`r`n$($script:strLineSeparator)"
     "$($script:diag)" | add-content $script:logPath -force
-    write-DRMMAlert "API_WatchDog : Execution Completed with Warnings : See Diagnostics"
+    write-DRMMAlert "API_WatchDog : Execution Completed with Warnings : See Diagnostics : $($script:finish)"
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
   }
-  if ((-not ($script:blnFAIL)) -and (-not ($script:blnWARN)) -and (-not ($script:blnSITE))) {
-    exit 0
-  } elseif (($script:blnFAIL) -or ($script:blnWARN) -or ($script:blnSITE)) {
-    exit 1
-  }
+  if ((-not ($script:blnFAIL)) -and (-not ($script:blnWARN)) -and (-not ($script:blnSITE))) {exit 0}
+  if (($script:blnFAIL) -or ($script:blnWARN) -or ($script:blnSITE)) {exit 1}
 } elseif ($script:blnFAIL) {
   #Stop script execution time calculation
   StopClock
   #CLEAR LOGFILE
   $null | set-content $script:logPath -force
   #WRITE TO LOGFILE
-  $script:diag += "`r`n`r`nAPI_WatchDog : Execution Completed with Errors : See Diagnostics"
+  logERR 3 "END" "API_WatchDog : Execution Failure : See Diagnostics : $($script:finish)`r`n$($script:strLineSeparator)"
   "$($script:diag)" | add-content $script:logPath -force
-  write-DRMMAlert "API_WatchDog : Execution Failure : See Diagnostics"
+  write-DRMMAlert "API_WatchDog : Execution Failure : See Diagnostics : $($script:finish)"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
   exit 1
