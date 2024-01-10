@@ -33,19 +33,20 @@
   #region######################## Hudu Settings ###########################
   $script:huduCalls         = 0
   # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
-  $script:HuduAPIKey        = $env:i_HuduKey
+  $script:HuduAPIKey        = $env:HuduKey
   # Set the base domain of your Hudu instance without a trailing /
-  $script:HuduBaseDomain    = $env:i_HuduDomain
+  $script:HuduBaseDomain    = $env:HuduDomain
   #endregion
   #region######################## RMM Settings ###########################
   #RMM API CREDS
-  $script:rmmKey            = $env:i_rmmKey
-  $script:rmmSecret         = $env:i_rmmSecret
+  $script:rmmToken          = $null
+  $script:rmmKey            = $env:DRMMAPIKey
+  $script:rmmSecret         = $env:DRMMAPISecret
   #RMM API VARS
   $script:rmmSites          = 0
   $script:rmmCalls          = 0
-  $script:rmmUDF            = $env:i_rmmUDF
-  $script:rmmAPI            = $env:i_rmmAPI
+  $script:rmmUDF            = 25
+  $script:rmmAPI            = $env:DRMMAPIBase
   #endregion
   #region######################## Autotask Settings ###########################
   #PSA API DATASETS
@@ -64,10 +65,10 @@
     "Cancelation", "Dead", "Lead", "Partner", "Prospect", "Vendor"
   )
   #PSA API CREDS
-  $script:psaUser           = $env:i_psaUser
-  $script:psaKey            = $env:i_psaKey
-  $script:psaSecret         = $env:i_psaSecret
-  $script:psaIntegration    = $env:i_psaIntegration
+  $script:psaUser           = $env:ATAPIUser
+  $script:psaKey            = $env:ATAPIUser
+  $script:psaSecret         = $env:ATAPISecret
+  $script:psaIntegration    = $env:ATIntegratorID
   $script:psaHeaders        = @{
     'UserName'              = "$($script:psaKey)"
     'Secret'                = "$($script:psaSecret)"
@@ -75,7 +76,7 @@
   }
   #PSA API VARS
   $script:psaCalls          = 0
-  $script:psaAPI            = $env:i_psaAPI
+  $script:psaAPI            = "$($env:ATAPIBase)/atservicesrest/v1.0"
   $script:psaGenFilter      = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
   $script:psaActFilter      = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
   #endregion
@@ -102,12 +103,12 @@
       Uri         = "$($script:psaAPI)/$($entity)"
       Headers     = $header
     }
-    $script:psaCalls += 1
     try {
+      $script:psaCalls += 1
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "PSA-Query" "API_WatchDog : Failed to query PSA API via $($params.Uri)`r`n$($err)"
+      logERR 3 "PSA-Query" "Failed to query PSA API via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -119,12 +120,12 @@
       Uri         = "$($script:psaAPI)/$($entity)/query?search=$($filter)"
       Headers     = $header
     }
-    $script:psaCalls += 1
     try {
+      $script:psaCalls += 1
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "PSA-FilterQuery" "API_WatchDog : Failed to query (filtered) PSA API via $($params.Uri)`r`n$($err)"
+      logERR 3 "PSA-FilterQuery" "Failed to query (filtered) PSA API via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -137,12 +138,12 @@
       Headers     = $header
       Body        = $body
     }
-    $script:psaCalls += 1
     try {
+      $script:psaCalls += 1
       Invoke-RestMethod @params -UseBasicParsing -erroraction stop
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "PSA-Put" "API_WatchDog : Failed to query PSA API via $($params.Uri)`r`n$($err)"
+      logERR 3 "PSA-Put" "Failed to post to PSA API via $($params.Uri)`r`n-----`r`n$($params.body)`r`n$($err)"
     }
   }
 
@@ -152,14 +153,14 @@
       PSA-Query $header "GET" "ThresholdInformation" -erroraction stop
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "PSA-GetThreshold" "API_WatchDog : Failed to populate PSA API Utilization via $($params.Uri)`r`n$($err)"
+      logERR 3 "PSA-GetThreshold" "Failed to populate PSA API Utilization`r`n$($err)"
     }
   }
 
   function PSA-GetMaps {
     param ($header, $dest, $entity)
-    $Uri = "$($script:psaAPI)/$($entity)/query?search=$($script:psaActFilter)"
     try {
+      $Uri = "$($script:psaAPI)/$($entity)/query?search=$($script:psaActFilter)"
       $list = PSA-FilterQuery $header "GET" "$($entity)" "$($script:psaActFilter)"
       foreach ($item in $list.items) {
         if ($dest.containskey($item.id)) {
@@ -171,15 +172,15 @@
     } catch {
       $script:blnFAIL = $true
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "PSA-GetMaps" "API_WatchDog : Failed to populate PSA $($entity) Maps via $($Uri)`r`n$($err)"
+      logERR 3 "PSA-GetMaps" "Failed to populate PSA $($entity) Maps via $($Uri)`r`n$($err)"
     }
   } ## PSA-GetMaps
 
   function PSA-GetCompanies {
     param ($header)
-    $script:CompanyDetails = @()
-    $Uri = "$($script:psaAPI)/Companies/query?search=$($script:psaActFilter)"
     try {
+      $script:CompanyDetails = @()
+      $Uri = "$($script:psaAPI)/Companies/query?search=$($script:psaActFilter)"
       $CompanyList = PSA-FilterQuery $header "GET" "Companies" "$($script:psaActFilter)"
       $sort = ($CompanyList.items | Sort-Object -Property companyName)
       foreach ($company in $sort) {
@@ -206,7 +207,7 @@
     } catch {
       $script:blnFAIL = $true
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "PSA-GetCompanies" "`r`nAPI_WatchDog : Failed to populate PSA Companies via $($Uri)`r`n$($err)"
+      logERR 3 "PSA-GetCompanies" "Failed to populate PSA Companies via $($Uri)`r`n$($err)"
     }
   } ## PSA-GetCompanies API Call
 #endregion ----- PSA FUNCTIONS ----
@@ -222,14 +223,14 @@
       Body        = 'grant_type=password&username={0}&password={1}' -f $script:rmmKey, $script:rmmSecret
       Credential  = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList ('public-client', $securePassword)
     }
-    $script:rmmCalls += 1
-    # Request access token
     try {
+      # Request access token
+      $script:rmmCalls += 1
       (Invoke-WebRequest @params -UseBasicParsing -erroraction stop | ConvertFrom-Json).access_token
     } catch {
       $script:blnFAIL = $true
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "RMM-ApiAccessToken" "API_WatchDog : Failed to obtain DRMM API Access Token via $($params.Uri)`r`n$($err)"
+      logERR 3 "RMM-ApiAccessToken" "Failed to obtain DRMM API Access Token via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -245,28 +246,23 @@
       Method        = $apiMethod
       ContentType   = 'application/json'
       Uri           = '{0}/api{1}' -f $script:rmmAPI, $apiRequest
-      Headers       = @{
-        'Authorization'	= 'Bearer {0}' -f $apiAccessToken
-      }
+      Headers       = @{'Authorization'	= 'Bearer {0}' -f $apiAccessToken}
     }
-    $script:rmmCalls += 1
-    # Add body to parameters if present
-    if ($apiRequestBody) {$params.Add('Body', $apiRequestBody)}
-    # Make request
     try {
+      # Make request
+      $script:rmmCalls += 1
+      # Add body to parameters if present
+      if ($apiRequestBody) {$params.Add('Body', $apiRequestBody)}
       (Invoke-WebRequest @params -UseBasicParsing).Content
     } catch {
       $script:blnWARN = $true
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "RMM-ApiRequest" "API_WatchDog : Failed to process DRMM API Query via $($params.Uri)`r`n$($err)"
+      logERR 3 "RMM-ApiRequest" "Failed to process DRMM API Query via $($params.Uri)`r`n$($err)"
     }
   }
 
   function RMM-PostUDF {
-    param (
-      [string]$deviceUID,
-      [string]$companyType
-    )
+    param ([string]$deviceUID, [string]$companyType)
     $params = @{
       apiMethod       = "POST"
       apiUrl          = $script:rmmAPI
@@ -279,14 +275,12 @@
     } catch {
       $script:blnWARN = $true
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "RMM-PostUDF" "API_WatchDog : Failed to populate DRMM Device UDF via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
+      logERR 3 "RMM-PostUDF" "Failed to populate DRMM Device UDF via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
     }
   }
 
   function RMM-GetDevices {
-    param (
-      [string]$siteUID
-    )
+    param ([string]$siteUID)
     $params = @{
       apiMethod       = "GET"
       apiUrl          = $script:rmmAPI
@@ -294,8 +288,9 @@
       apiRequest      = "/v2/site/$($siteUID)/devices"
       apiRequestBody  = $null
     }
-    $script:DeviceDetails = @()
+    
     try {
+      $script:DeviceDetails = @()
       $DeviceList = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
       foreach ($device in $DeviceList.devices) {
         $script:DeviceDetails += New-Object -TypeName PSObject -Property @{
@@ -307,7 +302,7 @@
     } catch {
       $script:blnWARN = $true
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "RMM-GetDevices" "API_WatchDog : Failed to populate DRMM Devices via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
+      logERR 3 "RMM-GetDevices" "Failed to populate DRMM Devices via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
     }
   }
 
@@ -324,12 +319,12 @@
       if (($null -eq $script:sitesList) -or ($script:sitesList -eq "")) {
         $script:blnFAIL = $true
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-        logERR 3 "API_WatchDog : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
+        logERR 3 "RMM-GetSites" "Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
       }
     } catch {
       $script:blnFAIL = $true
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "RMM-GetSites" "API_WatchDog : Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
+      logERR 3 "RMM-GetSites" "Failed to populate DRMM Sites via $($params.apiUrl)$($params.apiRequest)`r`n$($err)"
     }
   }
 
@@ -350,8 +345,8 @@
       apiRequest      = "/v2/site/$($rmmID)"
       apiRequestBody  = "{`"autotaskCompanyId`": `"$($psaID)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $onDemand,`"splashtopAutoInstall`": $installSplashtop}"
     }
-    $script:blnSITE = $false
     try {
+      $script:blnSITE = $false
       $script:updateSite = (RMM-ApiRequest @params -UseBasicParsing) #| ConvertFrom-Json
       if ($script:updateSite -match $name) {
         return $true
@@ -363,7 +358,7 @@
       $script:blnFAIL = $true
       $script:blnSITE = $false
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "RMM-UpdateSite" "API_WatchDog : Failed to update DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
+      logERR 3 "RMM-UpdateSite" "Failed to update DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
     }
   }
 
@@ -383,8 +378,8 @@
       apiRequest      = "/v2/site"
       apiRequestBody  = "{`"autotaskCompanyId`": `"$($id)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $onDemand,`"splashtopAutoInstall`": $installSplashtop}"
     }
-    $script:blnSITE = $false
     try {
+      $script:blnSITE = $false
       $script:newSite = (RMM-ApiRequest @params -UseBasicParsing) #| ConvertFrom-Json
       if ($script:newSite -match $name) {
         return $true
