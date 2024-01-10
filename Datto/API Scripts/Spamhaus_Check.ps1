@@ -221,6 +221,9 @@ Remove-Variable * -ErrorAction SilentlyContinue
     7 = "Vendor"
     8 = "Partner"
   }
+  $script:psaSkip           = @(
+    "Cancelation", "Dead", "Lead", "Partner", "Prospect", "Vendor"
+  )
   #PSA API CREDS
   $script:psaUser           = $env:ATAPIUser
   $script:psaKey            = $env:ATAPIUser
@@ -259,7 +262,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $params = @{
       Method      = "$($method)"
       ContentType = 'application/json'
-      Uri         = "$($script:psaAPI)/atservicesrest/v1.0/$($entity)"
+      Uri         = "$($script:psaAPI)/$($entity)"
       Headers     = $header
     }
     $script:psaCalls += 1
@@ -277,7 +280,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $params = @{
       Method      = "$($method)"
       ContentType = 'application/json'
-      Uri         = "$($script:psaAPI)/atservicesrest/v1.0/$($entity)/query?search=$($filter)"
+      Uri         = "$($script:psaAPI)/$($entity)/query?search=$($filter)"
       Headers     = $header
     }
     $script:psaCalls += 1
@@ -287,6 +290,24 @@ Remove-Variable * -ErrorAction SilentlyContinue
       $script:blnWARN = $true
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
       logERR 4 "PSA-FilterQuery" "Failed to query (filtered) PSA API via $($params.Uri)`r`n$($err)"
+    }
+  }
+
+  function PSA-Put {
+    param ($header, $method, $entity, $body)
+    $params = @{
+      Method      = "$($method)"
+      ContentType = 'application/json'
+      Uri         = "$($script:psaAPI)/$($entity)"
+      Headers     = $header
+      Body        = $body
+    }
+    $script:psaCalls += 1
+    try {
+      Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 3 "PSA-Put" "API_WatchDog : Failed to query PSA API via $($params.Uri)`r`n$($err)"
     }
   }
 
@@ -303,7 +324,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
   function PSA-GetMaps {
     param ($header, $dest, $entity)
-    $Uri = "$($script:psaAPI)/atservicesrest/v1.0/$($entity)/query?search=$($script:psaActFilter)"
+    $Uri = "$($script:psaAPI)/$($entity)/query?search=$($script:psaActFilter)"
     try {
       $list = PSA-FilterQuery $header "GET" "$($entity)" "$($psaActFilter)"
       foreach ($item in $list.items) {
@@ -450,7 +471,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $params = @{
       Method      = "GET"
       ContentType = 'application/json'
-      Uri         = "$($script:psaAPI)/atservicesrest/v1.0/Tickets/entityInformation/fields"
+      Uri         = "$($script:psaAPI)/Tickets/entityInformation/fields"
       Headers     = $header
     }
     try {
@@ -474,7 +495,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $params = @{
       Method         = "POST"
       ContentType    = 'application/json'
-      Uri            = "$($script:psaAPI)/atservicesrest/v1.0/Tickets"
+      Uri            = "$($script:psaAPI)/Tickets"
       Headers        = $header
       Body           = convertto-json $ticket
     }
@@ -682,9 +703,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
   }  ## Convert epoch time to date time
 
   function Pop-HashTable {
-    param (
-      $dest, $customer, $warn
-    )
+    param ($dest, $customer, $warn)
     #POPULATE DATA INTO NESTED HASHTABLE FORMAT FOR LATER USE
     try {
       #ONLY USE DATA IF NOT NULL / EMPTY
