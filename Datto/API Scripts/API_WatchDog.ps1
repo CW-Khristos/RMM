@@ -288,7 +288,6 @@
       apiRequest      = "/v2/site/$($siteUID)/devices"
       apiRequestBody  = $null
     }
-    
     try {
       $script:DeviceDetails = @()
       $DeviceList = (RMM-ApiRequest @params -UseBasicParsing) | ConvertFrom-Json
