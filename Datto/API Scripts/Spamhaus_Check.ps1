@@ -324,8 +324,9 @@ Remove-Variable * -ErrorAction SilentlyContinue
 
   function PSA-GetMaps {
     param ($header, $dest, $entity)
+    $Uri = "$($script:psaAPI)/$($entity)/query?search=$($script:psaActFilter)"
     try {
-      $list = PSA-FilterQuery $header "GET" "$($entity)" "$($psaActFilter)"
+      $list = PSA-FilterQuery $header "GET" "$($entity)" "$($script:psaActFilter)"
       foreach ($item in $list.items) {
         if ($dest.containskey($item.id)) {
           continue
@@ -853,44 +854,44 @@ Set-PSRepository -Name 'PSGallery' -InstallationPolicy Untrusted
 
 try {
   #QUERY AT PSA API
-  logERR 3 "AT API" "$($script:strLineSeparator)`r`nQUERYING AT API :`r`n`t$($script:strLineSeparator)"
+  logERR 4 "AT API" "$($script:strLineSeparator)`r`nQUERYING AT API :`r`n`t$($script:strLineSeparator)"
   $script:psaCountries = PSA-FilterQuery $script:psaHeaders "GET" "Countries" $psaGenFilter
-  logERR 3 "AT API" "$($strLineSeparator)`r`n`tCLASS MAP :"
+  logERR 4 "AT API" "$($strLineSeparator)`r`n`tCLASS MAP :"
   PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
   $script:classMap
   Write-Output "`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
   $script:diag += "`r`n`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)`r`n"
-  logERR 3 "AT API" "$($strLineSeparator)`r`n`tCATEGORY MAP :"
+  logERR 4 "AT API" "$($strLineSeparator)`r`n`tCATEGORY MAP :"
   PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
   $script:categoryMap
   write-output "`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
   $script:diag += "`r`n`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)`r`n"
-  logERR 3 "AT API" "$($strLineSeparator)`r`n`tASSET TYPE MAP :"
+  logERR 4 "AT API" "$($strLineSeparator)`r`n`tASSET TYPE MAP :"
   PSA-GetMaps $script:psaHeaders $script:ciTypeMap "ConfigurationItemTypes"
   $script:ciTypeMap
   write-output "`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
   $script:diag += "`r`n`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)`r`n"
-  logERR 3 "AT API" "$($strLineSeparator)`r`n`tTICKET FIELDS :"
+  logERR 4 "AT API" "$($strLineSeparator)`r`n`tTICKET FIELDS :"
   PSA-GetTicketFields $script:psaHeaders $script:ticketFields
   #$script:ticketFields
   write-output "`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
   $script:diag += "`r`n`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)`r`n"
-  logERR 3 "AT API" "RETRIEVING COMPANIES :`r`n`t$($strLineSeparator)"
+  logERR 4 "AT API" "RETRIEVING COMPANIES :`r`n`t$($strLineSeparator)"
   PSA-GetCompanies $script:psaHeaders
   write-output "`tDone`r`n`t$($strLineSeparator)"
   $script:diag += "`r`n`tDone`r`n`t$($strLineSeparator)"
-  logERR 3 "AT API" "QUERY AT DONE`r`n$($strLineSeparator)`r`n"
+  logERR 4 "AT API" "QUERY AT DONE`r`n$($strLineSeparator)`r`n"
 
   #QUERY DRMM API
   $script:rmmToken = RMM-ApiAccessToken
   RMM-GetFilters
   $filter = $script:drmmFilters.filters | where {$_.name -eq "Site Group: Spamhaus Checks"}
-  logERR 3 "DRMM API" "QUERYING DRMM API :`r`n`t$($strLineSeparator)"
-  logERR 3 "DRMM API" "RETRIEVING DRMM SITES :`r`n`t$($strLineSeparator)"
+  logERR 4 "DRMM API" "QUERYING DRMM API :`r`n`t$($strLineSeparator)"
+  logERR 4 "DRMM API" "RETRIEVING DRMM SITES :`r`n`t$($strLineSeparator)"
   RMM-GetSites
   write-output "`tDone`r`n`t$($strLineSeparator)"
   $script:diag += "`r`n`tDone`r`n`t$($strLineSeparator)"
-  logERR 3 "DRMM API" "QUERY DRMM DONE`r`n$($strLineSeparator)`r`n"
+  logERR 4 "DRMM API" "QUERY DRMM DONE`r`n$($strLineSeparator)`r`n"
 
   #ENUMERATE THROUGH DRMM SITES
   #foreach ($script:drmmSite in $script:drmmSites.sites) {
@@ -925,7 +926,7 @@ if (-not $script:blnBREAK) {
   $script:diag += "`r`n`r`n$($strLineSeparator)`r`nPerforming Spamhaus Check(s) :"
   foreach ($key in $script:spamCHECK.keys) {
     start-sleep -Milliseconds 200
-    logERR 3 "SPAMHAUS DIAG" "$($strLineSeparator)`r`n`t$($strLineSeparator)`r`n`t$(($key).trim())`r`n`t`t$($strLineSeparator)"
+    logERR 4 "SPAMHAUS DIAG" "$($strLineSeparator)`r`n`t$($strLineSeparator)`r`n`t$(($key).trim())`r`n`t`t$($strLineSeparator)"
     foreach ($extIP in $script:spamCHECK[$key]) {
       try {
         $script:outCheck = $null
@@ -939,7 +940,7 @@ if (-not $script:blnBREAK) {
           try {
             $script:outCheck = $null
             start-sleep -Milliseconds 200
-            logERR 3 "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
+            logERR 4 "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
             $script:diag += "`r`n`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
             $script:outCheck = [system.net.dns]::gethostentry("$($ipParts).$($script:spamMAP[$blocklist].siteAddress).")
           } catch {
@@ -1001,7 +1002,7 @@ if (-not $script:blnBREAK) {
 #Stop script execution time calculation
 StopClock
 $finish = "$((get-date).ToString('yyyy-MM-dd hh:mm:ss'))"
-logERR 3 "END" "$($finish) - Completed Execution"
+logERR 4 "END" "$($finish) - Completed Execution"
 #WRITE LOGFILE
 $null | set-content $script:logPath -force
 "$($script:diag)" | add-content $script:logPath -force
