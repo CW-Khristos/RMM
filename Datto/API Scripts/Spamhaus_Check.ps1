@@ -795,7 +795,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $secs = [string]($total / 1000)
     $mill = $secs.split(".")[1]
     $secs = $secs.split(".")[0]
-    $mill = $mill.SubString(0,[math]::min(3, $mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
     if ($Minutes -gt 0) {$secs = ($secs - ($Minutes * 60))}
     #AVERAGE
     $average = ($total / ($script:psaCalls + $script:rmmCalls + $script:syncroCalls))
