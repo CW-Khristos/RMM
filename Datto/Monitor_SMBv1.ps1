@@ -35,10 +35,10 @@
     $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
     $mill = [string]($total / 1000)
     $mill = $mill.split(".")[1]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
     $script:finish = (Get-Date).ToString('yyyy-MM-dd hh:mm:ss')
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
-    write-host "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
+    write-output "Total Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
 #endregion ----- FUNCTIONS ----
 
