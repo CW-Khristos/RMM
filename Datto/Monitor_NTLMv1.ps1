@@ -16,11 +16,11 @@
     "NtlmMinClientSec"
     "NtlmMinServerSec"
     "LMCompatibilityLevel"
+    "AuditReceivingNTLMTraffic"
     "RestrictSendingNTLMtraffic"
     "RestrictReceivingNTLMtraffic"
   )
   $regPaths                   = @(
-    "HKLM:\SYSTEM\CurrentControlSet\Services\Lsa"
     "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
     "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0"
   )
@@ -45,6 +45,20 @@
     write-output "Alert=$($message)"
     write-output "<-End Result->"
   } ## write-DRMMAlert
+
+  function write-NTLMSecurity ($path, $setting, $value) {
+    try {
+      write-output "$($script:strLineSeparator)`r`nApplying Changes to $($path)\$($setting) : New Value ($($value))`r`n$($script:strLineSeparator)"
+      $script:diag += "$($script:strLineSeparator)`r`nApplying Changes to $($path)\$($setting) : New Value ($($value))`r`n$($script:strLineSeparator)`r`n"
+      set-itemproperty -path "$($path)" -name "$($setting)" -value $value -force -erroraction stop
+      write-output "`tDone`r`n$($script:strLineSeparator)"
+      $script:diag += "`tDone`r`n$($script:strLineSeparator)`r`n"
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      $script:diag += "$($err)`r`n"
+      write-output "$($err)"
+    }
+  }
 
   function map-NTLMSecurity ($setting, $value) {
     $hashNTLM.add($setting, $value)
@@ -116,12 +130,28 @@
         $strConfig += "$($strMinSec)"
         break
       }
-      {($setting -eq "RestrictSendingNTLMtraffic") -or ($setting -eq "RestrictReceivingNTLMtraffic")} {
+      "AuditReceivingNTLMTraffic" {
         #https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-incoming-ntlm-traffic
         switch ($value) {
-          0 {$strConfig += "$($setting) : $($value) (Allow All"; break}
-          1 {$strConfig += "$($setting) : $($value) (Deny All Domain Accounts"; break}
-          2 {$strConfig += "$($setting) : $($value) (Deny All Accounts"; break}
+          0 {$strConfig += "$($setting) : $($value) (Disabled)"; break}
+          1 {$strConfig += "$($setting) : $($value) (Audit All Domain Accounts)"; break}
+          2 {$strConfig += "$($setting) : $($value) (Audit All Accounts)"; break}
+        }
+      }
+      "RestrictReceivingNTLMtraffic" {
+        #https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-incoming-ntlm-traffic
+        switch ($value) {
+          0 {$strConfig += "$($setting) : $($value) (Allow All)"; break}
+          1 {$strConfig += "$($setting) : $($value) (Deny All Domain Accounts)"; break}
+          2 {$strConfig += "$($setting) : $($value) (Deny All Accounts)"; break}
+        }
+      }
+      "RestrictSendingNTLMtraffic" {
+        #https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-incoming-ntlm-traffic
+        switch ($value) {
+          0 {$strConfig += "$($setting) : $($value) (Allow All)"; break}
+          1 {$strConfig += "$($setting) : $($value) (Audit All)"; break}
+          2 {$strConfig += "$($setting) : $($value) (Deny All)"; break}
         }
       }
     }
@@ -164,14 +194,37 @@ try {
     }
   }}
   $warn = $null
-  if (($hashNTLM.LMCompatibilityLevel -ne 3) -and ($hashNTLM.LMCompatibilityLevel -ne 5)) {$script:blnWARN = $true; $warn += "NTLMv1 Authentication Allowed`r`n"}
-  if (($hashNTLM.NtlmMinClientSec -band $mapNTLMSecurity.NTLMv1)) {$script:blnWARN = $true; $warn += "NTLMv1 Client Negotiation Allowed`r`n"}
-  if (($hashNTLM.NtlmMinServerSec -band $mapNTLMSecurity.NTLMv1)) {$script:blnWARN = $true; $warn += "NTLMv1 Server Negotiation Allowed`r`n"}
-  if (($hashNTLM.RestrictSendingNTLMtraffic -eq 0)) {$script:blnWARN = $true; $warn += "Sending of NTLM Traffic Remotely Allowed`r`n"}
-  if (($hashNTLM.RestrictReceivingNTLMtraffic -eq 0)) {$script:blnWARN = $true; $warn += "Receiving of NTLM Traffic Remotely Allowed`r`n"}
+  if (($null -eq $hashNTLM.LMCompatibilityLevel) -or ($hashNTLM.LMCompatibilityLevel -ne 3) -and ($hashNTLM.LMCompatibilityLevel -ne 5)) {
+    $script:blnWARN = $true; $warn += "NTLMv1 Authentication Allowed`r`n"
+    if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[0])" "LMCompatibilityLevel" 5}
+  }
+  if (($null -eq $hashNTLM.NtlmMinClientSec) -or ($hashNTLM.NtlmMinClientSec -band $mapNTLMSecurity.NTLMv1)) {
+    $script:blnWARN = $true; $warn += "NTLMv1 Client Negotiation Allowed`r`n"
+    if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinClientSec" 537395200}
+  }
+  if (($null -eq $hashNTLM.NtlmMinServerSec) -or ($hashNTLM.NtlmMinServerSec -band $mapNTLMSecurity.NTLMv1)) {
+    $script:blnWARN = $true; $warn += "NTLMv1 Server Negotiation Allowed`r`n"
+    if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinServerSec" 537395200}
+  }
+  if (($null -eq $hashNTLM.AuditReceivingNTLMTraffic) -or ($hashNTLM.AuditReceivingNTLMTraffic -ne 2)) {
+    $script:blnWARN = $true; $warn += "Not Auditing Received NTLM Traffic from All Accounts`r`n"
+    if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "AuditReceivingNTLMTraffic" 2}
+  }
+  if (($null -eq $hashNTLM.RestrictSendingNTLMtraffic) -or ($hashNTLM.RestrictSendingNTLMtraffic -eq 0)) {
+    $script:blnWARN = $true; $warn += "Sending of NTLM Traffic Remotely Allowed and not Audited`r`n"
+    #Full Consequences currently unknown
+    #Known Issues : 'Deny All' will prevent Outlook / Office authentication
+    if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "RestrictSendingNTLMtraffic" 1}
+  }
+  if (($null -eq $hashNTLM.RestrictReceivingNTLMtraffic) -or ($hashNTLM.RestrictReceivingNTLMtraffic -eq 0)) {
+    #$script:blnWARN = $true; 
+    $warn += "Receiving of NTLM Traffic Remotely Allowed`r`n"
+    #Full Consequences currently unknown - Likely Dangerous on a Domain / AD DC
+    #if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "RestrictReceivingNTLMtraffic" 1}
+  }
 } catch {
   #$err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-  #write-output $err
+  #write-output "$($err)"
 }
 $script:diag += "`r`n$($warn)`r`n"
 #Stop script execution time calculation
