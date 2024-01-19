@@ -219,7 +219,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
 #endregion ----- API FUNCTIONS ----
 
 #region ----- MISC FUNCTIONS ----
-  function Get-EpochDate ($epochDate, $opt) {                     #Convert Epoch Date Timestamps to Local Time
+  function Get-EpochDate ($epochDate, $opt) {
+    #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
       "sec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($epochDate))}
       "msec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddMilliSeconds($epochDate))}
@@ -248,7 +249,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
         $script:diag += "`t$($warn)`r`n"
         if ($dest.containskey($key)) {
           $prev = $dest[$key]
-          $prev = $prev.split("`r`n",[System.StringSplitOptions]::RemoveEmptyEntries)
+          $prev = $prev.split("`r`n", [System.StringSplitOptions]::RemoveEmptyEntries)
           if ($prev -contains $warn) {$blnADD = $false}
           if ($blnADD) {
             foreach ($itm in $prev) {$new.add("$($itm)`r`n")}
@@ -274,19 +275,22 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
-      1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      1 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - Syncro_Payments - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - Syncro_Payments - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
-      2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      2 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - Syncro_Payments - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - Syncro_Payments - ($($strModule)) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
       }
-      default {                                                   #'ERRRET'=3+
+      #'ERRRET'=3+
+      default {
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - Syncro_Payments - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
@@ -310,7 +314,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $secs = [string]($total / 1000)
     $mill = $secs.split(".")[1]
     $secs = $secs.split(".")[0]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
     if ($Minutes -gt 0) {$secs = ($secs - ($Minutes * 60))}
     #AVERAGE
     $average = ($total / ($script:psaCalls + $script:rmmCalls + $script:syncroCalls + $script:bdgzCalls))
