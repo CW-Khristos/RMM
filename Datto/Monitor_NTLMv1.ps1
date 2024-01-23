@@ -195,14 +195,17 @@ try {
   }}
   $warn = $null
   if (($null -eq $hashNTLM.LMCompatibilityLevel) -or ($hashNTLM.LMCompatibilityLevel -ne 3) -and ($hashNTLM.LMCompatibilityLevel -ne 5)) {
+    #Set `LMCompatibilityLevel` to `NTLMv2 Only; Refuse LM / NTLMv1`
     $script:blnWARN = $true; $warn += "NTLMv1 Authentication Allowed`r`n"
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[0])" "LMCompatibilityLevel" 5}
   }
   if (($null -eq $hashNTLM.NtlmMinClientSec) -or ($hashNTLM.NtlmMinClientSec -band $mapNTLMSecurity.NTLMv1)) {
+    #Set `NtlmMinClientSec` to `128-bit Session Security`
     $script:blnWARN = $true; $warn += "NTLMv1 Client Negotiation Allowed`r`n"
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinClientSec" 537395200}
   }
   if (($null -eq $hashNTLM.NtlmMinServerSec) -or ($hashNTLM.NtlmMinServerSec -band $mapNTLMSecurity.NTLMv1)) {
+    #Set `NtlmMinServerSec` to `128-bit Session Security`
     $script:blnWARN = $true; $warn += "NTLMv1 Server Negotiation Allowed`r`n"
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinServerSec" 537395200}
   }
