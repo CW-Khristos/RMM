@@ -68,8 +68,9 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     return $output
   } ## Get-ProcessOutput
 
-  function Get-OSArch {                                                                             #Determine Bit Architecture & OS Type
+  function Get-OSArch {
     #OS Bit Architecture
+    #Determine Bit Architecture & OS Type
     $osarch = (get-wmiobject win32_operatingsystem).osarchitecture
     if ($osarch -like '*32*') {
       $script:bitarch = "bit32"
@@ -108,26 +109,30 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     $logTime = "$((get-date).ToString('yyyy-MM-dd hh:mm:ss'))"
     #CUSTOM ERROR CODES
     switch ($intSTG) {
-      1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      1 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
         write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - NO ARGUMENTS PASSED, END SCRIPT`r`n$($strLineSeparator)`r`n"
       }
-      2 {                                                         #'ERRRET'=2 - END SCRIPT
+      #'ERRRET'=2 - END SCRIPT
+      2 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
         write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - ($($strModule)) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n$($strLineSeparator)`r`n"
       }
-      3 {                                                         #'ERRRET'=3
+      #'ERRRET'=3
+      3 {
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
         write-output "$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
       }
-      default {                                                   #'ERRRET'=4+
+      #'ERRRET'=4+
+      default {
         $script:blnBREAK = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($logTime) - WinKey - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)`r`n$($strLineSeparator)`r`n"
@@ -212,16 +217,16 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     try {
       logERR 3 "QueryWindowsKeys" "Querying Windows Keys"
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId" 52)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return;}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId4" 808)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return;}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId" 52)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return;}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId4" 808)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return;}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return}
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       logERR 3 "QueryWindowsKeys" "Failed to Query Windows Keys`r`n$($err)"
@@ -244,6 +249,20 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)"
+      try {
+        $binRegVal = (get-item -path "$($strRegPath)").getvalue("$($strRegValue)")
+        #write-output "Windows Key (Binary) : $($binRegVal)"
+        $strWinKey = $(DecodeProductKey $binRegVal $intKeyOffset)
+        if (($null -ne $strWinKey) -and ($strWinKey -ne "") -and ($strWinKey -ne "BBBBB-BBBBB-BBBBB-BBBBB-BBBBB")) {
+          #write-output "Windows Key : $($strWinKey)"
+          return $strWinKey
+        } else {
+          return $null
+        }
+      } catch {
+        $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)"
+      }
       return $null
     }
   }
@@ -288,7 +307,22 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
           }
         } catch {
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-          logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n$($err)"
+          logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n$($err)`r`n`r`nPerforming Fallback : $($subKey)"
+          try {
+            $strOfficeEdition = (get-item -path "Registry::$($subKey)" -erroraction silentlycontinue).getvalue("ConvertToEdition")
+            $arrProductID = (get-item -path "Registry::$($subKey)" -erroraction silentlycontinue).getvalue("DigitalProductID")
+            if (($null -ne $strOfficeEdition) -and ($strOfficeEdition -ne "") -and ($arrProductID -is [array])) {
+              logERR 3 "CheckOfficeKey" "Found : Office Product ($($intProductCount)) : $($strOfficeEdition)"
+              $officeKey = $(DecodeProductKey $arrProductID $intKeyOffset)
+              WriteData "Office Product ($($intProductCount))" $strOfficeEdition
+              WriteData "Office Key ($($intProductCount))" "$($strOfficeEdition) : $($officeKey)"
+              $script:blnOffice = $true
+              $intProductCount += 1
+            }
+          } catch {
+            $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+            logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n$($err)`r`n`r`nPerforming Fallback : $($subKey)"
+          }
         }
       }
     } catch {
