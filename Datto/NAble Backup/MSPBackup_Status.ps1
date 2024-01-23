@@ -124,11 +124,12 @@ try {
   $Backups = foreach ($source in $DataSources) {
     $Session = $SessionsList | where {$_.DSRC -eq $source} | sort -property start -descending | select -first 1
     $State = switch ($Session.state) {
+      'Completed' {"Backup has completed successfully. Backup Completed at $($session.end)"}
+      'CompletedwithErrors' {"Backup has completed with an error. Backup Started at $($session.start)"}
       'Failed' {"Backup has failed with an error. Backup Started at $($session.start)"}
-      'Skipped' {"Backup has been skipped as previous job was still running. Backup Started at $($session.start)"}
       'InProcess' {if ($session.start -lt $Date) {"Backup has been running for over $($range) hours. Backup Started at $($session.start)"}}
       'Interrupted' {"Backup has been interrupted. Backup Started at $($session.start)"}
-      'CompletedwithErrors' {"Backup has completed with an error. Backup Started at $($session.start)"}
+      'Skipped' {"Backup has been skipped as previous job was still running. Backup Started at $($session.start)"}
     }
     [pscustomobject] @{
       'DataSource'  = $source
