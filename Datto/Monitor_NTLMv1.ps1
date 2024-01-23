@@ -207,6 +207,7 @@ try {
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinServerSec" 537395200}
   }
   if (($null -eq $hashNTLM.AuditReceivingNTLMTraffic) -or ($hashNTLM.AuditReceivingNTLMTraffic -ne 2)) {
+    #Set `AuditReceivingNTLMTraffic` to `Audit All Accounts`
     $script:blnWARN = $true; $warn += "Not Auditing Received NTLM Traffic from All Accounts`r`n"
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "AuditReceivingNTLMTraffic" 2}
   }
@@ -214,6 +215,8 @@ try {
     $script:blnWARN = $true; $warn += "Sending of NTLM Traffic Remotely Allowed and not Audited`r`n"
     #Full Consequences currently unknown
     #Known Issues : 'Deny All' will prevent Outlook / Office authentication
+    #Known Issues : Any 'Deny' settings can/will prevent Network Shares/SMB authentication
+    #Set `RestrictSendingNTLMtraffic` to `Audit All`
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "RestrictSendingNTLMtraffic" 1}
   }
   if (($null -eq $hashNTLM.RestrictReceivingNTLMtraffic) -or ($hashNTLM.RestrictReceivingNTLMtraffic -eq 0)) {
