@@ -183,7 +183,68 @@
 
   function check-PERF ($objPERF, $objDISK) {
     #DOUBLE-CHECK PASSED THRESHOLDS
-    if ($objDISK.mediatype -ne "SSD") {
+    write-output "SETTING THRESHOLDS FOR MEDIATYPE : $($objDISK.mediatype)"
+    $script:diag += "SETTING THRESHOLDS FOR MEDIATYPE : $($objDISK.mediatype)`r`n"
+    switch ($($objDISK.mediatype).toupper()) {
+      "NVME" {
+        if (($env:varCurrentDiskQueueLength -eq $null) -or ($env:varCurrentDiskQueueLength -eq "")) {$env:varCurrentDiskQueueLength = 2}
+        if (($env:varAvgDiskQueueLength -eq $null) -or ($env:varAvgDiskQueueLength -eq "")) {$env:varAvgDiskQueueLength = 2}
+        if (($env:varAvgDiskReadQueueLength -eq $null) -or ($env:varAvgDiskReadQueueLength -eq "")) {$env:varAvgDiskReadQueueLength = 2}
+        if (($env:varAvgDiskWriteQueueLength -eq $null) -or ($env:varAvgDiskWriteQueueLength -eq "")) {$env:varAvgDiskWriteQueueLength = 2}
+
+        if (($env:varPercentDiskTime -eq $null) -or ($env:varPercentDiskTime -eq "")) {$env:varPercentDiskTime = 50}
+        if (($env:varPercentDiskReadTime -eq $null) -or ($env:varPercentDiskReadTime -eq "")) {$env:varPercentDiskReadTime = 75}
+        if (($env:varPercentDiskWriteTime -eq $null) -or ($env:varPercentDiskWriteTime -eq "")) {$env:varPercentDiskWriteTime = 75}
+        if (($env:varPercentIdleTime -eq $null) -or ($env:varPercentIdleTime -eq "")) {$env:varPercentIdleTime = 25}
+        if (($env:varSplitIOPerSec -eq $null) -or ($env:varSplitIOPerSec -eq "")) {$env:varSplitIOPerSec = 100}
+
+        if (($env:varDiskReadsPersec -eq $null) -or ($env:varDiskReadsPersec -eq "")) {$env:varDiskReadsPersec = 100}
+        #if (($env:varAvgDisksecPerRead -eq $null) -or ($env:varAvgDisksecPerRead -eq "")) {$env:varAvgDisksecPerRead = 2}
+        if (($env:varAvgDiskBytesPerRead -eq $null) -or ($env:varAvgDiskBytesPerRead -eq "")) {$env:varAvgDiskBytesPerRead = 1073741824}
+
+        if (($env:varDiskWritesPersec -eq $null) -or ($env:varDiskWritesPersec -eq "")) {$env:varDiskWritesPersec = 100}
+        #if (($env:varAvgDisksecPerWrite -eq $null) -or ($env:varAvgDisksecPerWrite -eq "")) {$env:varAvgDisksecPerWrite = 2}
+        if (($env:varAvgDiskBytesPerWrite -eq $null) -or ($env:varAvgDiskBytesPerWrite -eq "")) {$env:varAvgDiskBytesPerWrite = 1073741824}
+
+        if (($env:varDiskBytesPersec -eq $null) -or ($env:varDiskBytesPersec -eq "")) {$env:varDiskBytesPersec = 1073741824}
+        if (($env:varDiskReadBytesPersec -eq $null) -or ($env:varDiskReadBytesPersec -eq "")) {$env:varDiskReadBytesPersec = 1073741824}
+        if (($env:varDiskWriteBytesPersec -eq $null) -or ($env:varDiskWriteBytesPersec -eq "")) {$env:varDiskWriteBytesPersec = 1073741824}
+
+        if (($env:varDiskTransfersPersec -eq $null) -or ($env:varDiskTransfersPersec -eq "")) {$env:varDiskTransfersPersec = 100}
+        #if (($env:varAvgDisksecPerTransfer -eq $null) -or ($env:varAvgDisksecPerTransfer -eq "")) {$env:varAvgDisksecPerTransfer = 2}
+        if (($env:varAvgDiskBytesPerTransfer -eq $null) -or ($env:varAvgDiskBytesPerTransfer -eq "")) {$env:varAvgDiskBytesPerTransfer = 1073741824}
+      }
+
+      "SSD" {
+        if (($env:varCurrentDiskQueueLength -eq $null) -or ($env:varCurrentDiskQueueLength -eq "")) {$env:varCurrentDiskQueueLength = 2}
+        if (($env:varAvgDiskQueueLength -eq $null) -or ($env:varAvgDiskQueueLength -eq "")) {$env:varAvgDiskQueueLength = 2}
+        if (($env:varAvgDiskReadQueueLength -eq $null) -or ($env:varAvgDiskReadQueueLength -eq "")) {$env:varAvgDiskReadQueueLength = 2}
+        if (($env:varAvgDiskWriteQueueLength -eq $null) -or ($env:varAvgDiskWriteQueueLength -eq "")) {$env:varAvgDiskWriteQueueLength = 2}
+
+        if (($env:varPercentDiskTime -eq $null) -or ($env:varPercentDiskTime -eq "")) {$env:varPercentDiskTime = 50}
+        if (($env:varPercentDiskReadTime -eq $null) -or ($env:varPercentDiskReadTime -eq "")) {$env:varPercentDiskReadTime = 75}
+        if (($env:varPercentDiskWriteTime -eq $null) -or ($env:varPercentDiskWriteTime -eq "")) {$env:varPercentDiskWriteTime = 75}
+        if (($env:varPercentIdleTime -eq $null) -or ($env:varPercentIdleTime -eq "")) {$env:varPercentIdleTime = 25}
+        if (($env:varSplitIOPerSec -eq $null) -or ($env:varSplitIOPerSec -eq "")) {$env:varSplitIOPerSec = 100}
+
+        if (($env:varDiskReadsPersec -eq $null) -or ($env:varDiskReadsPersec -eq "")) {$env:varDiskReadsPersec = 100}
+        #if (($env:varAvgDisksecPerRead -eq $null) -or ($env:varAvgDisksecPerRead -eq "")) {$env:varAvgDisksecPerRead = 2}
+        if (($env:varAvgDiskBytesPerRead -eq $null) -or ($env:varAvgDiskBytesPerRead -eq "")) {$env:varAvgDiskBytesPerRead = 1073741824}
+
+        if (($env:varDiskWritesPersec -eq $null) -or ($env:varDiskWritesPersec -eq "")) {$env:varDiskWritesPersec = 100}
+        #if (($env:varAvgDisksecPerWrite -eq $null) -or ($env:varAvgDisksecPerWrite -eq "")) {$env:varAvgDisksecPerWrite = 2}
+        if (($env:varAvgDiskBytesPerWrite -eq $null) -or ($env:varAvgDiskBytesPerWrite -eq "")) {$env:varAvgDiskBytesPerWrite = 1073741824}
+
+        if (($env:varDiskBytesPersec -eq $null) -or ($env:varDiskBytesPersec -eq "")) {$env:varDiskBytesPersec = 1073741824}
+        if (($env:varDiskReadBytesPersec -eq $null) -or ($env:varDiskReadBytesPersec -eq "")) {$env:varDiskReadBytesPersec = 1073741824}
+        if (($env:varDiskWriteBytesPersec -eq $null) -or ($env:varDiskWriteBytesPersec -eq "")) {$env:varDiskWriteBytesPersec = 1073741824}
+
+        if (($env:varDiskTransfersPersec -eq $null) -or ($env:varDiskTransfersPersec -eq "")) {$env:varDiskTransfersPersec = 100}
+        #if (($env:varAvgDisksecPerTransfer -eq $null) -or ($env:varAvgDisksecPerTransfer -eq "")) {$env:varAvgDisksecPerTransfer = 2}
+        if (($env:varAvgDiskBytesPerTransfer -eq $null) -or ($env:varAvgDiskBytesPerTransfer -eq "")) {$env:varAvgDiskBytesPerTransfer = 1073741824}
+      }
+
+      "HDD" {
         if (($env:varCurrentDiskQueueLength -eq $null) -or ($env:varCurrentDiskQueueLength -eq "")) {$env:varCurrentDiskQueueLength = 5}
         if (($env:varAvgDiskQueueLength -eq $null) -or ($env:varAvgDiskQueueLength -eq "")) {$env:varAvgDiskQueueLength = 5}
         if (($env:varAvgDiskReadQueueLength -eq $null) -or ($env:varAvgDiskReadQueueLength -eq "")) {$env:varAvgDiskReadQueueLength = 5}
@@ -210,16 +271,20 @@
         if (($env:varDiskTransfersPersec -eq $null) -or ($env:varDiskTransfersPersec -eq "")) {$env:varDiskTransfersPersec = 100}
         #if (($env:varAvgDisksecPerTransfer -eq $null) -or ($env:varAvgDisksecPerTransfer -eq "")) {$env:varAvgDisksecPerTransfer = 2}
         if (($env:varAvgDiskBytesPerTransfer -eq $null) -or ($env:varAvgDiskBytesPerTransfer -eq "")) {$env:varAvgDiskBytesPerTransfer = 1073741824}
-    } elseif ($objDISK.mediatype -eq "SSD") {
-        if (($env:varCurrentDiskQueueLength -eq $null) -or ($env:varCurrentDiskQueueLength -eq "")) {$env:varCurrentDiskQueueLength = 2}
-        if (($env:varAvgDiskQueueLength -eq $null) -or ($env:varAvgDiskQueueLength -eq "")) {$env:varAvgDiskQueueLength = 2}
-        if (($env:varAvgDiskReadQueueLength -eq $null) -or ($env:varAvgDiskReadQueueLength -eq "")) {$env:varAvgDiskReadQueueLength = 2}
-        if (($env:varAvgDiskWriteQueueLength -eq $null) -or ($env:varAvgDiskWriteQueueLength -eq "")) {$env:varAvgDiskWriteQueueLength = 2}
+      }
+      
+      Default {
+        write-output "MEDIATYPE NOT DETECTED : USING DEFAULTS FOR : $($objDISK.mediatype)"
+        $script:diag += "MEDIATYPE NOT DETECTED : USING DEFAULTS FOR : $($objDISK.mediatype)`r`n"
+        if (($env:varCurrentDiskQueueLength -eq $null) -or ($env:varCurrentDiskQueueLength -eq "")) {$env:varCurrentDiskQueueLength = 5}
+        if (($env:varAvgDiskQueueLength -eq $null) -or ($env:varAvgDiskQueueLength -eq "")) {$env:varAvgDiskQueueLength = 5}
+        if (($env:varAvgDiskReadQueueLength -eq $null) -or ($env:varAvgDiskReadQueueLength -eq "")) {$env:varAvgDiskReadQueueLength = 5}
+        if (($env:varAvgDiskWriteQueueLength -eq $null) -or ($env:varAvgDiskWriteQueueLength -eq "")) {$env:varAvgDiskWriteQueueLength = 5}
 
-        if (($env:varPercentDiskTime -eq $null) -or ($env:varPercentDiskTime -eq "")) {$env:varPercentDiskTime = 25}
-        if (($env:varPercentDiskReadTime -eq $null) -or ($env:varPercentDiskReadTime -eq "")) {$env:varPercentDiskReadTime = 75}
-        if (($env:varPercentDiskWriteTime -eq $null) -or ($env:varPercentDiskWriteTime -eq "")) {$env:varPercentDiskWriteTime = 75}
-        if (($env:varPercentIdleTime -eq $null) -or ($env:varPercentIdleTime -eq "")) {$env:varPercentIdleTime = 25}
+        if (($env:varPercentDiskTime -eq $null) -or ($env:varPercentDiskTime -eq "")) {$env:varPercentDiskTime = 90}
+        if (($env:varPercentDiskReadTime -eq $null) -or ($env:varPercentDiskReadTime -eq "")) {$env:varPercentDiskReadTime = 90}
+        if (($env:varPercentDiskWriteTime -eq $null) -or ($env:varPercentDiskWriteTime -eq "")) {$env:varPercentDiskWriteTime = 90}
+        if (($env:varPercentIdleTime -eq $null) -or ($env:varPercentIdleTime -eq "")) {$env:varPercentIdleTime = 10}
         if (($env:varSplitIOPerSec -eq $null) -or ($env:varSplitIOPerSec -eq "")) {$env:varSplitIOPerSec = 100}
 
         if (($env:varDiskReadsPersec -eq $null) -or ($env:varDiskReadsPersec -eq "")) {$env:varDiskReadsPersec = 100}
@@ -237,6 +302,7 @@
         if (($env:varDiskTransfersPersec -eq $null) -or ($env:varDiskTransfersPersec -eq "")) {$env:varDiskTransfersPersec = 100}
         #if (($env:varAvgDisksecPerTransfer -eq $null) -or ($env:varAvgDisksecPerTransfer -eq "")) {$env:varAvgDisksecPerTransfer = 2}
         if (($env:varAvgDiskBytesPerTransfer -eq $null) -or ($env:varAvgDiskBytesPerTransfer -eq "")) {$env:varAvgDiskBytesPerTransfer = 1073741824}
+      }
     }
     #CHECK DRIVE PERFORMANCE
     if (($objPERF.CurrentDiskQueueLength -ne $null) -and ($objPERF.CurrentDiskQueueLength -gt $env:varCurrentDiskQueueLength)) {pop-Warnings $script:disks $objPERF.name "  - CurrentDiskQueueLength (Current Threshold : $($env:varCurrentDiskQueueLength))`r`n"}
