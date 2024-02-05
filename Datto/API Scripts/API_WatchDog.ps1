@@ -375,10 +375,11 @@
       apiUrl          = $script:rmmAPI
       ApiAccessToken  = $script:rmmToken
       apiRequest      = "/v2/site"
-      apiRequestBody  = "{`"autotaskCompanyId`": `"$($id)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $onDemand,`"splashtopAutoInstall`": $installSplashtop}"
+      apiRequestBody  = "{`"autotaskCompanyId`": `"$($id)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $($onDemand),`"splashtopAutoInstall`": $($installSplashtop)}"
     }
     try {
       $script:blnSITE = $false
+      RMM-ApiRequest @params -UseBasicParsing
       $script:newSite = (RMM-ApiRequest @params -UseBasicParsing) #| ConvertFrom-Json
       if ($script:newSite -match $name) {
         return $true
@@ -706,8 +707,8 @@ if (-not $script:blnFAIL) {
           $params = @{
             id                  = $company.CompanyID
             name                = $company.CompanyName
-            description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`nCreated by API Watchdog`r`n$($date)"
-            notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`nCreated by API Watchdog`r`n$($date)"
+            description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
+            notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
             onDemand            = "false"
             installSplashtop    = "true"
           }
@@ -743,7 +744,7 @@ if (-not $script:blnFAIL) {
               rmmID               = $rmmSite.uid
               psaID               = $company.CompanyID
               name                = $company.CompanyName
-              description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`nUpdated by API Watchdog`r`n$($date)"
+              description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nUpdated by API Watchdog\n$($date)"
               notes               = "$($note)"
               onDemand            = "false"
               installSplashtop    = "true"
