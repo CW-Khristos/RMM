@@ -902,7 +902,7 @@ try {
       if (($script:drmmDevice.externalIP) -and 
         ($null -ne $script:drmmDevice.externalIP) -and ($script:drmmDevice.externalIP -ne "")) {
           #ADD EXTERNAL IP TO 'spamCHECK' HASHTABLE
-          $script:drmmSite = $script:drmmSites.sites | where {$_.uid -eq $script:device.siteUid}
+          $script:drmmSite = $script:drmmSites.sites | where {$_.uid -eq $script:drmmDevice.SiteUid}
           Pop-HashTable $script:spamCHECK "$($script:drmmSite.name)" "$($script:drmmDevice.externalIP)"
       }
     }
