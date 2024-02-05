@@ -940,15 +940,17 @@ if (-not $script:blnBREAK) {
           try {
             $script:outCheck = $null
             start-sleep -Milliseconds 200
-            logERR 4 "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
-            $script:diag += "`r`n`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).' :`r`n`t`t$($strLineSeparator)"
+            logERR 4 "`tChecking : $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).'"
             $script:outCheck = [system.net.dns]::gethostentry("$($ipParts).$($script:spamMAP[$blocklist].siteAddress).")
           } catch {
             write-output "`tNo Listing for $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).'`r`n`t`t$($strLineSeparator)"
+            $script:diag += "`tNo Listing for $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).'`r`n`t`t$($strLineSeparator)`r`n"
             #NOT CATCHING ANY ERRORS ATM
           }
           #IF RETURNED DATA MATCHES KNOWN RETURN CODES in 'spamMAP' HASHTABLE
           $returnCode = $script:outCheck.addresslist.ipaddresstostring
+          write-output "`t`t$($blocklist) : Reported Return Code : $($returnCode.trim())`r`n`t`t$($strLineSeparator)"
+          $script:diag += "`t`t$($blocklist) : Reported Return Code : $($returnCode.trim())`r`n`t`t$($strLineSeparator)`r`n"
           if ($script:spamMAP[$blocklist].returnCodes."$($returnCode)") {
             $script:spamdiag = "`tBLOCKED : $($extIP.trim()) :`r`n"
             $script:spamdiag += "`t`tZone : $($script:spamMAP[$blocklist].returnCodes[$returnCode].zone)`r`n"
@@ -992,6 +994,7 @@ if (-not $script:blnBREAK) {
         }
       } catch {
         write-output "No Listing for $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).'"
+        $script:diag += "No Listing for $($extIP.trim()) as '$($ipParts).$($script:spamMAP[$blocklist].siteAddress).'`r`n"
         #NOT CATCHING ANY ERRORS ATM
       }
     }
