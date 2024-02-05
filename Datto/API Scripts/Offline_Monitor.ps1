@@ -479,7 +479,6 @@ Remove-Variable * -ErrorAction SilentlyContinue
   }  ## Convert epoch time to date time
 
   function logERR ($intSTG, $strModule, $strErr) {
-    $script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
       #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
@@ -496,9 +495,16 @@ Remove-Variable * -ErrorAction SilentlyContinue
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - Offline_Monitor - ($($strModule)) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr)`r`n`tEND SCRIPT`r`n`r`n"
       }
-      #'ERRRET'=3+
+      #'ERRRET'=3
       3 {
-        $script:blnWARN = $false
+        $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - Offline_Monitor - $($strModule) :"
+        $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
+        write-output "$($strLineSeparator)`r`n$($(get-date))`t - Offline_Monitor - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)"
+      }
+      #'ERRRET'=4
+      4 {
+        $script:blnWARN = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - Offline_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - Offline_Monitor - $($strModule) :"
@@ -506,6 +512,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
       }
       #'ERRRET'=4+
       default {
+        $script:blnWARN = $true
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date))`t - Offline_Monitor - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
@@ -686,3 +693,20 @@ StopClock
 #CLEAR LOGFILE
 $null | set-content $script:logPath -force
 "$($script:diag)" | add-content $script:logPath -force
+if (-not $script:blnBREAK) {
+  if (-not $script:blnWARN) {
+    write-DRMMAlert "Offline_Monitor : Healthy. No Issues Found : $($finish)"
+    write-DRMMDiag "$($script:diag)"
+    exit 0
+  } elseif ($script:blnWARN) {
+    write-DRMMAlert "Offline_Monitor : Issues Found. Please Check Diagnostics : $($finish)"
+    write-DRMMDiag "$($script:diag)"
+    exit 1
+  }
+} elseif ($script:blnBREAK) {
+  write-DRMMAlert "Offline_Monitor : Execution Failed : $($finish)"
+  write-DRMMDiag "$($script:diag)"
+  exit 1
+}
+#END SCRIPT
+#------------
