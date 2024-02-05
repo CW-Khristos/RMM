@@ -390,7 +390,7 @@
       $script:blnFAIL = $true
       $script:blnSITE = $false
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-      logERR 3 "RMM-NewSite" "API_WatchDog : Failed to create New DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
+      logERR 3 "RMM-NewSite" "Failed to create New DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
     }
   }
 #endregion ----- RMM FUNCTIONS ----
@@ -727,7 +727,7 @@ if (-not $script:blnFAIL) {
           $script:blnWARN = $true
           $script:blnFAIL = $true
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-          logERR 3 "RMM CREATE SITE" "RMM CREATE SITE : $($company.CompanyName) : FAILED`r`n$($err)"
+          logERR 3 "RMM CREATE SITE" "RMM CREATE SITE : $($company.CompanyName) : FAILED :`r`n$($params)`r`n$($strLineSeparator)`r`n$($err)"
         }
       #UPDATE SITE IN DRMM
       } elseif (($null -ne $rmmSite) -and ($rmmSite -ne "")) {
