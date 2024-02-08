@@ -217,16 +217,16 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
     try {
       logERR 3 "QueryWindowsKeys" "Querying Windows Keys"
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId" 52)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {return}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId4" 808)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {return}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId" 52)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {return}
       
       $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId4" 808)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {WriteData "Windows Key" $strWinKey; return}
+      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {return}
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       logERR 3 "QueryWindowsKeys" "Failed to Query Windows Keys`r`n$($err)"
@@ -236,34 +236,38 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
 
   function CheckWindowsKey ($strRegPath, $strRegValue, $intKeyOffset) {
     try {
+      $strWinKey = $null
       logERR 3 "CheckWindowsKey" "Checking Windows Key : $($strRegPath)"
       $binRegVal = get-itempropertyvalue -path "$($strRegPath)" -name "$($strRegValue)"
       #write-output "Windows Key (Binary) : $($binRegVal)"
       $strWinKey = $(DecodeProductKey $binRegVal $intKeyOffset)
       if (($null -ne $strWinKey) -and ($strWinKey -ne "") -and ($strWinKey -ne "BBBBB-BBBBB-BBBBB-BBBBB-BBBBB")) {
+        WriteData "Windows Key" $strWinKey
         #write-output "Windows Key : $($strWinKey)"
-        return $strWinKey
+        #return $strWinKey
       } else {
-        return $null
+        #return $null
       }
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)"
+      logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)`r`n`r`nPerforming Fallback : "
       try {
+        $strWinKey = $null
         $binRegVal = (get-item -path "$($strRegPath)").getvalue("$($strRegValue)")
         #write-output "Windows Key (Binary) : $($binRegVal)"
         $strWinKey = $(DecodeProductKey $binRegVal $intKeyOffset)
         if (($null -ne $strWinKey) -and ($strWinKey -ne "") -and ($strWinKey -ne "BBBBB-BBBBB-BBBBB-BBBBB-BBBBB")) {
           #write-output "Windows Key : $($strWinKey)"
-          return $strWinKey
+          WriteData "Windows Key" $strWinKey
+          #return $strWinKey
         } else {
-          return $null
+          #return $null
         }
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
         logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)"
+        #return $null
       }
-      return $null
     }
   }
 
