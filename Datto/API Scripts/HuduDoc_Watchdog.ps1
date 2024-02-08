@@ -248,30 +248,34 @@ To Do:
     $script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
-      1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      1 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
-      2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      2 {
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - ($($strModule)) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - ($($strModule)) :" -foregroundcolor red
-        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - ($($strModule)) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
       }
-      {3,4} {                                                     #'ERRRET'=3 & 4
+      #'ERRRET'=3 & 4
+      {3, 4} {
         $script:blnWARN = $false
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor yellow
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)"
       }
-      default {                                                   #'ERRRET'=5+
+      #'ERRRET'=5+
+      default {
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
-        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :" -foregroundcolor yellow
-        write-output "$($strLineSeparator)`r`n`t$($strErr)" -foregroundcolor red
+        write-output "$($strLineSeparator)`r`n$($(get-date)) - HuduDoc_WatchDog - $($strModule) :"
+        write-output "$($strLineSeparator)`r`n`t$($strErr)"
       }
     }
   }
