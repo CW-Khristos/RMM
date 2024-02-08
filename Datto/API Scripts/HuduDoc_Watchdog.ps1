@@ -69,9 +69,16 @@ To Do:
   $logPath                        = "C:\IT\Log\HuduDoc_Watchdog"
   $strLineSeparator               = "----------------------------------"
   $timestamp                      = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
-  ######################### TLS Settings ###########################
+  #region######################## TLS Settings ###########################
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
-  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+  #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
+  [System.Net.ServicePointManager]::SecurityProtocol = (
+    [System.Net.SecurityProtocolType]::Tls13 -bor 
+    [System.Net.SecurityProtocolType]::Tls12 -bor 
+    [System.Net.SecurityProtocolType]::Tls11 -bor 
+    [System.Net.SecurityProtocolType]::Tls
+  )
+  #endregion
   #region######################## Hudu Settings ###########################
   $script:huduCalls               = 0
   #HUDU DATASETS
@@ -191,6 +198,7 @@ To Do:
   #PSA API URLS
   $AutotaskRoot                   = $env:ATRoot
   $AutoTaskAPIBase                = $env:ATAPIBase
+  $AutotaskAcct                   = "/Autotask/AutotaskExtend/ExecuteCommand.aspx?Code=OpenAccount&AccountID="
   $AutotaskExe                    = "/Autotask/AutotaskExtend/ExecuteCommand.aspx?Code=OpenTicketDetail&TicketNumber="
   $AutotaskDev                    = "/Autotask/AutotaskExtend/AutotaskCommand.aspx?&Code=OpenInstalledProduct&InstalledProductID="
   ########################### Autotask Auth ##############################
@@ -784,16 +792,17 @@ To Do:
       $reportDate = get-date
       if ($i_AllDevices) {
         #BACKUPS
-        $script:SelectedDevices = $script:BackupsDetails | where {$_.PartnerName -eq "$($i_Company)"} | 
-          select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-            TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes
+        $script:SelectedDevices = $script:BackupsDetails | 
+          where {(($_.PartnerName -eq "$($i_Company)") -or ($_.PartnerName -match "$($i_Company)"))} | 
+            select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
+              TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes
         $bmdiag = "$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
         logERR 4 "Set-BackupDash : Backups" "$($bmdiag)"
         #RECOVERIES
-        $script:SelectedRecoveries = $Script:DRStatistics | where {$_.backup_cloud_partner_name -eq "$($i_Company)"} | 
-          select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,
-            plan_name,data_sources,backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,
-              current_recovery_status,last_recovery_timestamp,recovery_target_type
+        $script:SelectedRecoveries = $Script:DRStatistics | 
+          where {(($_.backup_cloud_partner_name -eq "$($i_Company)") -or ($_.backup_cloud_partner_name -match "$($i_Company)"))} | 
+            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,plan_name,data_sources,
+              backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,current_recovery_status,last_recovery_timestamp,recovery_target_type
         $bmdiag = "$($SelectedRecoveries.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
         logERR 4 "Set-BackupDash : Recoveries" "$($bmdiag)"
       } elseif (-not $i_AllDevices) {
@@ -806,9 +815,8 @@ To Do:
           logERR 4 "Set-BackupDash : Backups" "$($bmdiag)"
           #RECOVERIES
           $script:SelectedRecoveries = $Script:DRStatistics | where {$_.backup_cloud_device_machine_name -eq $i_BackupID} | 
-            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,
-              plan_name,data_sources,backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,
-                current_recovery_status,last_recovery_timestamp,recovery_target_type
+            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,plan_name,data_sources,
+              backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,current_recovery_status,last_recovery_timestamp,recovery_target_type
           $bmdiag = "$($SelectedRecoveries.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
           logERR 4 "Set-BackupDash : Recoveries" "$($bmdiag)"
         }
@@ -830,21 +838,21 @@ To Do:
         #RECOVERIES
         if (@($script:SelectedRecoveries).count -gt 0) {
           $recoveries = $script:SelectedRecoveries | 
-            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,
-              plan_name,data_sources,backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,
-                current_recovery_status,last_recovery_timestamp,recovery_target_type | format-table | out-string
+            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,plan_name,data_sources,
+              backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,current_recovery_status,last_recovery_timestamp,recovery_target_type | 
+                format-table | out-string
           $failed = @($script:SelectedRecoveries | where {$_.last_recovery_status -ne "Completed"}).count
           $bmdiag = $recoveries | out-string
           $bmdiag = "`r`n$($strLineSeparator)`r`n`tRecoveries :`r`n$($bmdiag)`r`n$($strLineSeparator)`r`n"
           $bmdiag = "$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
           logERR 4 "Set-BackupDash : Recoveries" "$($bmdiag)"
         }
-        $MagicMessage = "$(@($script:SelectedDevices).count) Protected Devices / `r`n"
+        $MagicMessage = "$(@($script:SelectedDevices).count) Protected Devices / `r`n<br>`r`n"
         $MagicMessage += " $(@($script:SelectedRecoveries).count) Recovery Verification Devices"
         #Update 'Tile' Shade based on Overdue Backups
         if (($overdue -ge 1) -or ($failed -ge 1)) {
           $shade = "warning"
-          $MagicMessage = "$($overdue) / $(@($script:SelectedDevices).count) Backups Overdue`r`n"
+          $MagicMessage = "$($overdue) / $(@($script:SelectedDevices).count) Backups Overdue`r`n<br>`r`n"
           $MagicMessage += " $($failed) / $(@($script:SelectedRecoveries).count) Recoveries Failed"
           #BACKUPS
           $badHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
@@ -1264,6 +1272,8 @@ if (-not $script:blnBREAK) {
         $skipCoTickets = 0
         $failCoTickets = 0
         #endregion
+        $atURL = "$($AutotaskAcct)$($company.CompanyID)"
+        $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"$($atURL)`"><b>Open $($company.CompanyName) in PSA</b></a></a></button></p>"
         write-output "`r`n$($strLineSeparator)`r`nProcessing $($company.CompanyName)`r`n$($strLineSeparator)" -foregroundcolor green
         $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($company.CompanyName)`r`n$($strLineSeparator)`r`n"
         #Find Company in Hudu
@@ -1318,14 +1328,14 @@ if (-not $script:blnBREAK) {
               select 'Ticket-Number', 'Created', 'Title', 'Due', 'Resource', 'Last-Updater', 'Last-Update', 
                 'Priority', 'Source', 'Status', 'Type', 'Sub-Type', 'Ticket-Type' | 
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
-            $body = "<h4>Report last updated: $($reportDate)</h4><h2>Overdue Tickets:</h2><figure class=`"table`">$($overdueHTML)</figure>"
+            $body = "$($body)<h4>Report last updated: $($reportDate)</h4><h2>Overdue Tickets:</h2><figure class=`"table`">$($overdueHTML)</figure>"
             $body = "$($body)<h2>Tickets:</h2><figure class=`"table`">$($goodhtml)</figure>"
           } else {
             $goodHTML = [System.Net.WebUtility]::HtmlDecode(($outTickets | 
               select 'Ticket-Number', 'Created', 'Title', 'Due', 'Resource', 'Last-Updater', 'Last-Update', 
                 'Priority', 'Source', 'Status', 'Type', 'Sub-Type', 'Ticket-Type' | 
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
-            $body = "<h4>Report last updated: $($reportDate)</h4><h2>Tickets:</h2><figure class=`"table`">$($goodHTML)</figure>"
+            $body = "$($body)<h4>Report last updated: $($reportDate)</h4><h2>Tickets:</h2><figure class=`"table`">$($goodHTML)</figure>"
           }
           #Update 'Tile' Shade based on Overdue Tickets
           if ($overdue -ge 2) {$shade = "danger"}
@@ -1346,7 +1356,7 @@ if (-not $script:blnBREAK) {
         } else {
           try {
             $script:huduCalls += 1
-            $Huduresult = Set-HuduMagicDash -title "Autotask - Open Tickets" -company_name "$(($company.companyName).Trim())" -message "No Open Tickets" -icon "fas fa-chart-pie" -shade "success" -ea stop
+            $Huduresult = Set-HuduMagicDash -title "Autotask - Open Tickets" -company_name "$(($company.companyName).Trim())" -message "No Open Tickets" -contentlink "$($atURL)" -icon "fas fa-chart-pie" -shade "success" -ea stop
             $psadiag = "Autotask Magic Dash Set`r`n$($strLineSeparator)"
             logERR 3 "Set Autotask MagicDash" "$($psadiag)"
           } catch {
