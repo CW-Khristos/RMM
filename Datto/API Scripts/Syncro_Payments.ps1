@@ -64,7 +64,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
               $params.Uri = "$($script:syncroAPI)/$($entity)?$($query)&page=$($page)"
             }
             $script:syncroCalls += 1
-            write-output $params
+            #write-output $params
             Invoke-RestMethod @params -UseBasicParsing -erroraction stop
             start-sleep -milliseconds 500
             $page += 1
@@ -82,9 +82,11 @@ Remove-Variable * -ErrorAction SilentlyContinue
         Syncro-Query $method $entity $query
       } else {
         $script:blnWARN = $true
-        $script:diag += "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($query) : $($page)"
-        $script:diag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        write-output "$($script:diag)`r`n"
+        #$script:diag += "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($query) : $($page)"
+        #$script:diag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        #write-output "$($script:diag)`r`n"
+        $err = "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        logERR 3 "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($query) : $($page)  FAILED`r`n $($err)`r`n$($strLineSeparator)"
       }
     }
   }
@@ -125,9 +127,11 @@ Remove-Variable * -ErrorAction SilentlyContinue
         Syncro-Post $method $entity $body
       } else {
         $script:blnWARN = $true
-        $script:diag += "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($body) : $($page)"
-        $script:diag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        write-output "$($script:diag)`r`n"
+        #$script:diag += "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($body) : $($page)"
+        #$script:diag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        #write-output "$($script:diag)`r`n"
+        $err = "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        logERR 3 "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($body) : $($page) : FAILED `r`n $($err)`r`n$($strLineSeparator)"  
       }
     }
   }
@@ -167,9 +171,11 @@ Remove-Variable * -ErrorAction SilentlyContinue
         Syncro-Post $method $entity $body
       } else {
         $script:blnWARN = $true
-        $script:diag += "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($query) : $($page)"
-        $script:diag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        write-output "$($script:diag)`r`n"
+        #$script:diag += "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($query) : $($page)"
+        #$script:diag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        #write-output "$($script:diag)`r`n"
+        $err = "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+        logERR 3 "`r`nSyncro_Payments : Failed to query Syncro API via $($params.Uri) : $($method) : $($entity) : $($body) : $($page) : FAILED `r`n $($err)`r`n$($strLineSeparator)"  
       }
     }
   }
@@ -351,19 +357,23 @@ $script:sw = [Diagnostics.Stopwatch]::StartNew()
 
 try {
   #QUERY SYNCRO API
-  write-output "`r`n$($script:strLineSeparator)`r`nQUERYING SYNCRO API :`r`n$($script:strLineSeparator)"
+  logERR 3 "QUERY SYNCRO" "QUERYING SYNCRO API :`r`n$($script:strLineSeparator)"
   $script:syncroCustomers = Syncro-Query "GET" "customers" $null
   #write-output $script:syncroCustomers | out-string
-  write-output "`t$($script:strLineSeparator)`r`n`tTotal # Syncro Customers : $($script:syncroCustomers.customers.Count)"
+  write-output "`tTotal # Syncro Customers : $($script:syncroCustomers.customers.Count)`r`n`t$($script:strLineSeparator)"
+  $script:diag += "`tTotal # Syncro Customers : $($script:syncroCustomers.customers.Count)`r`n`t$($script:strLineSeparator)`r`n"
   start-sleep -milliseconds 200
   $script:syncroProducts = Syncro-Query "GET" "products" "category_id=195696"
   #write-output $script:syncroProducts | out-string
-  write-output "`t$($script:strLineSeparator)`r`n`tTotal # Syncro Products : $($script:syncroProducts.products.Count)"
+  write-output "`tTotal # Syncro Products : $($script:syncroProducts.products.Count)`r`n`t$($script:strLineSeparator)"
+  $script:diag += "`tTotal # Syncro Products : $($script:syncroProducts.products.Count)`r`n`t$($script:strLineSeparator)`r`n"
   start-sleep -milliseconds 200
   $script:unpaidInvoices = Syncro-Query "GET" "invoices" "unpaid=true"
   #write-output $script:syncroInvoices | out-string
-  write-output "`t$($script:strLineSeparator)`r`n`tTotal # UnPaid Syncro Invoices : $($script:unpaidInvoices.invoices.Count)"
-  write-output "`t$($script:strLineSeparator)`r`nQUERY SYNCRO DONE`r`n$($script:strLineSeparator)`r`n"
+  write-output "`tTotal # UnPaid Syncro Invoices : $($script:unpaidInvoices.invoices.Count)`r`n`t$($script:strLineSeparator)"
+  $script:diag += "`tTotal # UnPaid Syncro Invoices : $($script:unpaidInvoices.invoices.Count)`r`n`t$($script:strLineSeparator)"
+  write-output "`tQUERY SYNCRO DONE`r`n$($script:strLineSeparator)`r`n"
+  $script:diag += "`tQUERY SYNCRO DONE`r`n$($script:strLineSeparator)`r`n`r`n"
   start-sleep -milliseconds 200
   
   if ($script:syncroCustomers) {
@@ -372,26 +382,25 @@ try {
     foreach ($script:customer in $script:syncroCustomers.customers) {
       $invoices = $null
       start-sleep -milliseconds 200 #200msec X ~300 = 1min
-      write-output "$($script:strLineSeparator)"
-      write-output "`tProcessing Syncro Customer : $($script:customer.fullname) | $($script:customer.business_name) | Last Updated : $($script:customer.updated_at)"
-      write-output "$($script:strLineSeparator)"
+      logERR 3 "Customer Processing" "Processing Syncro Customer : $($script:customer.fullname) | $($script:customer.business_name) | Last Updated : $($script:customer.updated_at)"
       switch ([datetime]$actDate -le [datetime]$script:customer.updated_at) {
         false {
           $blnChk = $false
           Pop-Warning $script:syncroWARN "$($script:customer.fullname) | $($script:customer.business_name)" "WARN : Last Updated : $($script:customer.updated_at)`r`n"
-          write-output "`tWARN : $($script:customer.fullname) : Last Updated : $($script:customer.updated_at)"
-          #break
+          break
         }
         true {
           $script:customerInvoices = $script:unpaidInvoices.invoices | where {($_.customer_id -eq $script:customer.id)}
           #write-output $script:customerInvoices | out-string
           if (($script:customerInvoices | measure).count -eq 0) {
             write-output "`t# UnPaid Customer Syncro Invoices : $(($script:customerInvoices | measure).count)`r`n`t$($script:strLineSeparator)"
+            $script:diag += "`t# UnPaid Customer Syncro Invoices : $(($script:customerInvoices | measure).count)`r`n`t$($script:strLineSeparator)`r`n"
           } elseif (($script:customerInvoices | measure).count -gt 0) {
             foreach ($invoice in $script:customerInvoices) {
               $invoices += "Invoice # : $($invoice.number)`t- Due : $($invoice.due_date)`t- Total : $($invoice.total)`r`nhttps://ipmcomputers.syncromsp.com/invoices/$($invoice.id)`r`n"
             }
             write-output "`t# UnPaid Customer Syncro Invoices : $(($script:customerInvoices | measure).count)`r`n`t$($script:strLineSeparator)"
+            $script:diag += "`t# UnPaid Customer Syncro Invoices : $(($script:customerInvoices | measure).count)`r`n`t$($script:strLineSeparator)`r`n"
             $script:paymentProfile = Syncro-Query "GET" "customers/$($script:customer.id)/payment_profiles" $null
             if (-not ($script:paymentProfile.payment_profiles)) {
               Pop-Warning $script:syncroWARN "$($script:customer.fullname) | $($script:customer.business_name)" "WARN : UnPaid Invoices Detected - No Payment Profile Detected`r`n"
@@ -399,8 +408,10 @@ try {
               $script:payTickets = $script:payTickets.tickets | where {(($_.status -ne 'Resolved') -and ($_.customer_id -eq $script:customer.id))}
               if ($script:payTickets.tickets.count -gt 0) {
                 write-output "`tOpen Payment Tickets Found : Not Creating Ticket"
+                $script:diag += "`tOpen Payment Tickets Found : Not Creating Ticket`r`n"
               } elseif ($script:payTickets.tickets.count -le 0) {
                 write-output "`tNo Open Payment Tickets Found : Creating Ticket"
+                $script:diag += "`tNo Open Payment Tickets Found : Creating Ticket`r`n"
                 $newTicket = @{
                   number               = $null
                   ticket_type_id       = 42563
@@ -433,9 +444,8 @@ try {
   }
 } catch {
   $script:blnWARN = $true
-  $script:diag += "`r`nSyncro_Payments : Failed to query API via $($params.Uri)"
-  $script:diag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-  write-output "$($script:diag)`r`n"
+  $err = "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+  logERR 3 "Syncro_Payments" "`r`nSyncro_Payments : Failed to query API via $($params.Uri) : FAILED`r`n $($err)`r`n$($strLineSeparator)"  
 }
 
 write-output "`r`n$($strLineSeparator)`r`n`tThe Following Warning(s) Occurred :"
