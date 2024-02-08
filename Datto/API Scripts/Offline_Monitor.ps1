@@ -630,12 +630,12 @@ try {
     start-sleep -Milliseconds 100
     $script:psaCompany = $script:psaCompanies | where {$_.CompanyName -eq $script:rmmSite.name}
     switch ($($script:typeMap[[int]$($script:psaCompany.CompanyType)])) {
-      {(($_ -eq "Lead") -or ($_ -eq "Cancelation") -or ($_ -eq "Dead") -or ($_ -eq "Partner") -or ($_ -eq "Prospect") -or ($_ -eq "Vendor"))} {
+      {(($_ -eq "Assessment") -or ($_ -eq "Lead") -or ($_ -eq "Cancelation") -or ($_ -eq "Dead") -or ($_ -eq "Partner") -or ($_ -eq "Prospect") -or ($_ -eq "Vendor"))} {
         logERR 3 "SITE DIAG" "Skipping $($script:rmmSite.name)`r`n$($strLineSeparator)"; break
       }
       default {
         switch ($script:rmmSite.name) {
-          {(($_ -match "CreateMe") -or ($_ -match "Garland") -or ($_ -eq "Managed") -or ($_ -match "Deleted Devices"))} {
+          {(($_ -match "IPM Computers - Private") -or ($_ -match "CreateMe") -or ($_ -match "Garland") -or ($_ -eq "Managed") -or ($_ -match "Deleted Devices"))} {
             logERR 3 "SITE DIAG" "Skipping $($script:rmmSite.name)`r`n$($strLineSeparator)"; break
           }
           default {
