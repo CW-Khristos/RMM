@@ -164,7 +164,7 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
       }
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 2 "Reg Add" "Failed to Query Windows/Office Keys`r`n$($err)"
+      logERR 2 "Reg Add" "Failed to Query Windows/Office Keys`r`n`t$($strLineSeparator)`r`n$($err)"
     }
   }
 
@@ -214,59 +214,57 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
   }
 
   function QueryWindowsKeys {
+    logERR 3 "QueryWindowsKeys" "Querying Windows Keys"
     try {
-      logERR 3 "QueryWindowsKeys" "Querying Windows Keys"
-      $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId" 52)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {return}
-      
-      $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId4" 808)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {return}
-      
-      $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId" 52)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {return}
-      
-      $strWinKey = $(CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId4" 808)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "")) {return}
+      CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId" 52
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 3 "QueryWindowsKeys" "Failed to Query Windows Keys`r`n$($err)"
-      return $null
+      logERR 3 "QueryWindowsKeys" "Failed to Query Windows Key`r`n`t$($strLineSeparator)`r`n$($err)"
+    }
+    try {
+      CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DigitalProductId4" 808
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 3 "QueryWindowsKeys" "Failed to Query Windows Key`r`n`t$($strLineSeparator)`r`n$($err)"
+    }
+    try {
+      CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId" 52
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 3 "QueryWindowsKeys" "Failed to Query Windows Key`r`n`t$($strLineSeparator)`r`n$($err)"
+    }
+    try {
+      CheckWindowsKey "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DefaultProductKey" "DigitalProductId4" 808
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 3 "QueryWindowsKeys" "Failed to Query Windows Key`r`n`t$($strLineSeparator)`r`n$($err)"
     }
   }
 
   function CheckWindowsKey ($strRegPath, $strRegValue, $intKeyOffset) {
     try {
-      $strWinKey = $null
       logERR 3 "CheckWindowsKey" "Checking Windows Key : $($strRegPath)"
       $binRegVal = get-itempropertyvalue -path "$($strRegPath)" -name "$($strRegValue)"
       #write-output "Windows Key (Binary) : $($binRegVal)"
-      $strWinKey = $(DecodeProductKey $binRegVal $intKeyOffset)
-      if (($null -ne $strWinKey) -and ($strWinKey -ne "") -and ($strWinKey -ne "BBBBB-BBBBB-BBBBB-BBBBB-BBBBB")) {
-        WriteData "Windows Key" $strWinKey
-        #write-output "Windows Key : $($strWinKey)"
-        #return $strWinKey
-      } else {
-        #return $null
+      $strKey = $(DecodeProductKey $binRegVal $intKeyOffset)
+      if (($null -ne $strKey) -and ($strKey -ne "") -and ($strKey -ne "BBBBB-BBBBB-BBBBB-BBBBB-BBBBB")) {
+        #write-output "CheckKey - Windows Key : $($strKey)"
+        WriteData "Windows Key" $strKey
       }
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)`r`n`r`nPerforming Fallback : "
+      logERR 3 "CheckWindowsKey" "Failed to Check Windows Key`r`n`t$($strLineSeparator)`r`n$($err)`r`n`r`nPerforming Fallback : "
       try {
-        $strWinKey = $null
         $binRegVal = (get-item -path "$($strRegPath)").getvalue("$($strRegValue)")
         #write-output "Windows Key (Binary) : $($binRegVal)"
-        $strWinKey = $(DecodeProductKey $binRegVal $intKeyOffset)
-        if (($null -ne $strWinKey) -and ($strWinKey -ne "") -and ($strWinKey -ne "BBBBB-BBBBB-BBBBB-BBBBB-BBBBB")) {
-          #write-output "Windows Key : $($strWinKey)"
-          WriteData "Windows Key" $strWinKey
-          #return $strWinKey
-        } else {
-          #return $null
+        $strKey = $(DecodeProductKey $binRegVal $intKeyOffset)
+        if (($null -ne $strKey) -and ($strKey -ne "") -and ($strKey -ne "BBBBB-BBBBB-BBBBB-BBBBB-BBBBB")) {
+          #write-output "CheckKey - Windows Key : $($strKey)"
+          WriteData "Windows Key" $strKey
         }
       } catch {
         $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-        logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n$($err)"
-        #return $null
+        logERR 4 "CheckWindowsKey" "Failed to Check Windows Key`r`n`t$($strLineSeparator)`r`n$($err)"
       }
     }
   }
@@ -289,7 +287,7 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
       if (-not $script:blnOffice) {logERR 3 "QueryOfficeKeys" "No Office Registration Data"}
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 3 "QueryOfficeKeys" "Failed to Query Office Keys`r`n$($err)"
+      logERR 3 "QueryOfficeKeys" "Failed to Query Office Keys`r`n`t$($strLineSeparator)`r`n$($err)"
     }
   }
 
@@ -310,8 +308,8 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
             $intProductCount += 1
           }
         } catch {
-          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-          logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n$($err)`r`n`r`nPerforming Fallback : $($subKey)"
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)"
+          logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n`t$($strLineSeparator)`r`n$($err)`r`n`r`nPerforming Fallback : $($subKey)"
           try {
             $strOfficeEdition = (get-item -path "Registry::$($subKey)" -erroraction silentlycontinue).getvalue("ConvertToEdition")
             $arrProductID = (get-item -path "Registry::$($subKey)" -erroraction silentlycontinue).getvalue("DigitalProductID")
@@ -325,13 +323,13 @@ This script was adapted from and based on the 'oldScript.vbs' VBS Script by 'Scr
             }
           } catch {
             $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-            logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n$($err)`r`n`r`nPerforming Fallback : $($subKey)"
+            logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n`t$($strLineSeparator)`r`n$($err)`r`n`r`nPerforming Fallback : $($subKey)"
           }
         }
       }
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n$($err)"
+      logERR 3 "CheckOfficeKey" "Failed to Check Office Registration`r`n`t$($strLineSeparator)`r`n$($err)"
     }
   }
 #endregion ----- FUNCTIONS ----
@@ -349,35 +347,20 @@ try {
   logERR 3 "WinKey" "Checking WMI for Windows Original Product Key"
   $prodKey = (Get-WmiObject -query 'select * from SoftwareLicensingService').OA3xOriginalProductKey
   if (-not $prodKey) {
-    try {
-      logERR 3 "WinKey" "Unable to locate Windows Original Product Key`r`n`tRunning legacy script..."
-      <#
-      $oldScript = get-processoutput -filename "cscript.exe" -args "/nologo .\oldScript.vbs $($windowsUDF) $($officeUDF)"
-      logERR 3 "Legacy Script" "StandardOutput :`r`n`t$($strLineSeparator)`r`n`t$($oldScript.StandardOutput)`t$($strLineSeparator)"
-      logERR 3 "Legacy Script" "StandardError :`r`n`t$($strLineSeparator)`r`n`t$($oldScript.StandardError)$($strLineSeparator)"
-      #>
-      QueryWindowsKeys
-    } catch {
-      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 2 "Legacy Script" "Failed to Query Windows/Office Keys`r`n$($err)"
-    }
+    logERR 3 "WinKey" "Unable to locate Windows Original Product Key`r`n`tRunning legacy script..."
+    QueryWindowsKeys
   } elseif ($prodKey) {
     try {
       logERR 3 "WinKey" "Windows Original Product Key found: $($prodKey)`r`n`tWritten to UDF$($windowsUDF)`r`n`t$($strLineSeparator)"
       WriteData "Windows Key" $($prodKey)
-      <#
-      $winKey = get-processoutput -filename "reg.exe" -args "add `"HKLM\Software\CentraStage`" /v `"Custom$($windowsUDF)`" /t REG_SZ /d `"$($prodKey) (Windows)`" /f"
-      logERR 3 "Reg Add" "StandardOutput :`r`n`t$($strLineSeparator)`r`n`t$($winKey.StandardOutput)`t$($strLineSeparator)"
-      logERR 3 "Reg Add" "StandardError :`r`n`t$($strLineSeparator)`r`n`t$($winKey.StandardError)$($strLineSeparator)"
-      #>
     } catch {
       $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 2 "WinKey" "Failed to Write Windows/Office Keys`r`n$($err)"
+      logERR 2 "WinKey" "Failed to Write Windows/Office Keys`r`n`t$($strLineSeparator)`r`n$($err)"
     }
   }
 } catch {
   $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-  logERR 2 "WinKey" "Failed to Query Windows/Office Keys`r`n$($err)"
+  logERR 2 "WinKey" "Failed to Query Windows/Office Keys`r`n`t$($strLineSeparator)`r`n$($err)"
 }
 #Stop script execution time calculation
 StopClock
