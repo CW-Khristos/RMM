@@ -9,8 +9,11 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $script:strLineSeparator  = "---------"
   $script:logPath           = "C:\IT\Log\BDGZ_Status"
   #region######################## TLS Settings ###########################
+  [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   [System.Net.ServicePointManager]::SecurityProtocol = (
+    [System.Net.SecurityProtocolType]::Ssl3 -bor 
+    [System.Net.SecurityProtocolType]::Ssl2 -bor 
     [System.Net.SecurityProtocolType]::Tls13 -bor 
     [System.Net.SecurityProtocolType]::Tls12 -bor 
     [System.Net.SecurityProtocolType]::Tls11 -bor 
@@ -675,7 +678,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
   }  ## Pop-Warnings
 
   function logERR ($intSTG, $strModule, $strErr) {
-    $script:blnWARN = $true
+    #$script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
       #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
@@ -776,6 +779,7 @@ try {
   logERR 3 "BDGZ API" "QUERYING BDGZ COMPANIES :`r`n`t$($script:strLineSeparator)"
   $script:bdgzCompanies = BDGZ-GetCompanies
   write-output "`tDone`r`n`t$($script:strLineSeparator)"
+  $script:diag += "`tDone`r`n`t$($script:strLineSeparator)`r`n"
   logERR 3 "BDGZ API" "QUERY BDGZ COMPANIES DONE`r`n$($script:strLineSeparator)`r`n"
 
   #QUERY AT PSA API
@@ -796,15 +800,17 @@ try {
   logERR 3 "AT API" "$($script:strLineSeparator)`r`n`tRETRIEVING COMPANIES :`r`n`t$($script:strLineSeparator)"
   PSA-GetCompanies $script:psaHeaders
   write-output "`tDone`r`n`t$($script:strLineSeparator)"
+  $script:diag += "`tDone`r`n`t$($script:strLineSeparator)`r`n"
   logERR 3 "AT API" "QUERY AT DONE`r`n$($script:strLineSeparator)`r`n"
 
   #QUERY SYNCRO API
-  write-output "`r`n$($script:strLineSeparator)`r`nQUERYING SYNCRO API :`r`n$($script:strLineSeparator)"
+  logERR 3 "SYNCRO API" "QUERYING SYNCRO API :`r`n$($script:strLineSeparator)"
   $script:syncroCustomers = Syncro-Query "GET" "customers" $null
   #write-output $script:syncroCustomers | out-string
-  write-output "`t$($script:strLineSeparator)`r`n`tTotal # Syncro Customers : $($script:syncroCustomers.customers.Count)"
+  write-output "`tTotal # Syncro Customers : $($script:syncroCustomers.customers.Count)`r`n$($script:strLineSeparator)"
+  $script:diag += "`tTotal # Syncro Customers : $($script:syncroCustomers.customers.Count)`r`n$($script:strLineSeparator)`r`n"
   start-sleep -milliseconds 200
-  write-output "`t$($script:strLineSeparator)`r`nQUERY SYNCRO DONE`r`n$($script:strLineSeparator)`r`n"
+  logERR 3 "SYNCRO API" "QUERY SYNCRO DONE`r`n$($script:strLineSeparator)`r`n"
   start-sleep -milliseconds 200
   
   #ITERATE THROUGH BDGZ CUSTOMERS
@@ -814,12 +820,13 @@ try {
       $script:psaAssets = $null
       $script:syncroAsset = $null
       $script:syncroAssets = $null
-      write-output "`r`n$($script:strLineSeparator)`r`nPROCESSING COMPANY : $($script:bdgzCompany.name)`r`n$($script:strLineSeparator)"
+      logERR 3 "Company Processing" "PROCESSING COMPANY : $($script:bdgzCompany.name)`r`n$($script:strLineSeparator)"
       #CHECK AT PSA FOR CUSTOMER
       $script:psaCompany = $script:psaCompanies | where {$_.CompanyName -match $script:bdgzCompany.name}
       if ($script:psaCompany) {
         $script:psaAssets = PSA-GetAssets $script:psaHeaders $script:psaCompany.CompanyID
         write-output "AT PSA ASSETS COUNT : $($script:psaAssets.count)"
+        $script:diag += "AT PSA ASSETS COUNT : $($script:psaAssets.count)`r`n"
       }
       #CHECK SYNCRO PSA FOR CUSTOMER
       if ($script:bdgzCompany.name -match "_") {
@@ -831,102 +838,105 @@ try {
             ($_.business_name -match $script:bdgzCompany.name) -or 
             ($_.business_and_full_name -match $script:bdgzCompany.name))}
       }
-      if ($script:syncroCompany) {
-        $script:syncroAssets = Syncro-Query "GET" "customer_assets" "customer_id=$($script:syncroCompany.id)"
-      }
+      if ($script:syncroCompany) {$script:syncroAssets = Syncro-Query "GET" "customer_assets" "customer_id=$($script:syncroCompany.id)"}
       #ENUMERATE THROUGH BDGZ DEVICES
       $script:bdgzEndpoints = BDGZ-GetEndpoints $script:bdgzCompany.id
       if ($script:bdgzEndpoints.result.items.count -gt 0) {
         foreach ($script:bdgzEndpoint in $script:bdgzEndpoints.result.items) {
-          $blnTicket = $false
-          $script:bdgzDetails = BDGZ-GetEndpointDetail $script:bdgzEndpoint.id
-          if (-not ($script:bdgzDetails.error)) {
-            $warn = $null
-            write-output "`t$($script:strLineSeparator)`r`n`tPROCESSING BDGZ DEVICE : $(($script:bdgzDetails.result.name | out-string).trim())`r`n`t$($script:strLineSeparator)"
-            if ($offTimestamp -ge [datetime]$script:bdgzDetails.result.lastSeen) {$blnTicket = $true; $warn = "DEVICE ALERT : OFFLINE 30+"}
-            if ($offTimestamp -ge [datetime]$script:bdgzDetails.result.agent.lastUpdate) {$blnTicket = $true; $warn = "DEVICE ALERT : AGENT OUTDATED"}
-            if ($script:bdgzDetails.result.agent.productOutdated -ne $false) {$blnTicket = $true; $warn = "DEVICE ALERT : PRODUCT OUTDATED"}
-            #if ($script:bdgzDetails.result.agent.signatureOutdated -ne $false) {$blnTicket = $true; $warn = "DEVICE ALERT : SIGNATURE OUTDATED"}
-            if (($script:bdgzDetails.result.malwareStatus.detection -ne $false) -or 
-              ($script:bdgzDetails.result.malwareStatus.infected -ne $false)) {
-                $blnTicket = $true; $warn = "DEVICE ALERT : MALWARE DETECTED"
-            }
-            write-output "`t`t$($warn)"
-            #CREATE TICKET
-            if ($blnTicket) {
-              #CHECK AT PSA ASSETS
-              if ($script:psaAssets.count -gt 0) {
-                $script:psaAsset = $script:psaAssets | where {$_.referenceTitle -eq $script:bdgzDetails.result.name}
-                #CHECK ASSET TICKETS
-                $script:assetTickets = PSA-GetTickets $script:psaHeaders $script:psaCompany.CompanyID $script:psaAsset.psaID "BDGZ Device Activity Alert: $($script:bdgzDetails.result.name)"
-                $diagAsset = "AT PSA ASSET : $(($script:psaAsset | fl | out-string).trim())`r`n"
-                $diagAsset += "$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss'))"
-                $diagAsset += "`r`n`t$($strLineSeparator)`r`n$(($script:psaTicketdetails | fl | out-string).trim())"
-                logERR 3 "ASSET DIAG" "$($diagAsset)`r`n`t$($strLineSeparator)"
-                if ($script:assetTickets) {
-                  write-output "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
-                  $script:diag += "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
-                } elseif (-not ($script:assetTickets)) {
-                  $newTicket = $null
-                  write-output "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
-                  $script:diag += "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
-                  $newTicket = @{
-                    id                   = '0'
-                    companyID            = "$($script:psaCompany.CompanyID)"
-                    configurationItemID  = "$($script:psaAsset.psaID)"
-                    queueID              = '8'         #Monitoring Alert
-                    ticketType           = '1'         #Standard
-                    ticketCategory       = "2"         #Datto RMM Alert
-                    status               = '1'         #New
-                    priority             = '2'         #Medium
-                    DueDateTime          = (get-date).adddays(7)
-                    monitorTypeID        = '1'         #Online Status Monitor
-                    source               = '8'         #Monitoring Alert
-                    issueType            = '29'        #bitDefender GZ
-                    subIssueType         = '323'       #Endpoint Connectivity
-                    billingCodeID        = '29682804'  #Maintenance
-                    title                = "BDGZ Device Activity Alert: $($script:bdgzDetails.result.name)"
-                    description          = "$($warn)`r`n$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss')))"
-                  }
-                  PSA-CreateTicket $script:psaHeaders $newTicket
-                }
-
+          try {
+            $blnTicket = $false
+            $script:bdgzDetails = BDGZ-GetEndpointDetail $script:bdgzEndpoint.id
+            if (-not ($script:bdgzDetails.error)) {
+              $warn = $null
+              logERR 3 "BDGZ ENDPOINT" "PROCESSING BDGZ DEVICE : $(($script:bdgzDetails.result.name | out-string).trim())`r`n`t$($script:strLineSeparator)"
+              if ($offTimestamp -ge [datetime]$script:bdgzDetails.result.lastSeen) {$blnTicket = $true; $warn += "DEVICE ALERT : OFFLINE 30+`r`n"}
+              if ($offTimestamp -ge [datetime]$script:bdgzDetails.result.agent.lastUpdate) {$blnTicket = $true; $warn += "DEVICE ALERT : AGENT OUTDATED"`r`n}
+              if ($script:bdgzDetails.result.agent.productOutdated -ne $false) {$blnTicket = $true; $warn += "DEVICE ALERT : PRODUCT OUTDATED"}
+              #if ($script:bdgzDetails.result.agent.signatureOutdated -ne $false) {$blnTicket = $true; $warn += "DEVICE ALERT : SIGNATURE OUTDATED"}
+              if (($script:bdgzDetails.result.malwareStatus.detection -ne $false) -or 
+                ($script:bdgzDetails.result.malwareStatus.infected -ne $false)) {
+                  $blnTicket = $true; $warn += "DEVICE ALERT : MALWARE DETECTED"
               }
-              #CHECK SYNCRO PSA ASSETS
-              if ($script:syncroAssets.assets.count -gt 0) {
-                $script:syncroAsset = $script:syncroAssets.assets | where {$_.name -match $script:bdgzDetails.result.name}
-                if ($script:syncroAsset) {
-                  write-output "SYNCRO PSA ASSET : $($script:syncroAsset | fl | out-string)"
-                  #CHECK SYNCRO ALERTS
-                  $script:assetAlerts = Syncro-Query "GET" "rmm_alerts" "status=active"
-                  $script:assetAlerts = $script:assetAlerts.rmm_alerts | where {$_.properties.description -match "$($warn)`r`n$($script:bdgzDetails.result.name)"}
-                  if ($script:assetAlerts) {
-                    write-output "`tExisting Syncro Alerts Found. Not Creating Alert`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
-                    $script:diag += "`tExisting Syncro Alerts Found. Not Creating Alert`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
-                  } elseif (-not ($script:assetAlerts)) {
-                    $newAlert = $null
-                    write-output "`tNo Syncro Alerts Found. Creating Alert`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
-                    $script:diag += "`tNo Syncro Alerts Found. Creating Alert`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
-                    $newAlert = @{
-                      status               = 'New'
-                      resolved             = $false
-                      asset_id             = $script:syncroAsset.id
-                      customer_id          = $script:syncroCompany.id
-                      description          = "BDGZ Device Activity Alert: $($script:bdgzDetails.result.name)"
-                      properties           = @{
-                        hidden        = $true
-                        do_not_email  = $true
-                        tech          = 'BDGZ API'
-                        subject       = "BDGZ $($warn)"
-                        body          = "$($warn)`r`n$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss')))"
-                        sms_body      = "$($warn)`r`n$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss')))"
-                      }
+              write-output "`t`t$($warn)"
+              $script:diag += "`t`t$($warn)`r`n"
+              #CREATE TICKET
+              if ($blnTicket) {
+                #CHECK AT PSA ASSETS
+                if ($script:psaAssets.count -gt 0) {
+                  $script:psaAsset = $script:psaAssets | where {$_.referenceTitle -eq $script:bdgzDetails.result.name}
+                  #CHECK ASSET TICKETS
+                  $script:assetTickets = PSA-GetTickets $script:psaHeaders $script:psaCompany.CompanyID $script:psaAsset.psaID "BDGZ Device Activity Alert: $($script:bdgzDetails.result.name)"
+                  $diagAsset = "AT PSA ASSET : $(($script:psaAsset | fl | out-string).trim())`r`n"
+                  $diagAsset += "$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss'))"
+                  $diagAsset += "`r`n`t$($strLineSeparator)`r`n$(($script:psaTicketdetails | fl | out-string).trim())"
+                  logERR 3 "ASSET DIAG" "$($diagAsset)`r`n`t$($strLineSeparator)"
+                  if ($script:assetTickets) {
+                    write-output "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
+                    $script:diag += "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
+                  } elseif (-not ($script:assetTickets)) {
+                    $newTicket = $null
+                    write-output "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
+                    $script:diag += "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
+                    $newTicket = @{
+                      id                   = '0'
+                      companyID            = "$($script:psaCompany.CompanyID)"
+                      configurationItemID  = "$($script:psaAsset.psaID)"
+                      queueID              = '8'         #Monitoring Alert
+                      ticketType           = '1'         #Standard
+                      ticketCategory       = "2"         #Datto RMM Alert
+                      status               = '1'         #New
+                      priority             = '2'         #Medium
+                      DueDateTime          = (get-date).adddays(7)
+                      monitorTypeID        = '1'         #Online Status Monitor
+                      source               = '8'         #Monitoring Alert
+                      issueType            = '29'        #bitDefender GZ
+                      subIssueType         = '323'       #Endpoint Connectivity
+                      billingCodeID        = '29682804'  #Maintenance
+                      title                = "BDGZ Device Activity Alert: $($script:bdgzDetails.result.name)"
+                      description          = "$($warn)`r`n$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss')))"
                     }
-                    Syncro-Alert $script:syncroAsset.properties.kabuto_live_uuid $newAlert
+                    PSA-CreateTicket $script:psaHeaders $newTicket
+                  }
+                }
+                #CHECK SYNCRO PSA ASSETS
+                if ($script:syncroAssets.assets.count -gt 0) {
+                  $script:syncroAsset = $script:syncroAssets.assets | where {$_.name -match $script:bdgzDetails.result.name}
+                  if ($script:syncroAsset) {
+                    logERR 3 "ASSET DIAG" "SYNCRO PSA ASSET : $($script:syncroAsset | fl | out-string)"
+                    #CHECK SYNCRO ALERTS
+                    $script:assetAlerts = Syncro-Query "GET" "rmm_alerts" "status=active"
+                    $script:assetAlerts = $script:assetAlerts.rmm_alerts | where {$_.properties.description -match "$($warn)`r`n$($script:bdgzDetails.result.name)"}
+                    if ($script:assetAlerts) {
+                      write-output "`tExisting Syncro Alerts Found. Not Creating Alert`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
+                      $script:diag += "`tExisting Syncro Alerts Found. Not Creating Alert`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
+                    } elseif (-not ($script:assetAlerts)) {
+                      $newAlert = $null
+                      write-output "`tNo Syncro Alerts Found. Creating Alert`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)"
+                      $script:diag += "`tNo Syncro Alerts Found. Creating Alert`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
+                      $newAlert = @{
+                        status               = 'New'
+                        resolved             = $false
+                        asset_id             = $script:syncroAsset.id
+                        customer_id          = $script:syncroCompany.id
+                        description          = "BDGZ Device Activity Alert: $($script:bdgzDetails.result.name)"
+                        properties           = @{
+                          hidden        = $true
+                          do_not_email  = $true
+                          tech          = 'BDGZ API'
+                          subject       = "BDGZ $($warn)"
+                          body          = "$($warn)`r`n$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss')))"
+                          sms_body      = "$($warn)`r`n$($script:bdgzDetails.result.name) - Last Seen : $((get-date $script:bdgzDetails.result.lastSeen).ToString('yyyy-MM-dd hh:mm:ss')))"
+                        }
+                      }
+                      Syncro-Alert $script:syncroAsset.properties.kabuto_live_uuid $newAlert
+                    }
                   }
                 }
               }
             }
+          } catch {
+            $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+            logERR 3 "BDGZ_ENDPOINT" "QUERY ENPOINT ($($script:bdgzCompany.name) - $($script:bdgzDetails.result.name)) ERROR :`r`n$($script:strLineSeparator)`r`n$($err)"
           }
         }
       }
