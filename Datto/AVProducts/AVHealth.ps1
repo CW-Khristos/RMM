@@ -203,9 +203,11 @@
   } ## write-DRMMAlert
   #endregion ----- DRMM FUNCTIONS
 
-  function Get-AVState ($dest, $state) {                                                            #DETERMINE ANTIVIRUS STATE
+  function Get-AVState ($dest, $state) {
+    #DETERMINE ANTIVIRUS STATE
     $xmldiag = $null
-    if (-not $script:blnPSXML) {                                                                    #AV PRODUCT STATES NOT LOADED INTO HASHTABLE
+    #AV PRODUCT STATES NOT LOADED INTO HASHTABLE
+    if (-not $script:blnPSXML) {
       $xmldiag += "Loading : AV Product State XML`r`n"
       write-output "Loading : AV Product State XML"
       if (test-path "C:\IT\Scripts\productstate.xml") {
@@ -307,7 +309,8 @@
           $xmldiag += "Loaded : AV Product State XML`r`n"
           write-output "Loaded : AV Product State XML"
           foreach ($itm in $psXML.NODE.ChildNodes) {
-            if ($itm.name -notmatch "#comment") {                                                   #AVOID 'BUG' WITH A KEY AS '#comment'
+            #AVOID 'BUG' WITH A KEY AS '#comment'
+            if ($itm.name -notmatch "#comment") {
               $hash = @{
                 defstatus = "$($itm.defstatus)"
                 displayval = "$($itm.rtstatus)"
@@ -329,7 +332,8 @@
         write-output $_.scriptstacktrace
         write-output $_
       }
-    } elseif ($script:blnPSXML) {                                                                   #AV PRODUCT STATES ALREADY LOADED IN HASHTABLE
+    #AV PRODUCT STATES ALREADY LOADED IN HASHTABLE
+    } elseif ($script:blnPSXML) {
       #SET '$script:defstatus' AND '$script:rtstatus' TO INTERPRET PASSED PRODUCT STATE FROM POPULATED HASHTABLE
       try {
         $script:defstatus = "$($script:pskey["ps$($state)"].defstatus)"
@@ -343,7 +347,8 @@
     $xmldiag = $null
   } ## Get-AVState
   
-  function Get-AVXML ($src, $dest) {                                                                #RETRIEVE AV VENDOR XML FROM GITHUB
+  function Get-AVXML ($src, $dest) {
+    #RETRIEVE AV VENDOR XML FROM GITHUB
     $xmldiag = $null
     if (-not $script:blnAVXML) {
       $xmldiag += "Loading : '$($src)' AV Product XML`r`n"
@@ -465,8 +470,10 @@
         write-output "$($env:i_PAV) XML Loaded"
         $script:diag += "$($env:i_PAV) XML Loaded`r`n"
         foreach ($itm in $avXML.NODE.ChildNodes) {
-          if ($itm.name -notmatch "#comment") {                                                     #AVOID 'BUG' WITH A KEY AS '#comment'
-            if ($env:i_PAV -match "Sophos") {                                                           #BUILD HASHTABLE FOR SOPHOS
+          #AVOID 'BUG' WITH A KEY AS '#comment'
+          if ($itm.name -notmatch "#comment") {
+            #BUILD HASHTABLE FOR SOPHOS
+            if ($env:i_PAV -match "Sophos") {
               $hash = @{
                 display = "$($itm.$script:bitarch.display)"
                 displayval = "$($itm.$script:bitarch.displayval)"
@@ -500,7 +507,8 @@
                 infectval = "$($itm.$script:bitarch.infectval)"
                 threat = "$($itm.$script:bitarch.threat)"
               }
-            } elseif ($env:i_PAV -notmatch "Trend Micro") {                                             #BUILD HASHTABLE FOR ALL AV PRODUCTS EXCEPT TREND MICRO
+            #BUILD HASHTABLE FOR ALL AV PRODUCTS EXCEPT TREND MICRO
+            } elseif ($env:i_PAV -notmatch "Trend Micro") {
               $hash = @{
                 display = "$($itm.$script:bitarch.display)"
                 displayval = "$($itm.$script:bitarch.displayval)"
@@ -530,7 +538,8 @@
                 infectval = "$($itm.$script:bitarch.infectval)"
                 threat = "$($itm.$script:bitarch.threat)"
               }
-            } elseif ($env:i_PAV -match "Trend Micro") {                                                #BUILD HASHTABLE FOR CURSED TREND MICRO
+            #BUILD HASHTABLE FOR CURSED TREND MICRO
+            } elseif ($env:i_PAV -match "Trend Micro") {
               $hash = @{
                 display = "$($itm.$script:bitarch.display)"
                 displayval = "$($itm.$script:bitarch.displayval)"
@@ -587,7 +596,8 @@
     }
   } ## Get-AVXML
   
-  function Pop-Components {                                                                         #POPULATE AV COMPONENT VERSIONS
+  function Pop-Components {
+    #POPULATE AV COMPONENT VERSIONS
     param (
       $dest, $name, $version
     )
@@ -624,7 +634,7 @@
           $prev = [System.Collections.ArrayList]@()
           $blnADD = $true
           $prev = $dest[$av]
-          $prev = $prev.split("`r`n",[System.StringSplitOptions]::RemoveEmptyEntries)
+          $prev = $prev.split("`r`n", [System.StringSplitOptions]::RemoveEmptyEntries)
           if ($prev -contains $warn) {
             $blnADD = $false
           }
@@ -837,7 +847,8 @@
   #endregion -----BITDEFENDER FUNCTIONS
 
   #region ----- MISC FUNCTIONS
-  function Get-EpochDate ($epochDate, $opt) {                                                       #Convert Epoch Date Timestamps to Local Time
+  function Get-EpochDate ($epochDate, $opt) {
+    #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
       "sec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($epochDate))}
       "msec" {[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddMilliSeconds($epochDate))}
@@ -888,8 +899,8 @@
     }
   }
 
-  function Get-OSArch {                                                                             #Determine Bit Architecture & OS Type
-    #OS Bit Architecture
+  function Get-OSArch {
+    #Determine Bit Architecture & OS Type
     $osarch = (get-wmiobject win32_operatingsystem).osarchitecture
     if ($osarch -like '*64*') {
       $script:bitarch = "bit64"
@@ -910,7 +921,7 @@
 
   function check-Reboot {
     param(
-      [Parameter(Mandatory=$true)]$window
+      [Parameter(Mandatory = $true)]$window
     )
     $tz = get-timezone
     $rebootdiag = "Timezone : $($tz)`r`n"
@@ -925,17 +936,27 @@
     $rebootdiag += "End Window : $($endwindow)`r`n"
     if (($curTime -ge $startWindow) -and ($curTime -le $endWindow)) {
       #Execute stuff
-      $rebootdiag += "Current Time : $($curTime) is Inside Window : $($runTime) +-(30min); Triggering Reboot`r`n"
-      $script:diag += "$($rebootdiag)"
-      write-output "$($rebootdiag)"
-      return $true
+      try {
+        $rebootdiag += "Current Time : $($curTime) is Inside Window : $($runTime) +-(30min); Triggering Reboot`r`n"
+        $script:diag += "$($rebootdiag)"
+        write-output "$($rebootdiag)"
+        shutdown /r /t $env:rebootDelay /d p:2:1 /c "IPM Computers : AV Health : $($avs[$av].display) reports a reboot is required, this reboot is manadated by your IT Staff"
+        $script:diag += "Reboot has been set; system will reboot in $($env:rebootDelay) minutes`r`n"
+        write-output "Reboot has been set; system will reboot in $($env:rebootDelay) minutes"
+      } catch {
+        write-output $_.scriptstacktrace
+        write-output $_
+      }
     } else {
       #Do Nothing obviously
       $rebootdiag += "Current Time : $($curTime) is Outside Window : $($runTime) +-(30min); Exiting`r`n"
       $script:diag += "$($rebootdiag)"
       write-output "$($rebootdiag)"
-      return $false
+      $time = get-date.tostring('yyyy-MM-dd HH:mm:ss')
+      $script:diag += "Current System Time $($time) not within configured Reboot Window : $($env:rebootTime)`r`n"
+      write-output "Current System Time $($time) not within configured Reboot Window : $($env:rebootTime)`r`n"
     }
+    Pop-Warnings $script:avwarn $($avs[$av].display) "Reboot Required : $($reboot) - Urgent Reboot Required : $($rval2) (REG Check)`r`n"
   }
 
   function StopClock {
@@ -950,7 +971,7 @@
     $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
     $mill = [string]($total / 1000)
     $mill = $mill.split(".")[1]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
@@ -1046,13 +1067,15 @@ if (-not ($script:blnAVXML)) {
       $script:blnWMI = $false
     }
   }
-  if (-not $script:blnWMI) {                                                                        #FAILED TO RETURN WMI SECURITYCENTER NAMESPACE
+  #FAILED TO RETURN WMI SECURITYCENTER NAMESPACE
+  if (-not $script:blnWMI) {
     try {
       $script:diag += "`r`nFailed to query WMI SecurityCenter Namespace`r`n"
       $script:diag += "Possibly Server, attempting to fallback to using 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' registry key`r`n"
       write-output "`r`nFailed to query WMI SecurityCenter Namespace"
       write-output "Possibly Server, attempting to fallback to using 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' registry key"
-      try {                                                                                         #QUERY 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' AND SEE IF AN AV IS REGISTRERED THERE
+      #QUERY 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' AND SEE IF AN AV IS REGISTRERED THERE
+      try {
         if ($script:bitarch = "bit64") {
           $AntiVirusProduct = (get-itemproperty -path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Security Center\Monitoring\*" -ErrorAction Stop).PSChildName
         } elseif ($script:bitarch = "bit32") {
@@ -1064,7 +1087,8 @@ if (-not ($script:blnAVXML)) {
         $AntiVirusProduct = $null
         $blnSecMon = $true
       }
-      if ($AntiVirusProduct -ne $null) {                                                            #RETURNED 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
+      #RETURNED 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
+      if ($AntiVirusProduct -ne $null) {
         $strDisplay = $null
         $blnSecMon = $false
         $script:diag += "`r`nPerforming AV Product discovery`r`n"
@@ -1092,7 +1116,8 @@ if (-not ($script:blnAVXML)) {
             }
           }
           #SEARCH PASSED PRIMARY AV VENDOR XML
-          foreach ($key in $script:vavkey.keys) {                                                   #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
+          foreach ($key in $script:vavkey.keys) {
+            #ATTEMPT TO VALIDATE EACH AV PRODUCT CONTAINED IN VENDOR XML
             if ($av.replace(" ", "").replace("-", "").toupper() -eq $key.toupper()) {
               $script:diag += "Matched AV : '$($av)' - '$($key)' AV Product`r`n"
               write-output "Matched AV : '$($av)' - '$($key)' AV Product"
@@ -1110,10 +1135,12 @@ if (-not ($script:blnAVXML)) {
           }
           try {
             if (($regDisplay -ne "") -and ($regDisplay -ne $null)) {
-              if (test-path "HKLM:$($regDisplay)") {                                                #ATTEMPT TO VALIDATE INSTALLED AV PRODUCT BY TEST READING A KEY
+              #ATTEMPT TO VALIDATE INSTALLED AV PRODUCT BY TEST READING A KEY
+              if (test-path "HKLM:$($regDisplay)") {
                 $script:diag += "Found 'HKLM:$($regDisplay)' for product : $($key)`r`n"
                 write-output "Found 'HKLM:$($regDisplay)' for product : $($key)"
-                try {                                                                               #IF VALIDATION PASSES; FABRICATE 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
+                try {
+                  #IF VALIDATION PASSES; FABRICATE 'HKLM:\SOFTWARE\Microsoft\Security Center\Monitoring\' DATA
                   $keyval1 = get-itemproperty -path "HKLM:$($regDisplay)" -name "$($regDisplayVal)" -erroraction stop
                   $keyval2 = get-itemproperty -path "HKLM:$($regPath)" -name "$($regPathVal)" -erroraction stop
                   $keyval3 = get-itemproperty -path "HKLM:$($regStat)" -name "$($regStatVal)" -erroraction stop
@@ -1145,11 +1172,14 @@ if (-not ($script:blnAVXML)) {
                     }
                   }
                   #FORMAT AV DATA
-                  if ($strName -match "Windows Defender") {                                         #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
+                  if ($strName -match "Windows Defender") {
+                    #'NORMALIZE' WINDOWS DEFENDER DISPLAY NAME
                     $strName = "Windows Defender"
-                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "BETA")) {           #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "BETA")) {
+                    #'NORMALIZE' SOPHOS INTERCEPT X BETA DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X Beta"
-                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {  #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
+                  } elseif (($env:i_PAV -match "Sophos") -and ($strName -match "\d+\.\d+\.\d+")) {
+                    #'NORMALIZE' SOPHOS INTERCEPT X DISPLAY NAME AND FIX SERVER REG CHECK
                     $strName = "Sophos Intercept X"
                   }
                   write-output "NORMALIZED DISPLAY VALUE : $($strName)"
@@ -1157,13 +1187,15 @@ if (-not ($script:blnAVXML)) {
                   $strPath = "$($strPath)$($keyval2.$regPathVal), "
                   $strStat = "$($strStat)$($keyval3.$regStatVal.tostring()), "
                   #INTERPRET REAL-TIME SCANNING STATUS
-                  if ($script:zRealTime -contains $script:vavkey[$key].display) {                   #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
+                  if ($script:zRealTime -contains $script:vavkey[$key].display) {
+                    #AV PRODUCTS TREATING '0' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
                     if ($keyval4.$regRTVal -eq "0") {
                       $strRealTime = "$($strRealTime)Enabled (REG Check), "
                     } elseif ($keyval4.$regRTVal -eq "1") {
                       $strRealTime = "$($strRealTime)Disabled (REG Check), "
                     }
-                  } elseif ($script:zRealTime -notcontains $script:vavkey[$key].display) {          #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
+                  } elseif ($script:zRealTime -notcontains $script:vavkey[$key].display) {
+                    #AV PRODUCTS TREATING '1' AS 'ENABLED' FOR 'REAL-TIME SCANNING'
                     if ($keyval4.$regRTVal -eq "1") {
                       $strRealTime = "$($strRealTime)Enabled (REG Check), "
                     } elseif ($keyval4.$regRTVal -eq "0") {
@@ -1752,8 +1784,12 @@ if (-not ($script:blnAVXML)) {
             }
             if ($updWARN) {
               $updWARN = $false
-              $script:blnWARN = $true
+              #$script:blnWARN = $true
               Pop-Warnings $script:avwarn $($avs[$av].display) "$($script:o_AVStatus)`r`n"
+              #DISABLE ALERTING ON UPDATES
+              $script:blnWARN = $false
+              #RUN UPDATE
+              if ($env:i_PAV -match "Sophos") {&"C:\Program Files\Sophos\AutoUpdate\SAUcli.exe" UpdateNow}
             }
             #GET PRIMARY AV PRODUCT REAL-TIME SCANNING
             $rtWARN = $false
@@ -1953,7 +1989,7 @@ if (-not ($script:blnAVXML)) {
             $script:o_AVStatus += "Reboot Required : $($reboot)`r`nUrgent Reboot Required : $($rval2) (REG Check)`r`n"
             if ($rebootWARN) {
               $rebootWARN = $false
-              $script:blnWARN = $true
+              #$script:blnWARN = $true
               $blnReboot = check-Reboot $env:rebootTime
               write-output "Reboot Flag : $($blnReboot)"
               if ($blnReboot) {
@@ -1997,7 +2033,7 @@ if (-not ($script:blnAVXML)) {
                 $script:diag += "Reading : -path 'HKLM:$($i_scan)' -name '$($i_scanval)'`r`n"
                 write-output "Reading : -path 'HKLM:$($i_scan)' -name '$($i_scanval)'"
                 $scankey = get-itemproperty -path "HKLM:$($i_scan)" -name "$($i_scanval)" -erroraction stop
-                $Int64Value = [System.BitConverter]::ToInt64($scankey.$i_scanval,0)
+                $Int64Value = [System.BitConverter]::ToInt64($scankey.$i_scanval, 0)
                 $stime = Get-Date([DateTime]::FromFileTime($Int64Value))
                 $lastage = new-timespan -start $stime -end (Get-Date)
                 $scans += "Last Scan Time : $($stime) (REG Check)`r`n"
@@ -2069,8 +2105,10 @@ if (-not ($script:blnAVXML)) {
             $script:o_AVStatus += "$($scans)"
             if ($scanWARN) {
               $scanWARN = $false
-              $script:blnWARN = $true
+              #$script:blnWARN = $true
               Pop-Warnings $script:avwarn $($avs[$av].display) "$($scans)`r`n"
+              #DISABLE ALERTING ON SCANS
+              $script:blnWARN = $false
             }
             #GET PRIMARY AV PRODUCT DEFINITIONS / SIGNATURES / PATTERN
             $defWARN = $false
@@ -2087,7 +2125,7 @@ if (-not ($script:blnAVXML)) {
               write-output "Reading : -path 'HKLM:$($i_defupdate)' -name '$($i_defupdateval)'"
               $defkey = get-itemproperty -path "HKLM:$($i_defupdate)" -name "$($i_defupdateval)" -erroraction stop
               if ($avs[$av].display -match "Windows Defender") {                                      #WINDOWS DEFENDER DEFINITION UPDATE TIMESTAMP
-                $Int64Value = [System.BitConverter]::ToInt64($defkey.$i_defupdateval,0)
+                $Int64Value = [System.BitConverter]::ToInt64($defkey.$i_defupdateval, 0)
                 $time = [DateTime]::FromFileTime($Int64Value)
                 $update = Get-Date($time)
                 $age = new-timespan -start $update -end (Get-Date)
@@ -2132,8 +2170,12 @@ if (-not ($script:blnAVXML)) {
             }
             if ($defWARN) {
               $defWARN = $false
-              $script:blnWARN = $true
+              #$script:blnWARN = $true
               Pop-Warnings $script:avwarn $($avs[$av].display) "$($script:o_DefStatus)`r`n"
+              #DISABLE ALERTING ON UPDATES
+              $script:blnWARN = $false
+              #RUN UPDATE
+              if ($env:i_PAV -match "Sophos") {&"C:\Program Files\Sophos\AutoUpdate\SAUcli.exe" UpdateNow}
             }
             #GET PRIMARY AV PRODUCT DETECTED ALERTS VIA REGISTRY
             if ($script:zNoAlert -notcontains $env:i_PAV) {
@@ -2194,13 +2236,13 @@ if (-not ($script:blnAVXML)) {
                       if ($infect.value -eq 0) {
                         $script:o_Infect += "Type - $($infect.name) : $($false)`r`n"
                       } elseif ($infect.value -eq 1) {
-                        #$infectWARN = $true
+                        $infectWARN = $true
                         $script:o_Infect += "Type - $($infect.name) : $($true)`r`n"
                       }
                     }
                   }
                 } catch {
-                  #$infectWARN = $true
+                  $infectWARN = $true
                   $script:diag += "Could not validate Registry data : 'HKLM:$($i_infect)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
                   write-output "Could not validate Registry data : 'HKLM:$($i_infect)'"
                   $script:o_Infect += "Virus/Malware Present : N/A`r`n"
@@ -2215,11 +2257,11 @@ if (-not ($script:blnAVXML)) {
                   if ($infectkey.$i_infectval -eq 0) {                                                #NO DETECTED INFECTIONS
                     $script:o_Infect += "Virus/Malware Present : $($false)`r`nVirus/Malware Count : $($infectkey.$i_infectval)`r`n"
                   } elseif ($infectkey.$i_infectval -gt 0) {                                          #DETECTED INFECTIONS
-                    #$infectWARN = $true
+                    $infectWARN = $true
                     $script:o_Infect += "Virus/Malware Present : $($true)`r`nVirus/Malware Count - $($infectkey.$i_infectval)`r`n"
                   }
                 } catch {
-                  #$infectWARN = $true
+                  $infectWARN = $true
                   $script:diag += "Could not validate Registry data : 'HKLM:$($i_infect)' -name '$($i_infectval)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
                   write-output "Could not validate Registry data : 'HKLM:$($i_infect)' -name '$($i_infectval)'"
                   $script:o_Infect += "Virus/Malware Present : N/A`r`n"
@@ -2235,13 +2277,13 @@ if (-not ($script:blnAVXML)) {
                     $script:o_Infect += "Virus/Malware Present : $($false)`r`n"
                   } elseif ($infectkey.$i_infectval -gt 0) {                                          #DETECTED INFECTIONS
                     try {
-                      #$infectWARN = $true
+                      $infectWARN = $true
                       $script:diag += "Reading : -path 'HKLM:$($i_scan)' -name 'WorstInfectionType'`r`n"
                       write-output "Reading : -path 'HKLM:$($i_scan)' -name 'WorstInfectionType'"
                       $worstkey = get-ItemProperty -path "HKLM:$($i_scan)" -name "WorstInfectionType" -erroraction silentlycontinue
                       $worst = SEP-Map($worstkey.WorstInfectionType)
                     } catch {
-                      #$infectWARN = $true
+                      $infectWARN = $true
                       $script:diag += "Could not validate Registry data : 'HKLM:$($i_scan)' -name 'WorstInfectionType'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
                       write-output "Could not validate Registry data : 'HKLM:$($i_scan)' -name 'WorstInfectionType'"
                       $worst = "N/A"
@@ -2251,7 +2293,7 @@ if (-not ($script:blnAVXML)) {
                     $script:o_Infect += "Virus/Malware Present : $($true)`r`nWorst Infection Type : $($worst)`r`n"
                   }
                 } catch {
-                  #$infectWARN = $true
+                  $infectWARN = $true
                   $script:diag += "Could not validate Registry data : 'HKLM:$($i_infect)' -name '$($i_infectval)'`r`n$($_.scriptstacktrace)`r`n$($_)`r`n"
                   write-output "Could not validate Registry data : 'HKLM:$($i_infect)' -name '$($i_infectval)'"
                   $script:o_Infect += "Virus/Malware Present : N/A`r`nWorst Infection Type : N/A`r`n"
@@ -2261,8 +2303,10 @@ if (-not ($script:blnAVXML)) {
               }
               if ($infectWARN) {
                 $infectWARN = $false
-                $script:blnWARN = $true
+                #$script:blnWARN = $true
                 Pop-Warnings $script:avwarn $($avs[$av].display) "Active Detections :`r`n$($script:o_Infect)`r`n"
+                #DISABLE ALERTING ON DETECTIONS
+                $script:blnWARN = $false
               }
             }
             #GET PRIMARY AV PRODUCT DETECTED THREATS VIA REGISTRY
@@ -2274,7 +2318,7 @@ if (-not ($script:blnAVXML)) {
                 $threatkey = get-childitem -path "HKLM:$($i_threat)" -erroraction silentlycontinue
                 if ($env:i_PAV -match "Sophos") {
                   if ($threatkey.count -gt 0) {
-                    #$threatWARN = $true
+                    $threatWARN = $true
                     foreach ($threat in $threatkey) {
                       $threattype = get-itemproperty -path "HKLM:$($i_threat)\$($threat.PSChildName)\" -name "Type" -erroraction silentlycontinue
                       $threatfile = get-childitem -path "HKLM:$($i_threat)\$($threat.PSChildName)\Files\" -erroraction silentlycontinue
@@ -2296,7 +2340,7 @@ if (-not ($script:blnAVXML)) {
                   }
                 }
               } catch {
-                #$threatWARN = $true
+                $threatWARN = $true
                 $script:diag += "Could not validate Registry data : 'HKLM:$($i_threat)'`r`n"
                 write-output "Could not validate Registry data : 'HKLM:$($i_threat)'"
                 $script:o_Threats = "N/A`r`n"
@@ -2306,8 +2350,10 @@ if (-not ($script:blnAVXML)) {
             }
             if ($threatWARN) {
               $threatWARN = $false
-              $script:blnWARN = $true
+              #$script:blnWARN = $true
               Pop-Warnings $script:avwarn $($avs[$av].display) "Detected Threats :`r`n$($script:o_Threats)`r`n"
+              #DISABLE ALERTING ON DETECTIONS
+              $script:blnWARN = $false
             }
           #SAVE WINDOWS DEFENDER FOR LAST - TO PREVENT SCRIPT CONSIDERING IT 'COMPETITOR AV' WHEN SET AS PRIMARY AV
           } elseif ($avs[$av].display -eq "Windows Defender") {
@@ -2334,39 +2380,39 @@ if (($script:o_AVname -match "No AV Product Found") -or ($script:o_AVname -match
 #DEVICE INFO
 $script:diag += "`r`nDevice Info :`r`nDevice : $($script:computername)`r`nOperating System : $($script:OSCaption) ($script:OSVersion)`r`n"
 write-output "`r`nDevice Info :"
-write-output "Device : $($script:computername)" -foregroundcolor $ccode
-write-output "Operating System : $($script:OSCaption) ($($script:OSVersion))" -foregroundcolor $ccode
+write-output "Device : $($script:computername)" #-foregroundcolor $ccode
+write-output "Operating System : $($script:OSCaption) ($($script:OSVersion))" #-foregroundcolor $ccode
 #AV DETAILS
 $script:diag += "`r`nAV Details :`r`nAV Display Name : $($script:o_AVname)`r`nAV Path : $($script:o_AVpath)`r`n"
 $script:diag += "`r`nAV Status :`r`n$($script:o_AVStatus)`r`n`r`nComponent Versions :`r`n$($o_compver)`r`n"
 write-output "`r`nAV Details :"
-write-output "AV Display Name : $($script:o_AVname)" -foregroundcolor $ccode
-write-output "AV Path : $($script:o_AVpath)" -foregroundcolor $ccode
+write-output "AV Display Name : $($script:o_AVname)" #-foregroundcolor $ccode
+write-output "AV Path : $($script:o_AVpath)" #-foregroundcolor $ccode
 write-output "`r`nAV Status :"
-write-output "$($script:o_AVStatus)" -foregroundcolor $ccode
+write-output "$($script:o_AVStatus)" #-foregroundcolor $ccode
 write-output "`r`nComponent Versions :"
-write-output "$($o_compver)" -foregroundcolor $ccode
+write-output "$($o_compver)" #-foregroundcolor $ccode
 $script:o_AVStatus += "`r`n`r`n$($o_compver)`r`n"
 #REAL-TIME SCANNING & DEFINITIONS
 $script:diag += "Definitions :`r`n$($script:o_DefStatus)`r`n"
 write-output "Definitions :"
-write-output "$($script:o_DefStatus)" -foregroundcolor $ccode
+write-output "$($script:o_DefStatus)" #-foregroundcolor $ccode
 #THREATS
 $script:diag += "`r`nActive Detections :`r`n$($script:o_Infect)`r`nDetected Threats :`r`n$($script:o_Threats)`r`n"
 write-output "`r`nActive Detections :"
-write-output "$($script:o_Infect)" -foregroundcolor $ccode
+write-output "$($script:o_Infect)" #-foregroundcolor $ccode
 write-output "Detected Threats :"
-write-output "$($script:o_Threats)" -foregroundcolor $ccode
+write-output "$($script:o_Threats)" #-foregroundcolor $ccode
 #COMPETITOR AV
 $script:diag += "Competitor AV :`r`nAV Conflict : $($script:o_AVcon)`r`n$($script:o_CompAV)`r`n"
 $script:diag += "Competitor Path :`r`n$($script:o_CompPath)`r`nCompetitor State :`r`n$($script:o_CompState)"
 write-output "Competitor AV :"
-write-output "AV Conflict : $($script:o_AVcon)" -foregroundcolor $ccode
-write-output "$($script:o_CompAV)" -foregroundcolor $ccode
+write-output "AV Conflict : $($script:o_AVcon)" #-foregroundcolor $ccode
+write-output "$($script:o_CompAV)" #-foregroundcolor $ccode
 write-output "Competitor Path :"
-write-output "$($script:o_CompPath)" -foregroundcolor $ccode
+write-output "$($script:o_CompPath)" #-foregroundcolor $ccode
 write-output "Competitor State :"
-write-output "$($script:o_CompState)" -foregroundcolor $ccode
+write-output "$($script:o_CompState)" #-foregroundcolor $ccode
 $script:diag += "`r`nThe following details failed checks :`r`n"
 write-output "The following details failed checks :"
 #DATTO OUTPUT
