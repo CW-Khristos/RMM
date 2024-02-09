@@ -11,9 +11,18 @@
   $logPath                        = "C:\IT\Log\Warranty_WatchDog"
   $strLineSeparator               = "----------------------------------"
   $timestamp                      = (get-date -format "yyyy-MM-dd HH:mm:ss").ToString()
-  ######################### TLS Settings ###########################
+  #region######################## TLS Settings ###########################
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
-  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+  #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
+  [System.Net.ServicePointManager]::SecurityProtocol = (
+    [System.Net.SecurityProtocolType]::Ssl3 -bor 
+    [System.Net.SecurityProtocolType]::Ssl2 -bor 
+    [System.Net.SecurityProtocolType]::Tls13 -bor 
+    [System.Net.SecurityProtocolType]::Tls12 -bor 
+    [System.Net.SecurityProtocolType]::Tls11 -bor 
+    [System.Net.SecurityProtocolType]::Tls
+  )
+  #endregion
   #region######################## Hudu Settings ###########################
   $script:huduCalls               = 0
   # The name of the field where you wish Warranty data to be stored
