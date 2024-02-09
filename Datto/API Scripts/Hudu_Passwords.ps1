@@ -9,7 +9,14 @@
   $strLineSeparator       = "-------------------"
   ######################### TLS Settings ###########################
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
-  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls -bor [System.Net.SecurityProtocolType]::Tls11 -bor [System.Net.SecurityProtocolType]::Tls12
+  [System.Net.ServicePointManager]::SecurityProtocol = (
+    [System.Net.SecurityProtocolType]::Ssl3 -bor 
+    [System.Net.SecurityProtocolType]::Ssl2 -bor 
+    [System.Net.SecurityProtocolType]::Tls13 -bor 
+    [System.Net.SecurityProtocolType]::Tls12 -bor 
+    [System.Net.SecurityProtocolType]::Tls11 -bor 
+    [System.Net.SecurityProtocolType]::Tls
+  )
   ######################### Hudu Settings ###########################
   $script:huduCalls       = 0
   # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
