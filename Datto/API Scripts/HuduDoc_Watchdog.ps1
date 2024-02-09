@@ -73,6 +73,8 @@ To Do:
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   [System.Net.ServicePointManager]::SecurityProtocol = (
+    [System.Net.SecurityProtocolType]::Ssl3 -bor 
+    [System.Net.SecurityProtocolType]::Ssl2 -bor 
     [System.Net.SecurityProtocolType]::Tls13 -bor 
     [System.Net.SecurityProtocolType]::Tls12 -bor 
     [System.Net.SecurityProtocolType]::Tls11 -bor 
@@ -296,11 +298,11 @@ To Do:
     $secs = [string]($total / 1000)
     $mill = $secs.split(".")[1]
     $secs = $secs.split(".")[0]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
     $asecs = [string]($average / 1000)
     $amill = $asecs.split(".")[1]
     $asecs = $asecs.split(".")[0]
-    $amill = $amill.SubString(0,[math]::min(3,$mill.length))
+    $amill = $amill.SubString(0, [math]::min(3, $mill.length))
     #HUDU AVERAGE CALLS (PER MIN)
     $avgHudu = [math]::Round(($script:huduCalls / $Minutes))
     #DISPLAY API THRESHOLDS
@@ -325,7 +327,7 @@ To Do:
     } elseif ($Minutes -gt 0) {
       $amin = [string]($asecs / 60)
       $amin = $amin.split(".")[0]
-      $amin = $amin.SubString(0,[math]::min(2,$amin.length))
+      $amin = $amin.SubString(0, [math]::min(2, $amin.length))
       write-output "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)"
       $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n$($strLineSeparator)`r`n"
     }
@@ -340,7 +342,7 @@ To Do:
     )
     #$script:psaCalls += 1
     $tempFields = ($fieldsIn.fields | where -filter {$_.name -eq $name}).picklistValues
-    $tempValues = $tempFields | where -filter {$_.isActive -eq $true} | select value,label
+    $tempValues = $tempFields | where -filter {$_.isActive -eq $true} | select value, label
     $tempHash = @{}
     $tempValues | Foreach {$tempHash[$_.value] = $_.label}
     return $tempHash	
@@ -495,7 +497,7 @@ To Do:
 #endregion ----- Backup.Management Authentication ----
 
 #region ----- Backup.Management JSON Calls ----
-  function CallBackupsJSON ($url,$object) {
+  function CallBackupsJSON ($url, $object) {
     $script:bmCalls += 1
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($object)
     $web = [System.Net.WebRequest]::Create($url)
@@ -503,10 +505,10 @@ To Do:
     $web.ContentLength = $bytes.Length
     $web.ContentType = "application/json"
     $stream = $web.GetRequestStream()
-    $stream.Write($bytes,0,$bytes.Length)
+    $stream.Write($bytes, 0, $bytes.Length)
     $stream.close()
     $reader = New-Object System.IO.Streamreader -ArgumentList $web.GetResponse().GetResponseStream()
-    return $reader.ReadToEnd()| ConvertFrom-Json
+    return $reader.ReadToEnd() | ConvertFrom-Json
     $reader.Close()
   }
 
@@ -530,7 +532,7 @@ To Do:
     $Script:websession = $websession
     $Script:Partner = $webrequest | convertfrom-json
 
-    $RestrictedPartnerLevel = @("Root","Sub-root","Distributor")
+    $RestrictedPartnerLevel = @("Root", "Sub-root", "Distributor")
     <#---# POWERSHELL 2.0 #---#>
     if ($RestrictedPartnerLevel -notcontains $Partner.result.result.Level) {
     #---#>
@@ -569,11 +571,14 @@ To Do:
     $data.params.query = @{}
     $data.params.query.PartnerId = [int]$PartnerId
     $data.params.query.Filter = $Filter1
-    $data.params.query.Columns = @("AU","AR","AN","MN","AL","LN","OP","OI","OS","PD","AP","PF","PN","CD","TS","TL","T3","US","AA843","AA77","AA2531","I78")
+    $data.params.query.Columns = @(
+      "AU", "AR", "AN", "MN", "AL", "LN", "OP", "OI", "OS", "PD", "AP", 
+      "PF", "PN", "CD", "TS", "TL", "T3", "US", "AA843", "AA77", "AA2531", "I78"
+    )
     $data.params.query.OrderBy = "CD DESC"
     $data.params.query.StartRecordNumber = 0
     $data.params.query.RecordsCount = 2000
-    $data.params.query.Totals = @("COUNT(AT==1)","SUM(T3)","SUM(US)")
+    $data.params.query.Totals = @("COUNT(AT==1)", "SUM(T3)", "SUM(US)")
     $jsondata = (ConvertTo-Json $data -depth 6)
 
     $params = @{
@@ -699,8 +704,8 @@ To Do:
     try {
       $Script:DRStatisticsResponse = Invoke-RestMethod @params
       $Script:DRStatistics = $Script:DRStatisticsResponse.data.attributes | sort-object -property backup_cloud_partner_name | Select-object *
-      $Script:DRStatistics | foreach-object { $_.last_recovery_selected_size = [Math]::Round([Decimal]($($_.last_recovery_selected_size) /1GB),2) }
-      $Script:DRStatistics | foreach-object { $_.last_recovery_restored_size = [Math]::Round([Decimal]($($_.last_recovery_restored_size) /1GB),2) }
+      $Script:DRStatistics | foreach-object { $_.last_recovery_selected_size = [Math]::Round([Decimal]($($_.last_recovery_selected_size) /1GB), 2) }
+      $Script:DRStatistics | foreach-object { $_.last_recovery_restored_size = [Math]::Round([Decimal]($($_.last_recovery_restored_size) /1GB), 2) }
       $Script:DRStatistics | foreach-object { $_.last_recovery_timestamp = Convert-UnixTimeToDateTime $($_.last_recovery_timestamp) }
       $bmdiag = "Retrieving Recovery Verification : Successful`r`n$($strLineSeparator)"
       logERR 4 "Get-DRStatistics" "$($bmdiag)"
@@ -721,7 +726,7 @@ To Do:
       [string]$companyName = ''
     )
     $Comp = Compare-Object -ReferenceObject $($currentDNS -split "`n") -DifferenceObject $($newDNS -split "`n")
-    if ($Comp){
+    if ($Comp) {
       # Send Teams Alert
       if ($enableTeamsAlerts) {
         $JSONBody = [PSCustomObject][Ordered]@{
@@ -729,22 +734,20 @@ To Do:
           "@context"   = "http://schema.org/extensions"
           "summary"    = "$companyName - $website - DNS $recordType change detected"
           "themeColor" = '0078D7'
-          "sections"   = @(
-            @{
-              "activityTitle"    = "$companyName - $website - DNS $recordType Change Detected"
-              "facts"            = @(
-                @{
-                  "name"  = "Original DNS Records"
-                  "value" = $((($Comp | where-object -filter {$_.SideIndicator -eq "<="}).InputObject | out-string ) -replace '<[^>]+>',' ')
-                },
-                @{
-                  "name"  = "New DNS Records"
-                  "value" = $((($Comp | where-object -filter {$_.SideIndicator -eq "=>"}).InputObject | out-string ) -replace '<[^>]+>',' ')
-                }
-              )
-              "markdown" = $true
-            }
-          )
+          "sections"   = @(@{
+            "activityTitle"    = "$companyName - $website - DNS $recordType Change Detected"
+            "facts"            = @(
+              @{
+                "name"  = "Original DNS Records"
+                "value" = $((($Comp | where-object -filter {$_.SideIndicator -eq "<="}).InputObject | out-string ) -replace '<[^>]+>', ' ')
+              },
+              @{
+                "name"  = "New DNS Records"
+                "value" = $((($Comp | where-object -filter {$_.SideIndicator -eq "=>"}).InputObject | out-string ) -replace '<[^>]+>', ' ')
+              }
+            )
+            "markdown" = $true
+          })
         }
         $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100          
         $parameters = @{
@@ -758,28 +761,28 @@ To Do:
       if ($enableEmailAlerts){
         $oldVal = ($Comp | where-object -filter {$_.SideIndicator -eq "<="}).InputObject | out-string
         $newVal = ($Comp | where-object -filter {$_.SideIndicator -eq "=>"}).InputObject | out-string
-        $mailSubject = "$companyName - $website - DNS $recordType change detected"
+        $mailSubject = "$($companyName) - $($website) - DNS $($recordType) change detected"
         $body = "
-          <h3>$mailSubject</h3>
+          <h3>$($mailSubject)</h3>
           <p>Original DNS Record:</p>
           <table>
-          $oldVal
+          $($oldVal)
           </table>
           <p>New DNS Record:</p>
           <table>
-          $newVal
+          $($newVal)
           </table>
           "
         $password = ConvertTo-SecureString $mailPass -AsPlainText -Force
         $mailcred = New-Object System.Management.Automation.PSCredential ($mailUser, $password)
         $sendMailParams = @{
-          From = $mailFrom
-          To = $mailTo
-          Subject = $mailSubject
-          Body = $body
-          SMTPServer = $mailServer
-          UseSsl = $mailUseSSL
-          Credential = $mailcred
+          To          = $mailTo
+          From        = $mailFrom
+          Subject     = $mailSubject
+          Body        = $body
+          Credential  = $mailcred
+          SMTPServer  = $mailServer
+          UseSsl      = $mailUseSSL
         }
         Send-MailMessage @sendMailParams -BodyAsHtml
       }
@@ -798,29 +801,29 @@ To Do:
         #BACKUPS
         $script:SelectedDevices = $script:BackupsDetails | 
           where {(($_.PartnerName -eq "$($i_Company)") -or ($_.PartnerName -match "$($i_Company)"))} | 
-            select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-              TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes
+            select PartnerId, PartnerName, AccountID, ComputerName, DeviceName, OS, IPMGUIPwd, 
+              TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes
         $bmdiag = "$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
         logERR 4 "Set-BackupDash : Backups" "$($bmdiag)"
         #RECOVERIES
         $script:SelectedRecoveries = $Script:DRStatistics | 
           where {(($_.backup_cloud_partner_name -eq "$($i_Company)") -or ($_.backup_cloud_partner_name -match "$($i_Company)"))} | 
-            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,plan_name,data_sources,
-              backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,current_recovery_status,last_recovery_timestamp,recovery_target_type
+            select backup_cloud_partner_name, backup_cloud_device_id, backup_cloud_device_name, backup_cloud_device_machine_name, plan_name, data_sources, 
+              backup_cloud_device_status, last_recovery_status, last_recovery_boot_status, current_recovery_status, last_recovery_timestamp, recovery_target_type
         $bmdiag = "$($SelectedRecoveries.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
         logERR 4 "Set-BackupDash : Recoveries" "$($bmdiag)"
       } elseif (-not $i_AllDevices) {
         if (($null -ne $i_BackupID) -and ($i_BackupID -ne "")) {
           #BACKUPS
           $script:SelectedDevices = $script:BackupsDetails | where {$_.DeviceName -eq $i_BackupID} | 
-            select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-              TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes
+            select PartnerId, PartnerName, AccountID, ComputerName, DeviceName, OS, IPMGUIPwd, 
+              TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes
           $bmdiag = "$($SelectedDevices.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
           logERR 4 "Set-BackupDash : Backups" "$($bmdiag)"
           #RECOVERIES
           $script:SelectedRecoveries = $Script:DRStatistics | where {$_.backup_cloud_device_machine_name -eq $i_BackupID} | 
-            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,plan_name,data_sources,
-              backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,current_recovery_status,last_recovery_timestamp,recovery_target_type
+            select backup_cloud_partner_name, backup_cloud_device_id, backup_cloud_device_name, backup_cloud_device_machine_name, plan_name, data_sources, 
+              backup_cloud_device_status, last_recovery_status, last_recovery_boot_status, current_recovery_status, last_recovery_timestamp, recovery_target_type
           $bmdiag = "$($SelectedRecoveries.AccountId.count) Devices Selected`r`n$($strLineSeparator)"
           logERR 4 "Set-BackupDash : Recoveries" "$($bmdiag)"
         }
@@ -829,21 +832,21 @@ To Do:
       if (@($script:SelectedDevices).count -gt 0) {
         #BACKUPS
         $selected = $script:SelectedDevices | 
-          select PartnerId,PartnerName,@{Name="AccountID"; Expression={[int]$_.AccountId}},ComputerName,DeviceName,OS,IPMGUIPwd,
-            TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
-              Sort-object AccountId | format-table | out-string
+          select PartnerId, PartnerName, @{Name="AccountID"; Expression={[int]$_.AccountId}}, ComputerName, DeviceName, OS, IPMGUIPwd,
+            TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes | 
+              sort-object AccountId | format-table | out-string
         $overdue = @($script:SelectedDevices | 
           where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
-            select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-              TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes).count
+            select PartnerId, PartnerName, AccountID, ComputerName, DeviceName, OS, IPMGUIPwd, 
+              TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes).count
         $bmdiag = $selected | out-string
         $bmdiag = "`r`n$($strLineSeparator)`r`n`tBackups :`r`n$($bmdiag)`r`n$($strLineSeparator)`r`n"
         logERR 4 "Set-BackupDash : Backups" "$($bmdiag)"
         #RECOVERIES
         if (@($script:SelectedRecoveries).count -gt 0) {
           $recoveries = $script:SelectedRecoveries | 
-            select backup_cloud_partner_name,backup_cloud_device_id,backup_cloud_device_name,backup_cloud_device_machine_name,plan_name,data_sources,
-              backup_cloud_device_status,last_recovery_status,last_recovery_boot_status,current_recovery_status,last_recovery_timestamp,recovery_target_type | 
+            select backup_cloud_partner_name, backup_cloud_device_id, backup_cloud_device_name, backup_cloud_device_machine_name, plan_name, data_sources,
+              backup_cloud_device_status, last_recovery_status, last_recovery_boot_status, current_recovery_status, last_recovery_timestamp, recovery_target_type | 
                 format-table | out-string
           $failed = @($script:SelectedRecoveries | where {$_.last_recovery_status -ne "Completed"}).count
           $bmdiag = $recoveries | out-string
@@ -861,13 +864,13 @@ To Do:
           #BACKUPS
           $badHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -lt $reportDate.AddDays(-1)} | 
-              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-                TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
+              select PartnerId, PartnerName, AccountID, ComputerName, DeviceName, OS, IPMGUIPwd, 
+                TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes | 
                   convertto-html -fragment | out-string) -replace $TableStylingBad)
           $goodHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -ge $reportDate.AddDays(-1)} | 
-              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-                TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
+              select PartnerId, PartnerName, AccountID, ComputerName, DeviceName, OS, IPMGUIPwd, 
+                TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes | 
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
           $badbody = "<h2>Overdue Backups:</h2><figure class=`"table`">$($badHTML)</figure>"
           $badbody = "$($badbody)<h2>Completed Backups:</h2><figure class=`"table`">$($goodHTML)</figure>"
@@ -882,8 +885,8 @@ To Do:
           #BACKUPS
           $goodHTML = [System.Net.WebUtility]::HtmlDecode(($script:SelectedDevices | 
             where {(get-date -date "$($_.TimeStamp)") -ge $reportDate.AddDays(-1)} | 
-              select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-                TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
+              select PartnerId, PartnerName, AccountID, ComputerName, DeviceName, OS, IPMGUIPwd, 
+                TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes | 
                   convertto-html -fragment | out-string) -replace $TableStylingGood)
           $goodbody = "<h2>$($i_Company) Backups:</h2><figure class=`"table`">$($goodHTML)</figure>"
           #RECOVERIES
@@ -893,12 +896,13 @@ To Do:
         }
         #Update 'Tile' Shade based on Overdue Backups
         if (($overdue -ge 2) -or ($failed -ge 2)) {$shade = "danger"}
-        $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"$($i_URL)`"><b>Open Backup.Management</b></a></button></p>"
+        $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">"
+        $body = "$($body)<a target=`"_blank`" href=`"$($i_URL)`"><b>Open Backup.Management</b></a></button></p>"
         $body = "$($body)<h4>Report last updated: $($timestamp)</h4>$($badbody)$($goodbody)"
-        $body = $body.replace("<table>",'<table style="width: 100%;">')
-        $body = $body.replace("<tr>",'<tr style="width: 100%;">')
-        $body = $body.replace("<td>",'<td style="resize: both;overflow: auto;margin: 25px;"><div style="resize: both; overflow: auto;margin: 5px;">')
-        $body = $body.replace("</td>",'</td></div>')
+        $body = $body.replace("<table>", '<table style="width: 100%;">')
+        $body = $body.replace("<tr>", '<tr style="width: 100%;">')
+        $body = $body.replace("<td>", '<td style="resize: both;overflow: auto;margin: 25px;"><div style="resize: both; overflow: auto;margin: 5px;">')
+        $body = $body.replace("</td>", '</td></div>')
         #write-output "$($body)"
         #write-output $i_Note
         try {
@@ -906,7 +910,7 @@ To Do:
           $Huduresult = Set-HuduMagicDash -title "Backup - $($i_Note)" -company_name "$($i_Company)" -message "$($MagicMessage)" -icon "fas fa-chart-pie" -content "$($body)" -shade "$($shade)" -ea stop
           $bmdiag = "Backup Magic Dash Set`r`n$($strLineSeparator)"
           logERR 4 "Set-BackupDash" "$($bmdiag)"
-          $arrayAssets = @("Server","Workstation")
+          $arrayAssets = @("Server", "Workstation")
           foreach ($type in $arrayAssets) {
             # Get the Asset Layout
             $AssetLayout = $huduLayouts | where {$_.name -match "$($type)"} #Get-HuduAssetLayouts -name "$($type)"
@@ -927,21 +931,22 @@ To Do:
                   $goodHTML = $null
                   if ((get-date -date "$($device.TimeStamp)") -lt $reportDate.AddDays(-1)) {
                     $badHTML = [System.Net.WebUtility]::HtmlDecode(($device | 
-                      select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-                        TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
+                      select PartnerId, PartnerName, AccountID, ComputerName, DeviceName, OS, IPMGUIPwd, 
+                        TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes | 
                           convertto-html -fragment | out-string) -replace $TableStylingBad)
                   } elseif ((get-date -date "$($device.TimeStamp)") -ge $reportDate.AddDays(-1)) {
                     $goodHTML = [System.Net.WebUtility]::HtmlDecode(($device | 
-                      select PartnerId,PartnerName,AccountID,ComputerName,DeviceName,OS,IPMGUIPwd,
-                        TimeStamp,LastSuccess,Product,DataSources,SelectedGB,UsedGB,Location,Notes | 
+                      select PartnerId, PartnerName, AccountID, ComputerName, DeviceName, OS, IPMGUIPwd, 
+                        TimeStamp, LastSuccess, Product, DataSources, SelectedGB, UsedGB, Location, Notes | 
                           convertto-html -fragment | out-string) -replace $TableStylingGood)
                   }
-                  $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"$($i_URL)`"><b>Open Backup.Management</b></a></a></button></p>"
+                  $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">"
+                  $body = "$($body)<a target=`"_blank`" href=`"$($i_URL)`"><b>Open Backup.Management</b></a></a></button></p>"
                   $body = "$($body)<h4>Report last updated: $($timestamp)</h4><h2>$($AssetName) Backups:</h2>$($badHTML)$($goodHTML)"
-                  $body = $body.replace("<table>",'<table style="width: 100%;">')
-                  $body = $body.replace("<tr>",'<tr style="width: 100%;">')
-                  $body = $body.replace("<td>",'<td style="resize: both;overflow: auto;margin: 25px;"><div style="resize: both; overflow: auto;margin: 5px;">')
-                  $body = $body.replace("</td>",'</td></div>')
+                  $body = $body.replace("<table>", '<table style="width: 100%;">')
+                  $body = $body.replace("<tr>", '<tr style="width: 100%;">')
+                  $body = $body.replace("<td>", '<td style="resize: both;overflow: auto;margin: 25px;"><div style="resize: both; overflow: auto;margin: 5px;">')
+                  $body = $body.replace("</td>", '</td></div>')
                   # Loop through all the fields on the Asset
                   $AssetFields = @{
                     'control_tools'         = ($Asset.fields | where-object -filter {$_.label -eq "Control Tools"}).value
@@ -1277,8 +1282,9 @@ if (-not $script:blnBREAK) {
         $failCoTickets = 0
         #endregion
         $atURL = "$($AutotaskAcct)$($company.CompanyID)"
-        $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`"><a target=`"_blank`" href=`"$($atURL)`"><b>Open $($company.CompanyName) in PSA</b></a></a></button></p>"
-        write-output "`r`n$($strLineSeparator)`r`nProcessing $($company.CompanyName)`r`n$($strLineSeparator)" -foregroundcolor green
+        $body = "<p class=`"callout callout-info`"><button type=`"button`" style=`"background-color: #B5B5B5;font-size: 16px;`">"
+        $body = "$($body)<a target=`"_blank`" href=`"$($atURL)`"><b>Open $($company.CompanyName) in PSA</b></a></a></button></p>"
+        write-output "`r`n$($strLineSeparator)`r`nProcessing $($company.CompanyName)`r`n$($strLineSeparator)"
         $script:diag += "`r`n`r`n$($strLineSeparator)`r`nProcessing $($company.CompanyName)`r`n$($strLineSeparator)`r`n"
         #Find Company in Hudu
         $script:huduCalls += 1
@@ -1286,7 +1292,8 @@ if (-not $script:blnBREAK) {
         #region###############    Arrange PSA Ticket data for Hudu
         $custTickets = $tickets | 
           where {$_.companyID -eq $company.CompanyID} | 
-            select id, ticketNUmber, createdate, title, description, dueDateTime, assignedResourceID, lastActivityPersonType, lastCustomerVisibleActivityDateTime, priority, source, status, issueType, subIssueType, ticketType
+            select id, ticketNUmber, createdate, title, description, dueDateTime, assignedResourceID, lastActivityPersonType, 
+              lastCustomerVisibleActivityDateTime, priority, source, status, issueType, subIssueType, ticketType
         if (@($custTickets).count -gt 0) {
           $outTickets = foreach ($ticket in $custTickets) {
             $procCoTickets += 1
@@ -1416,10 +1423,6 @@ if (-not $script:blnBREAK) {
         write-output "$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
         $script:diag += "`r`n$($strLineSeparator)`r`nCustomer Assets :`r`nCollected $(@($custAssets).count) Assets`r`n$($strLineSeparator)"
         if (@($custAssets).count -gt 0) {
-          $test = [System.Net.WebUtility]::HtmlDecode(($custAssets | 
-            select-object 'RMMLink', 'PSALink', 'make', 'model', 'ModelLink', 'dattoSerial', 'SerialLink', 
-              'dattoHost', 'refNumber', 'refTitle', 'rmmID', 'rmmUID', 'serial', 'rmmTypeID', 'rmmModelID', 'rmmInIP', 'rmmDevIP', 'rmmDevMAC' | 
-                convertto-html -fragment | out-string) -replace $TableStylingGood)
           foreach ($psaAsset in $custAssets) {
             if ((($null -ne $psaAsset.rmmTypeID) -and ($psaAsset.rmmTypeID -ne "")) -and 
               (($null -ne $psaAsset.refTitle) -and ($psaAsset.refTitle -ne ""))) {
@@ -1460,7 +1463,7 @@ if (-not $script:blnBREAK) {
                         if (($Asset | measure-object).count -ne 1) {
                           $psadiag = "No / multiple layout(s) found with Name : $($psaAsset.refTitle) - Serial : $($psaAsset.serial)`r`n$($strLineSeparator)"
                           logERR 3 "Update PSA Asset" "$($psadiag)"
-                          write-output "Skipped`r`n$($strLineSeparator)" -foregroundcolor yellow
+                          write-output "Skipped`r`n$($strLineSeparator)"
                           $script:diag += "`r`nSkipped`r`n$($strLineSeparator)"
                           $skipPSAassets += 1
                           $skipCoAssets += 1
@@ -1550,7 +1553,7 @@ if (-not $script:blnBREAK) {
         logERR 3 "Autotask Processing" "$($psadiag)"
         $procCompany += 1
     } else {
-      write-output "$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)" -foregroundcolor yellow
+      write-output "$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)"
       $script:diag += "`r`n$($strLineSeparator)`r`nSkipped`r`n$($strLineSeparator)"
       #$psadiag = "Skipped`r`n$($strLineSeparator)"
       #logERR 3 "Autotask Processing" "$($psadiag)"
@@ -1632,22 +1635,22 @@ if (-not $script:blnBREAK) {
           logERR 3 "Customer Management" "No Enabled Field was found`r`n$($strLineSeparator)"
         }
         $Colour = switch ($EnabledField.value) {
-          $true {'success'}
-          $false {'grey'}
+          $true   {'success'}
+          $false  {'grey'}
           default {'grey'}
         }
         $Param = @{
-          Title = "$($Service)"
+          Shade       = "$($Colour)"
+          Title       = "$($Service)"
           CompanyName = "$($Asset.company_name)"
-          Shade = "$($Colour)"
         }
         if ($NoteField.value){
           $Param['Message'] = "$($NoteField.value)"
           $Param | Add-Member -MemberType NoteProperty -Name 'Message' -Value "$($NoteField.value)"
         } else {
           $Param['Message'] = switch ($EnabledField.value) {
-            $true {"Customer has $($Service)"}
-            $false {"No $($Service)"}
+            $true   {"Customer has $($Service)"}
+            $false  {"No $($Service)"}
             default {"No $($Service)"}
           }
         }
@@ -1719,11 +1722,16 @@ if (-not $script:blnBREAK) {
       $script:diag += "`r`n$($strLineSeparator)`r`nResolving $($dnsname) for $($website.company_name)"
       try {
         $script:dnsCalls += 5
-        $arecords = resolve-dnsname "$($dnsname)" -type "A_AAAA" -ErrorAction Stop | select type, IPADDRESS | sort IPADDRESS | convertto-html -fragment | out-string
-        $mxrecords = resolve-dnsname "$($dnsname)" -type "MX" -ErrorAction Stop | sort NameExchange |convertto-html -fragment -property NameExchange | out-string
-        $nsrecords = resolve-dnsname "$($dnsname)" -type "NS" -ErrorAction Stop | sort NameHost | convertto-html -fragment -property NameHost| out-string
-        $txtrecords = resolve-dnsname "$($dnsname)" -type "TXT" -ErrorAction Stop | select @{N='Records';E={$($_.strings)}}| sort Records | convertto-html -fragment -property Records | out-string
-        $soarecords = resolve-dnsname "$($dnsname)" -type "SOA" -ErrorAction Stop | select PrimaryServer, NameAdministrator, SerialNumber | sort NameAdministrator | convertto-html -fragment | out-string
+        $arecords = resolve-dnsname "$($dnsname)" -type "A_AAAA" -ErrorAction Stop | 
+          select type, IPADDRESS | sort IPADDRESS | convertto-html -fragment | out-string
+        $mxrecords = resolve-dnsname "$($dnsname)" -type "MX" -ErrorAction Stop | 
+          sort NameExchange | convertto-html -fragment -property NameExchange | out-string
+        $nsrecords = resolve-dnsname "$($dnsname)" -type "NS" -ErrorAction Stop | 
+          sort NameHost | convertto-html -fragment -property NameHost | out-string
+        $txtrecords = resolve-dnsname "$($dnsname)" -type "TXT" -ErrorAction Stop | 
+          select @{N='Records'; E={$($_.strings)}} | sort Records | convertto-html -fragment -property Records | out-string
+        $soarecords = resolve-dnsname "$($dnsname)" -type "SOA" -ErrorAction Stop | 
+          select PrimaryServer, NameAdministrator, SerialNumber | sort NameAdministrator | convertto-html -fragment | out-string
       } catch {
         $err = "$($dnsname) lookup failed`r`n$($strLineSeparator)`r`n"
         $err += "$($strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
@@ -1743,7 +1751,7 @@ if (-not $script:blnBREAK) {
       $AssetName = "$($dnsname)"
       $companyid = $website.company_id
       $script:diag += "`r`n$($strLineSeparator)`r`n$($dnsname) lookup successful"
-      write-output "$($strLineSeparator)`r`n$($dnsname) lookup successful" -foregroundcolor green
+      write-output "$($strLineSeparator)`r`n$($dnsname) lookup successful"
       #Check if there is already an asset
       $Asset = $DNSAssets | where {(($_.name -eq "$($AssetName)") -and $_.company_name -eq "$($website.company_name)")}    #Get-HuduAssets -name "$($AssetName)" -companyid $companyid -assetlayoutid $DNSLayout.id
       #If the Asset does not exist, we edit the body to be in the form of a new asset, if not, we just upload.
