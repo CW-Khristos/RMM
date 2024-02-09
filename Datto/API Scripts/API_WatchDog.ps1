@@ -22,8 +22,11 @@
   $script:strLineSeparator  = "---------"
   $script:logPath           = "C:\IT\Log\API_WatchDog"
   #region######################## TLS Settings ###########################
+  #[System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   [System.Net.ServicePointManager]::SecurityProtocol = (
+    [System.Net.SecurityProtocolType]::Ssl3 -bor 
+    [System.Net.SecurityProtocolType]::Ssl2 -bor 
     [System.Net.SecurityProtocolType]::Tls13 -bor 
     [System.Net.SecurityProtocolType]::Tls12 -bor 
     [System.Net.SecurityProtocolType]::Tls11 -bor 
@@ -379,7 +382,6 @@
     }
     try {
       $script:blnSITE = $false
-      RMM-ApiRequest @params -UseBasicParsing
       $script:newSite = (RMM-ApiRequest @params -UseBasicParsing) #| ConvertFrom-Json
       if ($script:newSite -match $name) {
         return $true
