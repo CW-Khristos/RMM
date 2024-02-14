@@ -11,8 +11,8 @@ Remove-Variable * -ErrorAction SilentlyContinue
   #region######################## TLS Settings ###########################
   #[System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
+  #[System.Net.SecurityProtocolType]::Ssl3 -bor
   [System.Net.ServicePointManager]::SecurityProtocol = (
-    [System.Net.SecurityProtocolType]::Ssl3 -bor 
     [System.Net.SecurityProtocolType]::Ssl2 -bor 
     [System.Net.SecurityProtocolType]::Tls13 -bor 
     [System.Net.SecurityProtocolType]::Tls12 -bor 
@@ -47,6 +47,9 @@ Remove-Variable * -ErrorAction SilentlyContinue
     7 = "Vendor"
     8 = "Partner"
   }
+  $script:psaSkip           = @(
+    "Cancelation", "Dead", "Lead", "Partner", "Prospect", "Vendor"
+  )
   #PSA API CREDS
   $script:psaUser           = $env:ATAPIUser
   $script:psaKey            = $env:ATAPIUser
@@ -600,7 +603,7 @@ try {
   #QUERY AT PSA API
   logERR 3 "AT API" "QUERYING AT API :`r`n$($strLineSeparator)"
   $script:psaCountries = PSA-FilterQuery $script:psaHeaders "GET" "Countries" $psaGenFilter
-  logERR 3 "AT API" "$($strLineSeparator)`r`n`tASSET TYPE MAP :"
+  logERR 3 "AT API" "$($strLineSeparator)`r`n`tASSET TYPE MAP :`r`n`t$($strLineSeparator)"
   PSA-GetMaps $script:psaHeaders $script:ciTypeMap "ConfigurationItemTypes"
   write-output "$(($script:ciTypeMap | out-string).trim())`r`n`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
   $script:diag += "$(($script:ciTypeMap | out-string).trim())`r`n`t$($strLineSeparator)`r`n`tDone`r`n`t$($strLineSeparator)"
@@ -633,23 +636,24 @@ try {
     start-sleep -Milliseconds 100
     $script:psaCompany = $script:psaCompanies | where {$_.CompanyName -eq $script:rmmSite.name}
     switch ($($script:typeMap[[int]$($script:psaCompany.CompanyType)])) {
-      {(($_ -eq "Assessment") -or ($_ -eq "Lead") -or ($_ -eq "Cancelation") -or ($_ -eq "Dead") -or ($_ -eq "Partner") -or ($_ -eq "Prospect") -or ($_ -eq "Vendor"))} {
-        logERR 3 "SITE DIAG" "Skipping $($script:rmmSite.name)`r`n$($strLineSeparator)"; break
+      {($script:psaSkip -contains "$($script:typeMap[[int]$($company.CompanyType)])")} {
+      #{(($_ -eq "Assessment") -or ($_ -eq "Lead") -or ($_ -eq "Cancelation") -or ($_ -eq "Dead") -or ($_ -eq "Partner") -or ($_ -eq "Prospect") -or ($_ -eq "Vendor"))} {
+        logERR 3 "SITE DIAG" "Skipping : Not Managed : $($script:rmmSite.name)`r`n$($strLineSeparator)"; break
       }
-      default {
+      {($script:psaSkip -notcontains "$($script:typeMap[[int]$($company.CompanyType)])")} {
         switch ($script:rmmSite.name) {
           {(($_ -match "IPM Computers - Private") -or ($_ -match "CreateMe") -or ($_ -match "Garland") -or ($_ -eq "Managed") -or ($_ -match "Deleted Devices"))} {
-            logERR 3 "SITE DIAG" "Skipping $($script:rmmSite.name)`r`n$($strLineSeparator)"; break
+            logERR 3 "SITE DIAG" "Skipping : Not Managed (Exceptions) : $($script:rmmSite.name)`r`n$($strLineSeparator)"; break
           }
           default {
-            logERR 3 "SITE DIAG" "Processing $($script:rmmSite.name) :`r`n$($strLineSeparator)"
+            logERR 3 "SITE DIAG" "Processing : $($script:rmmSite.name) :`r`n$($strLineSeparator)"
             # collect all Devices
             $script:siteDevices = RMM-GetDevices $script:rmmSite.uid $filter.id
-            $script:siteAssets = PSA-GetAssets $script:psaHeaders $script:rmmSite.autotaskCompanyId
+            $script:siteAssets = PSA-GetAssets $script:psaHeaders $script:psaCompany.CompanyID
             # check Device online status and last seen
             foreach ($script:rmmDevice in $script:siteDevices) {
               $script:siteAsset = $script:siteAssets | where {$_.rmmDeviceUID -eq $script:rmmDevice.DeviceUID}
-              $script:assetTickets = PSA-GetTickets $script:psaHeaders $script:rmmSite.autotaskCompanyId $script:siteAsset.psaID "Device Activity Alert: Offline"
+              $script:assetTickets = PSA-GetTickets $script:psaHeaders $script:psaCompany.CompanyID $script:siteAsset.psaID "Device Activity Alert: Offline"
               $diagAsset = "$($script:rmmDevice.hostname) - Last Seen : $(Get-EpochDate $script:rmmDevice.lastSeen "msec")"
               $diagAsset += "`r`n`t$($strLineSeparator)`r`n$(($script:psaTicketdetails | fl | out-string).trim())"
               logERR 3 "ASSET DIAG" "$($diagAsset)`r`n`t$($strLineSeparator)"
@@ -661,7 +665,7 @@ try {
                 $script:diag += "`tNo Tickets Found. Creating Ticket`r`n`t$($strLineSeparator)`r`n$($strLineSeparator)`r`n"
                 $newTicket = @{
                   id                   = '0'
-                  companyID            = $script:rmmSite.autotaskCompanyId
+                  companyID            = $script:psaCompany.CompanyID
                   configurationItemID  = "$($script:siteAsset.psaID)"
                   queueID              = '8'         #Monitoring Alert
                   ticketType           = '1'         #Standard
@@ -685,6 +689,7 @@ try {
         }
         break
       }
+      default {logERR 3 "SITE DIAG" "No Case Match : Skipping : $($script:rmmSite.name)`r`n$($strLineSeparator)"; break}
     }
   }
 } catch {
