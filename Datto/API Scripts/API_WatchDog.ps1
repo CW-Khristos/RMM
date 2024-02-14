@@ -24,8 +24,8 @@
   #region######################## TLS Settings ###########################
   #[System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
+  #[System.Net.SecurityProtocolType]::Ssl3 -bor 
   [System.Net.ServicePointManager]::SecurityProtocol = (
-    [System.Net.SecurityProtocolType]::Ssl3 -bor 
     [System.Net.SecurityProtocolType]::Ssl2 -bor 
     [System.Net.SecurityProtocolType]::Tls13 -bor 
     [System.Net.SecurityProtocolType]::Tls12 -bor 
@@ -53,6 +53,8 @@
   #endregion
   #region######################## Autotask Settings ###########################
   #PSA API DATASETS
+  $script:classMap          = @{}
+  $script:categoryMap       = @{}
   $script:typeMap           = @{
     1 = "Customer"
     2 = "Lead"
@@ -62,8 +64,6 @@
     7 = "Vendor"
     8 = "Partner"
   }
-  $script:classMap          = @{}
-  $script:categoryMap       = @{}
   $script:psaSkip           = @(
     "Cancelation", "Dead", "Lead", "Partner", "Prospect", "Vendor"
   )
@@ -80,6 +80,9 @@
   #PSA API VARS
   $script:psaCalls          = 0
   $script:psaAPI            = "$($env:ATAPIBase)/atservicesrest/v1.0"
+  $AutotaskAcct             = "/Autotask/AutotaskExtend/ExecuteCommand.aspx?Code=OpenAccount&AccountID="
+  $AutotaskExe              = "/Autotask/AutotaskExtend/ExecuteCommand.aspx?Code=OpenTicketDetail&TicketNumber="
+  $AutotaskDev              = "/Autotask/AutotaskExtend/AutotaskCommand.aspx?&Code=OpenInstalledProduct&InstalledProductID="
   $script:psaGenFilter      = '{"Filter":[{"field":"Id","op":"gte","value":0}]}'
   $script:psaActFilter      = '{"Filter":[{"op":"and","items":[{"field":"IsActive","op":"eq","value":true},{"field":"Id","op":"gte","value":0}]}]}'
   #endregion
@@ -625,20 +628,21 @@ if (-not $script:blnFAIL) {
       switch ($oppStatus) {
         "Active" {
           switch ($oppStage) {
-            {(($_ -eq "New Lead") -or ($_ -eq "Stage 1 First Contact"))} {
-              if (($script:fullCompany.item.companyType -ne 3) -or 
-                ($script:fullCompany.item.classification -ne 7) -or 
-                ($script:fullCompany.item.companyCategoryID -ne 1)) {
-                  write-output "OPPORTUNITY DIAG : $($_) : Update Company"
-                  $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
-                  $script:fullCompany.item.companyType = 3            #Company Type 'Prospect'
-                  $script:fullCompany.item.classification = 7         #Company Classification 'Target'
-                  $script:fullCompany.item.companyCategoryID = 1      #Company Category 'Standard'
-                  $blnUpdate = $true
-              }
+            {(($_ -eq "New Lead") -or 
+              ($_ -eq "Stage 1 First Contact") -or ($_ -eq "Stage 2 Get CSRA Signature"))} {
+                if (($script:fullCompany.item.companyType -ne 3) -or 
+                  ($script:fullCompany.item.classification -ne 7) -or 
+                  ($script:fullCompany.item.companyCategoryID -ne 1)) {
+                    write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                    $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                    $script:fullCompany.item.companyType = 3            #Company Type 'Prospect'
+                    $script:fullCompany.item.classification = 7         #Company Classification 'Target'
+                    $script:fullCompany.item.companyCategoryID = 1      #Company Category 'Standard'
+                    $blnUpdate = $true
+                }
             }
-            {(($_ -eq "Stage 2 Qualification") -or ($_ -eq "Stage 3 Proposal Sent") -or 
-              ($_ -eq "Stage 4 Contract Sent") -or ($_ -eq "On Hold"))} {
+            {(($_ -eq "Stage 3 Performing Assessments") -or ($_ -eq "Stage 4 Proposal Sent") -or 
+              ($_ -eq "Stage 5 Contract Sent") -or ($_ -eq "On Hold"))} {
                 if (($script:fullCompany.item.companyType -ne 1) -or 
                   ($script:fullCompany.item.classification -ne 202) -or 
                   ($script:fullCompany.item.companyCategoryID -ne 101)) {
@@ -689,7 +693,7 @@ if (-not $script:blnFAIL) {
       if ($blnUpdate) {
         write-output "OPPORTUNITY DIAG : UPDATING : $($company.CompanyName)`r`n$($script:fullCompany.item | convertto-json)`r`n$($script:strLineSeparator)"
         $script:diag += "OPPORTUNITY DIAG : UPDATING : $($company.CompanyName)`r`n$($script:fullCompany.item | convertto-json)`r`n$($script:strLineSeparator)`r`n"
-        #PSA-Put $script:psaHeaders "PUT" "Companies" ($script:fullCompany.item | convertto-json)
+        PSA-Put $script:psaHeaders "PUT" "Companies" ($script:fullCompany.item | convertto-json)
       } elseif (-not ($blnUpdate)) {
         write-output "OPPORTUNITY DIAG : NO NEED TO UPDATE : $($company.CompanyName)`r`n$($script:strLineSeparator)"
         $script:diag += "OPPORTUNITY DIAG : NO NEED TO UPDATE : $($company.CompanyName)`r`n$($script:strLineSeparator)`r`n"
