@@ -123,7 +123,7 @@
     $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
     $mill = [string]($total / 1000)
     $mill = $mill.split(".")[1]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
@@ -243,8 +243,8 @@ if (-not $script:blnBREAK) {
   $huduCompany = Get-HuduCompanies -Name "$($script:Customer)"
   try {
     switch ($script:producttype) {
-      "Workstation" {$script:producttype = "Workstation";break}
-      {"DC","Server"} {$script:producttype = "Server";break}
+      "Workstation" {$script:producttype = "Workstation"; break}
+      {"DC", "Server"} {$script:producttype = "Server"; break}
     }
     write-output "`r`n$($strLineSeparator)`r`nAccessing $($script:computername) Hudu Asset in $($huduCompany.name)($($huduCompany.id))"
     $script:diag += "`r`n`r`n$($strLineSeparator)`r`nAccessing $($script:computername) Hudu Asset in $($huduCompany.name)($($huduCompany.id))`r`n"
