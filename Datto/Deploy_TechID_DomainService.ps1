@@ -113,31 +113,37 @@ if ($script:blnFAIL) {
 } elseif (-not ($script:blnFAIL)) {
   write-output "$($strLineSeparator)`r`nCHECKING FOR DomainService"
   $script:diag += "$($strLineSeparator)`r`nCHECKING FOR DomainService`r`n"
+  $strEXE = "$($env:strDeploy)\DomainService.exe"
   $service = get-service -name "RuffianDomainService"
   if ($service) {
     try {
+      write-output "$($strLineSeparator)`r`nUNINSTALLING DomainService`r`n`tCMD : $($strEXE) uninstall"
+      $script:diag += "$($strLineSeparator)`r`nUNINSTALLING DomainService`r`n`tCMD : $($strEXE) uninstall`r`n"
+      $output = Get-ProcessOutput -filename "$($strEXE)" -args "uninstall"
+      $script:diag += "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)`r`n"
+      write-output "`t - StdOut : $($output.standardoutput)`r`n`t - StdErr : $($output.standarderror)"
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+      logERR 3 "INSTALL" $err
+      #ATTEMPT TO FORCE REMOVAL
       write-output "$($strLineSeparator)`r`nSTOPPING DomainService"
       $script:diag += "$($strLineSeparator)`r`nSTOPPING DomainService`r`n"
       stop-service -name "RuffianDomainService"
       write-output "$($strLineSeparator)`r`nSTOPPED DomainService`r`nREMOVING FILES"
       $script:diag += "$($strLineSeparator)`r`nSTOPPED DomainService`r`nREMOVING FILES`r`n"
       get-childitem "$($env:strDeploy)" | remove-item -force -erroraction continue
-    } catch {
-      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
-      logERR 3 "INSTALL" $err
     }
   }
   write-output "$($strLineSeparator)`r`nDEPLOYING DomainService"
   $script:diag += "$($strLineSeparator)`r`nDEPLOYING DomainService`r`n"
-  move-item DomainService_v3.164x64.zip "$($env:strDeploy)"
+  move-item DomainService_v4.111x64.zip "$($env:strDeploy)"
   $shell = New-Object -ComObject Shell.Application
-  $zip = $shell.Namespace("$($env:strDeploy)\DomainService_v3.164x64.zip")
+  $zip = $shell.Namespace("$($env:strDeploy)\DomainService_v4.111x64.zip")
   $items = $zip.items()
   $shell.Namespace("$($env:strDeploy)").CopyHere($items, 1556)
   $script:diag += "DomainService EXTRACTED TO '$($env:strDeploy)'`r`n$($strLineSeparator)`r`n"
   write-output "DomainService EXTRACTED TO '$($env:strDeploy)'`r`n$($strLineSeparator)"
-  remove-item "$($env:strDeploy)\DomainService_v3.164x64.zip"
-  $strEXE = "$($env:strDeploy)\DomainService.exe"
+  remove-item "$($env:strDeploy)\DomainService_v4.111x64.zip"
   #INSTALL
   try {
     write-output "$($strLineSeparator)`r`nINSTALLING DomainService`r`n`tCMD : $($strEXE) install"
