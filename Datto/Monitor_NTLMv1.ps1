@@ -11,6 +11,7 @@
   $script:blnWARN             = $false
   $script:strLineSeparator    = "---------"
   $blnFix                     = $env:blnFix
+  $blnRevert                  = $env:blnRevert
   $hashNTLM                   = @{}
   $regValues                  = @(
     "NtlmMinClientSec"
@@ -199,16 +200,19 @@ try {
     $script:blnWARN = $true; $warn += "NTLMv1 Authentication Allowed`r`n"
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[0])" "LMCompatibilityLevel" 5}
   }
+  if ($blnRevert -eq 'True') {write-NTLMSecurity "$($regPaths[0])" "LMCompatibilityLevel" 1}
   if (($null -eq $hashNTLM.NtlmMinClientSec) -or ($hashNTLM.NtlmMinClientSec -band $mapNTLMSecurity.NTLMv1)) {
     #Set `NtlmMinClientSec` to `128-bit Session Security`
     $script:blnWARN = $true; $warn += "NTLMv1 Client Negotiation Allowed`r`n"
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinClientSec" 537395200}
   }
+  if ($blnRevert -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinClientSec" 524288}
   if (($null -eq $hashNTLM.NtlmMinServerSec) -or ($hashNTLM.NtlmMinServerSec -band $mapNTLMSecurity.NTLMv1)) {
     #Set `NtlmMinServerSec` to `128-bit Session Security`
     $script:blnWARN = $true; $warn += "NTLMv1 Server Negotiation Allowed`r`n"
     if ($blnFix -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinServerSec" 537395200}
   }
+  if ($blnRevert -eq 'True') {write-NTLMSecurity "$($regPaths[1])" "NtlmMinServerSec" 524288}
   if (($null -eq $hashNTLM.AuditReceivingNTLMTraffic) -or ($hashNTLM.AuditReceivingNTLMTraffic -ne 2)) {
     #Set `AuditReceivingNTLMTraffic` to `Audit All Accounts`
     $script:blnWARN = $true; $warn += "Not Auditing Received NTLM Traffic from All Accounts`r`n"
