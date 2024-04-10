@@ -10,11 +10,13 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $script:logPath           = "C:\IT\Log\Syncro_Payments"
   #region######################## TLS Settings ###########################
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
+  #[System.Net.SecurityProtocolType]::Ssl3 -bor 
+  #[System.Net.SecurityProtocolType]::Tls11 -bor 
+  #[System.Net.SecurityProtocolType]::Tls
   [System.Net.ServicePointManager]::SecurityProtocol = (
+    [System.Net.SecurityProtocolType]::Ssl2 -bor 
     [System.Net.SecurityProtocolType]::Tls13 -bor 
-    [System.Net.SecurityProtocolType]::Tls12 -bor 
-    [System.Net.SecurityProtocolType]::Tls11 -bor 
-    [System.Net.SecurityProtocolType]::Tls
+    [System.Net.SecurityProtocolType]::Tls12
   )
   #endregion
   #region######################## Syncro Settings ###########################
@@ -25,6 +27,18 @@ Remove-Variable * -ErrorAction SilentlyContinue
   #endregion
 #endregion
 
+#region ----- FUNCTIONS ----
+  function write-DRMMDiag ($messages) {
+    write-output "<-Start Diagnostic->"
+    foreach ($message in $messages) {$message}
+    write-output "<-End Diagnostic->"
+  } ## write-DRMMDiag
+  
+  function write-DRMMAlert ($message) {
+    write-output "<-Start Result->"
+    write-output "Alert=$($message)"
+    write-output "<-End Result->"
+  } ## write-DRMMAlert
 #region ----- API FUNCTIONS ----
 #region ----- SYNCRO FUNCTIONS ----
   function Syncro-Query {
@@ -359,9 +373,10 @@ try {
   #QUERY SYNCRO API
   logERR 3 "QUERY SYNCRO" "QUERYING SYNCRO API :`r`n$($script:strLineSeparator)"
   $script:syncroCustomers = Syncro-Query "GET" "customers" $null
+  $script:syncroCustomers = $script:syncroCustomers.customers | where {($_.properties.'Syncro Payments Notice') -ne '50150'}
   #write-output $script:syncroCustomers | out-string
-  write-output "`tTotal # Syncro Customers : $($script:syncroCustomers.customers.Count)`r`n`t$($script:strLineSeparator)"
-  $script:diag += "`tTotal # Syncro Customers : $($script:syncroCustomers.customers.Count)`r`n`t$($script:strLineSeparator)`r`n"
+  write-output "`tTotal # Syncro Customers : $($script:syncroCustomers.Count)`r`n`t$($script:strLineSeparator)"
+  $script:diag += "`tTotal # Syncro Customers : $($script:syncroCustomers.Count)`r`n`t$($script:strLineSeparator)`r`n"
   start-sleep -milliseconds 200
   $script:syncroProducts = Syncro-Query "GET" "products" "category_id=195696"
   #write-output $script:syncroProducts | out-string
@@ -379,7 +394,7 @@ try {
   if ($script:syncroCustomers) {
     #ITERATE THROUGH SYNCRO CUSTOMERS
     $actDate = ((get-date).AddYears(-3))
-    foreach ($script:customer in $script:syncroCustomers.customers) {
+    foreach ($script:customer in $script:syncroCustomers) {
       $invoices = $null
       start-sleep -milliseconds 200 #200msec X ~300 = 1min
       logERR 3 "Customer Processing" "Processing Syncro Customer : $($script:customer.fullname) | $($script:customer.business_name) | Last Updated : $($script:customer.updated_at)"
@@ -456,3 +471,26 @@ foreach ($key in $script:syncroWARN.keys) {
   }
 }
 write-output "$($strLineSeparator)`r`n"
+
+#Stop script execution time calculation
+StopClock
+#CLEAR LOGFILE
+$null | set-content $script:logPath -force
+"$($script:diag)" | add-content $script:logPath -force
+if (-not $script:blnBREAK) {
+  if (-not $script:blnWARN) {
+    write-DRMMAlert "Syncro_Payments : Healthy. No Issues Found : $($finish)"
+    write-DRMMDiag "$($script:diag)"
+    exit 0
+  } elseif ($script:blnWARN) {
+    write-DRMMAlert "Syncro_Payments : Issues Found. Please Check Diagnostics : $($finish)"
+    write-DRMMDiag "$($script:diag)"
+    exit 0
+  }
+} elseif ($script:blnBREAK) {
+  write-DRMMAlert "Syncro_Payments : Execution Failed : $($finish)"
+  write-DRMMDiag "$($script:diag)"
+  exit 1
+}
+#END SCRIPT
+#------------
