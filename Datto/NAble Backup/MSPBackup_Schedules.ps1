@@ -569,10 +569,10 @@ try {
       logERR 3 "THROTTLE" "$($throttle)`r`n$($strLineSeparator)"
       if ($curThrottle) {
         logERR 3 "THROTTLE" "PREV THROTTLE :`r`n$($strLineSeparator)`r`n`t$($curThrottle)`r`n$($strLineSeparator)"
-        if ($curThrottle.trim() -match $throttle.trim()) {
+        if ($curThrottle.trim() -eq $throttle.trim()) {
           $throttleMsg += "| Throttle Settings are same |"
           logERR 3 "THROTTLE" "$($throttleMsg)`r`n$($strLineSeparator)"
-        } elseif ($curThrottle.trim() -notmatch $throttle.trim()) {
+        } elseif ($curThrottle.trim() -ne $throttle.trim()) {
           $throttleMsg += "| Throttle Settings are different |"
           logERR 4 "THROTTLE" "$($throttleMsg)`r`n$($strLineSeparator)"
         }
