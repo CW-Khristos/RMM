@@ -9,7 +9,7 @@
   $script:bitarch = $null
   $script:blnWARN = $false
   $script:blnBREAK = $false
-  $BSODFilter = $null
+  $script:BSODFilter = $null
   $exePath = "$($env:strPath)"
   $logPath = "C:\IT\Log\BSOD_Monitor"
   $strLineSeparator = "----------------------------------"
@@ -28,8 +28,8 @@
     write-output "<-End Result->"
   } ## write-DRMMAlert
 
-  function Get-OSArch {                                                                             #Determine Bit Architecture & OS Type
-    #OS Bit Architecture
+  function Get-OSArch {
+    #Determine Bit Architecture & OS Type
     $osarch = (get-wmiobject win32_operatingsystem).osarchitecture
     if ($osarch -like '*64*') {
       $script:bitarch = "bit64"
@@ -59,6 +59,7 @@
         $script:blnBREAK = $true
         $script:diag += "`r`n$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
         write-output "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        break
       }
       2 {                                                         #'ERRRET'=2 - END SCRIPT
         $script:blnBREAK = $true
@@ -66,6 +67,7 @@
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
         write-output "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - ($($strModule)) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
+        break
       }
       3 {                                                         #'ERRRET'=3
         $script:blnWARN = $false
@@ -73,6 +75,7 @@
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
         write-output "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - $($strModule) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr)"
+        break
       }
       default {                                                   #'ERRRET'=4+
         $script:blnBREAK = $false
@@ -80,6 +83,7 @@
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
         write-output "$($strLineSeparator)`r`n$($(get-date)) - BSOD_Monitor - $($strModule) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr)"
+        break
       }
     }
   }
@@ -114,9 +118,11 @@
       $result = taskkill /IM "BlueScreenView.exe" /F
       start-sleep -seconds 5
       $result = get-process "BlueScreenView.exe" -erroraction silentlycontinue
-      if ($result) {                   #BLUESCREENVIEW STILL RUNNING
+      #BLUESCREENVIEW STILL RUNNING
+      if ($result) {
         $running = $true
-      } elseif (-not $result) {        #BLUESCREENVIEW NO LONGER RUNNING
+      #BLUESCREENVIEW NO LONGER RUNNING
+      } elseif (-not $result) {
         $running = $false
       }
     }
@@ -137,8 +143,7 @@
               $web = new-object system.net.webclient
               $web.downloadfile($srcBSV, "C:\IT\BlueScreenView.zip")
             } catch {
-              $depdiag = "FAILED TO DOWNLOAD BLUESCREENVIEW"
-              logERR 2 "run-Deploy" "$($depdiag)"
+              logERR 2 "run-Deploy" "FAILED TO DOWNLOAD BLUESCREENVIEW"
             }
           }
         }
@@ -147,8 +152,7 @@
           $zip = $shell.Namespace("C:\IT\BlueScreenView.zip")
           $items = $zip.items()
           $shell.Namespace("$($exePath)").CopyHere($items, 1556)
-          write-output " - BLUESCREENVIEW EXTRACTED"
-          $script:diag += " - BLUESCREENVIEW EXTRACTED`r`n"
+          logERR 3 "run-Deploy" "BLUESCREENVIEW EXTRACTED`r`n"
           start-sleep -seconds 2
           remove-item -path "C:\IT\BlueScreenView.zip" -force -erroraction continue
         }
@@ -157,8 +161,7 @@
         $depdiag += "`tBlueScreenView Location : '$($exePath)'`r`n$($strLineSeparator)"
         logERR 3 "run-Deploy" "$($depdiag)"
       } catch {
-        $depdiag = "FAILED TO EXTRACT BLUESCREENVIEW"
-        logERR 2 "run-Deploy" "$($depdiag)"
+        logERR 2 "run-Deploy" "FAILED TO EXTRACT BLUESCREENVIEW"
       }
     }
   }
@@ -166,16 +169,16 @@
   function run-Monitor () {
     #CHECK PATH EXISTENCE
     $result = test-path -path "$($exePath)"
-    if (-not $result) {                   #PATH DOES NOT EXIST, DEPLOY BlueScreenView
+    #PATH DOES NOT EXIST, DEPLOY BlueScreenView
+    if (-not $result) {
       run-Deploy
-    } elseif ($result) {                  #PATH EXISTS
+    #PATH EXISTS
+    } elseif ($result) {
       #CHECK EXECUTABLE AND DLL
       $exeFile = test-path -path "$($exePath)\BlueScreenView.exe"
       $chmFile = test-path -path "$($exePath)\BlueScreenView.chm"
       $txtFile = test-path -path "$($exePath)\readme.txt"
-      if ((-not $exeFile) -or (-not $chmFile) -or (-not $txtFile)) {
-        run-Deploy
-      }
+      if ((-not $exeFile) -or (-not $chmFile) -or (-not $txtFile)) {run-Deploy}
       try {
         Start-Process -FilePath "$($exePath)\Bluescreenview.exe" -ArgumentList "/scomma `"$($exePath)\Export.csv`"" -Wait
       } catch {
@@ -183,15 +186,15 @@
         if (Get-Item -Path $exportFile) {
           #Do nothing and move on. Process call has executed correctly and csv is generated for assessment.
         } else {
-          $mondiag = "BSODView Command has Failed: $($_.Exception.Message)`r`n$($strLineSeparator)"
-          logERR 2 "run-Monitor" "$($mondiag)"
+          $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+          logERR 2 "run-Monitor" "BSODView Command has Failed: $($err)"
         }
       }
-      $BSODs = get-content "$($exePath)\Export.csv" | 
+      $script:BSODs = get-content "$($exePath)\Export.csv" | 
         ConvertFrom-Csv -Delimiter ',' -Header Dumpfile, Timestamp, Reason, Errorcode, Parameter1, Parameter2, Parameter3, Parameter4, CausedByDriver | 
           foreach-object {$_.Timestamp = [datetime]::Parse($_.timestamp, [System.Globalization.CultureInfo]::CurrentCulture); $_}
       Remove-item "$($exePath)\Export.csv" -Force
-      $BSODFilter = $BSODs | where-object {$_.Timestamp -gt ((get-date).addhours(-12))}
+      $script:BSODFilter = $script:BSODs | where-object {$_.Timestamp -gt ((get-date).addhours(-12))}
     }
   }
 
@@ -199,45 +202,43 @@
     try {
       run-Remove
     } catch {
-      
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 2 "run-Upgrade" "Error during Remove :`r`n$($err)"
     }
     try {
       run-Deploy
     } catch {
-      
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      logERR 2 "run-Upgrade" "Error during Deploy :`r`n$($err)"
     }
   }
 
   function run-Remove () {
     #CHECK IF BLUESCREENVIEW IS RUNNING
-    $remdiag = "Checking if BlueScreenView is Running`r`n$($strLineSeparator)"
-    logERR 3 "run-Remove" "$($remdiag)"
+    logERR 3 "run-Remove" "Checking if BlueScreenView is Running`r`n$($strLineSeparator)"
     $process = tasklist | findstr /B "BlueScreenView"
-    if ($process) {                   #BLUESCREENVIEW RUNNING
+    #BLUESCREENVIEW RUNNING
+    if ($process) {
       $running = $true
+      logERR 3 "run-Remove" "Terminating BlueScreenView`r`n$($strLineSeparator)"
       $result = taskkill /IM "BlueScreenView" /F
-      $remdiag = "Terminating BlueScreenView`r`n$($strLineSeparator)"
-      logERR 3 "run-Remove" "$($remdiag)"
-      write-output "$($result)`r`n$($strLineSeparator)"
-      $script:diag += "$($result)`r`n$($strLineSeparator)`r`n"
-    } elseif (-not $process) {        #BLUESCREENVIEW NOT RUNNING
+      logERR 3 "run-Remove" "$($result)`r`n$($strLineSeparator)"
+    #BLUESCREENVIEW NOT RUNNING
+    } elseif (-not $process) {
       $running = $false
     }
-    write-output "`tStatus : $($running)`r`n$($strLineSeparator)"
-    $script:diag += "`r`n`tStatus : $($running)`r`n$($strLineSeparator)`r`n"
+    logERR 3 "run-Remove" "`tStatus : $($running)`r`n$($strLineSeparator)"
     #REMOVE FILES
-    $remdiag = "Removing BlueScreenView Files`r`n$($strLineSeparator)"
-    logERR 3 "run-Remove" "$($remdiag)"
     try {
+      logERR 3 "run-Remove" "Removing BlueScreenView Files`r`n$($strLineSeparator)"
       remove-item -path "$($exePath)" -recurse -force -erroraction continue
     } catch {
       if ($_.exception -match "ItemNotFoundException") {
-        write-output "NOT PRESENT : $($_.fullname)`r`n$($strLineSeparator)"
-        $script:diag += "NOT PRESENT : $($_.fullname)`r`n$($strLineSeparator)`r`n"
+        logERR 3 "run-Remove" "NOT PRESENT : $($_.fullname)`r`n$($strLineSeparator)"
       } elseif ($_.exception -notmatch "ItemNotFoundException") {
         $script:blnWARN = $true
-        write-output "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
-        $script:diag += "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)`r`n"
+        $err = "ERROR :`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+        logERR 4 "run-Remove" "$($err)"
       }
     }
   }
@@ -254,40 +255,40 @@ Get-OSArch
 #CHECK 'PERSISTENT' FOLDERS
 dir-Check
 if ($env:strTask -eq "DEPLOY") {
-  write-output "$($strLineSeparator)`r`nDeploying BlueScreenView Files`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nDeploying BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
+    logERR 3 "Mode : $($env:strTask)" "Deploying BlueScreenView Files`r`n$($strLineSeparator)"
     run-Deploy -erroraction stop
     
   } catch {
-    write-output "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
+    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    logERR 2 "Mode : $($env:strTask)" "Error during Deploy :`r`n$($err)"
   }
 } elseif ($env:strTask -eq "MONITOR") {
-  write-output "$($strLineSeparator)`r`nMonitoring BlueScreenView Files`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nMonitoring BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
-    run-Monitor -erroraction stop
+    logERR 3 "Mode : $($env:strTask)" "Monitoring BlueScreenView Files`r`n$($strLineSeparator)"
+    run-Monitor 
     
   } catch {
-    
+    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    logERR 2 "Mode : $($env:strTask)" "Error during Monitoring :`r`n$($err)"
   }
 } elseif ($env:strTask -eq "UPGRADE") {
-  write-output "$($strLineSeparator)`r`nReplacing BlueScreenView Files`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nReplacing BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
+    logERR 3 "Mode : $($env:strTask)" "Replacing BlueScreenView Files`r`n$($strLineSeparator)"
     run-Upgrade -erroraction stop
     
   } catch {
-    
+    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    logERR 2 "Mode : $($env:strTask)" "Error during Upgrade :`r`n$($err)"
   }
 } elseif ($env:strTask -eq "REMOVE") {
-  write-output "$($strLineSeparator)`r`nRemoving BlueScreenView Files`r`n$($strLineSeparator)"
-  $script:diag += "$($strLineSeparator)`r`nRemoving BlueScreenView Files`r`n$($strLineSeparator)`r`n"
   try {
+    logERR 3 "Mode : $($env:strTask)" "Removing BlueScreenView Files`r`n$($strLineSeparator)"
     run-Remove -erroraction stop
     
   } catch {
-    
+    $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    logERR 2 "Mode : $($env:strTask)" "Error during Remove :`r`n$($err)"
   }
 }
 #DATTO OUTPUT
@@ -304,7 +305,7 @@ if (-not $script:blnBREAK) {
     $result = "$($env:strTask) : Execution Completed with Warnings : $($finish)"
     $enddiag = "$($result)`r`n$($strLineSeparator)`r`n"
   }
-  if (-not $BSODFilter) {
+  if (-not $script:BSODFilter) {
     if ($env:strTask -eq "DEPLOY") {
       $alert = "- BSODView Files Deployed"
       $enddiag += "`t- BSODView Files Deployed`r`n$($strLineSeparator)"
@@ -318,13 +319,13 @@ if (-not $script:blnBREAK) {
       $alert = "- BSODView Files Removed"
       $enddiag += "`t- BSODView Files Removed`r`n$($strLineSeparator)"
     }
-    logERR 3 "BSOD_Monitor" "$($enddiag)"
     #WRITE TO LOGFILE
+    logERR 3 "BSOD_Monitor" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "BSOD_Monitor : $($result) : $($alert)"
-    write-DRMMDiag "$($script:diag)"
+    write-DRMMAlert "BSOD_Monitor $($alert) : $($result)"
+    write-DRMMDiag "$($script:diag)`r`n$($enddiag)"
     exit 0
-  } elseif ($BSODFilter) {
+  } elseif ($script:BSODFilter) {
     if ($env:strTask -eq "DEPLOY") {
       $alert = "- BSODView Files Deployed"
       $enddiag += "`t- BSODView Files Deployed`r`n$($strLineSeparator)"
@@ -338,11 +339,11 @@ if (-not $script:blnBREAK) {
       $alert = "- BSODView Files Removed"
       $enddiag += "`t- BSODView Files Removed`r`n$($strLineSeparator)"
     }
-    logERR 3 "BSOD_Monitor" "$($enddiag)"
     #WRITE TO LOGFILE
+    logERR 3 "BSOD_Monitor" "$($enddiag)"
     "$($script:diag)" | add-content $logPath -force
-    write-DRMMAlert "BSOD_Monitor : $($result) : $($alert)"
-    write-DRMMDiag "$($script:diag)"
+    write-DRMMAlert "BSOD_Monitor $($alert) : $($result)"
+    write-DRMMDiag "$($script:diag)`r`n$($enddiag)"
     exit 1
   }
 } elseif ($script:blnBREAK) {
