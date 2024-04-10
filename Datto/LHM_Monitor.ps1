@@ -305,12 +305,16 @@
     try {
       run-Remove
     } catch {
-      
+      $taskdiag = "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      $taskdiag += "Failed to Remove LHM Files`r`n$($strLineSeparator)"
+      logERR 3 "run-Upgrade" "$($taskdiag) "
     }
     try {
       run-Deploy
     } catch {
-      
+      $taskdiag = "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+      $taskdiag += "Failed to Deploy LHM`r`n$($strLineSeparator)"
+      logERR 3 "run-Upgrade" "$($taskdiag) "
     }
   }
 
@@ -356,16 +360,21 @@ if ($strOpt.toupper() -eq "DEPLOY") {
     run-Deploy -erroraction stop
     
   } catch {
-    
+    $taskdiag = "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    $taskdiag += "Failed to Deploy LHM`r`n$($strLineSeparator)"
+    logERR 2 "run-Deploy" "$($taskdiag) "
+    Exit 1
   }
 } elseif ($strOpt.toupper() -eq "MONITOR") {
   $taskdiag = "Monitoring LHM Files`r`n$($strLineSeparator)"
   logERR 3 "run-Monitor" "$($taskdiag)"
   try {
-    run-Monitor -erroraction stop
+    run-Monitor
     
   } catch {
-    
+    $taskdiag = "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    $taskdiag += "Failed to Monitor LHM`r`n$($strLineSeparator)"
+    logERR 2 "run-Monitor" "$($taskdiag) "
   }
 } elseif ($strOpt.toupper() -eq "UPGRADE") {
   $taskdiag = "Replacing LHM Files`r`n$($strLineSeparator)"
@@ -374,7 +383,9 @@ if ($strOpt.toupper() -eq "DEPLOY") {
     run-Upgrade -erroraction stop
     
   } catch {
-    
+    $taskdiag = "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    $taskdiag += "Failed to Upgrade LHM`r`n$($strLineSeparator)"
+    logERR 2 "run-Upgrade" "$($taskdiag) "
   }
 } elseif ($strOpt.toupper() -eq "REMOVE") {
   $taskdiag = "Removing LHM Files`r`n$($strLineSeparator)"
@@ -383,7 +394,9 @@ if ($strOpt.toupper() -eq "DEPLOY") {
     run-Remove -erroraction stop
     
   } catch {
-    
+    $taskdiag = "ERROR`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
+    $taskdiag += "Failed to Remove LHM`r`n$($strLineSeparator)"
+    logERR 2 "run-Remove" "$($taskdiag) "
   }
 }
 #DATTO OUTPUT
