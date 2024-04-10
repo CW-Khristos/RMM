@@ -8,7 +8,7 @@ Remove-Variable * -ErrorAction SilentlyContinue
   $script:vDisks        = @()
   $script:Controllers   = @()
   $strLineSeparator     = "---------"
-  $storCLIexe           = 'C:\IT\StorCLI\Storcli64.exe' #$env:StoreCliPath
+  $storCLIexe           = 'C:\IT\StorCLI\Storcli64.exe' #$env:StorCliPath
   $storCLIcmd           = "/call show all J"
   $storCLIsrc           = "https://github.com/CW-Khristos/scripts/raw/master/StorCLI/Windows/storcli64.exe"
 #endregion ----- DECLARATIONS ----
@@ -30,26 +30,30 @@ Remove-Variable * -ErrorAction SilentlyContinue
     $script:blnWARN = $true
     #CUSTOM ERROR CODES
     switch ($intSTG) {
-      1 {                                                         #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      #'ERRRET'=1 - NOT ENOUGH ARGUMENTS, END SCRIPT
+      1 {
         $script:blnBREAK = $true
         $script:diag += "$($strLineSeparator)`r`n$($(get-date))`t - MegaRAID_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - MegaRAID_Status - NO ARGUMENTS PASSED, END SCRIPT`r`n"
       }
-      2 {                                                         #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
+      2 {
         $script:blnBREAK = $true
         $script:diag += "$($strLineSeparator)`r`n$($(get-date))`t - MegaRAID_Status - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - MegaRAID_Status - $($strModule) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
       }
-      3 {                                                         #'ERRRET'=3+
+      #'ERRRET'=3+
+      3 {
         $script:blnWARN = $false
         $script:diag += "$($strLineSeparator)`r`n$($(get-date))`t - MegaRAID_Status - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - MegaRAID_Status - $($strModule) :"
         write-output "$($strLineSeparator)`r`n`t$($strErr)"
       }
-      default {                                                   #'ERRRET'=4+
+      #'ERRRET'=4+
+      default {
         $script:diag += "$($strLineSeparator)`r`n$($(get-date))`t - MegaRAID_Status - $($strModule) :"
         $script:diag += "`r`n$($strLineSeparator)`r`n`t$($strErr)"
         write-output "$($strLineSeparator)`r`n$($(get-date))`t - MegaRAID_Status - $($strModule) :"
@@ -115,70 +119,69 @@ if (-not ($script:blnBREAK)) {
   }
   #ADAPTERS / CONTROLLERS
   foreach ($Controller in $ArrayStorCLI.Controllers.'Response data') {
-    if ($($Controller.Status.'Controller Status') -eq "OK") {
-      $output = "Controller : $($Controller.Status | fl | out-string)"
+    if (($($Controller.Status.'Controller Status') -eq "OK") -or ($($Controller.Status.'Controller Status') -eq "Optimal")) {
+      $output = "Controller : $(($Controller.Status | fl | out-string).trim())"
       logERR 3 "CHK-CONTROLLER" "`t- INFO :`r`n$($output)`r`n$($strLineSeparator)"
-    } elseif ($($Controller.Status.'Controller Status') -ne "OK") {
+    } elseif (($($Controller.Status.'Controller Status') -ne "OK") -and ($($Controller.Status.'Controller Status') -ne "Optimal")) {
       $script:blnWARN = $true
-      $output = "Controller : $($Controller.Status | fl | out-string)"
-      logERR 3 "CHK-CONTROLLER" "`t- WARNING :`r`n$($output)`r`n$($strLineSeparator)"
+      $output = "Controller : $(($Controller.Status | fl | out-string).trim())"
+      logERR 4 "CHK-CONTROLLER" "`t- WARNING :`r`n$($output)`r`n$($strLineSeparator)"
     }
     #PHYSICAL DISKS
     $pDisk = @{}
-    $pDiskObj = $ArrayStorCLI.Controllers.'Response data'.'Physical Device Information'
-    foreach ($pDiskProp in $pDiskObj.psobject.properties) {
-      if ($pDiskProp.name -notmatch " - Detailed Information") {
-        if (($($pDiskProp.value.state) -eq "Onln") -or ($($pDiskProp.value.state) -eq "-")) {
-          $output = "$($pDiskProp.name) : State : Online"
-          logERR 3 "CHK-PDISK" "`t- INFO :`r`n$($output)`r`n$($strLineSeparator)"
-        } elseif (($($pDiskProp.value.state) -ne "Onln") -and ($($pDiskProp.value.state) -ne "-")) {
+    $pDiskObj = $ArrayStorCLI.Controllers.'Response data'.'Physical Device Information' | out-string
+    if (-not ($pDiskObj)) {
+      $strMatch = "SyncRoot"
+      $pDiskObj = $ArrayStorCLI.Controllers.'Response data'.'PD LIST'
+    } elseif ($pDiskObj) {
+      $strMatch = " - Detailed Information"
+      $pDiskObj = $ArrayStorCLI.Controllers.'Response data'.'Physical Device Information'
+    }
+    $pDiskObj.psobject.properties | where {($_.value.state)} | foreach {
+      foreach ($disk in $_.value) {$script:pDisks += New-Object -TypeName PSObject -Property @{pDisk = $disk}}
+    }
+    foreach ($disk in $script:pDisks.pDisk) {
+      if ($disk) {
+        if (($($disk.state) -eq "GHS") -or ($($disk.state) -eq "-")) {
+          $output = "`tSlot : $($disk.'EID:Slt')`r`n`t`tDisk : $($disk.DID) - Disk Group : $($disk.DG)"
+          $output += "`r`n`t`tModel : $($disk.Model)`r`n`t`tState : Global Hot Spare"
+          logERR 3 "CHK-PDISK" "- INFO :`r`n`t$($output)`r`n$($strLineSeparator)"
+        } elseif (($($disk.state) -eq "Onln") -or ($($disk.state) -eq "-")) {
+          $output = "`tSlot : $($disk.'EID:Slt')`r`n`t`tDisk : $($disk.DID) - Disk Group : $($disk.DG)"
+          $output += "`r`n`t`tModel : $($disk.Model)`r`n`t`tState : Online"
+          logERR 3 "CHK-PDISK" "- INFO :`r`n`t$($output)`r`n$($strLineSeparator)"
+        } elseif (($($disk.state) -ne "Onln") -and ($($disk.state) -ne "-") -and ($($disk.state) -ne "GHS")) {
           $script:blnWARN = $true
-          $output = "$($pDiskProp.name) : $($pDiskProp.value | fl | out-string)"
-          logERR 3 "CHK-PDISK" "`t- WARNING :`r`n$($output)`r`n$($strLineSeparator)"
+          $output = "$($_) : $($_ | fl | out-string)"
+          logERR 4 "CHK-PDISK" "- WARNING :`r`n`t$($output)`r`n$($strLineSeparator)"
         }
-        $pDisk = @{
-          ID                = $pDiskProp.value.DID
-          State             = $pDiskProp.value.State
-          Group             = $pDiskProp.value.DG
-          Interface         = $pDiskProp.value.Intf
-          Medium            = $pDiskProp.value.Med
-          SectorSz          = $pDiskProp.value.SeSz
-          Size              = $pDiskProp.value.Size
-          Model             = $pDiskProp.value.Model
-          DetailState       = $pDiskObj."$($pDiskProp.name) - Detailed Information"."$($pDiskProp.name) State"
-          DetailAttributes  = $pDiskObj."$($pDiskProp.name) - Detailed Information"."$($pDiskProp.name) Device attributes"
-          DetailSettings    = $pDiskObj."$($pDiskProp.name) - Detailed Information"."$($pDiskProp.name) Policies/Settings"
-        }
-        $script:pDisks += New-Object -TypeName PSObject -Property @{pDisk = $pDisk}
       }
     }
     #VIRTUAL DISKS
     $vDisk = @{}
-    $vDiskObj = $ArrayStorCLI.Controllers.'Response data'.'Virtual Drives'
-    foreach ($vDiskProp in $vDiskObj.psobject.properties) {
-      if ($vDiskProp.name -notmatch " - Detailed Information") {
-        if ($($vDiskProp.value.state) -eq "Optl") {
-          $output = "$($vDiskProp.name) : State : Optimal"
-          logERR 3 "CHK-VDISK" "`t- INFO :`r`n$($output)`r`n$($strLineSeparator)"
-        } elseif ($($vDiskProp.value.state) -ne "Optl") {
+    $vDiskObj = $ArrayStorCLI.Controllers.'Response data'.'Virtual Drives' | out-string
+    if ((-not ($vDiskObj)) -or ($vdiskObj -match 2)) {
+      $strMatch = "SyncRoot"
+      $vDiskObj = $ArrayStorCLI.Controllers.'Response data'.'VD LIST'
+    } elseif ($vDiskObj) {
+      $strMatch = " - Detailed Information"
+      $vDiskObj = $ArrayStorCLI.Controllers.'Response data'.'Physical Device Information'
+    }
+    $vDiskObj.psobject.properties | where {($_.value.state)} | foreach {
+      foreach ($disk in $_.value) {$script:vDisks += New-Object -TypeName PSObject -Property @{vDisk = $disk}}
+    }
+    foreach ($disk in $script:vDisks.vDisk) {
+      if ($disk) {
+        if (($($disk.state) -eq "Optl") -and ($($disk.Consist) -eq "Yes")) {
+          $output = "`tVirtual Disk : $($disk.'DG/VD') - Name : $($disk.Name)"
+          $output += "`r`n`t`tType : $($disk.Type)`r`n`t`tSize : $($disk.Size)`r`n`t`tCache : $($disk.Cache)"
+          logERR 3 "CHK-VDISK" "- INFO :`r`n`t$($output)`r`n$($strLineSeparator)"
+        } elseif (($($disk.state) -ne "Optl") -or ($($disk.state) -ne "Yes")) {
           $script:blnWARN = $true
-          $output = "$($vDiskProp.name) : $($vDiskProp.value | fl | out-string)"
-          logERR 3 "CHK-VDISK" "`t- WARNING :`r`n$($output)`r`n$($strLineSeparator)"
+          $output = "`tSlot : $($disk.'EID:Slt')`r`n`t`tDisk : $($disk.DID) - Disk Group : $($disk.DG)"
+          $output += "`r`n`t`tModel : $($disk.Model)`r`n`t`tState : Online"
+          logERR 4 "CHK-VDISK" "- INFO :`r`n`t$($output)`r`n$($strLineSeparator)"
         }
-        $vDisk = @{
-          ID                = $vDiskProp.value.DID
-          State             = $vDiskProp.value.State
-          Group             = $vDiskProp.value.DG
-          Interface         = $vDiskProp.value.Intf
-          Medium            = $vDiskProp.value.Med
-          SectorSz          = $vDiskProp.value.SeSz
-          Size              = $vDiskProp.value.Size
-          Model             = $vDiskProp.value.Model
-          DetailState       = $vDiskObj."$($vDiskProp.name) - Detailed Information"."$($vDiskProp.name) State"
-          DetailAttributes  = $vDiskObj."$($vDiskProp.name) - Detailed Information"."$($vDiskProp.name) Device attributes"
-          DetailSettings    = $vDiskObj."$($vDiskProp.name) - Detailed Information"."$($vDiskProp.name) Policies/Settings"
-        }
-        $script:vDisks += New-Object -TypeName PSObject -Property @{vDisk = $vDisk}
       }
     }
     $script:Controllers += New-Object -TypeName PSObject -Property @{
