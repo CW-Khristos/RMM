@@ -60,7 +60,7 @@
     $total = ((((($Hours * 60) + $Minutes) * 60) + $Seconds) * 1000) + $Milliseconds
     $mill = [string]($total / 1000)
     $mill = $mill.split(".")[1]
-    $mill = $mill.SubString(0,[math]::min(3,$mill.length))
+    $mill = $mill.SubString(0, [math]::min(3, $mill.length))
     $script:diag += "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
     write-output "`r`nTotal Execution Time - $($Minutes) Minutes : $($Seconds) Seconds : $($Milliseconds) Milliseconds`r`n"
   }
@@ -74,7 +74,7 @@ $ScrptStartTime = (Get-Date).ToString('dd-MM-yyyy hh:mm:ss')
 $script:sw = [Diagnostics.Stopwatch]::StartNew()
 #PREPARE DRIVE EXCLUSIONS
 if (($null -ne $env:ExcludedDrives) -and ($env:ExcludedDrives -ne "")) {
-  $Excludes = $env:ExcludedDrives.split("|",[System.StringSplitOptions]::RemoveEmptyEntries)
+  $Excludes = $env:ExcludedDrives.split("|", [System.StringSplitOptions]::RemoveEmptyEntries)
 }
 write-output "$($strLineSeparator)`r`nEXCLUDED DRIVES :`r`n$($Excludes)`r`n$($strLineSeparator)`r`n"
 #COLLECT ALL DRIVES / PARTITIONS FOR MATCHING CANARY PATHS TO DRIVE EXCLUSIONS
