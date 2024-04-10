@@ -73,12 +73,12 @@ To Do:
   [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   #[System.Net.SecurityProtocolType]::Ssl3 -bor 
+  #[System.Net.SecurityProtocolType]::Tls11 -bor 
+  #[System.Net.SecurityProtocolType]::Tls
   [System.Net.ServicePointManager]::SecurityProtocol = (
     [System.Net.SecurityProtocolType]::Ssl2 -bor 
     [System.Net.SecurityProtocolType]::Tls13 -bor 
-    [System.Net.SecurityProtocolType]::Tls12 -bor 
-    [System.Net.SecurityProtocolType]::Tls11 -bor 
-    [System.Net.SecurityProtocolType]::Tls
+    [System.Net.SecurityProtocolType]::Tls12
   )
   #endregion
   #region######################## Hudu Settings ###########################
@@ -95,7 +95,8 @@ To Do:
     "Servers",
     "UPS",
     "Unknown",
-    "Workstations")
+    "Workstations",
+    "Sales/Finance")
   $huduLayouts                    = $null
   # Get a Hudu API Key from https://yourhududomain.com/admin/api_keys
   $script:HuduAPIKey              = $env:HuduKey
@@ -136,6 +137,9 @@ To Do:
   #$mailPass                      = "pass"
   $DNSHistoryLayoutName           = "DNS Entries - Autodoc"
   #endregion
+  #region####################### Sales/Finance Settings ##########################
+  $SalesLayoutName                = "Sales/Finance"
+  #endregion####################### Sales/Finance Settings ##########################
   #region####################### Backups Settings ##########################
   $script:bmCalls                 = 0
   #region###############    Backups Counters - Tallied for All Companies
@@ -182,6 +186,7 @@ To Do:
   }
   $script:classMap                = @{}
   $script:categoryMap             = @{}
+  $script:salesIDs                = @(29682885, 29682895)
   $GlobalOverdue                  = [System.Collections.ArrayList]@()
   #PSA API FILTERS
   #Generic Filter - ID -ge 0
@@ -385,6 +390,24 @@ To Do:
       $psadiag += "Failed to query (filtered) PSA API via $($params.Uri)"
       $psadiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)"
       logERR 3 "PSA-FilterQuery" "$($psadiag)"
+    }
+  }
+
+  function PSA-Put {
+    param ($header, $method, $entity, $body)
+    $params = @{
+      Method      = "$($method)"
+      ContentType = 'application/json'
+      Uri         = "$($AutoTaskAPIBase)/ATServicesRest/V1.0//$($entity)"
+      Headers     = $header
+      Body        = $body
+    }
+    try {
+      $script:psaCalls += 1
+      Invoke-RestMethod @params -UseBasicParsing -erroraction stop
+    } catch {
+      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      logERR 3 "PSA-Put" "Failed to post to PSA API via $($params.Uri)`r`n-----`r`n$($params.body)`r`n$($err)"
     }
   }
 
@@ -1127,6 +1150,14 @@ if (-not $script:blnBREAK) {
     $DNSAssets = Get-HuduAssets -assetlayoutid $DNSLayout.id | Sort-Object -Property company_name
     write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    #Retrieve all Hudu Sales/Finance Assets Only Once
+    $script:huduCalls += 1
+    $hududiag = "Sales/Finance Assets :`r`n$($strLineSeparator)"
+    logERR 4 "Hudu Retrieval" "$($hududiag)"
+    $SalesLayout = $huduLayouts | where {$_.name -match "$($SalesLayoutName)"}
+    $SalesAssets = Get-HuduAssets -assetlayoutid $SalesLayout.id | Sort-Object -Property company_name
+    write-output "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
   } catch {
     $script:blnBREAK = $true
     $authdiag = "Failed`r`n$($strLineSeparator)"
@@ -1208,6 +1239,12 @@ if (-not $script:blnBREAK) {
     #$resourceValues
     logERR 3 "Autotask Retrieval" "RESOURCES :`r`n$($strLineSeparator)"
     $resources = PSA-FilterQuery $script:psaHeaders "GET" "Resources" $psaGenFilter
+    write-output "Done`r`n$($strLineSeparator)"
+    $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
+    #Grab all 'Open' Appointments from Dispatch Calendar
+    logERR 3 "Autotask Retrieval" "APPOINTMENTS :`r`n$($strLineSeparator)"
+    #$appointments = PSA-FilterQuery $script:psaHeaders "GET" "Appointments" $psaGenFilter
+    $appointments = Get-AutotaskAPIResource -Resource Appointments -SearchQuery "$($psaGenFilter)"
     write-output "Done`r`n$($strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($strLineSeparator)`r`n"
     #Grab All Assets for All Companies in a Single Call
@@ -1593,6 +1630,62 @@ if (-not $script:blnBREAK) {
   $psadiag += "`t- Processed : $($procPSAassets) - Skipped : $($skipPSAassets) - Failed : $($failPSAassets)`r`n$($strLineSeparator)"
   logERR 3 "Autotask Processing" "$($psadiag)"
   #endregion
+  #region######################## Sales/Finance Section ###########################
+  logERR 3 "Sales/Finance" "Beginning Sales/Finance Processing`r`n$($strLineSeparator)"
+  # Check we found the layout
+  if (($SalesLayout | measure-object).count -ne 1) {
+    logERR 3 "Sales/Finance" "No / multiple layout(s) found with name $($SalesLayoutName)`r`n$($strLineSeparator)"
+  } else {
+    # Loop through AT PSA Sales Resources
+    foreach ($resource in $script:salesIDs) {
+      # Loop through all Sales/Finance Assets
+      foreach ($Asset in $SalesAssets) {
+        #Create AT APPT
+        #'https://webservices14.autotask.net/ATServicesRest/V1.0/Appointments'
+        #$resources.items | where {($_.firstname -match 'Greg') -or ($_.firstname -match 'Raymond')}
+        #29682885 - Greg
+        #29682895 - Raymond
+        #29682901 - API User
+        $newAppt = @{
+          id = 0
+          createDateTime = "$(get-date)"
+          creatorResourceID = 29682901
+          description = "Test APPT via API"
+          endDateTime = "2024-03-04T19:48:50.773Z"
+          resourceID = $resource
+          startDateTime = "2024-03-04T18:48:50.773Z"
+          title = "$($sales.company_name) : " #"Test APPT"
+          updateDateTime = "$(get-date)"
+        }
+        #Clear any prev Appts
+        $cur30day = $null
+        $cur60day = $null
+        $RenewalDate = [datetime](($sales.fields | where {$_.label -eq "Agreement End"}).value).replace("Z", "")
+        #Filter AT PSA Appts
+        $cur30day = $appointments | where {(($_.resourceID -eq $resource) -and ($_.startDateTime -ge $(get-date)) -and 
+          ($_.title -match "$($sales.company_name) : Contract 30 Day Notice"))}
+        if (-not ($cur30day)) {
+          $newAppt.endDateTime = "$(($RenewalDate.AddDays(-30)).AddHours(13))"
+          $newAppt.startDateTime = "$(($RenewalDate.AddDays(-30)).AddHours(12))"
+          $newAppt.title = "$($sales.company_name) : Contract 30 Day Notice"
+          $newAppt.description = "$($sales.company_name) : Contract 30 Day Notice`r`nGenerated by HuduDoc_WatchDog API"
+          logERR 4 "APPT DIAG" "UPDATING : `r`n$($newAppt | convertto-json)`r`n$($script:strLineSeparator)"
+          PSA-Put $script:psaHeaders "POST" "Appointments" ($newAppt | convertto-json)
+        }
+        $cur60day = $appointments | where {(($_.resourceID -eq $resource) -and ($_.startDateTime -ge $(get-date)) -and 
+          ($_.title -match "$($sales.company_name) : Contract 60 Day Notice"))}
+        if (-not ($cur60day)) {
+          $newAppt.endDateTime = "$(($RenewalDate.AddDays(-60)).AddHours(13))"
+          $newAppt.startDateTime = "$(($RenewalDate.AddDays(-60)).AddHours(12))"
+          $newAppt.title = "$($sales.company_name) : Contract 60 Day Notice"
+          $newAppt.description = "$($sales.company_name) : Contract 60 Day Notice`r`nGenerated by HuduDoc_WatchDog API"
+          logERR 4 "APPT DIAG" "UPDATING : `r`n$($newAppt | convertto-json)`r`n$($script:strLineSeparator)"
+          PSA-Put $script:psaHeaders "POST" "Appointments" ($newAppt | convertto-json)
+        }
+      }
+    }
+  }
+  #endregion######################## Sales/Finance Section ###########################
   #region######################## Customer Management Section ###########################
   # https://mspp.io/hudu-magic-dash-customer-services/
   logERR 3 "Customer Management" "Beginning Customer Management Processing`r`n$($strLineSeparator)"
