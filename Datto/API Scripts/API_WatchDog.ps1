@@ -22,15 +22,15 @@
   $script:strLineSeparator  = "---------"
   $script:logPath           = "C:\IT\Log\API_WatchDog"
   #region######################## TLS Settings ###########################
-  #[System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
+  [System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
   #[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
   #[System.Net.SecurityProtocolType]::Ssl3 -bor 
+  #[System.Net.SecurityProtocolType]::Tls11 -bor 
+  #[System.Net.SecurityProtocolType]::Tls
   [System.Net.ServicePointManager]::SecurityProtocol = (
     [System.Net.SecurityProtocolType]::Ssl2 -bor 
     [System.Net.SecurityProtocolType]::Tls13 -bor 
-    [System.Net.SecurityProtocolType]::Tls12 -bor 
-    [System.Net.SecurityProtocolType]::Tls11 -bor 
-    [System.Net.SecurityProtocolType]::Tls
+    [System.Net.SecurityProtocolType]::Tls12
   )
   #endregion
   #region######################## Hudu Settings ###########################
@@ -100,7 +100,7 @@
     write-output "Alert=$($message)"
     write-output "<-End Result->"
   } ## write-DRMMAlert
-#region ----- PSA FUNCTIONS ----
+  #region ----- PSA FUNCTIONS ----
   function PSA-Query {
     param ($header, $method, $entity)
     $params = @{
@@ -216,8 +216,8 @@
       logERR 3 "PSA-GetCompanies" "Failed to populate PSA Companies via $($Uri)`r`n$($err)"
     }
   } ## PSA-GetCompanies API Call
-#endregion ----- PSA FUNCTIONS ----
-#region ----- RMM FUNCTIONS ----
+  #endregion ----- PSA FUNCTIONS ----
+  #region ----- RMM FUNCTIONS ----
   function RMM-ApiAccessToken {
     # Convert password to secure string
     $securePassword = ConvertTo-SecureString -String 'public' -AsPlainText -Force
@@ -251,7 +251,7 @@
     $params = @{
       Method        = $apiMethod
       ContentType   = 'application/json'
-      Uri           = '{0}/api{1}' -f $script:rmmAPI, $apiRequest
+      Uri           = "$($script:rmmAPI)/api$($apiRequest)"
       Headers       = @{'Authorization'	= 'Bearer {0}' -f $apiAccessToken}
     }
     try {
@@ -348,7 +348,7 @@
       apiUrl          = $script:rmmAPI
       ApiAccessToken  = $script:rmmToken
       apiRequest      = "/v2/site/$($rmmID)"
-      apiRequestBody  = "{`"autotaskCompanyId`": `"$($psaID)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $onDemand,`"splashtopAutoInstall`": $installSplashtop}"
+      apiRequestBody  = "{`"autotaskCompanyId`": `"$($psaID)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $($onDemand),`"splashtopAutoInstall`": $($installSplashtop)}"
     }
     try {
       $script:blnSITE = $false
@@ -369,7 +369,7 @@
 
   function RMM-NewSite {
     param (
-      [string]$id,
+      [string]$psaID,
       [string]$name,
       [string]$description,
       [string]$notes,
@@ -381,7 +381,7 @@
       apiUrl          = $script:rmmAPI
       ApiAccessToken  = $script:rmmToken
       apiRequest      = "/v2/site"
-      apiRequestBody  = "{`"autotaskCompanyId`": `"$($id)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $($onDemand),`"splashtopAutoInstall`": $($installSplashtop)}"
+      apiRequestBody  = "{`"autotaskCompanyId`": `"$($psaID)`",`"autotaskCompanyName`": `"$($name)`",`"description`": `"$($description)`",`"name`": `"$($name)`",`"notes`": `"$($notes)`",`"onDemand`": $($onDemand),`"splashtopAutoInstall`": $($installSplashtop)}"
     }
     try {
       $script:blnSITE = $false
@@ -399,7 +399,8 @@
       logERR 3 "RMM-NewSite" "Failed to create New DRMM Site via $($params.apiUrl)$($params.apiRequest)`r`n$($params.apiRequestBody)`r`n$($err)"
     }
   }
-#endregion ----- RMM FUNCTIONS ----
+  #endregion ----- RMM FUNCTIONS ----
+  #region ----- MISC FUNCTIONS ----
   function Get-EpochDate ($epochDate, $opt) {
     #Convert Epoch Date Timestamps to Local Time
     switch ($opt) {
@@ -435,6 +436,7 @@
         $script:blnBREAK = $true
         $script:diag += "`r`n$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n`r`n"
         write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - NO ARGUMENTS PASSED, END SCRIPT`r`n"
+        break
       }
       #'ERRRET'=2 - INSTALL / IMPORT MODULE FAILURE, END SCRIPT
       2 {
@@ -443,6 +445,7 @@
         $script:diag += "`r`n$($script:strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
         write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - ($($strModule)) :"
         write-output "$($script:strLineSeparator)`r`n`t$($strErr), END SCRIPT`r`n`r`n"
+        break
       }
       #'ERRRET'=3 - ERROR / WARNING
       3 {
@@ -451,6 +454,7 @@
         $script:diag += "`r`n$($script:strLineSeparator)`r`n`t$($strErr)"
         write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
         write-output "$($sscript:trLineSeparator)`r`n`t$($strErr)"
+        break
       }
       #'ERRRET'=4 - INFORMATIONAL
       4 {
@@ -458,6 +462,7 @@
         $script:diag += "`r`n$($script:strLineSeparator)`r`n`t$($strErr)"
         write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
         write-output "$($script:strLineSeparator)`r`n`t$($strErr)"
+        break
       }
       #'ERRRET'=5+ - DEBUG
       default {
@@ -466,6 +471,7 @@
         $script:diag += "`r`n$($script:strLineSeparator)`r`n`t$($strErr)"
         write-output "$($script:strLineSeparator)`r`n$($(get-date))`t - API_WatchDog - $($strModule) :"
         write-output "$($script:strLineSeparator)`r`n`t$($strErr)"
+        break
       }
     }
   }
@@ -509,6 +515,7 @@
     $script:diag += "Total Execution Time - $($Minutes) Minutes : $($secs) Seconds : $($mill) Milliseconds`r`n"
     $script:diag += "Average Execution Time (Per API Call) - $($amin) Minutes : $($asecs) Seconds : $($amill) Milliseconds`r`n`r`n"
   }
+  #endregion ----- MISC FUNCTIONS ----
 #endregion ----- FUNCTIONS ----
 
 #------------
@@ -613,97 +620,133 @@ if (-not $script:blnFAIL) {
     $script:diag += "CATEGORY : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`n"
     $script:diag += "CLASSIFICATION : $($script:classMap[[int]$($company.CompanyClass)])`r`n"
     $script:diag += "$($script:strLineSeparator)`r`n"
-    if ($script:psaSkip -contains "$($script:typeMap[[int]$($company.CompanyType)])") {
-      write-output "Skipping : Not Managed`r`n$($script:strLineSeparator)`r`n"
-      $script:diag += "Skipping : Not Managed`r`n$($script:strLineSeparator)`r`n`r`n"
-    } elseif ($script:psaSkip -notcontains "$($script:typeMap[[int]$($company.CompanyType)])") {
+    #'First Step' Evaluation
+    #if ($script:psaSkip -contains "$($script:typeMap[[int]$($company.CompanyType)])") {
       #GET COMPLETE PSA COMPANY DETAILS
       $script:fullCompany = PSA-Query $script:psaHeaders "GET" "Companies/$($company.companyID)"
       #COLLECT PSA COMPANY OPPORTUNITIES VIA NAMING STANDARD : 'Managed Services'
       $script:psaOpps = $script:psaAllOpps.items | where {(($_.companyID -eq $company.CompanyID) -and 
         (($_.title -match "Managed Services") -or ($_.title -match "Risk Assessment") -or ($_.title -match "Assessment MSA")))}
-      $oppStage = ($script:OpStages.picklistValues | where {$_.value -eq $script:psaOpps.stage}).label
-      $oppStatus = ($script:OpStatuses.picklistValues | where {$_.value -eq $script:psaOpps.status}).label
-      #CHECK PSA OPPORTUNITY PROGRESSION VIA STAUTS / STAGE
-      switch ($oppStatus) {
-        "Active" {
-          switch ($oppStage) {
-            {(($_ -eq "New Lead") -or 
-              ($_ -eq "Stage 1 First Contact") -or ($_ -eq "Stage 2 Get CSRA Signature"))} {
-                if (($script:fullCompany.item.companyType -ne 3) -or 
-                  ($script:fullCompany.item.classification -ne 7) -or 
-                  ($script:fullCompany.item.companyCategoryID -ne 1)) {
-                    write-output "OPPORTUNITY DIAG : $($_) : Update Company"
-                    $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
-                    $script:fullCompany.item.companyType = 3            #Company Type 'Prospect'
-                    $script:fullCompany.item.classification = 7         #Company Classification 'Target'
-                    $script:fullCompany.item.companyCategoryID = 1      #Company Category 'Standard'
-                    $blnUpdate = $true
-                }
+      if ($script:psaOpps) {
+        $oppStage = ($script:OpStages.picklistValues | where {$_.value -eq $script:psaOpps.stage}).label
+        $oppStatus = ($script:OpStatuses.picklistValues | where {$_.value -eq $script:psaOpps.status}).label
+        #CHECK PSA OPPORTUNITY PROGRESSION VIA STAUTS / STAGE
+        switch ($oppStatus) {
+          "Active" {
+            switch ($oppStage) {
+              {(($_ -eq "New Lead") -or 
+                ($_ -eq "Stage 1 First Contact") -or ($_ -eq "Stage 2 Get CSRA Signature"))} {
+                  if (($script:fullCompany.item.companyType -ne 3) -or 
+                    ($script:fullCompany.item.classification -ne 7) -or 
+                    ($script:fullCompany.item.companyCategoryID -ne 1)) {
+                      write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                      $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                      $company.CompanyType                        = 3       #Update evaluated '$company.CompanyType'
+                      $company.CompanyCategory                    = 1       #Update evaluated '$company.CompanyCategory'
+                      $script:fullCompany.item.companyType        = 3       #Company Type 'Prospect'
+                      $script:fullCompany.item.classification     = 7       #Company Classification 'Target'
+                      $script:fullCompany.item.companyCategoryID  = 1       #Company Category 'Standard'
+                      $blnUpdate = $true
+                  }
+                  break
+              }
+              {(($_ -eq "Stage 3 Performing Assessments") -or ($_ -eq "Stage 4 Proposal Sent") -or 
+                ($_ -eq "Stage 5 Contract Sent") -or ($_ -eq "On Hold"))} {
+                  if (($script:fullCompany.item.companyType -ne 1) -or 
+                    ($script:fullCompany.item.classification -ne 202) -or 
+                    ($script:fullCompany.item.companyCategoryID -ne 101)) {
+                      write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                      $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                      $company.CompanyType                        = 1       #Update evaluated '$company.CompanyType'
+                      $company.CompanyCategory                    = 101     #Update evaluated '$company.CompanyCategory'
+                      $script:fullCompany.item.companyType        = 1       #Company Type 'Customer'
+                      $script:fullCompany.item.classification     = 202     #Company Classification 'Assessment'
+                      $script:fullCompany.item.companyCategoryID  = 101     #Company Category 'Assessment'
+                      $blnUpdate = $true
+                  }
+                  break
+              }
             }
-            {(($_ -eq "Stage 3 Performing Assessments") -or ($_ -eq "Stage 4 Proposal Sent") -or 
-              ($_ -eq "Stage 5 Contract Sent") -or ($_ -eq "On Hold"))} {
+            break
+          }
+          "Closed" {
+            switch ($oppStage) {
+              {$_ -eq "Stage 5 Closed - Won"} {
                 if (($script:fullCompany.item.companyType -ne 1) -or 
-                  ($script:fullCompany.item.classification -ne 202) -or 
-                  ($script:fullCompany.item.companyCategoryID -ne 101)) {
+                  ($script:fullCompany.item.classification -ne 18) -or 
+                  ($script:fullCompany.item.companyCategoryID -ne 100)) {
                     write-output "OPPORTUNITY DIAG : $($_) : Update Company"
                     $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
-                    $script:fullCompany.item.companyType = 1            #Company Type 'Customer'
-                    $script:fullCompany.item.classification = 202       #Company Classification 'Assessment'
-                    $script:fullCompany.item.companyCategoryID = 101    #Company Category 'Assessment'
+                    $company.CompanyType                        = 1         #Update evaluated '$company.CompanyType'
+                    $company.CompanyCategory                    = 100       #Update evaluated '$company.CompanyCategory'
+                    $script:fullCompany.item.companyType        = 1         #Company Type 'Customer'
+                    $script:fullCompany.item.classification     = 18        #Company Classification 'Managed Services'
+                    $script:fullCompany.item.companyCategoryID  = 100       #Company Category 'Fully Managed'
                     $blnUpdate = $true
                 }
-            }
-          }
-        }
-        "Closed" {
-          switch ($oppStage) {
-            {$_ -eq "Stage 5 Closed - Won"} {
-              if (($script:fullCompany.item.companyType -ne 1) -or 
-                ($script:fullCompany.item.classification -ne 18) -or 
-                ($script:fullCompany.item.companyCategoryID -ne 100)) {
-                  write-output "OPPORTUNITY DIAG : $($_) : Update Company"
-                  $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
-                  $script:fullCompany.item.companyType = 1            #Company Type 'Customer'
-                  $script:fullCompany.item.classification = 18        #Company Classification 'Managed Services'
-                  $script:fullCompany.item.companyCategoryID = 100    #Company Category 'Fully Managed'
-                  $blnUpdate = $true
+                break
+              }
+              {$_ -eq "Stage 5 Closed - Lost"} {
+                if (($script:fullCompany.item.companyType -ne 1) -or 
+                  ($script:fullCompany.item.classification -ne 18) -or 
+                  ($script:fullCompany.item.companyCategoryID -ne 100)) {
+                    write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                    $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                    $company.CompanyType                        = 4         #Update evaluated '$company.CompanyType'
+                    $company.CompanyCategory                    = 106       #Update evaluated '$company.CompanyCategory'
+                    $script:fullCompany.item.companyType        = 4         #Company Type 'Dead'
+                    $script:fullCompany.item.isActive           = 'false'   #Set Company InActive
+                    $script:fullCompany.item.classification     = 204       #Company Classification 'Lost'
+                    $script:fullCompany.item.companyCategoryID  = 106       #Company Category 'Lost'
+                    $blnUpdate = $true
+                }
+                break
               }
             }
+            break
           }
-        }
-        "Lost" {
-          switch ($oppStage) {
-            {$_ -eq "Stage 5 Closed - Lost"} {
-              if (($script:fullCompany.item.companyType -ne 1) -or 
-                ($script:fullCompany.item.classification -ne 18) -or 
-                ($script:fullCompany.item.companyCategoryID -ne 100)) {
-                  write-output "OPPORTUNITY DIAG : $($_) : Update Company"
-                  $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
-                  $script:fullCompany.item.companyType = 4            #Company Type 'Dead'
-                  $script:fullCompany.item.classification = 204       #Company Classification 'Lost'
-                  $script:fullCompany.item.companyCategoryID = 106    #Company Category 'Lost'
-                  $blnUpdate = $true
+          "Lost" {
+            switch ($oppStage) {
+              {$_ -eq "Stage 5 Closed - Lost"} {
+                if (($script:fullCompany.item.companyType -ne 1) -or 
+                  ($script:fullCompany.item.classification -ne 18) -or 
+                  ($script:fullCompany.item.companyCategoryID -ne 100)) {
+                    write-output "OPPORTUNITY DIAG : $($_) : Update Company"
+                    $script:diag += "OPPORTUNITY DIAG : $($_) : Update Company`r`n"
+                    $company.CompanyType                        = 4         #Update evaluated '$company.CompanyType'
+                    $company.CompanyCategory                    = 106       #Update evaluated '$company.CompanyCategory'
+                    $script:fullCompany.item.companyType        = 4         #Company Type 'Dead'
+                    $script:fullCompany.item.isActive           = 'false'   #Set Company InActive
+                    $script:fullCompany.item.classification     = 204       #Company Classification 'Lost'
+                    $script:fullCompany.item.companyCategoryID  = 106       #Company Category 'Lost'
+                    $blnUpdate = $true
+                }
+                break
               }
             }
+            break
           }
         }
       }
       #UPDATE COMPANY - SHOULD BASE SETS OF ACTIONS DEPENDENT ON CURRENT COMPANY CLASSIFICATION
       if ($blnUpdate) {
-        write-output "OPPORTUNITY DIAG : UPDATING : $($company.CompanyName)`r`n$($script:fullCompany.item | convertto-json)`r`n$($script:strLineSeparator)"
-        $script:diag += "OPPORTUNITY DIAG : UPDATING : $($company.CompanyName)`r`n$($script:fullCompany.item | convertto-json)`r`n$($script:strLineSeparator)`r`n"
-        PSA-Put $script:psaHeaders "PUT" "Companies" ($script:fullCompany.item | convertto-json)
+        logERR 4 "OPPORTUNITY DIAG" "UPDATING : $($company.CompanyName)`r`n$($script:fullCompany.item | convertto-json)`r`n$($script:strLineSeparator)"
+        PSA-Put $script:psaHeaders "POST" "Companies" ($script:fullCompany.item | convertto-json)
+        logERR 4 "OPPORTUNITY DIAG" "Updated : $($company.CompanyName)`r`n$($script:strLineSeparator)`r`n"
       } elseif (-not ($blnUpdate)) {
-        write-output "OPPORTUNITY DIAG : NO NEED TO UPDATE : $($company.CompanyName)`r`n$($script:strLineSeparator)"
-        $script:diag += "OPPORTUNITY DIAG : NO NEED TO UPDATE : $($company.CompanyName)`r`n$($script:strLineSeparator)`r`n"
+        logERR 4 "OPPORTUNITY DIAG" "NO NEED TO UPDATE : $($company.CompanyName)`r`n$($script:strLineSeparator)`r`nSkipping : Not Managed`r`n$($script:strLineSeparator)`r`n"
       }
+    #} #else  --- Testing breaking If/Else; to evaluate AT Company Record again post potential updates
+    #end 'First Step' Evaluation
+    #'Second Step' Evaluation
+    if ($script:psaSkip -notcontains "$($script:typeMap[[int]$($company.CompanyType)])") {
       #CHECK FOR COMPANY IN DRMM SITES
       $rmmSite = $script:sitesList.sites | where-object {$_.name -eq "$($company.CompanyName)"}
       write-output "---------RMM Site :`r`n$($rmmSite)`r`n$($script:strLineSeparator)"
       $script:diag += "---------RMM Site :`r`n$($rmmSite)`r`n$($script:strLineSeparator)`r`n"
-      #CREATE SITE IN DRMM
+      #CREATE / UPDATE SITE IN DRMM
       if (($null -eq $rmmSite) -or ($rmmSite -eq "")) {
+        #CREATE SITE IN DRMM
         try {
           $script:rmmSites += 1
           $script:blnSITE = $true
@@ -711,7 +754,7 @@ if (-not $script:blnFAIL) {
           $script:diag += "NEED TO CREATE COMPANY IN RMM`r`n"
           logERR 4 "RMM CREATE SITE" "RMM CREATE SITE : $($company.CompanyName)`r`n$($script:strLineSeparator)"
           $params = @{
-            id                  = $company.CompanyID
+            psaID               = $company.CompanyID
             name                = $company.CompanyName
             description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
             notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog\n$($date)"
@@ -736,24 +779,27 @@ if (-not $script:blnFAIL) {
           $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($strLineSeparator)"
           logERR 3 "RMM CREATE SITE" "RMM CREATE SITE : $($company.CompanyName) : FAILED :`r`n$($params)`r`n$($strLineSeparator)`r`n$($err)"
         }
-      #UPDATE SITE IN DRMM
       } elseif (($null -ne $rmmSite) -and ($rmmSite -ne "")) {
+        #UPDATE SITE IN DRMM
         try {
           write-output "---------Notes :`r`n$($rmmSite.notes)`r`n---------"
           $script:diag += "---------Notes :`r`n$($rmmSite.notes)`r`n---------`r`n"
           write-output "---------Description :`r`n$($rmmSite.description)`r`n---------"
           $script:diag += "---------Description :`r`n$($rmmSite.description)`r`n---------`r`n"
           if ($rmmSite.description -notlike "*Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])*") {
+            $note = $null
             logERR 4 "RMM UPDATE SITE" "RMM UPDATE SITE : $($company.CompanyName)`r`n$($script:strLineSeparator)"
-            $note = "$($rmmSite.notes)"
+            $array = ($rmmSite.notes).split([Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
+            $array | foreach {$note += "$($_)\n"}; write-output $note
+            #notes               = "Updated by API Watchdog\n$($date)\n$($note)"
             $params = @{
               rmmID               = $rmmSite.uid
               psaID               = $company.CompanyID
               name                = $company.CompanyName
               description         = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nUpdated by API Watchdog\n$($date)"
-              notes               = "$($note)"
-              onDemand            = "false"
-              installSplashtop    = "true"
+              notes               = "Updated by API Watchdog\n$($date)\n$($note)"
+              onDemand            = 'false'
+              installSplashtop    = 'true'
             }
             $updateSite = (RMM-UpdateSite @params -UseBasicParsing)
             write-output "$($updateSite)`r`n$($script:strLineSeparator)"
@@ -780,8 +826,8 @@ if (-not $script:blnFAIL) {
       }
       #CHECK FOR COMPANY IN HUDU
       $huduSite = Get-HuduCompanies -Name "$($company.CompanyName)"
-      #CREATE COMPANY IN HUDU
       if (($null -eq $huduSite) -or ($huduSite -eq "")) {
+        #CREATE COMPANY IN HUDU
         try {
           $script:huduSites += 1
           $script:blnSITE = $true
@@ -804,7 +850,7 @@ if (-not $script:blnFAIL) {
             fax_number          = "$($company.fax)"
             website             = "$($company.webAddress)"
             id_number           = ""
-            notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])`r`nCreated by API Watchdog`r`n$($date)"
+            notes               = "Customer Type : $($script:categoryMap[[int]$($company.CompanyCategory)])\nCreated by API Watchdog`r`n$($date)"
           }
           $postHUDU = (New-HuduCompany @params -erroraction stop)
           write-output "$($postHUDU)`r`n$($script:strLineSeparator)"
@@ -829,6 +875,7 @@ if (-not $script:blnFAIL) {
         $script:diag += "DO NOT NEED TO CREATE COMPANY IN HUDU`r`n$($script:strLineSeparator)`r`n`r`n"
       }
     }
+    #end 'Second Step' Evaluation
   }
   #Stop script execution time calculation
   StopClock
@@ -865,8 +912,8 @@ if (-not $script:blnFAIL) {
     write-DRMMDiag "$($script:diag)"
     $script:diag = $null
   }
-  if ((-not ($script:blnFAIL)) -and (-not ($script:blnWARN)) -and (-not ($script:blnSITE))) {exit 0}
-  if (($script:blnFAIL) -or ($script:blnWARN) -or ($script:blnSITE)) {exit 1}
+  #if ((-not ($script:blnFAIL)) -and (-not ($script:blnWARN)) -and (-not ($script:blnSITE))) {exit 0}
+  #if (($script:blnFAIL) -or ($script:blnWARN) -or ($script:blnSITE)) {exit 1}
 } elseif ($script:blnFAIL) {
   #Stop script execution time calculation
   StopClock
@@ -878,7 +925,7 @@ if (-not $script:blnFAIL) {
   write-DRMMAlert "API_WatchDog : Execution Failure : See Diagnostics : $($script:finish)"
   write-DRMMDiag "$($script:diag)"
   $script:diag = $null
-  exit 1
+  #exit 1
 }
 #END SCRIPT
 #------------
