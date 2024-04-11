@@ -375,11 +375,11 @@
         return $script:result.result
       } elseif (-not ($script:result.result)) {
         $err = "$($script:result.error)`r`n$($script:strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-        logERR 4 "ZBX-ApiRequest"  "Failed to query Zabbix API via $($script:params.Uri)`r`n$($script:params.Body)`r`n$($err)"
+        logERR 4 "ZBX-ApiRequest"  "No Results from query to Zabbix API via $($script:params.Uri)`r`n$($script:params.Body)`r`n$($err)"
         return $null
       }
     } catch {
-      $err = "$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
+      $err = "$($script:result.error)`r`n$($script:strLineSeparator)`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
       logERR 4 "ZBX-ApiRequest"  "Failed to query Zabbix API via $($script:params.Uri)`r`n$($script:params.Body)`r`n$($err)"
     }
   }
@@ -647,9 +647,9 @@ if (-not $script:blnBREAK) {
     #Retrieve Zabbix Hosts by Host Groups
     $reqParams = @{
       "groupids" = $script:zbxGroup
-      "selectInterfaces" = "extend"
     }
     #reqParams = @{
+    #  "selectInterfaces" = "extend"
     #  "groupids" = 25
     #  "time_from" = ([DateTimeOffset]((get-date).adddays(-30))).tounixtimeseconds()
     #}
@@ -661,7 +661,6 @@ if (-not $script:blnBREAK) {
       $hostProb = ZBX-ApiRequest $_.name "problem.get" $hostReq
       [pscustomobject]@{
         'Name'        = $_.name
-        'Interfaces'  = $_.interfaces
         'Problems'    = if ($hostProb) {$hostProb} elseif (-not ($hostProb)) {$null}
       }
     }
