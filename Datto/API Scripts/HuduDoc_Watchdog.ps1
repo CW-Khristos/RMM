@@ -398,7 +398,7 @@ To Do:
     $params = @{
       Method      = "$($method)"
       ContentType = 'application/json'
-      Uri         = "$($AutoTaskAPIBase)/ATServicesRest/V1.0//$($entity)"
+      Uri         = "$($AutoTaskAPIBase)/ATServicesRest/V1.0/$($entity)"
       Headers     = $header
       Body        = $body
     }
