@@ -370,7 +370,7 @@
         Headers       = @{'Authorization' = "Bearer $script:zabbixKEY"}
         Body          = $script:apiBody | convertto-json
       }
-      $script:result = (invoke-webrequest @script:params).content | convertfrom-json
+      $script:result = (invoke-webrequest @script:params -UseBasicParsing).content | convertfrom-json
       if ($script:result.result) {
         return $script:result.result
       } elseif (-not ($script:result.result)) {
@@ -405,7 +405,7 @@
         Headers       = @{'Authorization' = "Bearer $script:zabbixKEY"}
         Body          = $script:apiBody | convertto-json
       }
-      $script:result = (invoke-webrequest @script:params).content | convertfrom-json
+      $script:result = (invoke-webrequest @script:params -UseBasicParsing).content | convertfrom-json
       if ($script:result.result) {
         return $script:result.result
       } elseif (-not ($script:result.result)) {
@@ -658,7 +658,7 @@ if (-not $script:blnBREAK) {
       #$($_.name).trim(); $($_.interfaces | out-string).trim();
       #write-output "`r`nProblems Detected :`r`n"
       $hostReq = @{"hostids" = $_.hostid}
-      $hostProb = ZBX-ApiRequest $_.name "problem.get" $hostReq
+      $hostProb = ZBX-ApiRequest $_.name "problem.get" $hostReq -UseBasicParsing
       [pscustomobject]@{
         'Name'        = $_.name
         'Problems'    = if ($hostProb) {$hostProb} elseif (-not ($hostProb)) {$null}
@@ -674,6 +674,7 @@ if (-not $script:blnBREAK) {
       }
       $script:psaCompany = $script:psaCompanies | where {$_.CompanyName -match (($zbxHost.name -split " - ")[0])}
       $script:siteAssets = $configitems | where {$_.companyID -eq $script:psaCompany.companyid}
+      logERR 5 "ZABBIX HOST" "Processing : $(($zbxHost.name -split " - ")[0]) : $($script:zbxHostDevice)`r`n$($script:strLineSeparator)"
       # Match PSA Asset by 'Zabbix HostID' UDF mapping
       $script:siteAsset = $script:siteAssets | where {$_.userDefinedFields.value -eq "$($zbxHost.interfaces.hostid)"}
       #region --- Process PSA Asset Open Tickets --- Turn this block into its own function
@@ -713,7 +714,10 @@ if (-not $script:blnBREAK) {
       }
       #endregion --- Process PSA Asset Open Tickets
       #region --- Process Problems --- Turn this block into its own function
-      if ($zbxHost.problems) {
+      if (-not ($zbxHost.problems)) {
+        write-output "`tNo Problems matching Defined Triggers Found`r`n$($script:strLineSeparator)"
+        $script:diag += "`tNo Problems matching Defined Triggers Found`r`n$($script:strLineSeparator)`r`n"
+      } elseif ($zbxHost.problems) {
         $zbxHost.problems | foreach {
           #start-sleep -seconds 5
           #Skip Problem if no Problem ID exists --- Issue with 'ghost' Problems returned by API but not present in UI
