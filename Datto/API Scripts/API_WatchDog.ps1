@@ -225,8 +225,8 @@
     $params = @{
       Method      = 'POST'
       ContentType = 'application/x-www-form-urlencoded'
-      Uri         = '{0}/auth/oauth/token' -f $script:rmmAPI
-      Body        = 'grant_type=password&username={0}&password={1}' -f $script:rmmKey, $script:rmmSecret
+      Uri         = "$($script:rmmAPI)/auth/oauth/token"
+      Body        = "grant_type=password&username=$($script:rmmKey)&password=$($script:rmmSecret)"
       Credential  = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList ('public-client', $securePassword)
     }
     try {
@@ -252,7 +252,7 @@
       Method        = $apiMethod
       ContentType   = 'application/json'
       Uri           = "$($script:rmmAPI)/api$($apiRequest)"
-      Headers       = @{'Authorization'	= 'Bearer {0}' -f $apiAccessToken}
+      Headers       = @{'Authorization'	= "Bearer $($apiAccessToken)"}
     }
     try {
       # Make request
