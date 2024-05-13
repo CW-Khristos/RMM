@@ -252,8 +252,8 @@ foreach ($dl in $script:exchPerfData.Keys) {
     write-output "`t$($strLineSeparator)`r`n`t$($dl) :`r`n`t$($strLineSeparator)"; $script:diag += "`t$($strLineSeparator)`r`n`t$($dl) :`r`n`t$($strLineSeparator)`r`n"
     $strOut = "`t$($dl) - Log Generation Checkpoint Depth : $($script:exchPerfData.$dl.LogGenerationCheckpointDepth)"
     Switch ($script:exchPerfData.$dl.LogGenerationCheckpointDepth) {
-        {$_ -lt 250} {$script:diag += "$($strOUT) : Normal`r`n"; write-output "$($strOUT) : Normal"; break}
-        {$_ -ge 250} {Pop-Warning $script:exchWARN $dl "$($strOUT) : Warning`r`n"; break}
+        {$_ -lt 350} {$script:diag += "$($strOUT) : Normal`r`n"; write-output "$($strOUT) : Normal"; break}
+        {$_ -ge 350} {Pop-Warning $script:exchWARN $dl "$($strOUT) : Warning`r`n"; break}
         {$_ -ge 500} {Pop-Warning $script:exchWARN $dl "$($strOUT) : Failed`r`n"; break}
     }
     $strOut = "`t$($dl) - IO Database Reads Average Latency : $($script:exchPerfData.$dl.IODatabaseReadsAverageLatency)"
