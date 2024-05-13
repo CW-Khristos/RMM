@@ -544,36 +544,36 @@ if (-not $script:blnBREAK) {
   try {
     $script:psaCalls += 1
     $authdiag = "Authenticating AutoTask`r`n$($script:strLineSeparator)"
-    logERR 3 "Authenticating AutoTask" "$($authdiag)"
+    logERR 4 "Authenticating AutoTask" "$($authdiag)"
     #Autotask Auth
     $Creds = New-Object System.Management.Automation.PSCredential($script:AutotaskAPIUser, $(ConvertTo-SecureString $script:AutotaskAPISecret -AsPlainText -Force))
     Add-AutotaskAPIAuth -ApiIntegrationcode "$($script:AutotaskIntegratorID)" -credentials $Creds
     $authdiag = "Successful`r`n$($script:strLineSeparator)"
-    logERR 3 "Authenticating AutoTask" "$($authdiag)"
+    logERR 4 "Authenticating AutoTask" "$($authdiag)"
     #Get Company Classifications and Categories
-    logERR 3 "Autotask Retrieval" "CLASS MAP :`r`n$($script:strLineSeparator)"
+    logERR 4 "Autotask Retrieval" "CLASS MAP :`r`n$($script:strLineSeparator)"
     PSA-GetMaps $script:psaHeaders $script:classMap "ClassificationIcons"
     $script:classMap
     write-output "$($script:strLineSeparator)`r`nDone`r`n$($script:strLineSeparator)"
     $script:diag += "`r`n$($script:strLineSeparator)`r`nDone`r`n$($script:strLineSeparator)`r`n"
-    logERR 3 "Autotask Retrieval" "CATEGORY MAP :`r`n$($script:strLineSeparator)"
+    logERR 4 "Autotask Retrieval" "CATEGORY MAP :`r`n$($script:strLineSeparator)"
     PSA-GetMaps $script:psaHeaders $script:categoryMap "CompanyCategories"
     $script:categoryMap
     write-output "$($script:strLineSeparator)`r`nDone`r`n$($script:strLineSeparator)"
     $script:diag += "`r`n$($script:strLineSeparator)`r`nDone`r`n$($script:strLineSeparator)`r`n"
     #Get Companies, Tickets, and Resources
-    logERR 3 "Autotask Retrieval" "COMPANIES :`r`n$($script:strLineSeparator)"
+    logERR 4 "Autotask Retrieval" "COMPANIES :`r`n$($script:strLineSeparator)"
     PSA-GetCompanies $script:psaHeaders
     write-output "Done`r`n$($script:strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($script:strLineSeparator)`r`n"
     $script:psaCalls += 1
-    logERR 3 "Autotask Retrieval" "TICKETS :`r`n$($script:strLineSeparator)"
+    logERR 4 "Autotask Retrieval" "TICKETS :`r`n$($script:strLineSeparator)"
     $tickets = Get-AutotaskAPIResource -Resource Tickets -SearchQuery "$($TicketFilter)"
     #$tickets = PSA-FilterQuery $script:psaHeaders "GET" "Tickets" $TicketFilter
     write-output "Done`r`n$($script:strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($script:strLineSeparator)`r`n"
     #Get Ticket Fields
-    logERR 3 "Autotask Retrieval" "TICKET FIELDS :`r`n$($script:strLineSeparator)"
+    logERR 4 "Autotask Retrieval" "TICKET FIELDS :`r`n$($script:strLineSeparator)"
     $ticketFields = PSA-Query $script:psaHeaders "GET" "Tickets/entityInformation/fields"
     $ticketUDFs = PSA-Query $script:psaHeaders "GET" "Tickets/entityInformation/userDefinedFields"
     #Get Statuses
@@ -612,20 +612,20 @@ if (-not $script:blnBREAK) {
     write-output "Done`r`n$($script:strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($script:strLineSeparator)`r`n"
     #$resourceValues
-    logERR 3 "Autotask Retrieval" "RESOURCES :`r`n$($script:strLineSeparator)"
+    logERR 4 "Autotask Retrieval" "RESOURCES :`r`n$($script:strLineSeparator)"
     $resources = PSA-FilterQuery $script:psaHeaders "GET" "Resources" $psaGenFilter
     write-output "Done`r`n$($script:strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($script:strLineSeparator)`r`n"
     #Grab All Assets for All Companies in a Single Call
     $configitems = $null
     $script:psaCalls += 1
-    logERR 3 "Autotask Retrieval" "PSA ASSETS :`r`n$($script:strLineSeparator)"
+    logERR 4 "Autotask Retrieval" "PSA ASSETS :`r`n$($script:strLineSeparator)"
     $psaAssetFilter = "{`"Filter`":[{`"field`":`"IsActive`",`"op`":`"eq`",`"value`":true}]}"
     $configitems = Get-AutotaskAPIResource -Resource ConfigurationItems -SearchQuery "$($psaAssetFilter)"
     write-output "Done`r`n$($script:strLineSeparator)"
     $script:diag += "`r`nDone`r`n$($script:strLineSeparator)`r`n"
     #Get PSA Asset Fields
-    logERR 3 "Autotask Retrieval" "ASSET FIELDS :`r`n$($script:strLineSeparator)"
+    logERR 4 "Autotask Retrieval" "ASSET FIELDS :`r`n$($script:strLineSeparator)"
     $assetFields = PSA-Query $script:psaHeaders "GET" "ConfigurationItems/entityInformation/fields"
     #Get PSA Asset Manufacturer Data Map
     $assetMakes = Get-ATFieldHash -name "rmmDeviceAuditManufacturerID" -fieldsIn $assetFields
@@ -637,7 +637,7 @@ if (-not $script:blnBREAK) {
     $script:blnBREAK = $true
     $authdiag = "Failed`r`n$($script:strLineSeparator)"
     $authdiag += "`r`n$($_.Exception)`r`n$($_.scriptstacktrace)`r`n$($_)`r`n$($script:strLineSeparator)"
-    logERR 5 "Authenticating AutoTask" "$($authdiag)"
+    logERR 3 "Authenticating AutoTask" "$($authdiag)"
   }
 }
 
@@ -674,7 +674,7 @@ if (-not $script:blnBREAK) {
       }
       $script:psaCompany = $script:psaCompanies | where {$_.CompanyName -match (($zbxHost.name -split " - ")[0])}
       $script:siteAssets = $configitems | where {$_.companyID -eq $script:psaCompany.companyid}
-      logERR 5 "ZABBIX HOST" "Processing : $(($zbxHost.name -split " - ")[0]) : $($script:zbxHostDevice)`r`n$($script:strLineSeparator)"
+      logERR 4 "ZABBIX HOST" "Processing : $(($zbxHost.name -split " - ")[0]) : $($script:zbxHostDevice)`r`n$($script:strLineSeparator)"
       # Match PSA Asset by 'Zabbix HostID' UDF mapping
       $script:siteAsset = $script:siteAssets | where {$_.userDefinedFields.value -eq "$($zbxHost.interfaces.hostid)"}
       #region --- Process PSA Asset Open Tickets --- Turn this block into its own function
@@ -688,7 +688,7 @@ if (-not $script:blnBREAK) {
           if ($zbxHost.problems.eventid -contains ($curTicket.userDefinedFields | where {$_.name -eq 'Zabbix Problem ID'}).value) {$blnClose = $false}
           #Close any Open Tickets without matching Open Problems
           if ($blnClose) {
-            logERR 3 "TICKET DIAG" "Close Ticket : $($curTicket.title)`r`n`t$($script:strLineSeparator)"
+            logERR 4 "TICKET DIAG" "Close Ticket : $($curTicket.title)`r`n`t$($script:strLineSeparator)"
             #Create Ticket Note
             $ticketNote                       = @{
               id                              = 0
@@ -708,7 +708,7 @@ if (-not $script:blnBREAK) {
             $curTicket.status = '20'
             PSA-Put $script:psaHeaders "PUT" "Tickets" ($curTicket | convertto-json)
           } elseif (-not ($blnClose)) {
-            logERR 3 "TICKET DIAG" "Matched Ticket : $($_.title)`r`n`t$($script:strLineSeparator)"
+            logERR 4 "TICKET DIAG" "Matched Ticket : $($_.title)`r`n`t$($script:strLineSeparator)"
           }
         }
       }
@@ -729,16 +729,16 @@ if (-not $script:blnBREAK) {
             $script:assetTickets = PSA-GetTickets $script:psaHeaders $script:psaCompany.CompanyID $script:siteAsset.id "Zabbix Alert: $($script:zbxHostDevice) : $($_.name)"
             $diagAsset = "$($zbxHost.name)`r`nProblem : $($_.name) reported @ $($pTimestamp)`r`n$(($_ | fl) | out-string)"
             #$diagAsset += "`r`n`t$($script:strLineSeparator)`r`n$(($script:assetTickets | fl | out-string).trim())"
-            logERR 3 "ASSET DIAG" "$($diagAsset)`r`n`t$($script:strLineSeparator)"
+            logERR 4 "ASSET DIAG" "$($diagAsset)`r`n`t$($script:strLineSeparator)"
             if ($script:assetTickets) {
               if (($script:assetTickets.userDefinedFields | where {$_.name -eq 'Zabbix Problem ID'}).value -eq "$($_.eventid)") {$blnTicket = $false}
             }
             if (-not ($blnTicket)) {
-              write-output "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)"
-              $script:diag += "`tExisting Tickets Found. Not Creating Ticket`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)`r`n"
+              write-output "`r`n`tExisting Tickets Found. Not Creating Ticket`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)"
+              $script:diag += "`r`n`tExisting Tickets Found. Not Creating Ticket`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)`r`n"
             } elseif ($blnTicket) {
-              write-output "`tNo Tickets Found. Creating Ticket`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)"
-              $script:diag += "`tNo Tickets Found. Creating Ticket`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)`r`n"
+              write-output "`r`n`tNo Tickets Found. Creating Ticket`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)"
+              $script:diag += "`r`n`tNo Tickets Found. Creating Ticket`r`n`t$($script:strLineSeparator)`r`n$($script:strLineSeparator)`r`n"
               $newTicket = @{
                 id                    = '0'
                 companyID             = $script:psaCompany.CompanyID
