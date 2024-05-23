@@ -1,4 +1,3 @@
-
 <#
     .SYNOPSIS
         Monitoring - Windows - Zabbix - Cameron Day - Chris Bledsoe
@@ -28,6 +27,18 @@ $pkg                        = "C:\IT\Zabbix_Agent_2.msi"
 $zabbixDownload             = "https://cdn.zabbix.com/zabbix/binaries/stable/6.4/6.4.13/zabbix_agent2-6.4.13-windows-amd64-openssl.msi"
 $drmmRoles                  = $env:UDF_7
 $strLineSeparator           = "----------------------------------"
+#region######################## TLS Settings ###########################
+[System.Net.ServicePointManager]::MaxServicePointIdleTime = 5000000
+#[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType] 'Tls12'
+#[System.Net.SecurityProtocolType]::Ssl3 -bor 
+#[System.Net.SecurityProtocolType]::Tls11 -bor 
+#[System.Net.SecurityProtocolType]::Tls
+[System.Net.ServicePointManager]::SecurityProtocol = (
+  [System.Net.SecurityProtocolType]::Ssl2 -bor 
+  [System.Net.SecurityProtocolType]::Tls13 -bor 
+  [System.Net.SecurityProtocolType]::Tls12
+)
+#endregion
 #endregion - DECLORATIONS
 
 #region - FUNCTIONS
