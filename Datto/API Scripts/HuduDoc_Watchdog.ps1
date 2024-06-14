@@ -568,17 +568,17 @@ To Do:
       [String]$script:Level = $Partner.result.result.Level
       [String]$Script:PartnerName = $Partner.result.result.Name
       $bmdiag = "$($PartnerName) - $($partnerId) - $($Uid)`r`n$($strLineSeparator)"
-      logERR 4 "Send-GetPartnerInfo" "$($bmdiag)"
+      logERR "Send-GetPartnerInfo" 4 "Send-GetPartnerInfo" "$($bmdiag)"
     } else {
       $script:blnBM = $false
       $bmdiag = "$($strLineSeparator)`r`n`tLookup for $($Partner.result.result.Level) Partner Level Not Allowed`r`n$($strLineSeparator)"
-      logERR 4 "Send-GetPartnerInfo" "$($bmdiag)"
+      logERR "Send-GetPartnerInfo" 4 "Send-GetPartnerInfo" "$($bmdiag)"
     }
 
     if ($partner.error) {
       $script:blnBM = $false
       $bmdiag = "$($strLineSeparator)`r`n`t$($partner.error.message)`r`n$($strLineSeparator)"
-      logERR 4 "Send-GetPartnerInfo" "$($bmdiag)"
+      logERR "Send-GetPartnerInfo" 4 "Send-GetPartnerInfo" "$($bmdiag)"
     }
   } ## Send-GetPartnerInfo API Call
 
